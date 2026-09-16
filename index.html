@@ -487,8 +487,53 @@
         lucide.createIcons();
     }
 
-    function openConsultingModal(title) {
-        alert(`📅 Iniciando agendamento para: ${title}\n\nEm breve: integração completa com calendário.`);
+   function openConsultingModal(title) {
+    document.getElementById('consultingType').value = title;
+    document.getElementById('consultingTypeDisplay').innerText = title;
+    document.getElementById('consultingModal').classList.remove('hidden');
+}
+
+function closeConsultingModal() {
+    document.getElementById('consultingModal').classList.add('hidden');
+    document.getElementById('consultingForm').reset();
+}
+
+function handleConsultingSubmit(event) {
+    event.preventDefault();
+
+    const type = document.getElementById('consultingType').value;
+    const name = document.getElementById('consultingName').value;
+    const phone = document.getElementById('consultingPhone').value;
+    const email = document.getElementById('consultingEmail').value;
+    const date = document.getElementById('consultingDate').value;
+    const time = document.getElementById('consultingTime').value;
+    const obs = document.getElementById('consultingObs').value || 'Nenhuma observação.';
+
+    // Formatar data para padrão brasileiro
+    const dateFormatted = new Date(date + 'T00:00:00').toLocaleDateString('pt-BR');
+    const timeFormatted = time;
+
+    // Mensagem para o WhatsApp
+    const message = `📅 *NOVA SOLICITAÇÃO DE CONSULTORIA*\n\n` +
+        `👤 *Nome:* ${name}\n` +
+        `📱 *WhatsApp:* ${phone}\n` +
+        `📧 *E-mail:* ${email}\n\n` +
+        `💼 *Tipo de Consultoria:* ${type}\n` +
+        `🗓️ *Data Preferida:* ${dateFormatted}\n` +
+        `⏰ *Horário:* ${timeFormatted}\n\n` +
+        `📝 *Observações:*\n${obs}\n\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `Aguardo confirmação da L&A Royal Advisory! 👑`;
+
+    // Número da L&A
+    const whatsappNumber = '5581989492224';
+
+    // Redirecionar para o WhatsApp
+    const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    
+    closeConsultingModal();
+    window.open(url, '_blank');
+}
     }
 
     function renderAdminProductsList() {
@@ -691,5 +736,62 @@
     function closeNavigationModal() { document.getElementById('navModal').classList.add('hidden'); }
     function toggleAdminModal() { document.getElementById('adminModal').classList.toggle('hidden'); }
     </script>
+
+    <!-- MODAL DE AGENDAMENTO DE CONSULTORIA -->
+<div id="consultingModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white text-slate-900 rounded-2xl max-w-lg w-full p-8 shadow-2xl relative border-2 border-amber-400/30 max-h-[90vh] overflow-y-auto">
+        <button onclick="closeConsultingModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
+            <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+        
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 gradient-gold rounded-full flex items-center justify-center mx-auto mb-4 shadow-gold">
+                <i data-lucide="calendar-check" class="w-8 h-8 text-slate-900"></i>
+            </div>
+            <h3 class="font-serif text-2xl font-bold text-slate-900">Agendar Consultoria</h3>
+            <p id="consultingTypeDisplay" class="text-sm font-semibold text-amber-600 mt-2"></p>
+        </div>
+
+        <form id="consultingForm" onsubmit="handleConsultingSubmit(event)" class="space-y-4">
+            <input type="hidden" id="consultingType">
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">Nome Completo *</label>
+                <input type="text" id="consultingName" required placeholder="Seu nome completo" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">WhatsApp (DDD) *</label>
+                    <input type="tel" id="consultingPhone" required placeholder="(81) 99999-9999" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">E-mail *</label>
+                    <input type="email" id="consultingEmail" required placeholder="seu@email.com" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">Data Preferida *</label>
+                    <input type="date" id="consultingDate" required class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">Horário Preferido *</label>
+                    <input type="time" id="consultingTime" required class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">Observações</label>
+                <textarea id="consultingObs" rows="3" placeholder="Descreva brevemente sua necessidade ou dúvida..." class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition"></textarea>
+            </div>
+
+            <button type="submit" class="w-full gradient-gold text-slate-900 py-4 rounded-xl font-bold text-base hover:shadow-gold transition shadow-lg flex items-center justify-center gap-3 mt-6 btn-premium">
+                <i data-lucide="send" class="w-5 h-5"></i> Enviar Solicitação via WhatsApp
+            </button>
+        </form>
+    </div>
+</div>
 </body>
 </html>
