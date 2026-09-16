@@ -509,36 +509,32 @@ function handleConsultingSubmit(event) {
     const time = document.getElementById('consultingTime').value;
     const obs = document.getElementById('consultingObs').value || 'Nenhuma observação.';
 
-    // Formatar data para padrão brasileiro
-    const dateFormatted = new Date(date + 'T00:00:00').toLocaleDateString('pt-BR');
-    const timeFormatted = time;
+    const dateFormatted = new Date(date + 'T00:00:00')
+        .toLocaleDateString('pt-BR');
 
-    // Mensagem para o WhatsApp
-    const message = `📅 *NOVA SOLICITAÇÃO DE CONSULTORIA*\n\n` +
+    const message =
+        `📅 *NOVA SOLICITAÇÃO DE CONSULTORIA*\n\n` +
         `👤 *Nome:* ${name}\n` +
         `📱 *WhatsApp:* ${phone}\n` +
         `📧 *E-mail:* ${email}\n\n` +
         `💼 *Tipo de Consultoria:* ${type}\n` +
         `🗓️ *Data Preferida:* ${dateFormatted}\n` +
-        `⏰ *Horário:* ${timeFormatted}\n\n` +
+        `⏰ *Horário:* ${time}\n\n` +
         `📝 *Observações:*\n${obs}\n\n` +
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `Aguardo confirmação da L&A Royal Advisory! 👑`;
 
-    // Número da L&A
     const whatsappNumber = '5581989492224';
+    const url =
+        `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
-    // Redirecionar para o WhatsApp
-    const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-    
     closeConsultingModal();
     window.open(url, '_blank');
 }
-    }
 
-    function renderAdminProductsList() {
-        const list = document.getElementById('adminProductsList');
-        list.innerHTML = '';
+function renderAdminProductsList() {
+    // continua o restante do código
+}
         
         if (products.length === 0) {
             list.innerHTML = '<p class="text-xs text-slate-400 italic">Nenhum produto cadastrado.</p>';
