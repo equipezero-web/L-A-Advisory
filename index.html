@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L&A Advisory</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            blue: '#0A192F',      /* Azul Principal por padrão */
+                            gold: '#D4AF37',      /* Dourado */
+                            silver: '#E5E7EB',    /* Prata */
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Cinzel', 'serif'],
+                        sans: ['Montserrat', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #D4AF37;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col justify-between">
+
+    <!-- BARRA TOP ADM TOGGLE (Apenas para simulação do Painel de Controle) -->
+    <div class="bg-slate-900 text-brand-silver px-4 py-2 flex justify-between items-center text-xs">
+        <span>Modo de Visualização do Site</span>
+        <button onclick="toggleAdminModal()" class="bg-brand-gold text-slate-900 px-3 py-1 rounded font-semibold hover:bg-yellow-500 transition flex items-center gap-1">
+            <i data-lucide="settings" class="w-3.5 h-3.5"></i> Abrir Painel ADM
+        </button>
+    </div>
+
+    <!-- CABEÇALHO (HEADER) -->
+    <header class="bg-brand-blue text-white shadow-lg sticky top-0 z-40 transition-colors duration-300" id="mainHeader">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            
+            <!-- Canto Esquerdo: Logotipo -->
+            <div class="flex items-center gap-2">
+                <div id="logoContainer" class="w-10 h-10 border border-brand-gold/40 rounded flex items-center justify-center text-brand-gold font-serif font-bold text-sm bg-slate-900/50">
+                    L&A
+                </div>
+            </div>
+
+            <!-- Centro: Nome da Empresa com Tipografia Sofisticada -->
+            <div class="text-center">
+                <h1 id="brandTitle" class="font-serif text-xl sm:text-2xl font-bold tracking-widest text-slate-100">LA ADVISORY</h1>
+                <p class="text-[10px] tracking-widest text-brand-gold uppercase">Luca & Antoninho Advisory</p>
+            </div>
+
+            <!-- Canto Direito: Ícone de Estrela (Menu de Seleção Rápida) -->
+            <div class="flex items-center">
+                <button onclick="openNavigationModal()" title="Seleção Rápida: Loja ou Consultoria" class="p-2 rounded-full text-brand-gold hover:bg-white/10 transition border border-brand-gold/30">
+                    <i data-lucide="star" class="w-5 h-5 fill-brand-gold/20"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow">
+        <!-- SEÇÃO 1: LOJA VIRTUAL (ACESSÓRIOS) -->
+        <section class="py-12 bg-white border-b border-slate-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <div class="flex justify-between items-end mb-8">
+                    <div>
+                        <span class="text-brand-gold font-semibold uppercase text-xs tracking-wider">Catálogo de Acessórios</span>
+                        <h2 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900">Loja Virtual</h2>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="scrollCarousel(-1)" class="p-2 rounded-full border border-slate-300 hover:border-brand-gold text-slate-600 hover:text-brand-gold transition">
+                            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                        </button>
+                        <button onclick="scrollCarousel(1)" class="p-2 rounded-full border border-slate-300 hover:border-brand-gold text-slate-600 hover:text-brand-gold transition">
+                            <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- CARROSSEL (3 Itens visíveis por vez em telas maiores) -->
+                <div id="carouselContainer" class="flex gap-6 overflow-x-auto custom-scrollbar pb-6 scroll-smooth snap-x">
+                    
+                    <!-- Produtos do Carrossel (Renderizados dinamicamente via JS) -->
+                    
+                </div>
+            </div>
+        </section>
+
+        <!-- SEÇÃO 2: SERVIÇOS DE CONSULTORIA -->
+        <section class="py-16 bg-slate-900 text-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <div class="text-center max-w-2xl mx-auto mb-12">
+                    <span class="text-brand-gold font-semibold uppercase text-xs tracking-wider">Soluções Corporativas</span>
+                    <h2 class="font-serif text-3xl font-bold mt-1 text-slate-100">Serviços de Consultoria</h2>
+                    <div class="w-16 h-0.5 bg-brand-gold mx-auto mt-4"></div>
+                </div>
+
+                <div id="consultingContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Cards de Consultoria (Renderizados via JS) -->
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-950 text-slate-400 py-8 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 text-center sm:flex sm:justify-between sm:items-center">
+            <p class="text-sm">&copy; L&A Advisory. Todos os direitos reservados.</p>
+            <p class="text-xs text-slate-500 mt-2 sm:mt-0">Liderança: Luca (CEO) & Antoninho (Vice-Presidente)</p>
+        </div>
+    </footer>
+
+    <!-- MODAL DE NAVEGAÇÃO RÁPIDA (ÍCONE DA ESTRELA) -->
+    <div id="navModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white text-slate-900 rounded-xl max-w-md w-full p-6 shadow-2xl relative border border-brand-gold/30">
+            <button onclick="closeNavigationModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <h3 class="font-serif text-xl font-bold mb-2 text-center text-slate-900">Navegação Rápida</h3>
+            <p class="text-xs text-slate-500 text-center mb-6">Escolha qual área da L&A Advisory deseja explorar:</p>
+            
+            <div class="grid grid-cols-1 gap-4">
+                <a href="#loja" onclick="closeNavigationModal()" class="p-4 rounded-lg border border-slate-200 hover:border-brand-gold bg-slate-50 hover:bg-slate-100 transition flex items-center gap-4 group">
+                    <div class="p-3 bg-brand-blue text-brand-gold rounded-lg group-hover:scale-105 transition">
+                        <i data-lucide="shopping-bag" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800">Loja Virtual</h4>
+                        <p class="text-xs text-slate-500">Relógios e acessórios sofisticados</p>
+                    </div>
+                </a>
+
+                <a href="#consultoria" onclick="closeNavigationModal()" class="p-4 rounded-lg border border-slate-200 hover:border-brand-gold bg-slate-50 hover:bg-slate-100 transition flex items-center gap-4 group">
+                    <div class="p-3 bg-brand-blue text-brand-gold rounded-lg group-hover:scale-105 transition">
+                        <i data-lucide="briefcase" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800">Consultoria Empresarial</h4>
+                        <p class="text-xs text-slate-500">Gestão financeira e administrativa</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAINEL ADM MODAL (SISTEMA DE EDIÇÃO EM TEMPO REAL) -->
+    <div id="adminModal" class="fixed inset-0 bg-slate-950/80 z-50 hidden flex justify-end">
+        <div class="bg-white text-slate-800 w-full max-w-md h-full shadow-2xl p-6 overflow-y-auto flex flex-col justify-between">
+            <div>
+                <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-200">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="sliders" class="w-5 h-5 text-brand-gold"></i>
+                        <h3 class="font-bold text-lg text-slate-900">Painel ADM (Editor de Layout)</h3>
+                    </div>
+                    <button onclick="toggleAdminModal()" class="text-slate-400 hover:text-slate-600">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <!-- Formulário de Alteração de Layout -->
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="text-xs font-bold uppercase text-brand-gold tracking-wider mb-3">1. Identidade & Cabeçalho</h4>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Nome da Empresa</label>
+                                <input type="text" id="inputBrandName" value="LA ADVISORY" class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-brand-gold outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Iniciais da Logo</label>
+                                <input type="text" id="inputLogoText" value="L&A" maxlength="4" class="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-brand-gold outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Cor Principal do Cabeçalho</label>
+                                <input type="color" id="inputHeaderColor" value="#0A192F" onchange="updateHeaderColor(this.value)" class="w-full h-10 p-1 border rounded-md cursor-pointer">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="text-xs font-bold uppercase text-brand-gold tracking-wider mb-3">2. Gerenciar Produtos (Carrossel)</h4>
+                        <div class="space-y-3">
+                            <input type="text" id="newProdName" placeholder="Nome do Produto" class="w-full px-3 py-2 border rounded-md text-sm">
+                            <input type="text" id="newProdPrice" placeholder="Preço (Ex: R$ 1.200)" class="w-full px-3 py-2 border rounded-md text-sm">
+                            <button onclick="addNewProduct()" class="w-full bg-slate-900 text-white py-2 rounded-md text-sm font-semibold hover:bg-slate-800 transition">
+                                Adicionar Acessório ao Catálogo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-6 border-t border-slate-200">
+                <button onclick="applyAdminChanges()" class="w-full bg-brand-gold text-slate-900 py-3 rounded-md font-bold hover:bg-yellow-500 transition shadow-md">
+                    Salvar e Aplicar Alterações
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS E LÓGICA DE FUNCIONAMENTO DA PLATAFORMA -->
+    <script>
+        // Dados Iniciais dos Produtos
+        let products = [
+            { id: 1, name: "Relógio Chrono Gold", price: "R$ 1.850,00", img: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=400&q=80" },
+            { id: 2, name: "Relógio Silver Executive", price: "R$ 2.100,00", img: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=400&q=80" },
+            { id: 3, name: "Abotoaduras de Ouro 18k", price: "R$ 650,00", img: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?auto=format&fit=crop&w=400&q=80" },
+            { id: 4, name: "Carteira de Couro Slim", price: "R$ 380,00", img: "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=400&q=80" },
+            { id: 5, name: "Relógio Minimalist Black", price: "R$ 1.450,00", img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80" },
+            { id: 6, name: "Caneta Tinseiro L&A Edition", price: "R$ 490,00", img: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?auto=format&fit=crop&w=400&q=80" },
+            { id: 7, name: "Relógio Navy Heritage", price: "R$ 2.400,00", img: "https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&w=400&q=80" }
+        ];
+
+        // Dados Iniciais das Consultorias
+        let consultings = [
+            { id: 1, title: "Consultoria Financeira", desc: "Gestão de capital, análise de investimento e otimização de fluxo de caixa para empresas.", icon: "dollar-sign" },
+            { id: 2, title: "Consultoria Administrativa", desc: "Reestruturação organizacional, mapeamento de processos e eficiência operacional.", icon: "bar-chart-3" },
+            { id: 3, title: "Novas Modalidades", desc: "Soluções personalizadas em desenvolvimento corporativo e parcerias estratégicas.", icon: "plus-circle" }
+        ];
+
+        // Renderizar Produtos no Carrossel
+        function renderProducts() {
+            const container = document.getElementById('carouselContainer');
+            container.innerHTML = '';
+
+            products.forEach(prod => {
+                const card = `
+                    <div class="flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-slate-50 border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition snap-start flex flex-col">
+                        <div class="h-64 bg-slate-200 overflow-hidden">
+                            <img src="${prod.img}" alt="${prod.name}" class="w-full h-full object-cover hover:scale-105 transition duration-500">
+                        </div>
+                        <div class="p-5 flex flex-col justify-between flex-grow">
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-lg mb-1">${prod.name}</h3>
+                                <p class="text-brand-gold font-bold text-base mb-4">${prod.price}</p>
+                            </div>
+                            <button class="w-full py-2 bg-slate-900 text-white text-sm font-medium rounded hover:bg-brand-blue transition">
+                                Detalhes do Item
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += card;
+            });
+
+            // 8º Elemento / Botão "Ver mais"
+            const seeMoreCard = `
+                <div class="flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-slate-900 text-white rounded-xl shadow-md snap-start flex flex-col items-center justify-center p-8 text-center border-2 border-dashed border-brand-gold/40">
+                    <div class="p-4 bg-brand-gold/10 text-brand-gold rounded-full mb-4">
+                        <i data-lucide="grid" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="font-serif font-bold text-xl mb-2">Catálogo Completo</h3>
+                    <p class="text-xs text-slate-400 mb-6">Explore toda a nossa coleção exclusiva de relógios e acessórios.</p>
+                    <button class="px-6 py-2.5 bg-brand-gold text-slate-900 font-bold text-sm rounded hover:bg-yellow-500 transition shadow">
+                        Ver mais
+                    </button>
+                </div>
+            `;
+            container.innerHTML += seeMoreCard;
+            lucide.createIcons();
+        }
+
+        // Renderizar Consultorias
+        function renderConsultings() {
+            const container = document.getElementById('consultingContainer');
+            container.innerHTML = '';
+
+            consultings.forEach(item => {
+                const card = `
+                    <div class="bg-slate-800/60 border border-slate-700/60 p-8 rounded-xl hover:border-brand-gold/50 transition">
+                        <div class="w-12 h-12 bg-brand-gold/10 rounded-lg flex items-center justify-center text-brand-gold mb-6">
+                            <i data-lucide="${item.icon}" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-serif text-xl font-bold mb-3 text-slate-100">${item.title}</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-6">${item.desc}</p>
+                        <a href="#" class="inline-flex items-center text-xs font-bold text-brand-gold hover:underline gap-1 uppercase tracking-wider">
+                            Saiba mais <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                        </a>
+                    </div>
+                `;
+                container.innerHTML += card;
+            });
+            lucide.createIcons();
+        }
+
+        // Funções de Navegação e Modais
+        function scrollCarousel(direction) {
+            const container = document.getElementById('carouselContainer');
+            const scrollAmount = container.clientWidth;
+            container.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+        }
+
+        function openNavigationModal() {
+            document.getElementById('navModal').classList.remove('hidden');
+        }
+
+        function closeNavigationModal() {
+            document.getElementById('navModal').classList.add('hidden');
+        }
+
+        function toggleAdminModal() {
+            const modal = document.getElementById('adminModal');
+            modal.classList.toggle('hidden');
+        }
+
+        // Funções do Painel ADM (Atualizações em tempo real)
+        function updateHeaderColor(color) {
+            document.getElementById('mainHeader').style.backgroundColor = color;
+        }
+
+        function applyAdminChanges() {
+            const name = document.getElementById('inputBrandName').value;
+            const logo = document.getElementById('inputLogoText').value;
+
+            if (name) document.getElementById('brandTitle').innerText = name;
+            if (logo) document.getElementById('logoContainer').innerText = logo;
+
+            toggleAdminModal();
+        }
+
+        function addNewProduct() {
+            const name = document.getElementById('newProdName').value;
+            const price = document.getElementById('newProdPrice').value;
+
+            if (name && price) {
+                products.push({
+                    id: products.length + 1,
+                    name: name,
+                    price: price,
+                    img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80"
+                });
+                renderProducts();
+                document.getElementById('newProdName').value = '';
+                document.getElementById('newProdPrice').value = '';
+                alert('Produto adicionado ao carrossel com sucesso!');
+            }
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            renderProducts();
+            renderConsultings();
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
