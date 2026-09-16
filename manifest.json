@@ -1,46 +1,21 @@
 {
   "short_name": "L&A Advisory",
-  "name": "L&A Advisory - Loja & Consultoria",
-  "description": "Plataforma de consultoria empresarial (Financeira e Administrativa) e loja virtual de relógios e acessórios sofisticados.",
+  "name": "L&A Advisory - Consultoria & Loja",
   "icons": [
     {
-      "src": "/icons/icon-192x192.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
       "type": "image/png",
-      "sizes": "192x192",
-      "purpose": "any maskable"
+      "sizes": "192x192"
     },
     {
-      "src": "/icons/icon-512x512.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
       "type": "image/png",
-      "sizes": "512x512",
-      "purpose": "any maskable"
+      "sizes": "512x512"
     }
   ],
-  "start_url": "/?source=pwa",
+  "start_url": "./index.html",
   "background_color": "#0A192F",
   "theme_color": "#0A192F",
   "display": "standalone",
-  "orientation": "portrait",
-  "lang": "pt-BR",
-  "categories": [
-    "business",
-    "shopping",
-    "finance"
-  ],
-  "shortcuts": [
-    {
-      "name": "Loja Virtual",
-      "short_name": "Loja",
-      "description": "Acesse o catálogo de relógios e acessórios",
-      "url": "/#loja",
-      "icons": [{ "src": "/icons/shop-icon.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "Consultoria",
-      "short_name": "Consultoria",
-      "description": "Serviços de consultoria financeira e administrativa",
-      "url": "/#consultoria",
-      "icons": [{ "src": "/icons/briefcase-icon.png", "sizes": "192x192" }]
-    }
-  ]
+  "orientation": "portrait"
 }
