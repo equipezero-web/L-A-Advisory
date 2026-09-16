@@ -7,7 +7,7 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0c1933">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400,600,700&family=Lato:wght@300,400,600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <script>
@@ -41,6 +41,9 @@
         
         .login-fade-in { animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
@@ -71,6 +74,10 @@
             </div>
 
             <div class="flex items-center gap-3">
+                <button onclick="toggleCart()" class="relative p-2.5 rounded-full text-amber-400 hover:bg-amber-400/10 transition border border-amber-400/30 hover:border-amber-400/60">
+                    <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                    <span id="cartCount" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">0</span>
+                </button>
                 <button onclick="openNavigationModal()" class="p-2.5 rounded-full text-amber-400 hover:bg-amber-400/10 transition border border-amber-400/30 hover:border-amber-400/60">
                     <i data-lucide="compass" class="w-5 h-5"></i>
                 </button>
@@ -120,6 +127,142 @@
                 <div id="consultingContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             </div>
         </section>
+
+        <!-- DEPOIMENTOS -->
+        <section class="py-16 bg-gradient-to-b from-slate-100 to-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <span class="text-amber-600 font-bold uppercase text-xs tracking-[0.2em]">Depoimentos</span>
+                    <h2 class="font-serif text-3xl sm:text-4xl font-bold text-slate-900 mt-2">O Que Dizem Nossos Clientes</h2>
+                    <div class="w-20 h-1 gradient-gold rounded mt-3 mx-auto"></div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-white p-6 rounded-2xl shadow-lg border border-slate-200">
+                        <div class="flex items-center gap-1 mb-4 text-amber-500">
+                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                        </div>
+                        <p class="text-slate-600 mb-6 italic">"A consultoria financeira transformou nosso fluxo de caixa. Resultados em 30 dias!"</p>
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 gradient-gold rounded-full flex items-center justify-center text-slate-900 font-bold">CM</div>
+                            <div>
+                                <p class="font-bold text-sm text-slate-900">Carlos Mendes</p>
+                                <p class="text-xs text-slate-500">CEO, TechBrasil</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-2xl shadow-lg border border-slate-200">
+                        <div class="flex items-center gap-1 mb-4 text-amber-500">
+                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                        </div>
+                        <p class="text-slate-600 mb-6 italic">"Profissionalismo impecável. Recomendo a L&A para qualquer empresário sério."</p>
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 gradient-gold rounded-full flex items-center justify-center text-slate-900 font-bold">RS</div>
+                            <div>
+                                <p class="font-bold text-sm text-slate-900">Roberto Silva</p>
+                                <p class="text-xs text-slate-500">Diretor, Silva & Associados</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-2xl shadow-lg border border-slate-200">
+                        <div class="flex items-center gap-1 mb-4 text-amber-500">
+                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                        </div>
+                        <p class="text-slate-600 mb-6 italic">"Comprei um relógio e a experiência foi incrível. Entrega rápida e produto original!"</p>
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 gradient-gold rounded-full flex items-center justify-center text-slate-900 font-bold">AL</div>
+                            <div>
+                                <p class="font-bold text-sm text-slate-900">André Lima</p>
+                                <p class="text-xs text-slate-500">Empresário</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section class="py-16 bg-white">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <span class="text-amber-600 font-bold uppercase text-xs tracking-[0.2em]">Dúvidas</span>
+                    <h2 class="font-serif text-3xl sm:text-4xl font-bold text-slate-900 mt-2">Perguntas Frequentes</h2>
+                    <div class="w-20 h-1 gradient-gold rounded mt-3 mx-auto"></div>
+                </div>
+                
+                <div class="space-y-4">
+                    <details class="bg-slate-50 border border-slate-200 p-5 rounded-xl cursor-pointer group">
+                        <summary class="font-bold text-slate-800 flex justify-between items-center">
+                            <span>Qual o prazo de entrega dos produtos?</span>
+                            <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition"></i>
+                        </summary>
+                        <p class="text-slate-600 mt-3 text-sm leading-relaxed">
+                            Produtos em estoque são enviados em até 2 dias úteis após a confirmação do pagamento. 
+                            O prazo de entrega varia de 3 a 10 dias úteis dependendo da sua região.
+                        </p>
+                    </details>
+                    
+                    <details class="bg-slate-50 border border-slate-200 p-5 rounded-xl cursor-pointer group">
+                        <summary class="font-bold text-slate-800 flex justify-between items-center">
+                            <span>Quais formas de pagamento vocês aceitam?</span>
+                            <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition"></i>
+                        </summary>
+                        <p class="text-slate-600 mt-3 text-sm leading-relaxed">
+                            Aceitamos PIX (com aprovação imediata), cartão de crédito (em até 12x), 
+                            boleto bancário e transferência bancária.
+                        </p>
+                    </details>
+                    
+                    <details class="bg-slate-50 border border-slate-200 p-5 rounded-xl cursor-pointer group">
+                        <summary class="font-bold text-slate-800 flex justify-between items-center">
+                            <span>Como funciona a consultoria empresarial?</span>
+                            <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition"></i>
+                        </summary>
+                        <p class="text-slate-600 mt-3 text-sm leading-relaxed">
+                            Após o agendamento, realizamos um diagnóstico completo da sua empresa. 
+                            Em seguida, apresentamos um plano personalizado com ações práticas para 
+                            melhorar seus resultados em até 90 dias.
+                        </p>
+                    </details>
+                    
+                    <details class="bg-slate-50 border border-slate-200 p-5 rounded-xl cursor-pointer group">
+                        <summary class="font-bold text-slate-800 flex justify-between items-center">
+                            <span>Vocês emitem nota fiscal?</span>
+                            <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition"></i>
+                        </summary>
+                        <p class="text-slate-600 mt-3 text-sm leading-relaxed">
+                            Sim! Todos os produtos e serviços são acompanhados de nota fiscal eletrônica, 
+                            garantindo procedência e direito à garantia.
+                        </p>
+                    </details>
+                    
+                    <details class="bg-slate-50 border border-slate-200 p-5 rounded-xl cursor-pointer group">
+                        <summary class="font-bold text-slate-800 flex justify-between items-center">
+                            <span>Qual a política de troca e devolução?</span>
+                            <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition"></i>
+                        </summary>
+                        <p class="text-slate-600 mt-3 text-sm leading-relaxed">
+                            Você tem até 7 dias corridos após o recebimento para solicitar troca ou devolução. 
+                            O produto deve estar em perfeitas condições, com todas as etiquetas e embalagem original.
+                        </p>
+                    </details>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- FOOTER -->
@@ -131,10 +274,17 @@
             </div>
             <p class="text-sm">&copy; 2026 L&A Royal Advisory. Todos os direitos reservados.</p>
             <p class="text-xs text-slate-500 mt-2">Leadership: Luca (CEO) & Antoninho (Vice-President)</p>
+            <div class="mt-8 pt-8 border-t border-slate-800">
+                <div class="flex flex-wrap justify-center gap-6 text-sm">
+                    <a href="sobre.html" class="text-slate-400 hover:text-white">Sobre Nós</a>
+                    <a href="privacidade.html" class="text-slate-400 hover:text-white">Política de Privacidade</a>
+                    <a href="termos.html" class="text-slate-400 hover:text-white">Termos de Uso</a>
+                </div>
+            </div>
         </div>
     </footer>
-
-    <!-- MODAL CHECKOUT -->
+    
+        <!-- MODAL CHECKOUT -->
     <div id="orderModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white text-slate-900 rounded-2xl max-w-lg w-full p-8 shadow-2xl relative border-2 border-amber-400/30 max-h-[90vh] overflow-y-auto">
             <button onclick="closeOrderModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
@@ -272,7 +422,6 @@
                 </div>
 
                 <div class="space-y-8">
-                    <!-- CONFIG API WHATSAPP -->
                     <div class="bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-xl p-5">
                         <h4 class="text-xs font-bold uppercase text-amber-700 tracking-wider mb-3 flex items-center gap-2">
                             <i data-lucide="settings" class="w-4 h-4"></i> Configuração API WhatsApp
@@ -281,11 +430,10 @@
                             <input type="text" id="whatsappToken" placeholder="Token da API (System User)" class="w-full px-3 py-2.5 border-2 border-amber-300 rounded-lg text-sm outline-none focus:border-amber-500">
                             <input type="text" id="whatsappInstance" placeholder="Phone Number ID" class="w-full px-3 py-2.5 border-2 border-amber-300 rounded-lg text-sm outline-none focus:border-amber-500">
                             <input type="text" id="whatsappBaseUrl" placeholder="URL Base (https://graph.facebook.com/v21.0)" class="w-full px-3 py-2.5 border-2 border-amber-300 rounded-lg text-sm outline-none focus:border-amber-500">
-                            <p class="text-xs text-amber-700">💡 Deixe vazio para usar modo demonstração (apenas console.log)</p>
+                            <p class="text-xs text-amber-700">💡 Deixe vazio para modo demonstração</p>
                         </div>
                     </div>
 
-                    <!-- CADASTRAR PRODUTO -->
                     <div>
                         <h4 class="text-xs font-bold uppercase text-amber-600 tracking-wider mb-4 flex items-center gap-2">
                             <i data-lucide="circle-plus" class="w-4 h-4"></i> 1. Adicionar Novo Produto
@@ -294,14 +442,13 @@
                             <input type="text" id="adminProdName" required placeholder="Nome do Produto" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm outline-none focus:border-amber-500">
                             <input type="text" id="adminProdPrice" required placeholder="Preço (R$ 1.850,00)" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm outline-none focus:border-amber-500">
                             <input type="url" id="adminProdImg" placeholder="URL da Imagem (opcional)" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm outline-none focus:border-amber-500">
-                            <textarea id="adminProdDesc" rows="3" placeholder="Descrição detalhada do produto..." class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm outline-none focus:border-amber-500"></textarea>
+                            <textarea id="adminProdDesc" rows="3" placeholder="Descrição detalhada..." class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm outline-none focus:border-amber-500"></textarea>
                             <button type="submit" class="w-full gradient-gold text-slate-900 py-3 rounded-xl font-bold text-sm hover:shadow-gold transition btn-premium">
                                 <i data-lucide="plus-circle" class="w-4 h-4 inline mr-2"></i> Adicionar Produto
                             </button>
                         </form>
                     </div>
 
-                    <!-- LISTA PRODUTOS -->
                     <div>
                         <h4 class="text-xs font-bold uppercase text-amber-600 tracking-wider mb-4 flex items-center gap-2">
                             <i data-lucide="package" class="w-4 h-4"></i> 2. Produtos Cadastrados
@@ -309,13 +456,12 @@
                         <div id="adminProductsList" class="space-y-3 max-h-64 overflow-y-auto pr-2"></div>
                     </div>
 
-                    <!-- PEDIDOS RECEBIDOS -->
                     <div>
                         <h4 class="text-xs font-bold uppercase text-amber-600 tracking-wider mb-4 flex items-center gap-2">
                             <i data-lucide="bell-ring" class="w-4 h-4"></i> 3. Pedidos Recebidos
                         </h4>
                         <div id="adminOrdersLog" class="space-y-3 max-h-64 overflow-y-auto pr-2">
-                            <p class="text-xs text-slate-400 italic">Nenhum pedido recebido nesta sessão.</p>
+                            <p class="text-xs text-slate-400 italic">Nenhum pedido recebido.</p>
                         </div>
                     </div>
                 </div>
@@ -339,17 +485,43 @@
             <div class="grid grid-cols-1 gap-4">
                 <a href="#loja" onclick="closeNavigationModal()" class="p-5 rounded-xl border-2 border-slate-200 hover:border-amber-500 bg-gradient-to-r from-slate-50 to-white flex items-center gap-5 transition card-hover">
                     <div class="p-4 gradient-gold rounded-xl"><i data-lucide="shopping-bag" class="w-7 h-7 text-slate-900"></i></div>
-                    <div><h4 class="font-bold text-lg">Loja Premium</h4><p class="text-xs text-slate-500">Relógios e Acessórios Exclusivos</p></div>
+                    <div><h4 class="font-bold text-lg">Loja Premium</h4><p class="text-xs text-slate-500">Relógios e Acessórios</p></div>
                 </a>
                 <a href="#consultoria" onclick="closeNavigationModal()" class="p-5 rounded-xl border-2 border-slate-200 hover:border-amber-500 bg-gradient-to-r from-slate-50 to-white flex items-center gap-5 transition card-hover">
                     <div class="p-4 gradient-gold rounded-xl"><i data-lucide="briefcase" class="w-7 h-7 text-slate-900"></i></div>
-                    <div><h4 class="font-bold text-lg">Consultoria</h4><p class="text-xs text-slate-500">Soluções Financeiras e Administrativas</p></div>
+                    <div><h4 class="font-bold text-lg">Consultoria</h4><p class="text-xs text-slate-500">Soluções Empresariais</p></div>
                 </a>
             </div>
         </div>
     </div>
 
-    <!-- MODAL DE AGENDAMENTO DE CONSULTORIA -->
+    <!-- MODAL CARRINHO -->
+    <div id="cartModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white text-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl relative border-2 border-amber-400/30">
+            <button onclick="toggleCart()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            
+            <h3 class="font-serif text-2xl font-bold mb-4">Seu Carrinho</h3>
+            
+            <div id="cartItems" class="max-h-96 overflow-y-auto mb-6 space-y-2">
+                <p class="text-slate-500 text-sm">Carrinho vazio</p>
+            </div>
+            
+            <div class="border-t border-slate-200 pt-4 mb-4">
+                <div class="flex justify-between font-bold text-lg">
+                    <span>Total:</span>
+                    <span id="cartTotal" class="text-amber-600">R$ 0,00</span>
+                </div>
+            </div>
+            
+            <button onclick="checkoutCart()" class="w-full gradient-gold text-slate-900 py-3 rounded-xl font-bold hover:shadow-gold transition btn-premium">
+                Finalizar via WhatsApp
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL AGENDAMENTO CONSULTORIA -->
     <div id="consultingModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white text-slate-900 rounded-2xl max-w-lg w-full p-8 shadow-2xl relative border-2 border-amber-400/30 max-h-[90vh] overflow-y-auto">
             <button onclick="closeConsultingModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
@@ -396,7 +568,7 @@
 
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">Observações</label>
-                    <textarea id="consultingObs" rows="3" placeholder="Descreva brevemente sua necessidade ou dúvida..." class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition"></textarea>
+                    <textarea id="consultingObs" rows="3" placeholder="Descreva sua necessidade..." class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition"></textarea>
                 </div>
 
                 <button type="submit" class="w-full gradient-gold text-slate-900 py-4 rounded-xl font-bold text-base hover:shadow-gold transition shadow-lg flex items-center justify-center gap-3 mt-6 btn-premium">
@@ -405,6 +577,13 @@
             </form>
         </div>
     </div>
+
+    <!-- BOTÃO WHATSAPP FLUTUANTE -->
+    <a href="https://wa.me/5581989492224" 
+       target="_blank"
+       class="fixed bottom-6 right-6 w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg hover:bg-green-600 transition z-50">
+        <i data-lucide="message-circle" class="w-7 h-7 text-white"></i>
+    </a>
 
     <!-- JAVASCRIPT -->
     <script>
@@ -429,6 +608,7 @@
 
     let receivedOrders = [];
     let isAdminLoggedIn = false;
+    let cart = [];
 
     // SISTEMA DE LOGIN
     function checkAdminAccess() {
@@ -473,6 +653,80 @@
         }
     }
 
+    // CARRINHO
+    function addToCart(productId) {
+        const product = products.find(p => p.id === productId);
+        cart.push(product);
+        updateCartUI();
+        alert(`✅ ${product.name} adicionado ao carrinho!`);
+    }
+
+    function removeFromCart(index) {
+        cart.splice(index, 1);
+        updateCartUI();
+    }
+
+    function updateCartUI() {
+        const cartCount = document.getElementById('cartCount');
+        if (cartCount) {
+            cartCount.textContent = cart.length;
+        }
+        
+        const cartItems = document.getElementById('cartItems');
+        const cartTotal = document.getElementById('cartTotal');
+        
+        if (cartItems) {
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<p class="text-slate-500 text-sm">Carrinho vazio</p>';
+                if (cartTotal) cartTotal.textContent = 'R$ 0,00';
+            } else {
+                cartItems.innerHTML = cart.map((item, index) => `
+                    <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                        <div>
+                            <p class="font-bold text-sm">${item.name}</p>
+                            <p class="text-xs text-amber-600">${item.price}</p>
+                        </div>
+                        <button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-700">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `).join('');
+                
+                const total = cart.reduce((sum, p) => sum + parseFloat(p.price.replace('R$ ', '').replace(',', '.')), 0);
+                if (cartTotal) cartTotal.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+            }
+            lucide.createIcons();
+        }
+    }
+
+    function toggleCart() {
+        const cartModal = document.getElementById('cartModal');
+        if (cartModal.classList.contains('hidden')) {
+            cartModal.classList.remove('hidden');
+            updateCartUI();
+        } else {
+            cartModal.classList.add('hidden');
+        }
+    }
+
+    function checkoutCart() {
+        if (cart.length === 0) {
+            alert('Seu carrinho está vazio!');
+            return;
+        }
+        
+        const total = cart.reduce((sum, p) => sum + parseFloat(p.price.replace('R$ ', '').replace(',', '.')), 0);
+        
+        const message = `🛒 *NOVO PEDIDO DO CARRINHO*\n\n` +
+            `Itens: ${cart.length}\n` +
+            `Produtos:\n${cart.map(p => `- ${p.name} (${p.price})`).join('\n')}\n\n` +
+            `*Total: R$ ${total.toFixed(2).replace('.', ',')}*\n\n` +
+            `Aguardo confirmação!`;
+        
+        const url = `https://wa.me/5581989492224?text=${encodeURIComponent(message)}`;
+        window.open(url, '_blank');
+    }
+
     // Verificar sessão ao carregar
     window.addEventListener('DOMContentLoaded', () => {
         if (sessionStorage.getItem('adminSession') === 'true') {
@@ -501,9 +755,12 @@
                             <p class="text-amber-600 font-bold text-2xl">${prod.price}</p>
                         </div>
                     </div>
-                    <div class="p-6 pt-0">
-                        <button onclick="openOrderModal(${prod.id})" class="w-full gradient-gold text-slate-900 text-sm font-bold rounded-xl py-3.5 hover:shadow-gold transition flex items-center justify-center gap-2 btn-premium">
-                            <i data-lucide="shopping-bag" class="w-4 h-4"></i> Fazer Pedido
+                    <div class="p-6 pt-0 flex gap-2">
+                        <button onclick="addToCart(${prod.id})" class="flex-1 py-3 bg-slate-900 text-white text-sm font-bold rounded-xl hover:bg-slate-800 transition flex items-center justify-center gap-2">
+                            <i data-lucide="shopping-cart" class="w-4 h-4"></i> Carrinho
+                        </button>
+                        <button onclick="openOrderModal(${prod.id})" class="flex-1 gradient-gold text-slate-900 text-sm font-bold rounded-xl hover:shadow-gold transition flex items-center justify-center gap-2 btn-premium">
+                            <i data-lucide="zap" class="w-4 h-4"></i> Comprar
                         </button>
                     </div>
                 </div>
@@ -515,7 +772,7 @@
             <div class="flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-gradient-to-br from-slate-900 to-blue-950 text-white rounded-2xl shadow-xl snap-start flex flex-col items-center justify-center p-10 text-center border-2 border-dashed border-amber-400/40">
                 <div class="p-5 gradient-gold rounded-full mb-5"><i data-lucide="grid-3x3" class="w-10 h-10 text-slate-900"></i></div>
                 <h3 class="font-serif font-bold text-2xl mb-3">Catálogo Completo</h3>
-                <p class="text-xs text-slate-400 mb-6 max-w-xs">Explore todos os produtos exclusivos da coleção L&A Royal Advisory.</p>
+                <p class="text-xs text-slate-400 mb-6 max-w-xs">Explore todos os produtos exclusivos.</p>
                 <button class="px-8 py-3 gradient-gold text-slate-900 font-bold text-sm rounded-xl shadow-gold btn-premium">Ver Coleção</button>
             </div>
         `;
@@ -543,7 +800,7 @@
         lucide.createIcons();
     }
 
-    // AGENDAMENTO DE CONSULTORIA
+    // AGENDAMENTO
     function openConsultingModal(title) {
         document.getElementById('consultingType').value = title;
         document.getElementById('consultingTypeDisplay').innerText = title;
@@ -573,15 +830,14 @@
             `👤 *Nome:* ${name}\n` +
             `📱 *WhatsApp:* ${phone}\n` +
             `📧 *E-mail:* ${email}\n\n` +
-            `💼 *Tipo de Consultoria:* ${type}\n` +
-            `🗓️ *Data Preferida:* ${dateFormatted}\n` +
+            `💼 *Tipo:* ${type}\n` +
+            `🗓️ *Data:* ${dateFormatted}\n` +
             `⏰ *Horário:* ${time}\n\n` +
-            `📝 *Observações:*\n${obs}\n\n` +
+            `📝 *Obs:* ${obs}\n\n` +
             `━━━━━━━━━━━━━━━━━━━━\n` +
-            `Aguardo confirmação da L&A Royal Advisory! 👑`;
+            `Aguardo confirmação! 👑`;
 
-        const whatsappNumber = '5581989492224';
-        const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+        const url = `https://wa.me/5581989492224?text=${encodeURIComponent(message)}`;
         
         closeConsultingModal();
         window.open(url, '_blank');
@@ -592,18 +848,18 @@
         list.innerHTML = '';
         
         if (products.length === 0) {
-            list.innerHTML = '<p class="text-xs text-slate-400 italic">Nenhum produto cadastrado.</p>';
+            list.innerHTML = '<p class="text-xs text-slate-400 italic">Nenhum produto.</p>';
             return;
         }
 
         products.forEach(p => {
             list.innerHTML += `
-                <div class="flex items-center justify-between p-4 bg-slate-50 border-2 border-slate-200 rounded-xl text-xs card-hover">
+                <div class="flex items-center justify-between p-4 bg-slate-50 border-2 border-slate-200 rounded-xl text-xs">
                     <div class="truncate pr-3 flex-1">
                         <p class="font-bold text-slate-800 truncate">${p.name}</p>
                         <p class="text-amber-600 font-bold">${p.price}</p>
                     </div>
-                    <button onclick="deleteProduct(${p.id})" title="Excluir" class="p-2.5 text-red-500 hover:bg-red-50 rounded-lg transition border-2 border-transparent hover:border-red-200">
+                    <button onclick="deleteProduct(${p.id})" class="p-2.5 text-red-500 hover:bg-red-50 rounded-lg">
                         <i data-lucide="trash-2" class="w-4 h-4"></i>
                     </button>
                 </div>
@@ -612,13 +868,12 @@
         lucide.createIcons();
     }
 
-    // FUNÇÕES ADM
     function handleAddProduct(event) {
         event.preventDefault();
         const name = document.getElementById('adminProdName').value;
         const price = document.getElementById('adminProdPrice').value;
         const img = document.getElementById('adminProdImg').value || "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80";
-        const desc = document.getElementById('adminProdDesc').value || "Produto exclusivo L&A Royal Advisory.";
+        const desc = document.getElementById('adminProdDesc').value || "Produto exclusivo L&A.";
 
         products.push({ id: Date.now(), name, price, img, desc });
         renderProducts();
@@ -628,18 +883,17 @@
         document.getElementById('adminProdImg').value = '';
         document.getElementById('adminProdDesc').value = '';
         
-        alert('✅ Produto adicionado com sucesso!');
+        alert('✅ Produto adicionado!');
     }
 
     function deleteProduct(id) {
-        if (confirm('⚠️ Tem certeza que deseja excluir este produto?')) {
+        if (confirm('Excluir este produto?')) {
             products = products.filter(p => p.id !== id);
             renderProducts();
             alert('Produto excluído!');
         }
     }
 
-    // MODAL CHECKOUT
     function openOrderModal(productId) {
         const product = products.find(p => p.id === productId);
         if (!product) return;
@@ -653,14 +907,13 @@
         document.getElementById('orderModal').classList.add('hidden');
     }
 
-    // ENVIAR MENSAGEM WHATSAPP
     async function sendWhatsAppMessage(phone, message) {
         const token = document.getElementById('whatsappToken').value;
         const instance = document.getElementById('whatsappInstance').value;
         const baseUrl = document.getElementById('whatsappBaseUrl').value;
 
         if (!token || !instance || !baseUrl) {
-            console.log('📱 [MODO DEMO] Mensagem WhatsApp:', { phone, message });
+            console.log('📱 [DEMO] WhatsApp:', { phone, message });
             return { success: true, demo: true };
         }
 
@@ -680,15 +933,13 @@
             });
 
             const result = await response.json();
-            console.log('✅ WhatsApp enviado:', result);
             return { success: response.ok, data: result };
         } catch (error) {
-            console.error('❌ Erro ao enviar WhatsApp:', error);
+            console.error('❌ Erro WhatsApp:', error);
             return { success: false, error: error.message };
         }
     }
 
-    // FINALIZAR PEDIDO
     async function handleOrderSubmit(event) {
         event.preventDefault();
 
@@ -718,28 +969,21 @@
         receivedOrders.unshift(orderDetails);
         updateAdminOrdersLog();
 
-        const clientMessage = `✅ *Pedido Confirmado - L&A Royal Advisory*\n\n` +
-            `Olá *${recipient}*! Seu pedido foi recebido com sucesso.\n\n` +
-            `📦 *Produto:* ${product.name}\n` +
-            `💰 *Valor:* ${product.price}\n` +
-            `🔖 *Pedido:* ${orderId}\n\n` +
-            `Em breve entraremos em contato para confirmar o pagamento e envio.\n\n` +
-            `Obrigado por escolher a L&A! 👑`;
+        const clientMessage = `✅ *Pedido Confirmado*\n\n` +
+            `Olá *${recipient}*!\n\n` +
+            `📦 ${product.name}\n` +
+            `💰 ${product.price}\n` +
+            `🔖 ${orderId}\n\n` +
+            `Entraremos em contato! 👑`;
 
-        const sellerMessage = `🔔 *NOVO PEDIDO RECEBIDO*\n\n` +
-            `📋 *ID:* ${orderId}\n` +
-            `⏰ *Horário:* ${orderDetails.datetime}\n\n` +
-            `👤 *Cliente:* ${recipient}\n` +
-            `📱 *WhatsApp:* ${phone}\n\n` +
-            `📦 *Produto:* ${product.name}\n` +
-            `💰 *Valor:* ${product.price}\n` +
-            `💳 *Pagamento:* ${payment}\n\n` +
-            `📍 *Endereço:*\n${address}\n` +
-            `CEP: ${cep}\n\n` +
-            `━━━━━━━━━━━━━━━━━━━━`;
+        const sellerMessage = `🔔 *NOVO PEDIDO*\n\n` +
+            `📋 ${orderId}\n` +
+            `👤 ${recipient} (${phone})\n` +
+            `📦 ${product.name}\n` +
+            `💰 ${product.price}\n` +
+            `💳 ${payment}\n` +
+            `📍 ${address}`;
 
-        console.log('📤 Enviando notificações WhatsApp...');
-        
         const [clientResult, sellerResult] = await Promise.all([
             sendWhatsAppMessage(phone, clientMessage),
             sendWhatsAppMessage('5581999999999', sellerMessage)
@@ -748,16 +992,9 @@
         closeOrderModal();
         document.getElementById('orderForm').reset();
         
-        let alertMessage = `✅ Pedido ${orderId} recebido!\n\n`;
-        if (clientResult.demo || sellerResult.demo) {
-            alertMessage += `📱 Modo demonstração ativo.\n`;
-            alertMessage += `Configure a API WhatsApp no Painel ADM para envio automático.\n\n`;
-        } else {
-            alertMessage += `📱 Mensagem de confirmação enviada para seu WhatsApp.\n`;
-        }
-        alertMessage += `\nA equipe L&A entrará em contato em breve!`;
-        
-        alert(alertMessage);
+        let msg = `✅ Pedido ${orderId} recebido!\n\n`;
+        if (clientResult.demo) msg += `📱 Configure a API no ADM para envio automático.\n`;
+        alert(msg + `\nA equipe L&A entrará em contato!`);
     }
 
     function updateAdminOrdersLog() {
@@ -770,14 +1007,12 @@
                     <span>${o.id} - ${o.product}</span>
                     <span>${o.date}</span>
                 </div>
-                <p><strong class="text-amber-300">Cliente:</strong> ${o.recipient} (${o.phone})</p>
-                <p><strong class="text-amber-300">Endereço:</strong> ${o.address} - CEP: ${o.cep}</p>
-                <p><strong class="text-amber-300">Pagamento:</strong> <span class="text-yellow-400 font-bold">${o.payment}</span> (${o.price})</p>
+                <p><strong>Cliente:</strong> ${o.recipient}</p>
+                <p><strong>Valor:</strong> ${o.price} (${o.payment})</p>
             </div>
         `).join('');
     }
 
-    // UTILITÁRIOS
     function scrollCarousel(direction) {
         const container = document.getElementById('carouselContainer');
         container.scrollBy({ left: direction * container.clientWidth, behavior: 'smooth' });
