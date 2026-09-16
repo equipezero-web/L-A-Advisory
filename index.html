@@ -3,278 +3,334 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>L&A Advisory</title>
+    <title>L&A Royal Advisory</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0A192F">
+    <meta name="theme-color" content="#0c1933">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then(reg => console.log('Service Worker registrado com sucesso! Scope:', reg.scope))
-        .catch(err => console.error('Falha ao registrar o Service Worker:', err));
-    });
-  }
-</script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('Service Worker registrado!', reg.scope))
+            .catch(err => console.error('Erro no Service Worker:', err));
+        });
+      }
+    </script>
+    
     <style>
-        .custom-scrollbar::-webkit-scrollbar { height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 3px; }
+        * { scrollbar-width: thin; scrollbar-color: #1e3a5f #f1f5f9; }
+        *::-webkit-scrollbar { width: 6px; height: 6px; }
+        *::-webkit-scrollbar-track { background: #f1f5f9; }
+        *::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 3px; }
+        *::-webkit-scrollbar-thumb:hover { background: #0f2942; }
+        
+        .gradient-gold { background: linear-gradient(135deg, #d4af37 0%, #f4d03f 50%, #d4af37 100%); }
+        .text-gradient-gold { background: linear-gradient(135deg, #d4af37, #f4d03f); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .shadow-gold { box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3); }
+        .glow-gold { box-shadow: 0 0 15px rgba(212, 175, 55, 0.5); }
+        
+        .card-hover { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+        
+        @keyframes shimmer { 0% { background-position: -1000px 0; } 100% { background-position: 1000px 0; } }
+        .loading-skeleton { animation: shimmer 2s infinite linear; background: linear-gradient(to right, #1e3a5f 0%, #2d4a6f 20%, #1e3a5f 40%, #1e3a5f 100%); background-size: 1000px 100%; }
+        
+        .btn-premium { position: relative; overflow: hidden; }
+        .btn-premium::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent); transform: rotate(45deg); transition: 0.5s; }
+        .btn-premium:hover::after { left: 100%; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col justify-between">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
 
-    <!-- BARRA ADM FIXA NO TOPO -->
-    <div class="bg-slate-900 text-brand-silver px-4 py-2 flex justify-between items-center text-xs z-50">
-        <span>Visão do Cliente</span>
-        <button onclick="toggleAdminModal()" class="bg-brand-gold text-slate-900 px-3 py-1 rounded font-semibold hover:bg-yellow-500 transition flex items-center gap-1">
-            <i data-lucide="settings" class="w-3.5 h-3.5"></i> Painel ADM (Gerenciar Produtos)
+    <!-- BARRA SUPERIOR -->
+    <div class="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-slate-300 px-4 py-2.5 flex justify-between items-center text-xs z-50 border-b border-blue-800/30">
+        <div class="flex items-center gap-2">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span>Visão do Cliente</span>
+        </div>
+        <button onclick="toggleAdminModal()" class="gradient-gold text-slate-900 px-4 py-1.5 rounded font-bold text-xs hover:shadow-gold transition flex items-center gap-2 btn-premium">
+            <i data-lucide="crown" class="w-3.5 h-3.5"></i> Painel Real ADM
         </button>
     </div>
 
-    <!-- CABEÇALHO DA PÁGINA -->
-    <header class="bg-brand-blue text-white shadow-lg sticky top-0 z-40 transition-colors duration-300" id="mainHeader">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <div id="logoContainer" class="w-10 h-10 border border-brand-gold/40 rounded flex items-center justify-center text-brand-gold font-serif font-bold text-sm bg-slate-900/50">
+    <!-- CABEÇALHO -->
+    <header class="bg-gradient-to-r from-blue-950 via-slate-900 to-blue-950 text-white shadow-2xl sticky top-0 z-40 border-b border-amber-500/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-24 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-14 h-14 gradient-gold rounded-lg flex items-center justify-center text-slate-900 font-serif font-bold text-lg shadow-gold border-2 border-amber-300/50">
                     L&A
                 </div>
             </div>
 
             <div class="text-center">
-                <h1 id="brandTitle" class="font-serif text-xl sm:text-2xl font-bold tracking-widest text-slate-100">LA ADVISORY</h1>
-                <p class="text-[10px] tracking-widest text-brand-gold uppercase">Luca & Antoninho Advisory</p>
+                <h1 class="font-serif text-2xl sm:text-3xl font-bold tracking-widest text-white">ROYAL ADVISORY</h1>
+                <p class="text-[10px] tracking-[0.3em] text-amber-400 uppercase">Excellence in Every Detail</p>
             </div>
 
-            <div class="flex items-center">
-                <button onclick="openNavigationModal()" title="Navegação Rápida" class="p-2 rounded-full text-brand-gold hover:bg-white/10 transition border border-brand-gold/30">
-                    <i data-lucide="star" class="w-5 h-5 fill-brand-gold/20"></i>
+            <div class="flex items-center gap-3">
+                <button onclick="openNavigationModal()" class="p-2.5 rounded-full text-amber-400 hover:bg-amber-400/10 transition border border-amber-400/30 hover:border-amber-400/60">
+                    <i data-lucide="compass" class="w-5 h-5"></i>
                 </button>
             </div>
         </div>
     </header>
 
     <main class="flex-grow">
-        <!-- SEÇÃO DA LOJA VIRTUAL -->
-        <section id="loja" class="py-12 bg-white border-b border-slate-200">
+        <!-- LOJA VIRTUAL -->
+        <section id="loja" class="py-16 bg-gradient-to-b from-white to-slate-100 border-b border-slate-200">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-end mb-8">
+                <div class="flex justify-between items-end mb-10">
                     <div>
-                        <span class="text-brand-gold font-semibold uppercase text-xs tracking-wider">Catálogo Exclusivo</span>
-                        <h2 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900">Loja Virtual</h2>
+                        <span class="text-amber-600 font-bold uppercase text-xs tracking-[0.2em]">Coleção Exclusiva</span>
+                        <h2 class="font-serif text-3xl sm:text-4xl font-bold text-slate-900 mt-2">Loja Premium</h2>
+                        <div class="w-20 h-1 gradient-gold rounded mt-3"></div>
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="scrollCarousel(-1)" class="p-2 rounded-full border border-slate-300 hover:border-brand-gold text-slate-600 hover:text-brand-gold transition">
+                        <button onclick="scrollCarousel(-1)" class="p-3 rounded-full border-2 border-slate-300 hover:border-amber-500 text-slate-600 hover:text-amber-600 transition bg-white shadow-md hover:shadow-lg">
                             <i data-lucide="chevron-left" class="w-5 h-5"></i>
                         </button>
-                        <button onclick="scrollCarousel(1)" class="p-2 rounded-full border border-slate-300 hover:border-brand-gold text-slate-600 hover:text-brand-gold transition">
+                        <button onclick="scrollCarousel(1)" class="p-3 rounded-full border-2 border-slate-300 hover:border-amber-500 text-slate-600 hover:text-amber-600 transition bg-white shadow-md hover:shadow-lg">
                             <i data-lucide="chevron-right" class="w-5 h-5"></i>
                         </button>
                     </div>
                 </div>
 
-                <div id="carouselContainer" class="flex gap-6 overflow-x-auto custom-scrollbar pb-6 scroll-smooth snap-x">
-                    <!-- Cards de Produtos inseridos dinamicamente via JS -->
-                </div>
+                <div id="carouselContainer" class="flex gap-6 overflow-x-auto pb-6 scroll-smooth snap-x"></div>
             </div>
         </section>
 
-        <!-- SEÇÃO DE CONSULTORIA -->
-        <section id="consultoria" class="py-16 bg-slate-900 text-white">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center max-w-2xl mx-auto mb-12">
-                    <span class="text-brand-gold font-semibold uppercase text-xs tracking-wider">Soluções Corporativas</span>
-                    <h2 class="font-serif text-3xl font-bold mt-1 text-slate-100">Serviços de Consultoria</h2>
-                    <div class="w-16 h-0.5 bg-brand-gold mx-auto mt-4"></div>
+        <!-- CONSULTORIA -->
+        <section id="consultoria" class="py-20 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white relative overflow-hidden">
+            <div class="absolute inset-0 opacity-10">
+                <div class="absolute top-20 left-10 w-72 h-72 bg-amber-400 rounded-full blur-3xl"></div>
+                <div class="absolute bottom-20 right-10 w-96 h-96 bg-blue-600 rounded-full blur-3xl"></div>
+            </div>
+            
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <span class="text-amber-400 font-bold uppercase text-xs tracking-[0.2em]">Soluções Executive</span>
+                    <h2 class="font-serif text-4xl font-bold mt-3 text-white">Consultoria Empresarial</h2>
+                    <div class="w-24 h-1 gradient-gold mx-auto mt-5 rounded"></div>
+                    <p class="text-slate-400 mt-6 text-lg">Estratégias personalizadas para elevar seu negócio ao próximo nível</p>
                 </div>
-                <div id="consultingContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <!-- Serviços inseridos via JS -->
-                </div>
+                
+                <div id="consultingContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             </div>
         </section>
     </main>
 
-    <footer class="bg-slate-950 text-slate-400 py-8 border-t border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 text-center sm:flex sm:justify-between sm:items-center">
-            <p class="text-sm">&copy; L&A Advisory. Todos os direitos reservados.</p>
-            <p class="text-xs text-slate-500 mt-2 sm:mt-0">Liderança: Luca (CEO) & Antoninho (Vice-Presidente)</p>
+    <!-- FOOTER -->
+    <footer class="bg-slate-950 text-slate-400 py-10 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <div class="flex items-center justify-center gap-2 mb-4">
+                <div class="w-10 h-10 gradient-gold rounded flex items-center justify-center text-slate-900 font-serif font-bold text-sm">L&A</div>
+                <span class="font-serif text-lg text-white">ROYAL ADVISORY</span>
+            </div>
+            <p class="text-sm">&copy; 2026 L&A Royal Advisory. Todos os direitos reservados.</p>
+            <p class="text-xs text-slate-500 mt-2">Leadership: Luca (CEO) & Antoninho (Vice-President)</p>
         </div>
     </footer>
 
-    <!-- MODAL (POP-UP) DE CHECKOUT DO PEDIDO -->
-    <div id="orderModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white text-slate-900 rounded-xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative border border-brand-gold/40 max-h-[90vh] overflow-y-auto">
-            <button onclick="closeOrderModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
-                <i data-lucide="x" class="w-5 h-5"></i>
+    <!-- MODAL CHECKOUT -->
+    <div id="orderModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white text-slate-900 rounded-2xl max-w-lg w-full p-8 shadow-2xl relative border-2 border-amber-400/30 max-h-[90vh] overflow-y-auto">
+            <button onclick="closeOrderModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
+                <i data-lucide="x" class="w-6 h-6"></i>
             </button>
             
-            <div class="text-center mb-6">
-                <div class="w-12 h-12 bg-brand-gold/10 text-brand-gold rounded-full flex items-center justify-center mx-auto mb-3">
-                    <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 gradient-gold rounded-full flex items-center justify-center mx-auto mb-4 shadow-gold">
+                    <i data-lucide="shopping-bag" class="w-8 h-8 text-slate-900"></i>
                 </div>
                 <h3 class="font-serif text-2xl font-bold text-slate-900">Finalizar Pedido</h3>
-                <p id="orderProductTitle" class="text-sm font-semibold text-brand-gold mt-1"></p>
+                <p id="orderProductTitle" class="text-sm font-semibold text-amber-600 mt-2"></p>
             </div>
 
-            <form id="orderForm" onsubmit="handleOrderSubmit(event)" class="space-y-4">
+            <form id="orderForm" onsubmit="handleOrderSubmit(event)" class="space-y-5">
                 <input type="hidden" id="orderProductId">
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Destinatário *</label>
-                        <input type="text" id="orderRecipient" required placeholder="Nome de quem recebe" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-gold outline-none">
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">Destinatário *</label>
+                        <input type="text" id="orderRecipient" required placeholder="Nome completo" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">WhatsApp (com DDD) *</label>
-                        <input type="tel" id="orderPhone" required placeholder="(81) 99999-9999" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-gold outline-none">
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">WhatsApp (DDD) *</label>
+                        <input type="tel" id="orderPhone" required placeholder="(81) 99999-9999" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">CEP *</label>
-                        <input type="text" id="orderCep" required placeholder="50000-000" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-gold outline-none">
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">CEP *</label>
+                        <input type="text" id="orderCep" required placeholder="50000-000" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
                     </div>
                     <div class="sm:col-span-2">
-                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Endereço Completo *</label>
-                        <input type="text" id="orderAddress" required placeholder="Rua, Nº, Bairro, Complemento" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-gold outline-none">
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">Endereço Completo *</label>
+                        <input type="text" id="orderAddress" required placeholder="Rua, Nº, Bairro, Complemento" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Forma de Pagamento *</label>
-                    <div class="grid grid-cols-2 gap-4 mt-1">
-                        <label class="border border-slate-300 rounded-lg p-3 flex items-center gap-2 cursor-pointer hover:border-brand-gold has-[:checked]:border-brand-gold has-[:checked]:bg-brand-gold/10">
-                            <input type="radio" name="paymentType" value="PIX" checked class="text-brand-gold focus:ring-brand-gold">
-                            <span class="text-sm font-medium text-slate-800">Pix</span>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-3 tracking-wide">Forma de Pagamento *</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <label class="border-2 border-slate-300 rounded-xl p-4 flex items-center gap-3 cursor-pointer hover:border-amber-500 has-[:checked]:border-amber-500 has-[:checked]:bg-amber-50 transition">
+                            <input type="radio" name="paymentType" value="PIX" checked class="w-5 h-5 text-amber-600 focus:ring-amber-500">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="qr-code" class="w-5 h-5 text-amber-600"></i>
+                                <span class="text-sm font-bold text-slate-800">Pix</span>
+                            </div>
                         </label>
-                        <label class="border border-slate-300 rounded-lg p-3 flex items-center gap-2 cursor-pointer hover:border-brand-gold has-[:checked]:border-brand-gold has-[:checked]:bg-brand-gold/10">
-                            <input type="radio" name="paymentType" value="Cartão de Crédito" class="text-brand-gold focus:ring-brand-gold">
-                            <span class="text-sm font-medium text-slate-800">Cartão</span>
+                        <label class="border-2 border-slate-300 rounded-xl p-4 flex items-center gap-3 cursor-pointer hover:border-amber-500 has-[:checked]:border-amber-500 has-[:checked]:bg-amber-50 transition">
+                            <input type="radio" name="paymentType" value="Cartão de Crédito" class="w-5 h-5 text-amber-600 focus:ring-amber-500">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="credit-card" class="w-5 h-5 text-amber-600"></i>
+                                <span class="text-sm font-bold text-slate-800">Cartão</span>
+                            </div>
                         </label>
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-brand-blue text-brand-gold py-3 rounded-lg font-bold hover:bg-slate-800 transition shadow-lg flex items-center justify-center gap-2 mt-4">
-                    <i data-lucide="check-circle-2" class="w-5 h-5"></i> Confirmar e Enviar Pedido
+                <button type="submit" class="w-full gradient-gold text-slate-900 py-4 rounded-xl font-bold text-base hover:shadow-gold transition shadow-lg flex items-center justify-center gap-3 mt-6 btn-premium">
+                    <i data-lucide="circle-check" class="w-6 h-6"></i> Confirmar e Enviar Pedido
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- PAINEL ADM (CADASTRO, EXCLUSÃO E NOTIFICAÇÕES) -->
-    <div id="adminModal" class="fixed inset-0 bg-slate-950/80 z-50 hidden flex justify-end">
+    <!-- PAINEL ADM -->
+    <div id="adminModal" class="fixed inset-0 bg-slate-950/90 z-50 hidden flex justify-end">
         <div class="bg-white text-slate-800 w-full max-w-lg h-full shadow-2xl p-6 overflow-y-auto flex flex-col justify-between">
             <div>
-                <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-200">
+                <div class="flex justify-between items-center mb-6 pb-4 border-b-2 border-amber-400/30">
                     <div class="flex items-center gap-2">
-                        <i data-lucide="sliders" class="w-5 h-5 text-brand-gold"></i>
-                        <h3 class="font-bold text-lg text-slate-900">Painel ADM - Loja & Pedidos</h3>
+                        <i data-lucide="crown" class="w-6 h-6 text-amber-600"></i>
+                        <h3 class="font-bold text-xl text-slate-900">Painel Real ADM</h3>
                     </div>
-                    <button onclick="toggleAdminModal()" class="text-slate-400 hover:text-slate-600">
-                        <i data-lucide="x" class="w-5 h-5"></i>
+                    <button onclick="toggleAdminModal()" class="text-slate-400 hover:text-slate-600 transition">
+                        <i data-lucide="x" class="w-6 h-6"></i>
                     </button>
                 </div>
 
-                <div class="space-y-6">
-                    <!-- Cadastrar Novo Produto -->
+                <div class="space-y-8">
+                    <!-- CONFIG API WHATSAPP -->
+                    <div class="bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-xl p-5">
+                        <h4 class="text-xs font-bold uppercase text-amber-700 tracking-wider mb-3 flex items-center gap-2">
+                            <i data-lucide="settings" class="w-4 h-4"></i> Configuração API WhatsApp
+                        </h4>
+                        <div class="space-y-3">
+                            <input type="text" id="whatsappToken" placeholder="Token da API (Evolution/Z-API)" class="w-full px-3 py-2.5 border-2 border-amber-300 rounded-lg text-sm outline-none focus:border-amber-500">
+                            <input type="text" id="whatsappInstance" placeholder="ID da Instância" class="w-full px-3 py-2.5 border-2 border-amber-300 rounded-lg text-sm outline-none focus:border-amber-500">
+                            <input type="text" id="whatsappBaseUrl" placeholder="URL Base (ex: https://api.seuservico.com/v1)" class="w-full px-3 py-2.5 border-2 border-amber-300 rounded-lg text-sm outline-none focus:border-amber-500">
+                            <p class="text-xs text-amber-700">💡 Deixe vazio para usar modo demonstração (apenas console.log)</p>
+                        </div>
+                    </div>
+
+                    <!-- CADASTRAR PRODUTO -->
                     <div>
-                        <h4 class="text-xs font-bold uppercase text-brand-gold tracking-wider mb-3">1. Adicionar Novo Produto ao Catálogo</h4>
+                        <h4 class="text-xs font-bold uppercase text-amber-600 tracking-wider mb-4 flex items-center gap-2">
+                            <i data-lucide="circle-plus" class="w-4 h-4"></i> 1. Adicionar Novo Produto
+                        </h4>
                         <form onsubmit="handleAddProduct(event)" class="space-y-3">
-                            <input type="text" id="adminProdName" required placeholder="Título do Produto" class="w-full px-3 py-2 border rounded-md text-sm outline-none">
-                            <input type="text" id="adminProdPrice" required placeholder="Preço (Ex: R$ 1.850,00)" class="w-full px-3 py-2 border rounded-md text-sm outline-none">
-                            <input type="url" id="adminProdImg" placeholder="URL da Imagem (Opcional)" class="w-full px-3 py-2 border rounded-md text-sm outline-none">
-                            <textarea id="adminProdDesc" rows="2" placeholder="Informações/Descrição do produto..." class="w-full px-3 py-2 border rounded-md text-sm outline-none"></textarea>
-                            <button type="submit" class="w-full bg-slate-900 text-brand-gold py-2 rounded-md font-bold text-sm hover:bg-slate-800 transition">
-                                Adicionar Produto
+                            <input type="text" id="adminProdName" required placeholder="Nome do Produto" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm outline-none focus:border-amber-500">
+                            <input type="text" id="adminProdPrice" required placeholder="Preço (R$ 1.850,00)" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm outline-none focus:border-amber-500">
+                            <input type="url" id="adminProdImg" placeholder="URL da Imagem (opcional)" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm outline-none focus:border-amber-500">
+                            <textarea id="adminProdDesc" rows="3" placeholder="Descrição detalhada do produto..." class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm outline-none focus:border-amber-500"></textarea>
+                            <button type="submit" class="w-full gradient-gold text-slate-900 py-3 rounded-xl font-bold text-sm hover:shadow-gold transition btn-premium">
+                                <i data-lucide="plus-circle" class="w-4 h-4 inline mr-2"></i> Adicionar Produto
                             </button>
                         </form>
                     </div>
 
-                    <!-- Listagem e Exclusão de Produtos -->
+                    <!-- LISTA PRODUTOS -->
                     <div>
-                        <h4 class="text-xs font-bold uppercase text-brand-gold tracking-wider mb-3">2. Gerenciar Produtos Cadastrados</h4>
-                        <div id="adminProductsList" class="space-y-2 max-h-48 overflow-y-auto pr-1">
-                            <!-- Renderizado via JS -->
-                        </div>
+                        <h4 class="text-xs font-bold uppercase text-amber-600 tracking-wider mb-4 flex items-center gap-2">
+                            <i data-lucide="package" class="w-4 h-4"></i> 2. Produtos Cadastrados
+                        </h4>
+                        <div id="adminProductsList" class="space-y-3 max-h-64 overflow-y-auto pr-2"></div>
                     </div>
 
-                    <!-- Notificações de Pedidos no ADM -->
+                    <!-- PEDIDOS RECEBIDOS -->
                     <div>
-                        <h4 class="text-xs font-bold uppercase text-brand-gold tracking-wider mb-3">3. Notificações de Pedidos Recebidos</h4>
-                        <div id="adminOrdersLog" class="space-y-2 max-h-48 overflow-y-auto pr-1">
-                            <p class="text-xs text-slate-400 italic">Nenhum pedido recebido ainda nesta sessão.</p>
+                        <h4 class="text-xs font-bold uppercase text-amber-600 tracking-wider mb-4 flex items-center gap-2">
+                            <i data-lucide="bell-ring" class="w-4 h-4"></i> 3. Pedidos Recebidos
+                        </h4>
+                        <div id="adminOrdersLog" class="space-y-3 max-h-64 overflow-y-auto pr-2">
+                            <p class="text-xs text-slate-400 italic">Nenhum pedido recebido nesta sessão.</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="pt-6 border-t border-slate-200">
-                <button onclick="toggleAdminModal()" class="w-full bg-brand-gold text-slate-900 py-3 rounded-md font-bold hover:bg-yellow-500 transition">
+            <div class="pt-6 border-t-2 border-slate-200">
+                <button onclick="toggleAdminModal()" class="w-full bg-slate-900 text-amber-400 py-4 rounded-xl font-bold hover:bg-slate-800 transition">
                     Fechar Painel
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL DE NAVEGAÇÃO RÁPIDA -->
-    <div id="navModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white text-slate-900 rounded-xl max-w-md w-full p-6 shadow-2xl relative border border-brand-gold/30">
-            <button onclick="closeNavigationModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
-                <i data-lucide="x" class="w-5 h-5"></i>
+    <!-- MODAL NAVEGAÇÃO -->
+    <div id="navModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white text-slate-900 rounded-2xl max-w-md w-full p-8 shadow-2xl relative border-2 border-amber-400/30">
+            <button onclick="closeNavigationModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
+                <i data-lucide="x" class="w-6 h-6"></i>
             </button>
-            <h3 class="font-serif text-xl font-bold mb-2 text-center text-slate-900">Navegação Rápida</h3>
-            <div class="grid grid-cols-1 gap-4 mt-4">
-                <a href="#loja" onclick="closeNavigationModal()" class="p-4 rounded-lg border border-slate-200 hover:border-brand-gold bg-slate-50 flex items-center gap-4">
-                    <div class="p-3 bg-brand-blue text-brand-gold rounded-lg"><i data-lucide="shopping-bag" class="w-6 h-6"></i></div>
-                    <div><h4 class="font-bold">Loja Virtual</h4><p class="text-xs text-slate-500">Relógios e Acessórios</p></div>
+            <h3 class="font-serif text-2xl font-bold mb-6 text-center text-slate-900">Navegação</h3>
+            <div class="grid grid-cols-1 gap-4">
+                <a href="#loja" onclick="closeNavigationModal()" class="p-5 rounded-xl border-2 border-slate-200 hover:border-amber-500 bg-gradient-to-r from-slate-50 to-white flex items-center gap-5 transition card-hover">
+                    <div class="p-4 gradient-gold rounded-xl"><i data-lucide="shopping-bag" class="w-7 h-7 text-slate-900"></i></div>
+                    <div><h4 class="font-bold text-lg">Loja Premium</h4><p class="text-xs text-slate-500">Relógios e Acessórios Exclusivos</p></div>
                 </a>
-                <a href="#consultoria" onclick="closeNavigationModal()" class="p-4 rounded-lg border border-slate-200 hover:border-brand-gold bg-slate-50 flex items-center gap-4">
-                    <div class="p-3 bg-brand-blue text-brand-gold rounded-lg"><i data-lucide="briefcase" class="w-6 h-6"></i></div>
-                    <div><h4 class="font-bold">Consultoria Empresarial</h4><p class="text-xs text-slate-500">Financeira & Administrativa</p></div>
+                <a href="#consultoria" onclick="closeNavigationModal()" class="p-5 rounded-xl border-2 border-slate-200 hover:border-amber-500 bg-gradient-to-r from-slate-50 to-white flex items-center gap-5 transition card-hover">
+                    <div class="p-4 gradient-gold rounded-xl"><i data-lucide="briefcase" class="w-7 h-7 text-slate-900"></i></div>
+                    <div><h4 class="font-bold text-lg">Consultoria</h4><p class="text-xs text-slate-500">Soluções Financeiras e Administrativas</p></div>
                 </a>
             </div>
         </div>
     </div>
 
-    <!-- LÓGICA E AUTOMAÇÃO EM JAVASCRIPT -->
+    <!-- JAVASCRIPT -->
     <script>
+    // CONFIGURAÇÕES
     let products = [
-        { id: 1, name: "Relógio Chrono Gold", price: "R$ 1.850,00", desc: "Caixa em aço inoxidável revestido a ouro 18k.", img: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=400&q=80" },
-        { id: 2, name: "Relógio Silver Executive", price: "R$ 2.100,00", desc: "Mostrador minimalista prateado com vidro de safira.", img: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=400&q=80" },
-        { id: 3, name: "Abotoaduras de Ouro 18k", price: "R$ 650,00", desc: "Acabamento polido artesanal exclusivo L&A.", img: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?auto=format&fit=crop&w=400&q=80" },
-        { id: 4, name: "Carteira de Couro Slim", price: "R$ 380,00", desc: "Couro legítimo com proteção RFID integrada.", img: "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=400&q=80" }
+        { id: 1, name: "Chrono Gold Royal", price: "R$ 1.850,00", desc: "Caixa em aço inoxidável com revestimento em ouro 18k. Movimento suíço.", img: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=400&q=80" },
+        { id: 2, name: "Silver Executive", price: "R$ 2.100,00", desc: "Mostrador minimalista prateado com vidro de safira anti-risco.", img: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=400&q=80" },
+        { id: 3, name: "Cufflinks Gold 18k", price: "R$ 650,00", desc: "Abotoaduras em ouro 18k com acabamento polido artesanal.", img: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?auto=format&fit=crop&w=400&q=80" },
+        { id: 4, name: "Leather Slim Wallet", price: "R$ 380,00", desc: "Carteira slim em couro legítimo com proteção RFID.", img: "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=400&q=80" }
     ];
 
     let consultings = [
-        { id: 1, title: "Consultoria Financeira", desc: "Gestão de capital, análise de investimento e otimização de fluxo de caixa para empresas.", icon: "dollar-sign" },
-        { id: 2, title: "Consultoria Administrativa", desc: "Reestruturação organizacional, mapeamento de processos e eficiência operacional.", icon: "bar-chart-3" }
+        { id: 1, title: "Consultoria Financeira", desc: "Gestão estratégica de capital, análise de investimentos e otimização de fluxo de caixa corporativo.", icon: "trending-up" },
+        { id: 2, title: "Consultoria Administrativa", desc: "Reestruturação organizacional, mapeamento de processos e maximização da eficiência operacional.", icon: "briefcase" },
+        { id: 3, title: "Planejamento Estratégico", desc: "Desenvolvimento de roadmap empresarial com metas de curto, médio e longo prazo.", icon: "target" }
     ];
 
     let receivedOrders = [];
 
+    // RENDERIZAÇÃO
     function renderProducts() {
         const container = document.getElementById('carouselContainer');
         container.innerHTML = '';
 
         products.forEach(prod => {
             const card = `
-                <div class="flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-slate-50 border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition snap-start flex flex-col justify-between">
+                <div class="flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-white border-2 border-slate-200 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition card-hover snap-start flex flex-col justify-between">
                     <div>
-                        <div class="h-64 bg-slate-200 overflow-hidden">
-                            <img src="${prod.img}" alt="${prod.name}" class="w-full h-full object-cover hover:scale-105 transition duration-500">
+                        <div class="h-72 bg-slate-100 overflow-hidden">
+                            <img src="${prod.img}" alt="${prod.name}" class="w-full h-full object-cover hover:scale-110 transition duration-700">
                         </div>
-                        <div class="p-5">
-                            <h3 class="font-bold text-slate-800 text-lg mb-1">${prod.name}</h3>
-                            <p class="text-xs text-slate-500 mb-3">${prod.desc}</p>
-                            <p class="text-brand-gold font-bold text-lg">${prod.price}</p>
+                        <div class="p-6">
+                            <h3 class="font-serif font-bold text-slate-900 text-xl mb-2">${prod.name}</h3>
+                            <p class="text-xs text-slate-500 mb-4 leading-relaxed">${prod.desc}</p>
+                            <p class="text-amber-600 font-bold text-2xl">${prod.price}</p>
                         </div>
                     </div>
-                    <div class="p-5 pt-0">
-                        <button onclick="openOrderModal(${prod.id})" class="w-full py-2.5 bg-brand-blue text-brand-gold text-sm font-bold rounded-lg hover:bg-slate-800 transition flex items-center justify-center gap-2 shadow">
+                    <div class="p-6 pt-0">
+                        <button onclick="openOrderModal(${prod.id})" class="w-full gradient-gold text-slate-900 text-sm font-bold rounded-xl py-3.5 hover:shadow-gold transition flex items-center justify-center gap-2 btn-premium">
                             <i data-lucide="shopping-bag" class="w-4 h-4"></i> Fazer Pedido
                         </button>
                     </div>
@@ -284,11 +340,11 @@
         });
 
         container.innerHTML += `
-            <div class="flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-slate-900 text-white rounded-xl shadow-md snap-start flex flex-col items-center justify-center p-8 text-center border-2 border-dashed border-brand-gold/40">
-                <div class="p-4 bg-brand-gold/10 text-brand-gold rounded-full mb-4"><i data-lucide="grid" class="w-8 h-8"></i></div>
-                <h3 class="font-serif font-bold text-xl mb-2">Catálogo Completo</h3>
-                <p class="text-xs text-slate-400 mb-6">Explore todos os acessórios cadastrados.</p>
-                <button class="px-6 py-2.5 bg-brand-gold text-slate-900 font-bold text-sm rounded shadow">Ver mais</button>
+            <div class="flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-gradient-to-br from-slate-900 to-blue-950 text-white rounded-2xl shadow-xl snap-start flex flex-col items-center justify-center p-10 text-center border-2 border-dashed border-amber-400/40">
+                <div class="p-5 gradient-gold rounded-full mb-5"><i data-lucide="grid-3x3" class="w-10 h-10 text-slate-900"></i></div>
+                <h3 class="font-serif font-bold text-2xl mb-3">Catálogo Completo</h3>
+                <p class="text-xs text-slate-400 mb-6 max-w-xs">Explore todos os produtos exclusivos da coleção L&A Royal Advisory.</p>
+                <button class="px-8 py-3 gradient-gold text-slate-900 font-bold text-sm rounded-xl shadow-gold btn-premium">Ver Coleção</button>
             </div>
         `;
         lucide.createIcons();
@@ -300,15 +356,15 @@
         container.innerHTML = '';
         consultings.forEach(item => {
             container.innerHTML += `
-                <div class="bg-slate-800/60 border border-slate-700/60 p-8 rounded-xl flex flex-col justify-between">
+                <div class="bg-slate-800/70 backdrop-blur border border-slate-700/60 p-8 rounded-2xl flex flex-col justify-between card-hover">
                     <div>
-                        <div class="w-12 h-12 bg-brand-gold/10 rounded-lg flex items-center justify-center text-brand-gold mb-6">
-                            <i data-lucide="${item.icon}" class="w-6 h-6"></i>
+                        <div class="w-14 h-14 gradient-gold rounded-xl flex items-center justify-center mb-6 shadow-gold">
+                            <i data-lucide="${item.icon}" class="w-7 h-7 text-slate-900"></i>
                         </div>
-                        <h3 class="font-serif text-xl font-bold mb-3 text-slate-100">${item.title}</h3>
+                        <h3 class="font-serif text-2xl font-bold mb-4 text-white">${item.title}</h3>
                         <p class="text-slate-400 text-sm leading-relaxed mb-6">${item.desc}</p>
                     </div>
-                    <button onclick="openConsultingModal('${item.title}')" class="w-full py-3 bg-brand-gold text-slate-900 font-bold rounded-lg hover:bg-yellow-500 transition shadow">Agendar Consultoria</button>
+                    <button onclick="openConsultingModal('${item.title}')" class="w-full gradient-gold text-slate-900 font-bold rounded-xl py-4 hover:shadow-gold transition btn-premium">Agendar Consultoria</button>
                 </div>
             `;
         });
@@ -316,7 +372,7 @@
     }
 
     function openConsultingModal(title) {
-        alert(`Iniciando agendamento para: ${title}`);
+        alert(`📅 Iniciando agendamento para: ${title}\n\nEm breve: integração completa com calendário.`);
     }
 
     function renderAdminProductsList() {
@@ -330,12 +386,12 @@
 
         products.forEach(p => {
             list.innerHTML += `
-                <div class="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded text-xs">
-                    <div class="truncate pr-2">
+                <div class="flex items-center justify-between p-4 bg-slate-50 border-2 border-slate-200 rounded-xl text-xs card-hover">
+                    <div class="truncate pr-3 flex-1">
                         <p class="font-bold text-slate-800 truncate">${p.name}</p>
-                        <p class="text-brand-gold font-semibold">${p.price}</p>
+                        <p class="text-amber-600 font-bold">${p.price}</p>
                     </div>
-                    <button onclick="deleteProduct(${p.id})" title="Excluir Produto" class="p-1.5 text-red-500 hover:bg-red-50 rounded transition">
+                    <button onclick="deleteProduct(${p.id})" title="Excluir" class="p-2.5 text-red-500 hover:bg-red-50 rounded-lg transition border-2 border-transparent hover:border-red-200">
                         <i data-lucide="trash-2" class="w-4 h-4"></i>
                     </button>
                 </div>
@@ -344,12 +400,13 @@
         lucide.createIcons();
     }
 
+    // FUNÇÕES ADM
     function handleAddProduct(event) {
         event.preventDefault();
         const name = document.getElementById('adminProdName').value;
         const price = document.getElementById('adminProdPrice').value;
         const img = document.getElementById('adminProdImg').value || "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80";
-        const desc = document.getElementById('adminProdDesc').value || "Produto exclusivo da coleção L&A Advisory.";
+        const desc = document.getElementById('adminProdDesc').value || "Produto exclusivo L&A Royal Advisory.";
 
         products.push({ id: Date.now(), name, price, img, desc });
         renderProducts();
@@ -358,16 +415,19 @@
         document.getElementById('adminProdPrice').value = '';
         document.getElementById('adminProdImg').value = '';
         document.getElementById('adminProdDesc').value = '';
-        alert('Produto adicionado com sucesso!');
+        
+        alert('✅ Produto adicionado com sucesso!');
     }
 
     function deleteProduct(id) {
-        if (confirm('Tem certeza que deseja excluir este produto do catálogo?')) {
+        if (confirm('⚠️ Tem certeza que deseja excluir este produto?')) {
             products = products.filter(p => p.id !== id);
             renderProducts();
+            alert('Produto excluído!');
         }
     }
 
+    // MODAL CHECKOUT
     function openOrderModal(productId) {
         const product = products.find(p => p.id === productId);
         if (!product) return;
@@ -381,6 +441,42 @@
         document.getElementById('orderModal').classList.add('hidden');
     }
 
+    // ENVIAR MENSAGEM WHATSAPP
+    async function sendWhatsAppMessage(phone, message) {
+        const token = document.getElementById('whatsappToken').value;
+        const instance = document.getElementById('whatsappInstance').value;
+        const baseUrl = document.getElementById('whatsappBaseUrl').value;
+
+        // Se não tiver API configurada, apenas loga no console
+        if (!token || !instance || !baseUrl) {
+            console.log('📱 [MODO DEMO] Mensagem WhatsApp:', { phone, message });
+            return { success: true, demo: true };
+        }
+
+        try {
+            const response = await fetch(`${baseUrl}/instances/${instance}/send`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    phone: phone.replace(/\D/g, ''), // Remove caracteres não numéricos
+                    type: 'text',
+                    text: message
+                })
+            });
+
+            const result = await response.json();
+            console.log('✅ WhatsApp enviado:', result);
+            return { success: response.ok, data: result };
+        } catch (error) {
+            console.error('❌ Erro ao enviar WhatsApp:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // FINALIZAR PEDIDO
     async function handleOrderSubmit(event) {
         event.preventDefault();
 
@@ -392,8 +488,10 @@
         const address = document.getElementById('orderAddress').value;
         const payment = document.querySelector('input[name="paymentType"]:checked').value;
 
+        const orderId = `PED-${Math.floor(1000 + Math.random() * 9000)}`;
+        
         const orderDetails = {
-            id: `PED-${Math.floor(1000 + Math.random() * 9000)}`,
+            id: orderId,
             product: product.name,
             price: product.price,
             recipient,
@@ -401,18 +499,58 @@
             cep,
             address,
             payment,
-            date: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+            date: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+            datetime: new Date().toLocaleString('pt-BR')
         };
 
         receivedOrders.unshift(orderDetails);
         updateAdminOrdersLog();
 
-        console.log("[NOTIFICAÇÃO AUTOMÁTICA] Mensagem enviada ao WhatsApp do cliente:", phone, "-> 'pedido feito'");
-        console.log("[NOTIFICAÇÃO AUTOMÁTICA] Ficha completa enviada ao vendedor:", orderDetails);
+        // MENSAGEM PARA O CLIENTE
+        const clientMessage = `✅ *Pedido Confirmado - L&A Royal Advisory*\n\n` +
+            `Olá *${recipient}*! Seu pedido foi recebido com sucesso.\n\n` +
+            `📦 *Produto:* ${product.name}\n` +
+            `💰 *Valor:* ${product.price}\n` +
+            `🔖 *Pedido:* ${orderId}\n\n` +
+            `Em breve entraremos em contato para confirmar o pagamento e envio.\n\n` +
+            `Obrigado por escolher a L&A! 👑`;
 
+        // MENSAGEM PARA O VENDEDOR
+        const sellerMessage = `🔔 *NOVO PEDIDO RECEBIDO*\n\n` +
+            `📋 *ID:* ${orderId}\n` +
+            `⏰ *Horário:* ${orderDetails.datetime}\n\n` +
+            `👤 *Cliente:* ${recipient}\n` +
+            `📱 *WhatsApp:* ${phone}\n\n` +
+            `📦 *Produto:* ${product.name}\n` +
+            `💰 *Valor:* ${product.price}\n` +
+            `💳 *Pagamento:* ${payment}\n\n` +
+            `📍 *Endereço:*\n${address}\n` +
+            `CEP: ${cep}\n\n` +
+            `━━━━━━━━━━━━━━━━━━━━`;
+
+        // ENVIAR MENSAGENS
+        console.log('📤 Enviando notificações WhatsApp...');
+        
+        const [clientResult, sellerResult] = await Promise.all([
+            sendWhatsAppMessage(phone, clientMessage),
+            sendWhatsAppMessage('5581999999999', sellerMessage) // Substitua pelo número do vendedor
+        ]);
+
+        // FECHAR E LIMPAR
         closeOrderModal();
         document.getElementById('orderForm').reset();
-        alert(`✅ Pedido ${orderDetails.id} recebido!\n\nFoi enviada uma mensagem ("pedido feito") para o seu WhatsApp (${phone}) e os detalhes foram repassados para a nossa equipe.`);
+        
+        // ALERTA PARA O CLIENTE
+        let alertMessage = `✅ Pedido ${orderId} recebido!\n\n`;
+        if (clientResult.demo || sellerResult.demo) {
+            alertMessage += `📱 Modo demonstração ativo.\n`;
+            alertMessage += `Configure a API WhatsApp no Painel ADM para envio automático.\n\n`;
+        } else {
+            alertMessage += `📱 Mensagem de confirmação enviada para seu WhatsApp.\n`;
+        }
+        alertMessage += `\nA equipe L&A entrará em contato em breve!`;
+        
+        alert(alertMessage);
     }
 
     function updateAdminOrdersLog() {
@@ -420,31 +558,34 @@
         if (receivedOrders.length === 0) return;
 
         log.innerHTML = receivedOrders.map(o => `
-            <div class="p-3 bg-slate-900 text-white rounded-lg border border-brand-gold/30 text-xs space-y-1">
-                <div class="flex justify-between font-bold text-brand-gold">
+            <div class="p-4 bg-gradient-to-r from-slate-900 to-blue-950 text-white rounded-xl border-2 border-amber-400/30 text-xs space-y-2">
+                <div class="flex justify-between font-bold text-amber-400">
                     <span>${o.id} - ${o.product}</span>
                     <span>${o.date}</span>
                 </div>
-                <p><strong>Destinatário:</strong> ${o.recipient} (${o.phone})</p>
-                <p><strong>Endereço:</strong> ${o.address} - CEP: ${o.cep}</p>
-                <p><strong>Pagamento:</strong> <span class="text-yellow-400 font-semibold">${o.payment}</span> (${o.price})</p>
+                <p><strong class="text-amber-300">Cliente:</strong> ${o.recipient} (${o.phone})</p>
+                <p><strong class="text-amber-300">Endereço:</strong> ${o.address} - CEP: ${o.cep}</p>
+                <p><strong class="text-amber-300">Pagamento:</strong> <span class="text-yellow-400 font-bold">${o.payment}</span> (${o.price})</p>
             </div>
         `).join('');
     }
 
+    // UTILITÁRIOS
     function scrollCarousel(direction) {
         const container = document.getElementById('carouselContainer');
         container.scrollBy({ left: direction * container.clientWidth, behavior: 'smooth' });
     }
+    
     function openNavigationModal() { document.getElementById('navModal').classList.remove('hidden'); }
     function closeNavigationModal() { document.getElementById('navModal').classList.add('hidden'); }
     function toggleAdminModal() { document.getElementById('adminModal').classList.toggle('hidden'); }
 
+    // INICIALIZAÇÃO
     document.addEventListener('DOMContentLoaded', () => {
         renderProducts();
         renderConsultings();
         lucide.createIcons();
     });
-</script>
+    </script>
 </body>
 </html>
