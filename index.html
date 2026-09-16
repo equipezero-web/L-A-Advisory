@@ -30,7 +30,6 @@
         .gradient-gold { background: linear-gradient(135deg, #d4af37 0%, #f4d03f 50%, #d4af37 100%); }
         .text-gradient-gold { background: linear-gradient(135deg, #d4af37, #f4d03f); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .shadow-gold { box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3); }
-        .glow-gold { box-shadow: 0 0 15px rgba(212, 175, 55, 0.5); }
         
         .card-hover { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .card-hover:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
@@ -44,6 +43,9 @@
         
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
+        
+        .tab-active { background: linear-gradient(135deg, #d4af37, #f4d03f); color: #0c1933; }
+        .tab-inactive { background: #f1f5f9; color: #64748b; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
@@ -283,8 +285,8 @@
             </div>
         </div>
     </footer>
-    
-        <!-- MODAL CHECKOUT -->
+
+    <!-- MODAL CHECKOUT -->
     <div id="orderModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white text-slate-900 rounded-2xl max-w-lg w-full p-8 shadow-2xl relative border-2 border-amber-400/30 max-h-[90vh] overflow-y-auto">
             <button onclick="closeOrderModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
@@ -320,7 +322,7 @@
                     </div>
                     <div class="sm:col-span-2">
                         <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">Endereço Completo *</label>
-                        <input type="text" id="orderAddress" required placeholder="Rua, Nº, Bairro, Complemento" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                        <input type="text" id="orderAddress" required placeholder="Rua, Nº, Bairro" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
                     </div>
                 </div>
 
@@ -345,7 +347,7 @@
                 </div>
 
                 <button type="submit" class="w-full gradient-gold text-slate-900 py-4 rounded-xl font-bold text-base hover:shadow-gold transition shadow-lg flex items-center justify-center gap-3 mt-6 btn-premium">
-                    <i data-lucide="circle-check" class="w-6 h-6"></i> Confirmar e Enviar Pedido
+                    <i data-lucide="circle-check" class="w-6 h-6"></i> Confirmar Pedido
                 </button>
             </form>
         </div>
@@ -363,15 +365,15 @@
                     <i data-lucide="shield" class="w-10 h-10 text-slate-900"></i>
                 </div>
                 <h3 class="font-serif text-2xl font-bold text-slate-900">Acesso Restrito</h3>
-                <p class="text-sm text-slate-600 mt-2">Painel Administrativo L&A Royal Advisory</p>
+                <p class="text-sm text-slate-600 mt-2">Painel Administrativo L&A</p>
             </div>
 
             <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-5">
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">Email Administrativo *</label>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">Email *</label>
                     <div class="relative">
                         <i data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
-                        <input type="email" id="adminEmail" required placeholder="adm@royaladvisory.com" class="w-full pl-12 pr-4 py-3.5 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                        <input type="email" id="adminEmail" required placeholder="adm@royaladvisory.com" class="w-full pl-12 pr-4 py-3.5 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none">
                     </div>
                 </div>
 
@@ -379,50 +381,54 @@
                     <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">Senha *</label>
                     <div class="relative">
                         <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
-                        <input type="password" id="adminPassword" required placeholder="••••••••••••" class="w-full pl-12 pr-4 py-3.5 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                        <input type="password" id="adminPassword" required placeholder="••••••••" class="w-full pl-12 pr-4 py-3.5 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none">
                     </div>
                 </div>
 
-                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                    <p class="text-xs text-amber-800 flex items-start gap-2">
-                        <i data-lucide="info" class="w-4 h-4 flex-shrink-0 mt-0.5"></i>
-                        <span><strong>Acesso exclusivo</strong> para administradores autorizados. Seus dados estão protegidos.</span>
-                    </p>
-                </div>
-
-                <button type="submit" class="w-full gradient-gold text-slate-900 py-4 rounded-xl font-bold text-base hover:shadow-gold transition shadow-lg flex items-center justify-center gap-3 btn-premium">
-                    <i data-lucide="log-in" class="w-5 h-5"></i> Acessar Painel ADM
+                <button type="submit" class="w-full gradient-gold text-slate-900 py-4 rounded-xl font-bold hover:shadow-gold transition btn-premium">
+                    <i data-lucide="log-in" class="w-5 h-5"></i> Acessar
                 </button>
             </form>
-
-            <p class="text-center text-xs text-slate-500 mt-6">
-                <i data-lucide="shield-check" class="w-3.5 h-3.5 inline mr-1"></i>
-                Ambiente seguro e criptografado
-            </p>
         </div>
     </div>
 
-    <!-- PAINEL ADM -->
+    <!-- PAINEL ADM COM ABAS -->
     <div id="adminModal" class="fixed inset-0 bg-slate-950/90 z-50 hidden flex justify-end">
-        <div class="bg-white text-slate-800 w-full max-w-lg h-full shadow-2xl p-6 overflow-y-auto flex flex-col justify-between">
-            <div>
-                <div class="flex justify-between items-center mb-6 pb-4 border-b-2 border-amber-400/30">
-                    <div class="flex items-center gap-2">
-                        <i data-lucide="crown" class="w-6 h-6 text-amber-600"></i>
-                        <h3 class="font-bold text-xl text-slate-900">Painel Real ADM</h3>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="logout()" title="Sair" class="p-2 text-slate-400 hover:text-red-500 transition">
-                            <i data-lucide="log-out" class="w-5 h-5"></i>
-                        </button>
-                        <button onclick="toggleAdminModal()" class="text-slate-400 hover:text-slate-600 transition">
-                            <i data-lucide="x" class="w-6 h-6"></i>
-                        </button>
-                    </div>
+        <div class="bg-white text-slate-800 w-full max-w-5xl h-full shadow-2xl p-6 overflow-y-auto flex flex-col">
+            <div class="flex justify-between items-center mb-6 pb-4 border-b-2 border-amber-400/30">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="crown" class="w-6 h-6 text-amber-600"></i>
+                    <h3 class="font-bold text-xl text-slate-900">Painel Real ADM</h3>
                 </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="logout()" class="p-2 text-slate-400 hover:text-red-500">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                    </button>
+                    <button onclick="toggleAdminModal()" class="text-slate-400 hover:text-slate-600">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
 
-                <div class="space-y-8">
-                    <div class="bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-xl p-5">
+            <!-- ABAS -->
+            <div class="flex gap-2 mb-6">
+                <button onclick="switchTab('produtos')" id="tab-produtos" class="flex-1 py-3 px-4 rounded-xl font-bold text-sm tab-active transition">
+                    <i data-lucide="package" class="w-4 h-4 inline mr-2"></i>Produtos
+                </button>
+                <button onclick="switchTab('consultorias')" id="tab-consultorias" class="flex-1 py-3 px-4 rounded-xl font-bold text-sm tab-inactive transition">
+                    <i data-lucide="briefcase" class="w-4 h-4 inline mr-2"></i>Consultorias
+                </button>
+                <button onclick="switchTab('financeiro')" id="tab-financeiro" class="flex-1 py-3 px-4 rounded-xl font-bold text-sm tab-inactive transition">
+                    <i data-lucide="trending-up" class="w-4 h-4 inline mr-2"></i>Financeiro
+                </button>
+            </div>
+
+            <!-- CONTEÚDO -->
+            <div class="flex-grow">
+                <!-- ABA PRODUTOS -->
+                <div id="content-produtos" class="tab-content">
+                    <!-- CONFIG API WHATSAPP -->
+                    <div class="bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-xl p-5 mb-6">
                         <h4 class="text-xs font-bold uppercase text-amber-700 tracking-wider mb-3 flex items-center gap-2">
                             <i data-lucide="settings" class="w-4 h-4"></i> Configuração API WhatsApp
                         </h4>
@@ -434,43 +440,124 @@
                         </div>
                     </div>
 
-                    <div>
-                        <h4 class="text-xs font-bold uppercase text-amber-600 tracking-wider mb-4 flex items-center gap-2">
-                            <i data-lucide="circle-plus" class="w-4 h-4"></i> 1. Adicionar Novo Produto
-                        </h4>
-                        <form onsubmit="handleAddProduct(event)" class="space-y-3">
-                            <input type="text" id="adminProdName" required placeholder="Nome do Produto" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm outline-none focus:border-amber-500">
-                            <input type="text" id="adminProdPrice" required placeholder="Preço (R$ 1.850,00)" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm outline-none focus:border-amber-500">
-                            <input type="url" id="adminProdImg" placeholder="URL da Imagem (opcional)" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm outline-none focus:border-amber-500">
-                            <textarea id="adminProdDesc" rows="3" placeholder="Descrição detalhada..." class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm outline-none focus:border-amber-500"></textarea>
-                            <button type="submit" class="w-full gradient-gold text-slate-900 py-3 rounded-xl font-bold text-sm hover:shadow-gold transition btn-premium">
-                                <i data-lucide="plus-circle" class="w-4 h-4 inline mr-2"></i> Adicionar Produto
-                            </button>
-                        </form>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-bold text-lg mb-4 flex items-center gap-2">
+                                <i data-lucide="circle-plus" class="w-5 h-5 text-amber-600"></i>
+                                Adicionar Produto
+                            </h4>
+                            <form onsubmit="handleAddProduct(event)" class="space-y-3">
+                                <input type="text" id="adminProdName" required placeholder="Nome do Produto" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500">
+                                <input type="text" id="adminProdPrice" required placeholder="Preço (R$ 1.850,00)" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500">
+                                <input type="url" id="adminProdImg" placeholder="URL da Imagem" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500">
+                                <textarea id="adminProdDesc" rows="3" placeholder="Descrição" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500"></textarea>
+                                <button type="submit" class="w-full gradient-gold text-slate-900 py-3 rounded-xl font-bold hover:shadow-gold transition">
+                                    Adicionar Produto
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-bold text-lg mb-4 flex items-center gap-2">
+                                <i data-lucide="list" class="w-5 h-5 text-amber-600"></i>
+                                Produtos Cadastrados
+                            </h4>
+                            <div id="adminProductsList" class="space-y-2 max-h-96 overflow-y-auto"></div>
+                        </div>
                     </div>
-
-                    <div>
-                        <h4 class="text-xs font-bold uppercase text-amber-600 tracking-wider mb-4 flex items-center gap-2">
-                            <i data-lucide="package" class="w-4 h-4"></i> 2. Produtos Cadastrados
+                    
+                    <div class="mt-6">
+                        <h4 class="font-bold text-lg mb-4 flex items-center gap-2">
+                            <i data-lucide="shopping-cart" class="w-5 h-5 text-amber-600"></i>
+                            Pedidos de Produtos
                         </h4>
-                        <div id="adminProductsList" class="space-y-3 max-h-64 overflow-y-auto pr-2"></div>
-                    </div>
-
-                    <div>
-                        <h4 class="text-xs font-bold uppercase text-amber-600 tracking-wider mb-4 flex items-center gap-2">
-                            <i data-lucide="bell-ring" class="w-4 h-4"></i> 3. Pedidos Recebidos
-                        </h4>
-                        <div id="adminOrdersLog" class="space-y-3 max-h-64 overflow-y-auto pr-2">
-                            <p class="text-xs text-slate-400 italic">Nenhum pedido recebido.</p>
+                        <div id="adminOrdersLog" class="space-y-2 max-h-64 overflow-y-auto">
+                            <p class="text-sm text-slate-400">Nenhum pedido recebido.</p>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="pt-6 border-t-2 border-slate-200">
-                <button onclick="toggleAdminModal()" class="w-full bg-slate-900 text-amber-400 py-4 rounded-xl font-bold hover:bg-slate-800 transition">
-                    Fechar Painel
-                </button>
+                <!-- ABA CONSULTORIAS -->
+                <div id="content-consultorias" class="tab-content hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-6 rounded-2xl">
+                            <div class="flex items-center justify-between mb-2">
+                                <i data-lucide="trending-up" class="w-8 h-8"></i>
+                                <span class="text-3xl font-bold" id="totalConsultorias">0</span>
+                            </div>
+                            <p class="text-sm opacity-90">Total de Consultorias</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-amber-500 to-amber-700 text-white p-6 rounded-2xl">
+                            <div class="flex items-center justify-between mb-2">
+                                <i data-lucide="dollar-sign" class="w-8 h-8"></i>
+                                <span class="text-3xl font-bold" id="totalReceita">R$ 0</span>
+                            </div>
+                            <p class="text-sm opacity-90">Receita Total</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 text-white p-6 rounded-2xl">
+                            <div class="flex items-center justify-between mb-2">
+                                <i data-lucide="building" class="w-8 h-8"></i>
+                                <span class="text-3xl font-bold" id="totalClientes">0</span>
+                            </div>
+                            <p class="text-sm opacity-90">Clientes Únicos</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-bold text-lg mb-4">Por Tipo de Consultoria</h4>
+                            <div class="space-y-3">
+                                <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="font-bold text-slate-700">Financeira</span>
+                                        <span class="text-amber-600 font-bold" id="countFinanceira">0</span>
+                                    </div>
+                                    <div class="text-sm text-slate-500">Receita: <span id="receitaFinanceira" class="font-bold">R$ 0</span></div>
+                                </div>
+                                <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="font-bold text-slate-700">Administrativa</span>
+                                        <span class="text-amber-600 font-bold" id="countAdministrativa">0</span>
+                                    </div>
+                                    <div class="text-sm text-slate-500">Receita: <span id="receitaAdministrativa" class="font-bold">R$ 0</span></div>
+                                </div>
+                                <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="font-bold text-slate-700">Estratégico</span>
+                                        <span class="text-amber-600 font-bold" id="countEstrategico">0</span>
+                                    </div>
+                                    <div class="text-sm text-slate-500">Receita: <span id="receitaEstrategico" class="font-bold">R$ 0</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="font-bold text-lg mb-4">Empresas/Clientes que Solicitaram</h4>
+                            <div id="consultingClientsList" class="space-y-2 max-h-96 overflow-y-auto"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA FINANCEIRO -->
+                <div id="content-financeiro" class="tab-content hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-bold text-lg mb-4 flex items-center gap-2">
+                                <i data-lucide="building-2" class="w-5 h-5 text-amber-600"></i>
+                                Ganhos por Cliente/Empresa
+                            </h4>
+                            <div id="ganhosPorCliente" class="space-y-2 max-h-96 overflow-y-auto"></div>
+                        </div>
+
+                        <div>
+                            <h4 class="font-bold text-lg mb-4 flex items-center gap-2">
+                                <i data-lucide="calendar" class="w-5 h-5 text-amber-600"></i>
+                                Ganhos por Mês
+                            </h4>
+                            <div id="ganhosPorMes" class="space-y-2 max-h-96 overflow-y-auto"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -478,16 +565,16 @@
     <!-- MODAL NAVEGAÇÃO -->
     <div id="navModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white text-slate-900 rounded-2xl max-w-md w-full p-8 shadow-2xl relative border-2 border-amber-400/30">
-            <button onclick="closeNavigationModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
+            <button onclick="closeNavigationModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
                 <i data-lucide="x" class="w-6 h-6"></i>
             </button>
-            <h3 class="font-serif text-2xl font-bold mb-6 text-center text-slate-900">Navegação</h3>
+            <h3 class="font-serif text-2xl font-bold mb-6 text-center">Navegação</h3>
             <div class="grid grid-cols-1 gap-4">
-                <a href="#loja" onclick="closeNavigationModal()" class="p-5 rounded-xl border-2 border-slate-200 hover:border-amber-500 bg-gradient-to-r from-slate-50 to-white flex items-center gap-5 transition card-hover">
+                <a href="#loja" onclick="closeNavigationModal()" class="p-5 rounded-xl border-2 border-slate-200 hover:border-amber-500 bg-slate-50 flex items-center gap-5">
                     <div class="p-4 gradient-gold rounded-xl"><i data-lucide="shopping-bag" class="w-7 h-7 text-slate-900"></i></div>
                     <div><h4 class="font-bold text-lg">Loja Premium</h4><p class="text-xs text-slate-500">Relógios e Acessórios</p></div>
                 </a>
-                <a href="#consultoria" onclick="closeNavigationModal()" class="p-5 rounded-xl border-2 border-slate-200 hover:border-amber-500 bg-gradient-to-r from-slate-50 to-white flex items-center gap-5 transition card-hover">
+                <a href="#consultoria" onclick="closeNavigationModal()" class="p-5 rounded-xl border-2 border-slate-200 hover:border-amber-500 bg-slate-50 flex items-center gap-5">
                     <div class="p-4 gradient-gold rounded-xl"><i data-lucide="briefcase" class="w-7 h-7 text-slate-900"></i></div>
                     <div><h4 class="font-bold text-lg">Consultoria</h4><p class="text-xs text-slate-500">Soluções Empresariais</p></div>
                 </a>
@@ -498,24 +585,18 @@
     <!-- MODAL CARRINHO -->
     <div id="cartModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white text-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl relative border-2 border-amber-400/30">
-            <button onclick="toggleCart()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
+            <button onclick="toggleCart()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
                 <i data-lucide="x" class="w-6 h-6"></i>
             </button>
-            
             <h3 class="font-serif text-2xl font-bold mb-4">Seu Carrinho</h3>
-            
-            <div id="cartItems" class="max-h-96 overflow-y-auto mb-6 space-y-2">
-                <p class="text-slate-500 text-sm">Carrinho vazio</p>
-            </div>
-            
+            <div id="cartItems" class="max-h-96 overflow-y-auto mb-6 space-y-2"></div>
             <div class="border-t border-slate-200 pt-4 mb-4">
                 <div class="flex justify-between font-bold text-lg">
                     <span>Total:</span>
                     <span id="cartTotal" class="text-amber-600">R$ 0,00</span>
                 </div>
             </div>
-            
-            <button onclick="checkoutCart()" class="w-full gradient-gold text-slate-900 py-3 rounded-xl font-bold hover:shadow-gold transition btn-premium">
+            <button onclick="checkoutCart()" class="w-full gradient-gold text-slate-900 py-3 rounded-xl font-bold hover:shadow-gold transition">
                 Finalizar via WhatsApp
             </button>
         </div>
@@ -524,7 +605,7 @@
     <!-- MODAL AGENDAMENTO CONSULTORIA -->
     <div id="consultingModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white text-slate-900 rounded-2xl max-w-lg w-full p-8 shadow-2xl relative border-2 border-amber-400/30 max-h-[90vh] overflow-y-auto">
-            <button onclick="closeConsultingModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
+            <button onclick="closeConsultingModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
                 <i data-lucide="x" class="w-6 h-6"></i>
             </button>
             
@@ -540,240 +621,169 @@
                 <input type="hidden" id="consultingType">
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">Nome Completo *</label>
-                    <input type="text" id="consultingName" required placeholder="Seu nome completo" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">Nome Empresarial ou Nome do Cliente *</label>
+                    <input type="text" id="consultingCompany" required placeholder="Ex: TechBrasil Ltda ou João Silva" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none">
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">WhatsApp (DDD) *</label>
-                        <input type="tel" id="consultingPhone" required placeholder="(81) 99999-9999" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                        <input type="tel" id="consultingPhone" required placeholder="(81) 99999-9999" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">E-mail *</label>
-                        <input type="email" id="consultingEmail" required placeholder="seu@email.com" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                        <input type="email" id="consultingEmail" required placeholder="email@empresa.com" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">Data Preferida *</label>
-                        <input type="date" id="consultingDate" required class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                        <input type="date" id="consultingDate" required class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">Horário Preferido *</label>
-                        <input type="time" id="consultingTime" required class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                        <input type="time" id="consultingTime" required class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none">
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">Observações</label>
-                    <textarea id="consultingObs" rows="3" placeholder="Descreva sua necessidade..." class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition"></textarea>
+                    <textarea id="consultingObs" rows="3" placeholder="Descreva sua necessidade..." class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none"></textarea>
                 </div>
 
-                <button type="submit" class="w-full gradient-gold text-slate-900 py-4 rounded-xl font-bold text-base hover:shadow-gold transition shadow-lg flex items-center justify-center gap-3 mt-6 btn-premium">
-                    <i data-lucide="send" class="w-5 h-5"></i> Enviar Solicitação via WhatsApp
+                <button type="submit" class="w-full gradient-gold text-slate-900 py-4 rounded-xl font-bold hover:shadow-gold transition btn-premium">
+                    <i data-lucide="send" class="w-5 h-5 inline mr-2"></i> Enviar Solicitação
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- BOTÃO WHATSAPP FLUTUANTE -->
-    <a href="https://wa.me/5581989492224" 
-       target="_blank"
-       class="fixed bottom-6 right-6 w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg hover:bg-green-600 transition z-50">
+    <!-- BOTÃO WHATSAPP -->
+    <a href="https://wa.me/5581989492224" target="_blank" class="fixed bottom-6 right-6 w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg hover:bg-green-600 transition z-50">
         <i data-lucide="message-circle" class="w-7 h-7 text-white"></i>
     </a>
 
     <!-- JAVASCRIPT -->
     <script>
-    // CONFIGURAÇÕES
-    const ADMIN_CREDENTIALS = {
-        email: 'adm.la201@royaladvisory.com',
-        password: 'm#vYBa0HvjEj'
-    };
+    const ADMIN_CREDENTIALS = { email: 'adm.la201@royaladvisory.com', password: 'm#vYBa0HvjEj' };
 
     let products = [
-        { id: 1, name: "Chrono Gold Royal", price: "R$ 1.850,00", desc: "Caixa em aço inoxidável com revestimento em ouro 18k. Movimento suíço.", img: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=400&q=80" },
-        { id: 2, name: "Silver Executive", price: "R$ 2.100,00", desc: "Mostrador minimalista prateado com vidro de safira anti-risco.", img: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=400&q=80" },
-        { id: 3, name: "Cufflinks Gold 18k", price: "R$ 650,00", desc: "Abotoaduras em ouro 18k com acabamento polido artesanal.", img: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?auto=format&fit=crop&w=400&q=80" },
-        { id: 4, name: "Leather Slim Wallet", price: "R$ 380,00", desc: "Carteira slim em couro legítimo com proteção RFID.", img: "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=400&q=80" }
+        { id: 1, name: "Chrono Gold Royal", price: "R$ 1.850,00", desc: "Caixa em aço com ouro 18k.", img: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=400&q=80" },
+        { id: 2, name: "Silver Executive", price: "R$ 2.100,00", desc: "Mostrador prateado safira.", img: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=400&q=80" },
+        { id: 3, name: "Cufflinks Gold 18k", price: "R$ 650,00", desc: "Abotoaduras ouro artesanal.", img: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?auto=format&fit=crop&w=400&q=80" },
+        { id: 4, name: "Leather Wallet", price: "R$ 380,00", desc: "Carteira couro RFID.", img: "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=400&q=80" }
     ];
 
     let consultings = [
-        { id: 1, title: "Consultoria Financeira", desc: "Gestão estratégica de capital, análise de investimentos e otimização de fluxo de caixa corporativo.", icon: "trending-up" },
-        { id: 2, title: "Consultoria Administrativa", desc: "Reestruturação organizacional, mapeamento de processos e maximização da eficiência operacional.", icon: "briefcase" },
-        { id: 3, title: "Planejamento Estratégico", desc: "Desenvolvimento de roadmap empresarial com metas de curto, médio e longo prazo.", icon: "target" }
+        { id: 1, title: "Consultoria Financeira", desc: "Gestão de capital e fluxo de caixa.", icon: "trending-up" },
+        { id: 2, title: "Consultoria Administrativa", desc: "Otimização de processos.", icon: "briefcase" },
+        { id: 3, title: "Planejamento Estratégico", desc: "Roadmap empresarial.", icon: "target" }
     ];
 
     let receivedOrders = [];
+    let consultingRequests = [];
     let isAdminLoggedIn = false;
     let cart = [];
 
-    // SISTEMA DE LOGIN
     function checkAdminAccess() {
-        if (isAdminLoggedIn) {
-            toggleAdminModal();
-        } else {
-            document.getElementById('loginModal').classList.remove('hidden');
-        }
+        isAdminLoggedIn ? toggleAdminModal() : document.getElementById('loginModal').classList.remove('hidden');
     }
 
-    function handleLogin(event) {
-        event.preventDefault();
-        
-        const email = document.getElementById('adminEmail').value;
-        const password = document.getElementById('adminPassword').value;
-
-        if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
+    function handleLogin(e) {
+        e.preventDefault();
+        if (document.getElementById('adminEmail').value === ADMIN_CREDENTIALS.email && 
+            document.getElementById('adminPassword').value === ADMIN_CREDENTIALS.password) {
             isAdminLoggedIn = true;
             closeLoginModal();
             toggleAdminModal();
-            
             sessionStorage.setItem('adminSession', 'true');
-            
-            alert('✅ Acesso autorizado!\n\nBem-vindo ao Painel Real ADM.');
+            alert('✅ Acesso autorizado!');
         } else {
-            alert('❌ Credenciais inválidas!\n\nAcesso negado. Verifique email e senha.');
-            document.getElementById('adminPassword').value = '';
+            alert('❌ Credenciais inválidas!');
         }
     }
 
-    function closeLoginModal() {
-        document.getElementById('loginModal').classList.add('hidden');
-        document.getElementById('loginForm').reset();
-    }
+    function closeLoginModal() { document.getElementById('loginModal').classList.add('hidden'); }
+    function logout() { isAdminLoggedIn = false; sessionStorage.removeItem('adminSession'); toggleAdminModal(); }
 
-    function logout() {
-        if (confirm('Deseja realmente sair do Painel ADM?')) {
-            isAdminLoggedIn = false;
-            sessionStorage.removeItem('adminSession');
-            toggleAdminModal();
-            alert('Sessão encerrada.');
-        }
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+        document.getElementById('content-' + tab).classList.remove('hidden');
+        
+        document.querySelectorAll('[id^="tab-"]').forEach(el => {
+            el.classList.remove('tab-active');
+            el.classList.add('tab-inactive');
+        });
+        document.getElementById('tab-' + tab).classList.remove('tab-inactive');
+        document.getElementById('tab-' + tab).classList.add('tab-active');
+        
+        if (tab === 'consultorias') updateConsultingDashboard();
+        if (tab === 'financeiro') updateFinancialDashboard();
     }
 
     // CARRINHO
-    function addToCart(productId) {
-        const product = products.find(p => p.id === productId);
-        cart.push(product);
+    function addToCart(id) {
+        cart.push(products.find(p => p.id === id));
         updateCartUI();
-        alert(`✅ ${product.name} adicionado ao carrinho!`);
+        alert('✅ Adicionado ao carrinho!');
     }
 
-    function removeFromCart(index) {
-        cart.splice(index, 1);
-        updateCartUI();
-    }
+    function removeFromCart(i) { cart.splice(i, 1); updateCartUI(); }
 
     function updateCartUI() {
-        const cartCount = document.getElementById('cartCount');
-        if (cartCount) {
-            cartCount.textContent = cart.length;
-        }
+        document.getElementById('cartCount').textContent = cart.length;
+        const items = document.getElementById('cartItems');
+        const total = document.getElementById('cartTotal');
         
-        const cartItems = document.getElementById('cartItems');
-        const cartTotal = document.getElementById('cartTotal');
-        
-        if (cartItems) {
-            if (cart.length === 0) {
-                cartItems.innerHTML = '<p class="text-slate-500 text-sm">Carrinho vazio</p>';
-                if (cartTotal) cartTotal.textContent = 'R$ 0,00';
-            } else {
-                cartItems.innerHTML = cart.map((item, index) => `
-                    <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                        <div>
-                            <p class="font-bold text-sm">${item.name}</p>
-                            <p class="text-xs text-amber-600">${item.price}</p>
-                        </div>
-                        <button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-700">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                `).join('');
-                
-                const total = cart.reduce((sum, p) => sum + parseFloat(p.price.replace('R$ ', '').replace(',', '.')), 0);
-                if (cartTotal) cartTotal.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-            }
-            lucide.createIcons();
+        if (cart.length === 0) {
+            items.innerHTML = '<p class="text-slate-500">Carrinho vazio</p>';
+            total.textContent = 'R$ 0,00';
+        } else {
+            items.innerHTML = cart.map((p, i) => `
+                <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                    <div><p class="font-bold text-sm">${p.name}</p><p class="text-xs text-amber-600">${p.price}</p></div>
+                    <button onclick="removeFromCart(${i})" class="text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+            `).join('');
+            total.textContent = 'R$ ' + cart.reduce((s, p) => s + parseFloat(p.price.replace('R$ ', '').replace(',', '.')), 0).toFixed(2).replace('.', ',');
         }
+        lucide.createIcons();
     }
 
     function toggleCart() {
-        const cartModal = document.getElementById('cartModal');
-        if (cartModal.classList.contains('hidden')) {
-            cartModal.classList.remove('hidden');
-            updateCartUI();
-        } else {
-            cartModal.classList.add('hidden');
-        }
+        const modal = document.getElementById('cartModal');
+        modal.classList.contains('hidden') ? (modal.classList.remove('hidden'), updateCartUI()) : modal.classList.add('hidden');
     }
 
     function checkoutCart() {
-        if (cart.length === 0) {
-            alert('Seu carrinho está vazio!');
-            return;
-        }
-        
-        const total = cart.reduce((sum, p) => sum + parseFloat(p.price.replace('R$ ', '').replace(',', '.')), 0);
-        
-        const message = `🛒 *NOVO PEDIDO DO CARRINHO*\n\n` +
-            `Itens: ${cart.length}\n` +
-            `Produtos:\n${cart.map(p => `- ${p.name} (${p.price})`).join('\n')}\n\n` +
-            `*Total: R$ ${total.toFixed(2).replace('.', ',')}*\n\n` +
-            `Aguardo confirmação!`;
-        
-        const url = `https://wa.me/5581989492224?text=${encodeURIComponent(message)}`;
-        window.open(url, '_blank');
+        if (cart.length === 0) { alert('Carrinho vazio!'); return; }
+        const total = cart.reduce((s, p) => s + parseFloat(p.price.replace('R$ ', '').replace(',', '.')), 0);
+        const msg = `🛒 *NOVO PEDIDO*\n\nItens: ${cart.length}\n${cart.map(p => `- ${p.name} (${p.price})`).join('\n')}\n\n*Total: R$ ${total.toFixed(2).replace('.', ',')}*`;
+        window.open(`https://wa.me/5581989492224?text=${encodeURIComponent(msg)}`, '_blank');
     }
-
-    // Verificar sessão ao carregar
-    window.addEventListener('DOMContentLoaded', () => {
-        if (sessionStorage.getItem('adminSession') === 'true') {
-            isAdminLoggedIn = true;
-        }
-        renderProducts();
-        renderConsultings();
-        lucide.createIcons();
-    });
 
     // RENDERIZAÇÃO
     function renderProducts() {
-        const container = document.getElementById('carouselContainer');
-        container.innerHTML = '';
-
-        products.forEach(prod => {
-            const card = `
-                <div class="flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-white border-2 border-slate-200 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition card-hover snap-start flex flex-col justify-between">
-                    <div>
-                        <div class="h-72 bg-slate-100 overflow-hidden">
-                            <img src="${prod.img}" alt="${prod.name}" class="w-full h-full object-cover hover:scale-110 transition duration-700">
-                        </div>
-                        <div class="p-6">
-                            <h3 class="font-serif font-bold text-slate-900 text-xl mb-2">${prod.name}</h3>
-                            <p class="text-xs text-slate-500 mb-4 leading-relaxed">${prod.desc}</p>
-                            <p class="text-amber-600 font-bold text-2xl">${prod.price}</p>
-                        </div>
-                    </div>
-                    <div class="p-6 pt-0 flex gap-2">
-                        <button onclick="addToCart(${prod.id})" class="flex-1 py-3 bg-slate-900 text-white text-sm font-bold rounded-xl hover:bg-slate-800 transition flex items-center justify-center gap-2">
-                            <i data-lucide="shopping-cart" class="w-4 h-4"></i> Carrinho
-                        </button>
-                        <button onclick="openOrderModal(${prod.id})" class="flex-1 gradient-gold text-slate-900 text-sm font-bold rounded-xl hover:shadow-gold transition flex items-center justify-center gap-2 btn-premium">
-                            <i data-lucide="zap" class="w-4 h-4"></i> Comprar
-                        </button>
-                    </div>
+        const c = document.getElementById('carouselContainer');
+        c.innerHTML = products.map(p => `
+            <div class="flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-white border-2 border-slate-200 rounded-2xl overflow-hidden shadow-lg snap-start flex flex-col">
+                <div class="h-72 bg-slate-100"><img src="${p.img}" class="w-full h-full object-cover hover:scale-110 transition duration-700"></div>
+                <div class="p-6 flex-grow">
+                    <h3 class="font-serif font-bold text-slate-900 text-xl mb-2">${p.name}</h3>
+                    <p class="text-xs text-slate-500 mb-4">${p.desc}</p>
+                    <p class="text-amber-600 font-bold text-2xl">${p.price}</p>
                 </div>
-            `;
-            container.innerHTML += card;
-        });
-
-        container.innerHTML += `
+                <div class="p-6 pt-0 flex gap-2">
+                    <button onclick="addToCart(${p.id})" class="flex-1 py-3 bg-slate-900 text-white text-sm font-bold rounded-xl flex items-center justify-center gap-2"><i data-lucide="shopping-cart" class="w-4 h-4"></i> Carrinho</button>
+                    <button onclick="openOrderModal(${p.id})" class="flex-1 gradient-gold text-slate-900 text-sm font-bold rounded-xl flex items-center justify-center gap-2"><i data-lucide="zap" class="w-4 h-4"></i> Comprar</button>
+                </div>
+            </div>
+        `).join('') + `
             <div class="flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-gradient-to-br from-slate-900 to-blue-950 text-white rounded-2xl shadow-xl snap-start flex flex-col items-center justify-center p-10 text-center border-2 border-dashed border-amber-400/40">
                 <div class="p-5 gradient-gold rounded-full mb-5"><i data-lucide="grid-3x3" class="w-10 h-10 text-slate-900"></i></div>
                 <h3 class="font-serif font-bold text-2xl mb-3">Catálogo Completo</h3>
-                <p class="text-xs text-slate-400 mb-6 max-w-xs">Explore todos os produtos exclusivos.</p>
-                <button class="px-8 py-3 gradient-gold text-slate-900 font-bold text-sm rounded-xl shadow-gold btn-premium">Ver Coleção</button>
+                <button class="px-8 py-3 gradient-gold text-slate-900 font-bold text-sm rounded-xl shadow-gold">Ver Coleção</button>
             </div>
         `;
         lucide.createIcons();
@@ -781,246 +791,181 @@
     }
 
     function renderConsultings() {
-        const container = document.getElementById('consultingContainer');
-        container.innerHTML = '';
-        consultings.forEach(item => {
-            container.innerHTML += `
-                <div class="bg-slate-800/70 backdrop-blur border border-slate-700/60 p-8 rounded-2xl flex flex-col justify-between card-hover">
-                    <div>
-                        <div class="w-14 h-14 gradient-gold rounded-xl flex items-center justify-center mb-6 shadow-gold">
-                            <i data-lucide="${item.icon}" class="w-7 h-7 text-slate-900"></i>
-                        </div>
-                        <h3 class="font-serif text-2xl font-bold mb-4 text-white">${item.title}</h3>
-                        <p class="text-slate-400 text-sm leading-relaxed mb-6">${item.desc}</p>
-                    </div>
-                    <button onclick="openConsultingModal('${item.title}')" class="w-full gradient-gold text-slate-900 font-bold rounded-xl py-4 hover:shadow-gold transition btn-premium">Agendar Consultoria</button>
+        document.getElementById('consultingContainer').innerHTML = consultings.map(i => `
+            <div class="bg-slate-800/70 backdrop-blur border border-slate-700/60 p-8 rounded-2xl flex flex-col justify-between card-hover">
+                <div>
+                    <div class="w-14 h-14 gradient-gold rounded-xl flex items-center justify-center mb-6 shadow-gold"><i data-lucide="${i.icon}" class="w-7 h-7 text-slate-900"></i></div>
+                    <h3 class="font-serif text-2xl font-bold mb-4 text-white">${i.title}</h3>
+                    <p class="text-slate-400 text-sm mb-6">${i.desc}</p>
                 </div>
-            `;
-        });
+                <button onclick="openConsultingModal('${i.title}')" class="w-full gradient-gold text-slate-900 font-bold rounded-xl py-4 hover:shadow-gold transition">Agendar Consultoria</button>
+            </div>
+        `).join('');
         lucide.createIcons();
     }
 
-    // AGENDAMENTO
     function openConsultingModal(title) {
         document.getElementById('consultingType').value = title;
         document.getElementById('consultingTypeDisplay').innerText = title;
         document.getElementById('consultingModal').classList.remove('hidden');
     }
 
-    function closeConsultingModal() {
-        document.getElementById('consultingModal').classList.add('hidden');
-        document.getElementById('consultingForm').reset();
+    function closeConsultingModal() { document.getElementById('consultingModal').classList.add('hidden'); document.getElementById('consultingForm').reset(); }
+
+    function handleConsultingSubmit(e) {
+        e.preventDefault();
+        const req = {
+            id: Date.now(),
+            company: document.getElementById('consultingCompany').value,
+            phone: document.getElementById('consultingPhone').value,
+            email: document.getElementById('consultingEmail').value,
+            date: document.getElementById('consultingDate').value,
+            time: document.getElementById('consultingTime').value,
+            type: document.getElementById('consultingType').value,
+            obs: document.getElementById('consultingObs').value || 'Nenhuma',
+            valor: (Math.random() * 5000 + 2000).toFixed(2)
+        };
+        consultingRequests.push(req);
+        
+        const msg = `📅 *NOVA CONSULTORIA*\n\n👤 ${req.company}\n📱 ${req.phone}\n💼 ${req.type}\n🗓️ ${new Date(req.date).toLocaleDateString('pt-BR')}\n⏰ ${req.time}`;
+        window.open(`https://wa.me/5581989492224?text=${encodeURIComponent(msg)}`, '_blank');
+        closeConsultingModal();
+        alert('✅ Solicitação enviada!');
     }
 
-    function handleConsultingSubmit(event) {
-        event.preventDefault();
-
-        const type = document.getElementById('consultingType').value;
-        const name = document.getElementById('consultingName').value;
-        const phone = document.getElementById('consultingPhone').value;
-        const email = document.getElementById('consultingEmail').value;
-        const date = document.getElementById('consultingDate').value;
-        const time = document.getElementById('consultingTime').value;
-        const obs = document.getElementById('consultingObs').value || 'Nenhuma observação.';
-
-        const dateFormatted = new Date(date + 'T00:00:00').toLocaleDateString('pt-BR');
-
-        const message =
-            `📅 *NOVA SOLICITAÇÃO DE CONSULTORIA*\n\n` +
-            `👤 *Nome:* ${name}\n` +
-            `📱 *WhatsApp:* ${phone}\n` +
-            `📧 *E-mail:* ${email}\n\n` +
-            `💼 *Tipo:* ${type}\n` +
-            `🗓️ *Data:* ${dateFormatted}\n` +
-            `⏰ *Horário:* ${time}\n\n` +
-            `📝 *Obs:* ${obs}\n\n` +
-            `━━━━━━━━━━━━━━━━━━━━\n` +
-            `Aguardo confirmação! 👑`;
-
-        const url = `https://wa.me/5581989492224?text=${encodeURIComponent(message)}`;
+    function updateConsultingDashboard() {
+        document.getElementById('totalConsultorias').textContent = consultingRequests.length;
+        document.getElementById('totalReceita').textContent = 'R$ ' + consultingRequests.reduce((s, r) => s + parseFloat(r.valor), 0).toFixed(2).replace('.', ',');
+        document.getElementById('totalClientes').textContent = new Set(consultingRequests.map(r => r.company)).size;
         
-        closeConsultingModal();
-        window.open(url, '_blank');
+        const byType = { Financeira: { count: 0, revenue: 0 }, Administrativa: { count: 0, revenue: 0 }, Estrategico: { count: 0, revenue: 0 } };
+        consultingRequests.forEach(r => {
+            if (byType[r.type]) { byType[r.type].count++; byType[r.type].revenue += parseFloat(r.valor); }
+        });
+        
+        document.getElementById('countFinanceira').textContent = byType.Financeira.count;
+        document.getElementById('receitaFinanceira').textContent = 'R$ ' + byType.Financeira.revenue.toFixed(2).replace('.', ',');
+        document.getElementById('countAdministrativa').textContent = byType.Administrativa.count;
+        document.getElementById('receitaAdministrativa').textContent = 'R$ ' + byType.Administrativa.revenue.toFixed(2).replace('.', ',');
+        document.getElementById('countEstrategico').textContent = byType.Estrategico.count;
+        document.getElementById('receitaEstrategico').textContent = 'R$ ' + byType.Estrategico.revenue.toFixed(2).replace('.', ',');
+        
+        const clients = {};
+        consultingRequests.forEach(r => {
+            if (!clients[r.company]) clients[r.company] = { count: 0, types: [] };
+            clients[r.company].count++;
+            if (!clients[r.company].types.includes(r.type)) clients[r.company].types.push(r.type);
+        });
+        
+        document.getElementById('consultingClientsList').innerHTML = Object.entries(clients).map(([name, data]) => `
+            <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200">
+                <p class="font-bold text-slate-800">${name}</p>
+                <p class="text-xs text-slate-500">${data.count} solicitação(ões) • ${data.types.join(', ')}</p>
+            </div>
+        `).join('') || '<p class="text-slate-400">Nenhuma solicitação</p>';
+    }
+
+    function updateFinancialDashboard() {
+        const byClient = {};
+        const byMonth = {};
+        
+        consultingRequests.forEach(r => {
+            const val = parseFloat(r.valor);
+            if (!byClient[r.company]) byClient[r.company] = 0;
+            byClient[r.company] += val;
+            
+            const month = new Date(r.date).toLocaleString('pt-BR', { month: '2-digit', year: 'numeric' });
+            if (!byMonth[month]) byMonth[month] = 0;
+            byMonth[month] += val;
+        });
+        
+        document.getElementById('ganhosPorCliente').innerHTML = Object.entries(byClient)
+            .sort((a, b) => b[1] - a[1])
+            .map(([name, val]) => `
+                <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200 flex justify-between items-center">
+                    <span class="font-bold text-slate-800">${name}</span>
+                    <span class="text-amber-600 font-bold">R$ ${val.toFixed(2).replace('.', ',')}</span>
+                </div>
+            `).join('') || '<p class="text-slate-400">Sem dados</p>';
+        
+        document.getElementById('ganhosPorMes').innerHTML = Object.entries(byMonth)
+            .sort()
+            .map(([month, val]) => `
+                <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200 flex justify-between items-center">
+                    <span class="font-bold text-slate-800">${month}</span>
+                    <span class="text-amber-600 font-bold">R$ ${val.toFixed(2).replace('.', ',')}</span>
+                </div>
+            `).join('') || '<p class="text-slate-400">Sem dados</p>';
     }
 
     function renderAdminProductsList() {
-        const list = document.getElementById('adminProductsList');
-        list.innerHTML = '';
-        
-        if (products.length === 0) {
-            list.innerHTML = '<p class="text-xs text-slate-400 italic">Nenhum produto.</p>';
-            return;
-        }
-
-        products.forEach(p => {
-            list.innerHTML += `
-                <div class="flex items-center justify-between p-4 bg-slate-50 border-2 border-slate-200 rounded-xl text-xs">
-                    <div class="truncate pr-3 flex-1">
-                        <p class="font-bold text-slate-800 truncate">${p.name}</p>
-                        <p class="text-amber-600 font-bold">${p.price}</p>
-                    </div>
-                    <button onclick="deleteProduct(${p.id})" class="p-2.5 text-red-500 hover:bg-red-50 rounded-lg">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                    </button>
-                </div>
-            `;
-        });
+        document.getElementById('adminProductsList').innerHTML = products.map(p => `
+            <div class="flex justify-between items-center p-4 bg-slate-50 border-2 border-slate-200 rounded-xl">
+                <div class="truncate flex-1"><p class="font-bold text-sm">${p.name}</p><p class="text-amber-600 font-bold">${p.price}</p></div>
+                <button onclick="deleteProduct(${p.id})" class="p-2 text-red-500 hover:bg-red-50 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+            </div>
+        `).join('');
         lucide.createIcons();
     }
 
-    function handleAddProduct(event) {
-        event.preventDefault();
-        const name = document.getElementById('adminProdName').value;
-        const price = document.getElementById('adminProdPrice').value;
-        const img = document.getElementById('adminProdImg').value || "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80";
-        const desc = document.getElementById('adminProdDesc').value || "Produto exclusivo L&A.";
-
-        products.push({ id: Date.now(), name, price, img, desc });
+    function handleAddProduct(e) {
+        e.preventDefault();
+        products.push({
+            id: Date.now(),
+            name: document.getElementById('adminProdName').value,
+            price: document.getElementById('adminProdPrice').value,
+            img: document.getElementById('adminProdImg').value || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80',
+            desc: document.getElementById('adminProdDesc').value || 'Produto exclusivo'
+        });
         renderProducts();
-
         document.getElementById('adminProdName').value = '';
         document.getElementById('adminProdPrice').value = '';
         document.getElementById('adminProdImg').value = '';
         document.getElementById('adminProdDesc').value = '';
-        
         alert('✅ Produto adicionado!');
     }
 
-    function deleteProduct(id) {
-        if (confirm('Excluir este produto?')) {
-            products = products.filter(p => p.id !== id);
-            renderProducts();
-            alert('Produto excluído!');
-        }
-    }
+    function deleteProduct(id) { if (confirm('Excluir?')) { products = products.filter(p => p.id !== id); renderProducts(); } }
 
-    function openOrderModal(productId) {
-        const product = products.find(p => p.id === productId);
-        if (!product) return;
-
-        document.getElementById('orderProductId').value = product.id;
-        document.getElementById('orderProductTitle').innerText = `${product.name} - ${product.price}`;
+    function openOrderModal(id) {
+        const p = products.find(x => x.id === id);
+        if (!p) return;
+        document.getElementById('orderProductId').value = p.id;
+        document.getElementById('orderProductTitle').innerText = `${p.name} - ${p.price}`;
         document.getElementById('orderModal').classList.remove('hidden');
     }
 
-    function closeOrderModal() {
-        document.getElementById('orderModal').classList.add('hidden');
-    }
+    function closeOrderModal() { document.getElementById('orderModal').classList.add('hidden'); }
 
-    async function sendWhatsAppMessage(phone, message) {
-        const token = document.getElementById('whatsappToken').value;
-        const instance = document.getElementById('whatsappInstance').value;
-        const baseUrl = document.getElementById('whatsappBaseUrl').value;
-
-        if (!token || !instance || !baseUrl) {
-            console.log('📱 [DEMO] WhatsApp:', { phone, message });
-            return { success: true, demo: true };
-        }
-
-        try {
-            const response = await fetch(`${baseUrl}/${instance}/messages`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    messaging_product: 'whatsapp',
-                    to: phone.replace(/\D/g, ''),
-                    type: 'text',
-                    text: { body: message }
-                })
-            });
-
-            const result = await response.json();
-            return { success: response.ok, data: result };
-        } catch (error) {
-            console.error('❌ Erro WhatsApp:', error);
-            return { success: false, error: error.message };
-        }
-    }
-
-    async function handleOrderSubmit(event) {
-        event.preventDefault();
-
-        const productId = parseInt(document.getElementById('orderProductId').value);
-        const product = products.find(p => p.id === productId);
-        const recipient = document.getElementById('orderRecipient').value;
-        const phone = document.getElementById('orderPhone').value;
-        const cep = document.getElementById('orderCep').value;
-        const address = document.getElementById('orderAddress').value;
-        const payment = document.querySelector('input[name="paymentType"]:checked').value;
-
-        const orderId = `PED-${Math.floor(1000 + Math.random() * 9000)}`;
-        
-        const orderDetails = {
-            id: orderId,
-            product: product.name,
-            price: product.price,
-            recipient,
-            phone,
-            cep,
-            address,
-            payment,
-            date: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-            datetime: new Date().toLocaleString('pt-BR')
+    async function handleOrderSubmit(e) {
+        e.preventDefault();
+        const id = `PED-${Math.floor(1000 + Math.random() * 9000)}`;
+        const order = {
+            id, product: products.find(p => p.id === parseInt(document.getElementById('orderProductId').value)).name,
+            price: products.find(p => p.id === parseInt(document.getElementById('orderProductId').value)).price,
+            recipient: document.getElementById('orderRecipient').value, phone: document.getElementById('orderPhone').value,
+            date: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
         };
-
-        receivedOrders.unshift(orderDetails);
-        updateAdminOrdersLog();
-
-        const clientMessage = `✅ *Pedido Confirmado*\n\n` +
-            `Olá *${recipient}*!\n\n` +
-            `📦 ${product.name}\n` +
-            `💰 ${product.price}\n` +
-            `🔖 ${orderId}\n\n` +
-            `Entraremos em contato! 👑`;
-
-        const sellerMessage = `🔔 *NOVO PEDIDO*\n\n` +
-            `📋 ${orderId}\n` +
-            `👤 ${recipient} (${phone})\n` +
-            `📦 ${product.name}\n` +
-            `💰 ${product.price}\n` +
-            `💳 ${payment}\n` +
-            `📍 ${address}`;
-
-        const [clientResult, sellerResult] = await Promise.all([
-            sendWhatsAppMessage(phone, clientMessage),
-            sendWhatsAppMessage('5581999999999', sellerMessage)
-        ]);
-
+        receivedOrders.unshift(order);
+        document.getElementById('adminOrdersLog').innerHTML = receivedOrders.map(o => `
+            <div class="p-4 bg-slate-900 text-white rounded-xl text-xs"><p class="font-bold text-amber-400">${o.id} - ${o.product}</p><p>${o.recipient} - ${o.price}</p></div>
+        `).join('');
         closeOrderModal();
         document.getElementById('orderForm').reset();
-        
-        let msg = `✅ Pedido ${orderId} recebido!\n\n`;
-        if (clientResult.demo) msg += `📱 Configure a API no ADM para envio automático.\n`;
-        alert(msg + `\nA equipe L&A entrará em contato!`);
+        alert(`✅ Pedido ${id} recebido!`);
     }
 
-    function updateAdminOrdersLog() {
-        const log = document.getElementById('adminOrdersLog');
-        if (receivedOrders.length === 0) return;
-
-        log.innerHTML = receivedOrders.map(o => `
-            <div class="p-4 bg-gradient-to-r from-slate-900 to-blue-950 text-white rounded-xl border-2 border-amber-400/30 text-xs space-y-2">
-                <div class="flex justify-between font-bold text-amber-400">
-                    <span>${o.id} - ${o.product}</span>
-                    <span>${o.date}</span>
-                </div>
-                <p><strong>Cliente:</strong> ${o.recipient}</p>
-                <p><strong>Valor:</strong> ${o.price} (${o.payment})</p>
-            </div>
-        `).join('');
-    }
-
-    function scrollCarousel(direction) {
-        const container = document.getElementById('carouselContainer');
-        container.scrollBy({ left: direction * container.clientWidth, behavior: 'smooth' });
-    }
-    
+    function scrollCarousel(d) { document.getElementById('carouselContainer').scrollBy({ left: d * document.getElementById('carouselContainer').clientWidth, behavior: 'smooth' }); }
     function openNavigationModal() { document.getElementById('navModal').classList.remove('hidden'); }
     function closeNavigationModal() { document.getElementById('navModal').classList.add('hidden'); }
     function toggleAdminModal() { document.getElementById('adminModal').classList.toggle('hidden'); }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        if (sessionStorage.getItem('adminSession') === 'true') isAdminLoggedIn = true;
+        renderProducts();
+        renderConsultings();
+        lucide.createIcons();
+    });
     </script>
 </body>
 </html>
