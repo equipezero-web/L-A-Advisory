@@ -9,211 +9,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-
-   <script>
-    let products = [
-        { id: 1, name: "Relógio Chrono Gold", price: "R$ 1.850,00", desc: "Caixa em aço inoxidável revestido a ouro 18k.", img: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=400&q=80" },
-        { id: 2, name: "Relógio Silver Executive", price: "R$ 2.100,00", desc: "Mostrador minimalista prateado com vidro de safira.", img: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=400&q=80" },
-        { id: 3, name: "Abotoaduras de Ouro 18k", price: "R$ 650,00", desc: "Acabamento polido artesanal exclusivo L&A.", img: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?auto=format&fit=crop&w=400&q=80" },
-        { id: 4, name: "Carteira de Couro Slim", price: "R$ 380,00", desc: "Couro legítimo com proteção RFID integrada.", img: "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=400&q=80" }
-    ];
-
-    let consultings = [
-        { id: 1, title: "Consultoria Financeira", desc: "Gestão de capital, análise de investimento e otimização de fluxo de caixa para empresas.", icon: "dollar-sign" },
-        { id: 2, title: "Consultoria Administrativa", desc: "Reestruturação organizacional, mapeamento de processos e eficiência operacional.", icon: "bar-chart-3" }
-    ];
-
-    let receivedOrders = [];
-
-    function renderProducts() {
-        const container = document.getElementById('carouselContainer');
-        container.innerHTML = '';
-
-        products.forEach(prod => {
-            const card = `
-                <div class="flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-slate-50 border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition snap-start flex flex-col justify-between">
-                    <div>
-                        <div class="h-64 bg-slate-200 overflow-hidden">
-                            <img src="${prod.img}" alt="${prod.name}" class="w-full h-full object-cover hover:scale-105 transition duration-500">
-                        </div>
-                        <div class="p-5">
-                            <h3 class="font-bold text-slate-800 text-lg mb-1">${prod.name}</h3>
-                            <p class="text-xs text-slate-500 mb-3">${prod.desc}</p>
-                            <p class="text-brand-gold font-bold text-lg">${prod.price}</p>
-                        </div>
-                    </div>
-                    <div class="p-5 pt-0">
-                        <button onclick="openOrderModal(${prod.id})" class="w-full py-2.5 bg-brand-blue text-brand-gold text-sm font-bold rounded-lg hover:bg-slate-800 transition flex items-center justify-center gap-2 shadow">
-                            <i data-lucide="shopping-bag" class="w-4 h-4"></i> Fazer Pedido
-                        </button>
-                    </div>
-                </div>
-            `;
-            container.innerHTML += card;
-        });
-
-        container.innerHTML += `
-            <div class="flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-slate-900 text-white rounded-xl shadow-md snap-start flex flex-col items-center justify-center p-8 text-center border-2 border-dashed border-brand-gold/40">
-                <div class="p-4 bg-brand-gold/10 text-brand-gold rounded-full mb-4"><i data-lucide="grid" class="w-8 h-8"></i></div>
-                <h3 class="font-serif font-bold text-xl mb-2">Catálogo Completo</h3>
-                <p class="text-xs text-slate-400 mb-6">Explore todos os acessórios cadastrados.</p>
-                <button class="px-6 py-2.5 bg-brand-gold text-slate-900 font-bold text-sm rounded shadow">Ver mais</button>
-            </div>
-        `;
-        lucide.createIcons();
-        renderAdminProductsList();
-    }
-
-    function renderConsultings() {
-        const container = document.getElementById('consultingContainer');
-        container.innerHTML = '';
-        consultings.forEach(item => {
-            container.innerHTML += `
-                <div class="bg-slate-800/60 border border-slate-700/60 p-8 rounded-xl flex flex-col justify-between">
-                    <div>
-                        <div class="w-12 h-12 bg-brand-gold/10 rounded-lg flex items-center justify-center text-brand-gold mb-6">
-                            <i data-lucide="${item.icon}" class="w-6 h-6"></i>
-                        </div>
-                        <h3 class="font-serif text-xl font-bold mb-3 text-slate-100">${item.title}</h3>
-                        <p class="text-slate-400 text-sm leading-relaxed mb-6">${item.desc}</p>
-                    </div>
-                    <button onclick="openConsultingModal('${item.title}')" class="w-full py-3 bg-brand-gold text-slate-900 font-bold rounded-lg hover:bg-yellow-500 transition shadow">Agendar Consultoria</button>
-                </div>
-            `;
-        });
-        lucide.createIcons();
-    }
-
-    function openConsultingModal(title) {
-        alert(`Iniciando agendamento para: ${title}`);
-    }
-
-    function renderAdminProductsList() {
-        const list = document.getElementById('adminProductsList');
-        list.innerHTML = '';
-        
-        if (products.length === 0) {
-            list.innerHTML = '<p class="text-xs text-slate-400 italic">Nenhum produto cadastrado.</p>';
-            return;
-        }
-
-        products.forEach(p => {
-            list.innerHTML += `
-                <div class="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded text-xs">
-                    <div class="truncate pr-2">
-                        <p class="font-bold text-slate-800 truncate">${p.name}</p>
-                        <p class="text-brand-gold font-semibold">${p.price}</p>
-                    </div>
-                    <button onclick="deleteProduct(${p.id})" title="Excluir Produto" class="p-1.5 text-red-500 hover:bg-red-50 rounded transition">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                    </button>
-                </div>
-            `;
-        });
-        lucide.createIcons();
-    }
-
-    function handleAddProduct(event) {
-        event.preventDefault();
-        const name = document.getElementById('adminProdName').value;
-        const price = document.getElementById('adminProdPrice').value;
-        const img = document.getElementById('adminProdImg').value || "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80";
-        const desc = document.getElementById('adminProdDesc').value || "Produto exclusivo da coleção L&A Advisory.";
-
-        products.push({ id: Date.now(), name, price, img, desc });
-        renderProducts();
-
-        document.getElementById('adminProdName').value = '';
-        document.getElementById('adminProdPrice').value = '';
-        document.getElementById('adminProdImg').value = '';
-        document.getElementById('adminProdDesc').value = '';
-        alert('Produto adicionado com sucesso!');
-    }
-
-    function deleteProduct(id) {
-        if (confirm('Tem certeza que deseja excluir este produto do catálogo?')) {
-            products = products.filter(p => p.id !== id);
-            renderProducts();
-        }
-    }
-
-    function openOrderModal(productId) {
-        const product = products.find(p => p.id === productId);
-        if (!product) return;
-
-        document.getElementById('orderProductId').value = product.id;
-        document.getElementById('orderProductTitle').innerText = `${product.name} - ${product.price}`;
-        document.getElementById('orderModal').classList.remove('hidden');
-    }
-
-    function closeOrderModal() {
-        document.getElementById('orderModal').classList.add('hidden');
-    }
-
-    async function handleOrderSubmit(event) {
-        event.preventDefault();
-
-        const productId = parseInt(document.getElementById('orderProductId').value);
-        const product = products.find(p => p.id === productId);
-        const recipient = document.getElementById('orderRecipient').value;
-        const phone = document.getElementById('orderPhone').value;
-        const cep = document.getElementById('orderCep').value;
-        const address = document.getElementById('orderAddress').value;
-        const payment = document.querySelector('input[name="paymentType"]:checked').value;
-
-        const orderDetails = {
-            id: `PED-${Math.floor(1000 + Math.random() * 9000)}`,
-            product: product.name,
-            price: product.price,
-            recipient,
-            phone,
-            cep,
-            address,
-            payment,
-            date: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-        };
-
-        receivedOrders.unshift(orderDetails);
-        updateAdminOrdersLog();
-
-        console.log("[NOTIFICAÇÃO AUTOMÁTICA] Mensagem enviada ao WhatsApp do cliente:", phone, "-> 'pedido feito'");
-        console.log("[NOTIFICAÇÃO AUTOMÁTICA] Ficha completa enviada ao vendedor:", orderDetails);
-
-        closeOrderModal();
-        document.getElementById('orderForm').reset();
-        alert(`✅ Pedido ${orderDetails.id} recebido!\n\nFoi enviada uma mensagem ("pedido feito") para o seu WhatsApp (${phone}) e os detalhes foram repassados para a nossa equipe.`);
-    }
-
-    function updateAdminOrdersLog() {
-        const log = document.getElementById('adminOrdersLog');
-        if (receivedOrders.length === 0) return;
-
-        log.innerHTML = receivedOrders.map(o => `
-            <div class="p-3 bg-slate-900 text-white rounded-lg border border-brand-gold/30 text-xs space-y-1">
-                <div class="flex justify-between font-bold text-brand-gold">
-                    <span>${o.id} - ${o.product}</span>
-                    <span>${o.date}</span>
-                </div>
-                <p><strong>Destinatário:</strong> ${o.recipient} (${o.phone})</p>
-                <p><strong>Endereço:</strong> ${o.address} - CEP: ${o.cep}</p>
-                <p><strong>Pagamento:</strong> <span class="text-yellow-400 font-semibold">${o.payment}</span> (${o.price})</p>
-            </div>
-        `).join('');
-    }
-
-    function scrollCarousel(direction) {
-        const container = document.getElementById('carouselContainer');
-        container.scrollBy({ left: direction * container.clientWidth, behavior: 'smooth' });
-    }
-    function openNavigationModal() { document.getElementById('navModal').classList.remove('hidden'); }
-    function closeNavigationModal() { document.getElementById('navModal').classList.add('hidden'); }
-    function toggleAdminModal() { document.getElementById('adminModal').classList.toggle('hidden'); }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        renderProducts();
-        renderConsultings();
-        lucide.createIcons();
+    
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('Service Worker registrado com sucesso! Scope:', reg.scope))
+        .catch(err => console.error('Falha ao registrar o Service Worker:', err));
     });
+  }
 </script>
     <style>
         .custom-scrollbar::-webkit-scrollbar { height: 6px; }
@@ -438,205 +242,209 @@
 
     <!-- LÓGICA E AUTOMAÇÃO EM JAVASCRIPT -->
     <script>
-        let products = [
-            { id: 1, name: "Relógio Chrono Gold", price: "R$ 1.850,00", desc: "Caixa em aço inoxidável revestido a ouro 18k.", img: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=400&q=80" },
-            { id: 2, name: "Relógio Silver Executive", price: "R$ 2.100,00", desc: "Mostrador minimalista prateado com vidro de safira.", img: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=400&q=80" },
-            { id: 3, name: "Abotoaduras de Ouro 18k", price: "R$ 650,00", desc: "Acabamento polido artesanal exclusivo L&A.", img: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?auto=format&fit=crop&w=400&q=80" },
-            { id: 4, name: "Carteira de Couro Slim", price: "R$ 380,00", desc: "Couro legítimo com proteção RFID integrada.", img: "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=400&q=80" }
-        ];
+    let products = [
+        { id: 1, name: "Relógio Chrono Gold", price: "R$ 1.850,00", desc: "Caixa em aço inoxidável revestido a ouro 18k.", img: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=400&q=80" },
+        { id: 2, name: "Relógio Silver Executive", price: "R$ 2.100,00", desc: "Mostrador minimalista prateado com vidro de safira.", img: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=400&q=80" },
+        { id: 3, name: "Abotoaduras de Ouro 18k", price: "R$ 650,00", desc: "Acabamento polido artesanal exclusivo L&A.", img: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?auto=format&fit=crop&w=400&q=80" },
+        { id: 4, name: "Carteira de Couro Slim", price: "R$ 380,00", desc: "Couro legítimo com proteção RFID integrada.", img: "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=400&q=80" }
+    ];
 
-        let consultings = [
-            { id: 1, title: "Consultoria Financeira", desc: "Gestão de capital, análise de investimento e otimização de fluxo de caixa para empresas.", icon: "dollar-sign" },
-            { id: 2, title: "Consultoria Administrativa", desc: "Reestruturação organizacional, mapeamento de processos e eficiência operacional.", icon: "bar-chart-3" }
-        ];
+    let consultings = [
+        { id: 1, title: "Consultoria Financeira", desc: "Gestão de capital, análise de investimento e otimização de fluxo de caixa para empresas.", icon: "dollar-sign" },
+        { id: 2, title: "Consultoria Administrativa", desc: "Reestruturação organizacional, mapeamento de processos e eficiência operacional.", icon: "bar-chart-3" }
+    ];
 
-        let receivedOrders = [];
+    let receivedOrders = [];
 
-        function renderProducts() {
-            const container = document.getElementById('carouselContainer');
-            container.innerHTML = '';
+    function renderProducts() {
+        const container = document.getElementById('carouselContainer');
+        container.innerHTML = '';
 
-            products.forEach(prod => {
-                const card = `
-                    <div class="flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-slate-50 border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition snap-start flex flex-col justify-between">
-                        <div>
-                            <div class="h-64 bg-slate-200 overflow-hidden">
-                                <img src="${prod.img}" alt="${prod.name}" class="w-full h-full object-cover hover:scale-105 transition duration-500">
-                            </div>
-                            <div class="p-5">
-                                <h3 class="font-bold text-slate-800 text-lg mb-1">${prod.name}</h3>
-                                <p class="text-xs text-slate-500 mb-3">${prod.desc}</p>
-                                <p class="text-brand-gold font-bold text-lg">${prod.price}</p>
-                            </div>
+        products.forEach(prod => {
+            const card = `
+                <div class="flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-slate-50 border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition snap-start flex flex-col justify-between">
+                    <div>
+                        <div class="h-64 bg-slate-200 overflow-hidden">
+                            <img src="${prod.img}" alt="${prod.name}" class="w-full h-full object-cover hover:scale-105 transition duration-500">
                         </div>
-                        <div class="p-5 pt-0">
-                            <button onclick="openOrderModal(${prod.id})" class="w-full py-2.5 bg-brand-blue text-brand-gold text-sm font-bold rounded-lg hover:bg-slate-800 transition flex items-center justify-center gap-2 shadow">
-                                <i data-lucide="shopping-bag" class="w-4 h-4"></i> Fazer Pedido
-                            </button>
+                        <div class="p-5">
+                            <h3 class="font-bold text-slate-800 text-lg mb-1">${prod.name}</h3>
+                            <p class="text-xs text-slate-500 mb-3">${prod.desc}</p>
+                            <p class="text-brand-gold font-bold text-lg">${prod.price}</p>
                         </div>
                     </div>
-                `;
-                container.innerHTML += card;
-            });
-
-            container.innerHTML += `
-                <div class="flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-slate-900 text-white rounded-xl shadow-md snap-start flex flex-col items-center justify-center p-8 text-center border-2 border-dashed border-brand-gold/40">
-                    <div class="p-4 bg-brand-gold/10 text-brand-gold rounded-full mb-4"><i data-lucide="grid" class="w-8 h-8"></i></div>
-                    <h3 class="font-serif font-bold text-xl mb-2">Catálogo Completo</h3>
-                    <p class="text-xs text-slate-400 mb-6">Explore todos os acessórios cadastrados.</p>
-                    <button class="px-6 py-2.5 bg-brand-gold text-slate-900 font-bold text-sm rounded shadow">Ver mais</button>
-                </div>
-            `;
-            lucide.createIcons();
-            renderAdminProductsList();
-        }
-
-        function renderAdminProductsList() {
-            const list = document.getElementById('adminProductsList');
-            list.innerHTML = '';
-            
-            if (products.length === 0) {
-                list.innerHTML = '<p class="text-xs text-slate-400 italic">Nenhum produto cadastrado.</p>';
-                return;
-            }
-
-            products.forEach(p => {
-                list.innerHTML += `
-                    <div class="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded text-xs">
-                        <div class="truncate pr-2">
-                            <p class="font-bold text-slate-800 truncate">${p.name}</p>
-                            <p class="text-brand-gold font-semibold">${p.price}</p>
-                        </div>
-                        <button onclick="deleteProduct(${p.id})" title="Excluir Produto" class="p-1.5 text-red-500 hover:bg-red-50 rounded transition">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    <div class="p-5 pt-0">
+                        <button onclick="openOrderModal(${prod.id})" class="w-full py-2.5 bg-brand-blue text-brand-gold text-sm font-bold rounded-lg hover:bg-slate-800 transition flex items-center justify-center gap-2 shadow">
+                            <i data-lucide="shopping-bag" class="w-4 h-4"></i> Fazer Pedido
                         </button>
                     </div>
-                `;
-            });
-            lucide.createIcons();
-        }
-
-        function handleAddProduct(event) {
-            event.preventDefault();
-            const name = document.getElementById('adminProdName').value;
-            const price = document.getElementById('adminProdPrice').value;
-            const img = document.getElementById('adminProdImg').value || "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80";
-            const desc = document.getElementById('adminProdDesc').value || "Produto exclusivo da coleção L&A Advisory.";
-
-            products.push({ id: Date.now(), name, price, img, desc });
-            renderProducts();
-
-            document.getElementById('adminProdName').value = '';
-            document.getElementById('adminProdPrice').value = '';
-            document.getElementById('adminProdImg').value = '';
-            document.getElementById('adminProdDesc').value = '';
-            alert('Produto adicionado com sucesso!');
-        }
-
-        function deleteProduct(id) {
-            if (confirm('Tem certeza que deseja excluir este produto do catálogo?')) {
-                products = products.filter(p => p.id !== id);
-                renderProducts();
-            }
-        }
-
-        function openOrderModal(productId) {
-            const product = products.find(p => p.id === productId);
-            if (!product) return;
-
-            document.getElementById('orderProductId').value = product.id;
-            document.getElementById('orderProductTitle').innerText = `${product.name} - ${product.price}`;
-            document.getElementById('orderModal').classList.remove('hidden');
-        }
-
-        function closeOrderModal() {
-            document.getElementById('orderModal').classList.add('hidden');
-        }
-
-        async function handleOrderSubmit(event) {
-            event.preventDefault();
-
-            const productId = parseInt(document.getElementById('orderProductId').value);
-            const product = products.find(p => p.id === productId);
-            const recipient = document.getElementById('orderRecipient').value;
-            const phone = document.getElementById('orderPhone').value;
-            const cep = document.getElementById('orderCep').value;
-            const address = document.getElementById('orderAddress').value;
-            const payment = document.querySelector('input[name="paymentType"]:checked').value;
-
-            const orderDetails = {
-                id: `PED-${Math.floor(1000 + Math.random() * 9000)}`,
-                product: product.name,
-                price: product.price,
-                recipient,
-                phone,
-                cep,
-                address,
-                payment,
-                date: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-            };
-
-            receivedOrders.unshift(orderDetails);
-            updateAdminOrdersLog();
-
-            console.log("[NOTIFICAÇÃO AUTOMÁTICA] Mensagem enviada ao WhatsApp do cliente:", phone, "-> 'pedido feito'");
-            console.log("[NOTIFICAÇÃO AUTOMÁTICA] Ficha completa enviada ao vendedor:", orderDetails);
-
-            closeOrderModal();
-            document.getElementById('orderForm').reset();
-            alert(`✅ Pedido ${orderDetails.id} recebido!\n\nFoi enviada uma mensagem ("pedido feito") para o seu WhatsApp (${phone}) e os detalhes foram repassados para a nossa equipe.`);
-        }
-
-        function updateAdminOrdersLog() {
-            const log = document.getElementById('adminOrdersLog');
-            if (receivedOrders.length === 0) return;
-
-            log.innerHTML = receivedOrders.map(o => `
-                <div class="p-3 bg-slate-900 text-white rounded-lg border border-brand-gold/30 text-xs space-y-1">
-                    <div class="flex justify-between font-bold text-brand-gold">
-                        <span>${o.id} - ${o.product}</span>
-                        <span>${o.date}</span>
-                    </div>
-                    <p><strong>Destinatário:</strong> ${o.recipient} (${o.phone})</p>
-                    <p><strong>Endereço:</strong> ${o.address} - CEP: ${o.cep}</p>
-                    <p><strong>Pagamento:</strong> <span class="text-yellow-400 font-semibold">${o.payment}</span> (${o.price})</p>
                 </div>
-            `).join('');
-        }
-
-        function renderConsultings() {
-            const container = document.getElementById('consultingContainer');
-            container.innerHTML = '';
-            consultings.forEach(item => {
-                container.innerHTML += `
-                    <div class="bg-slate-800/60 border border-slate-700/60 p-8 rounded-xl flex flex-col justify-between">
-                        <div>
-                            <div class="w-12 h-12 bg-brand-gold/10 rounded-lg flex items-center justify-center text-brand-gold mb-6">
-                                <i data-lucide="${item.icon}" class="w-6 h-6"></i>
-                            </div>
-                            <h3 class="font-serif text-xl font-bold mb-3 text-slate-100">${item.title}</h3>
-                            <p class="text-slate-400 text-sm leading-relaxed mb-6">${item.desc}</p>
-                        </div>
-                        <button class="w-full py-3 bg-brand-gold text-slate-900 font-bold rounded-lg hover:bg-yellow-500 transition">Agendar Consultoria</button>
-                    </div>
-                `;
-            });
-            lucide.createIcons();
-        }
-
-        function scrollCarousel(direction) {
-            const container = document.getElementById('carouselContainer');
-            container.scrollBy({ left: direction * container.clientWidth, behavior: 'smooth' });
-        }
-        function openNavigationModal() { document.getElementById('navModal').classList.remove('hidden'); }
-        function closeNavigationModal() { document.getElementById('navModal').classList.add('hidden'); }
-        function toggleAdminModal() { document.getElementById('adminModal').classList.toggle('hidden'); }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            renderProducts();
-            renderConsultings();
-            lucide.createIcons();
+            `;
+            container.innerHTML += card;
         });
-    </script>
+
+        container.innerHTML += `
+            <div class="flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-slate-900 text-white rounded-xl shadow-md snap-start flex flex-col items-center justify-center p-8 text-center border-2 border-dashed border-brand-gold/40">
+                <div class="p-4 bg-brand-gold/10 text-brand-gold rounded-full mb-4"><i data-lucide="grid" class="w-8 h-8"></i></div>
+                <h3 class="font-serif font-bold text-xl mb-2">Catálogo Completo</h3>
+                <p class="text-xs text-slate-400 mb-6">Explore todos os acessórios cadastrados.</p>
+                <button class="px-6 py-2.5 bg-brand-gold text-slate-900 font-bold text-sm rounded shadow">Ver mais</button>
+            </div>
+        `;
+        lucide.createIcons();
+        renderAdminProductsList();
+    }
+
+    function renderConsultings() {
+        const container = document.getElementById('consultingContainer');
+        container.innerHTML = '';
+        consultings.forEach(item => {
+            container.innerHTML += `
+                <div class="bg-slate-800/60 border border-slate-700/60 p-8 rounded-xl flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 bg-brand-gold/10 rounded-lg flex items-center justify-center text-brand-gold mb-6">
+                            <i data-lucide="${item.icon}" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-serif text-xl font-bold mb-3 text-slate-100">${item.title}</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-6">${item.desc}</p>
+                    </div>
+                    <button onclick="openConsultingModal('${item.title}')" class="w-full py-3 bg-brand-gold text-slate-900 font-bold rounded-lg hover:bg-yellow-500 transition shadow">Agendar Consultoria</button>
+                </div>
+            `;
+        });
+        lucide.createIcons();
+    }
+
+    function openConsultingModal(title) {
+        alert(`Iniciando agendamento para: ${title}`);
+    }
+
+    function renderAdminProductsList() {
+        const list = document.getElementById('adminProductsList');
+        list.innerHTML = '';
+        
+        if (products.length === 0) {
+            list.innerHTML = '<p class="text-xs text-slate-400 italic">Nenhum produto cadastrado.</p>';
+            return;
+        }
+
+        products.forEach(p => {
+            list.innerHTML += `
+                <div class="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded text-xs">
+                    <div class="truncate pr-2">
+                        <p class="font-bold text-slate-800 truncate">${p.name}</p>
+                        <p class="text-brand-gold font-semibold">${p.price}</p>
+                    </div>
+                    <button onclick="deleteProduct(${p.id})" title="Excluir Produto" class="p-1.5 text-red-500 hover:bg-red-50 rounded transition">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            `;
+        });
+        lucide.createIcons();
+    }
+
+    function handleAddProduct(event) {
+        event.preventDefault();
+        const name = document.getElementById('adminProdName').value;
+        const price = document.getElementById('adminProdPrice').value;
+        const img = document.getElementById('adminProdImg').value || "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80";
+        const desc = document.getElementById('adminProdDesc').value || "Produto exclusivo da coleção L&A Advisory.";
+
+        products.push({ id: Date.now(), name, price, img, desc });
+        renderProducts();
+
+        document.getElementById('adminProdName').value = '';
+        document.getElementById('adminProdPrice').value = '';
+        document.getElementById('adminProdImg').value = '';
+        document.getElementById('adminProdDesc').value = '';
+        alert('Produto adicionado com sucesso!');
+    }
+
+    function deleteProduct(id) {
+        if (confirm('Tem certeza que deseja excluir este produto do catálogo?')) {
+            products = products.filter(p => p.id !== id);
+            renderProducts();
+        }
+    }
+
+    function openOrderModal(productId) {
+        const product = products.find(p => p.id === productId);
+        if (!product) return;
+
+        document.getElementById('orderProductId').value = product.id;
+        document.getElementById('orderProductTitle').innerText = `${product.name} - ${product.price}`;
+        document.getElementById('orderModal').classList.remove('hidden');
+    }
+
+    function closeOrderModal() {
+        document.getElementById('orderModal').classList.add('hidden');
+    }
+
+    async function handleOrderSubmit(event) {
+        event.preventDefault();
+
+        const productId = parseInt(document.getElementById('orderProductId').value);
+        const product = products.find(p => p.id === productId);
+        const recipient = document.getElementById('orderRecipient').value;
+        const phone = document.getElementById('orderPhone').value;
+        const cep = document.getElementById('orderCep').value;
+        const address = document.getElementById('orderAddress').value;
+        const payment = document.querySelector('input[name="paymentType"]:checked').value;
+
+        const orderDetails = {
+            id: `PED-${Math.floor(1000 + Math.random() * 9000)}`,
+            product: product.name,
+            price: product.price,
+            recipient,
+            phone,
+            cep,
+            address,
+            payment,
+            date: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+        };
+
+        receivedOrders.unshift(orderDetails);
+        updateAdminOrdersLog();
+
+        console.log("[NOTIFICAÇÃO AUTOMÁTICA] Mensagem enviada ao WhatsApp do cliente:", phone, "-> 'pedido feito'");
+        console.log("[NOTIFICAÇÃO AUTOMÁTICA] Ficha completa enviada ao vendedor:", orderDetails);
+
+        closeOrderModal();
+        document.getElementById('orderForm').reset();
+        alert(`✅ Pedido ${orderDetails.id} recebido!\n\nFoi enviada uma mensagem ("pedido feito") para o seu WhatsApp (${phone}) e os detalhes foram repassados para a nossa equipe.`);
+    }
+
+    function updateAdminOrdersLog() {
+        const log = document.getElementById('adminOrdersLog');
+        if (receivedOrders.length === 0) return;
+
+        log.innerHTML = receivedOrders.map(o => `
+            <div class="p-3 bg-slate-900 text-white rounded-lg border border-brand-gold/30 text-xs space-y-1">
+                <div class="flex justify-between font-bold text-brand-gold">
+                    <span>${o.id} - ${o.product}</span>
+                    <span>${o.date}</span>
+                </div>
+                <p><strong>Destinatário:</strong> ${o.recipient} (${o.phone})</p>
+                <p><strong>Endereço:</strong> ${o.address} - CEP: ${o.cep}</p>
+                <p><strong>Pagamento:</strong> <span class="text-yellow-400 font-semibold">${o.payment}</span> (${o.price})</p>
+            </div>
+        `).join('');
+    }
+
+    function scrollCarousel(direction) {
+        const container = document.getElementById('carouselContainer');
+        container.scrollBy({ left: direction * container.clientWidth, behavior: 'smooth' });
+    }
+    function openNavigationModal() { document.getElementById('navModal').classList.remove('hidden'); }
+    function closeNavigationModal() { document.getElementById('navModal').classList.add('hidden'); }
+    function toggleAdminModal() { document.getElementById('adminModal').classList.toggle('hidden'); }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        renderProducts();
+        renderConsultings();
+        lucide.createIcons();
+    });
+</script>
 </body>
 </html>
