@@ -1,3 +1,9 @@
 {
-  "target": "equipezero-web/L-A-Advisory"
+  "owner": {
+    "username": "equipezero-web",
+    "email": "lucaalves17.20@gmail.com"
+  },
+  "record": {
+    "CNAME": "equipezero-web.github.io"
+  }
 }
