@@ -10,15 +10,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400,600,700&family=Lato:wght@300,400,600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('Service Worker registrado!', reg.scope))
-            .catch(err => console.error('Erro no Service Worker:', err));
-        });
-      }
-    </script>
+   <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then((reg) => console.log('Service Worker registrado com sucesso:', reg.scope))
+        .catch((err) => console.error('Erro ao registrar Service Worker:', err));
+    });
+  }
+</script>
     
     <style>
         * { scrollbar-width: thin; scrollbar-color: #1e3a5f #f1f5f9; }
