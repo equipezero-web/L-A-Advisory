@@ -90,29 +90,29 @@
                 </button>
             </div>
         </div>
-
-     <!-- BARRA SUPERIOR -->
-    <div class="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-slate-300 px-4 py-2.5 flex justify-between items-center text-xs z-50 border-b border-blue-800/30">
-        <div class="flex items-center gap-2">
-            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-400"></i>
-            <span>Visão do Cliente</span>
-        </div>
-        <button onclick="checkAdminAccess()" class="gradient-gold text-slate-900 px-4 py-1.5 rounded font-bold text-xs hover:shadow-gold transition flex items-center gap-2 btn-premium">
-            <i data-lucide="crown" class="w-3.5 h-3.5"></i> Painel Real ADM
-        </button>
-    </div>
     </header>
         
     <main class="flex-grow">
         <!-- LOJA VIRTUAL -->
         <section id="loja" class="py-16 bg-gradient-to-b from-white to-slate-100 border-b border-slate-200">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-end mb-10">
+                
+                <!-- TÍTULO E BOTÃO DE VER CATÁLOGO -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
                     <div>
                         <span class="text-amber-600 font-bold uppercase text-xs tracking-[0.2em]">Coleção Exclusiva</span>
                         <h2 class="font-serif text-3xl sm:text-4xl font-bold text-slate-900 mt-2">Loja Premium</h2>
                         <div class="w-20 h-1 gradient-gold rounded mt-3"></div>
                     </div>
+
+                    <!-- Botão para Expandir Categorias -->
+                    <div id="inicio-container">
+                        <button id="btn-ver-catalogo" onclick="abrirCatalogo()" class="gradient-gold text-slate-900 px-6 py-3 rounded-lg font-bold text-sm shadow-md hover:shadow-gold transition flex items-center gap-2 cursor-pointer">
+                            <i data-lucide="grid" class="w-4 h-4"></i> Ver Catálogo
+                        </button>
+                    </div>
+
+                    <!-- Botões de Navegação Lateral (Setas) -->
                     <div class="flex gap-2">
                         <button type="button" onclick="scrollCarousel('left')" class="p-3 rounded-full border-2 border-slate-300 hover:border-amber-500 text-slate-600 hover:text-amber-600 transition bg-white shadow-md hover:shadow-lg cursor-pointer">
                             <i data-lucide="chevron-left" class="w-5 h-5"></i>
@@ -123,7 +123,26 @@
                     </div>
                 </div>
 
-                <div id="carouselContainer" class="flex gap-6 overflow-x-auto pb-6 scroll-smooth snap-x snap-mandatory no-scrollbar"></div>
+                <!-- PAINEL DE CATEGORIAS (Inicia Oculto) -->
+                <div id="painel-categorias" class="hidden mb-10 p-4 bg-slate-900 rounded-xl border border-amber-500/20 shadow-xl">
+                    <p class="text-xs text-amber-400 font-semibold mb-3 uppercase tracking-wider">Filtrar por Categoria:</p>
+                    <div class="flex flex-wrap gap-2">
+                        <button class="btn-cat px-4 py-2 rounded-lg text-xs font-bold transition bg-amber-500 text-slate-900 shadow-md" onclick="filtrarCategoria('todas', event)">Tudo</button>
+                        <button class="btn-cat px-4 py-2 rounded-lg text-xs font-bold transition bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700" onclick="filtrarCategoria('roupas-masculinas', event)">Roupas Masculinas</button>
+                        <button class="btn-cat px-4 py-2 rounded-lg text-xs font-bold transition bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700" onclick="filtrarCategoria('roupas-femininas', event)">Roupas Femininas</button>
+                        <button class="btn-cat px-4 py-2 rounded-lg text-xs font-bold transition bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700" onclick="filtrarCategoria('acessorios-masculinos', event)">Acessórios Masculinos</button>
+                        <button class="btn-cat px-4 py-2 rounded-lg text-xs font-bold transition bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700" onclick="filtrarCategoria('acessorios-femininos', event)">Acessórios Femininos</button>
+                        <button class="btn-cat px-4 py-2 rounded-lg text-xs font-bold transition bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700" onclick="filtrarCategoria('sapatos-masculinos', event)">Sapatos Masculinos</button>
+                        <button class="btn-cat px-4 py-2 rounded-lg text-xs font-bold transition bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700" onclick="filtrarCategoria('sapatos-femininos', event)">Sapatos Femininos</button>
+                        <button class="btn-cat px-4 py-2 rounded-lg text-xs font-bold transition bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700" onclick="filtrarCategoria('aparelhos', event)">Aparelhos</button>
+                    </div>
+                </div>
+
+                <!-- CARROSSEL / GRELHA DE PRODUTOS -->
+                <div id="carouselContainer" class="flex gap-6 overflow-x-auto pb-6 scroll-smooth snap-x snap-mandatory no-scrollbar">
+                    <!-- Os produtos serão inseridos aqui via JS ou diretamente como HTML -->
+                </div>
+
             </div>
         </section>
 
@@ -596,7 +615,7 @@
     </a>
 
     <!-- LÓGICA EM JAVASCRIPT ES6/FIREBASE -->
-    <script type="module">
+<script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -617,12 +636,12 @@
 
         const ADMIN_CREDENTIALS = { email: 'adm.la201@royaladvisory.com', password: 'm#vYBa0HvjEj' };
 
-        // ESTADO GLOBAL DA APLICAÇÃO
+        // ESTADO GLOBAL DA APLICAÇÃO (COM PROPRIEDADE CATEGORY)
         let products = [
-            { id: 1, name: "Chrono Gold Royal", price: "R$ 1.850,00", desc: "Caixa em aço com ouro 18k.", img: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=400&q=80" },
-            { id: 2, name: "Silver Executive", price: "R$ 2.100,00", desc: "Mostrador prateado safira.", img: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=400&q=80" },
-            { id: 3, name: "Cufflinks Gold 18k", price: "R$ 650,00", desc: "Abotoaduras ouro artesanal.", img: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?auto=format&fit=crop&w=400&q=80" },
-            { id: 4, name: "Leather Wallet", price: "R$ 380,00", desc: "Carteira couro RFID.", img: "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=400&q=80" }
+            { id: 1, name: "Chrono Gold Royal", price: "R$ 1.850,00", desc: "Caixa em aço com ouro 18k.", category: "acessorios-masculinos", img: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=400&q=80" },
+            { id: 2, name: "Silver Executive", price: "R$ 2.100,00", desc: "Mostrador prateado safira.", category: "acessorios-masculinos", img: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=400&q=80" },
+            { id: 3, name: "Cufflinks Gold 18k", price: "R$ 650,00", desc: "Abotoaduras ouro artesanal.", category: "acessorios-masculinos", img: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?auto=format&fit=crop&w=400&q=80" },
+            { id: 4, name: "Leather Wallet", price: "R$ 380,00", desc: "Carteira couro RFID.", category: "acessorios-masculinos", img: "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=400&q=80" }
         ];
 
         let consultings = [
@@ -665,13 +684,42 @@
             if (await salvarNoFirebase()) alert("☁️ Alterações salvas na nuvem com sucesso!");
         };
 
+        // FUNÇÕES DO SISTEMA DE CATEGORIAS E FILTROS
+        window.abrirCatalogo = function() {
+            const painel = document.getElementById('painel-categorias');
+            const btn = document.getElementById('btn-ver-catalogo');
+            if (painel) painel.classList.remove('hidden');
+            if (btn) btn.classList.add('hidden');
+        };
+
+        window.filtrarCategoria = function(categoria, event) {
+            const botoes = document.querySelectorAll('.btn-cat');
+            botoes.forEach(btn => {
+                btn.className = "btn-cat px-4 py-2 rounded-lg text-xs font-bold transition bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700";
+            });
+
+            if (event) {
+                event.currentTarget.className = "btn-cat px-4 py-2 rounded-lg text-xs font-bold transition bg-amber-500 text-slate-900 shadow-md";
+            }
+
+            const items = document.querySelectorAll('#carouselContainer > .item-produto-card');
+            items.forEach(item => {
+                const itemCat = item.getAttribute('data-categoria');
+                if (categoria === 'todas' || itemCat === categoria) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        };
+
         // RENDERIZAÇÃO E NAVEGAÇÃO DA LOJA
         function renderProducts() {
             const c = document.getElementById('carouselContainer');
             if (!c) return;
 
             c.innerHTML = products.map(p => `
-                <div class="flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-white border-2 border-slate-200 rounded-2xl overflow-hidden shadow-lg snap-start flex flex-col">
+                <div data-categoria="${p.category || 'todas'}" class="item-produto-card flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-white border-2 border-slate-200 rounded-2xl overflow-hidden shadow-lg snap-start flex flex-col">
                     <div class="h-72 bg-slate-100"><img src="${p.img}" alt="${p.name}" class="w-full h-full object-cover hover:scale-110 transition duration-700"></div>
                     <div class="p-6 flex-grow flex flex-col justify-between">
                         <div>
@@ -689,7 +737,7 @@
                 <div class="flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-gradient-to-br from-slate-900 to-blue-950 text-white rounded-2xl shadow-xl snap-start flex flex-col items-center justify-center p-10 text-center border-2 border-dashed border-amber-400/40">
                     <div class="p-5 gradient-gold rounded-full mb-5"><i data-lucide="grid-3x3" class="w-10 h-10 text-slate-900"></i></div>
                     <h3 class="font-serif font-bold text-2xl mb-3">Catálogo Completo</h3>
-                    <button class="px-8 py-3 gradient-gold text-slate-900 font-bold text-sm rounded-xl shadow-gold">Ver Coleção</button>
+                    <button onclick="abrirCatalogo()" class="px-8 py-3 gradient-gold text-slate-900 font-bold text-sm rounded-xl shadow-gold">Ver Coleção</button>
                 </div>
             `;
             if (window.lucide) lucide.createIcons();
@@ -881,6 +929,7 @@
                 id: Date.now(),
                 name: document.getElementById('adminProdName').value,
                 price: document.getElementById('adminProdPrice').value,
+                category: document.getElementById('adminProdCategory')?.value || 'todas',
                 img: document.getElementById('adminProdImg').value || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80',
                 desc: document.getElementById('adminProdDesc').value || 'Produto exclusivo'
             };
@@ -891,6 +940,7 @@
                 document.getElementById('adminProdPrice').value = '';
                 document.getElementById('adminProdImg').value = '';
                 document.getElementById('adminProdDesc').value = '';
+                if(document.getElementById('adminProdCategory')) document.getElementById('adminProdCategory').value = 'todas';
                 alert('✅ Produto adicionado com sucesso!');
             }
         };
