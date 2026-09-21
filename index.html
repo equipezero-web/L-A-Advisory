@@ -727,11 +727,11 @@ onSnapshot(catalogoRef, (docSnap) => {
         const data = docSnap.data();
         if (data.products && Array.isArray(data.products)) {
             products = data.products;
+            renderProducts(); // Atualiza a tela para qualquer visitante automaticamente
         }
     } else {
         salvarNoFirebase();
     }
-    renderProducts();
 }, (error) => {
     console.error("Erro ao ler do Firebase:", error);
 });
@@ -759,7 +759,22 @@ window.salvarManualFirebase = async function() {
     }
 };
 
-// 3. ADMIN & AUTENTICAÇÃO
+// 3. ROLAGEM DO CARROSSEL (DESKTOP E MOBILE)
+window.scrollCarousel = function(direction) {
+    const container = document.getElementById('carouselContainer');
+    if (!container) return;
+
+    const firstCard = container.firstElementChild;
+    const amount = firstCard ? (firstCard.offsetWidth + 24) : 340;
+
+    if (direction === 'left') {
+        container.scrollBy({ left: -amount, behavior: 'smooth' });
+    } else {
+        container.scrollBy({ left: amount, behavior: 'smooth' });
+    }
+};
+
+// 4. ADMIN & AUTENTICAÇÃO
 window.checkAdminAccess = function() {
     isAdminLoggedIn ? toggleAdminModal() : document.getElementById('loginModal').classList.remove('hidden');
 }
@@ -796,7 +811,7 @@ window.switchTab = function(tab) {
     if (tab === 'financeiro') updateFinancialDashboard();
 }
 
-// 4. CARRINHO DE COMPRAS
+// 5. CARRINHO DE COMPRAS
 window.addToCart = function(id) {
     cart.push(products.find(p => p.id === id));
     updateCartUI();
@@ -837,7 +852,7 @@ window.checkoutCart = function() {
     window.open(`https://wa.me/5581989492224?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
-// 5. RENDERIZAÇÃO E INTERAÇÃO COM PRODUTOS
+// 6. RENDERIZAÇÃO E INTERAÇÃO COM PRODUTOS
 function renderProducts() {
     const c = document.getElementById('carouselContainer');
     if (!c) return;
@@ -916,7 +931,7 @@ window.openOrderModal = function(id) {
     window.open(`https://wa.me/5581989492224?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
-// 6. DASHBOARDS E CONSULTORIAS
+// 7. DASHBOARDS E CONSULTORIAS
 function renderConsultings() {
     const el = document.getElementById('consultingContainer');
     if (!el) return;
@@ -1008,6 +1023,7 @@ window.toggleAdminModal = function() { document.getElementById('adminModal').cla
 // INICIALIZAÇÃO
 window.addEventListener('DOMContentLoaded', () => {
     if (sessionStorage.getItem('adminSession') === 'true') isAdminLoggedIn = true;
+    renderProducts();
     renderConsultings();
     if (window.lucide) lucide.createIcons();
 });
