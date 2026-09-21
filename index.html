@@ -670,7 +670,7 @@
     </a>
 
     <!-- JAVASCRIPT -->
- <script type="module">
+<script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { 
     getFirestore, 
@@ -679,7 +679,7 @@
     onSnapshot 
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // 1. CREDENCIAIS DO SEU PROJETO FIREBASE (advisory-web)
+  // 1. CREDENCIAIS FIREBASE
   const firebaseConfig = {
     apiKey: "AIzaSyAGKRQoKeZpj4LBQPFYX0AqtqNUZjqkqCA",
     authDomain: "advisory-web.firebaseapp.com",
@@ -690,14 +690,12 @@
     measurementId: "G-0M6LRHCQCD"
   };
 
-  // Inicialização do Firebase
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const catalogoRef = doc(db, "site", "catalogo");
 
   const ADMIN_CREDENTIALS = { email: 'adm.la201@royaladvisory.com', password: 'm#vYBa0HvjEj' };
 
-  // Produtos Padrão (utilizados apenas caso o banco esteja vazio na primeira vez)
   let products = [
     { id: 1, name: "Chrono Gold Royal", price: "R$ 1.850,00", desc: "Caixa em aço com ouro 18k.", img: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=400&q=80" },
     { id: 2, name: "Silver Executive", price: "R$ 2.100,00", desc: "Mostrador prateado safira.", img: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=400&q=80" },
@@ -716,32 +714,45 @@
   let isAdminLoggedIn = false;
   let cart = [];
 
-  // 2. SINCRONIZAÇÃO EM TEMPO REAL COM FIREBASE
+  // 2. ESCUTADOR EM TEMPO REAL
   onSnapshot(catalogoRef, (docSnap) => {
     if (docSnap.exists()) {
       const data = docSnap.data();
-      if (data.products && data.products.length > 0) {
+      if (data.products && Array.isArray(data.products)) {
         products = data.products;
       }
     } else {
-      // Grava a lista padrão na nuvem se for a primeira vez
       salvarNoFirebase();
     }
     renderProducts();
+  }, (error) => {
+    console.error("Erro ao ler do Firebase:", error);
   });
 
+  // FUNÇÃO DE SALVAMENTO NO FIREBASE
   async function salvarNoFirebase() {
     try {
       await setDoc(catalogoRef, { 
         products: products, 
         updatedAt: new Date().toISOString() 
       });
+      return true;
     } catch (err) {
-      console.error("Erro ao sincronizar com Firebase:", err);
+      console.error("Erro ao salvar no Firebase:", err);
+      alert("❌ Erro ao salvar na nuvem: " + err.message);
+      return false;
     }
   }
 
-  // 3. FUNÇÕES ADMINISTRATIVAS E AUTENTICAÇÃO
+  // BOTÃO MANUAL DE SALVAMENTO
+  window.salvarManualFirebase = async function() {
+    const ok = await salvarNoFirebase();
+    if (ok) {
+      alert("☁️ Alterações salvas na nuvem com sucesso!");
+    }
+  };
+
+  // 3. ADMIN & LOGIN
   window.checkAdminAccess = function() {
     isAdminLoggedIn ? toggleAdminModal() : document.getElementById('loginModal').classList.remove('hidden');
   }
@@ -819,7 +830,7 @@
     window.open(`https://wa.me/5581989492224?text=${encodeURIComponent(msg)}`, '_blank');
   }
 
-  // RENDERIZAÇÃO
+  // RENDERIZAÇÃO DE PRODUTOS
   function renderProducts() {
     const c = document.getElementById('carouselContainer');
     if (!c) return;
@@ -959,12 +970,20 @@
       `).join('') || '<p class="text-slate-400">Sem dados</p>';
   }
 
+  // LISTA DE PRODUTOS NO PAINEL ADM COM BOTÃO SALVAR MANUAL
   function renderAdminProductsList() {
     const el = document.getElementById('adminProductsList');
     if (!el) return;
 
-    el.innerHTML = products.map(p => `
-      <div class="flex justify-between items-center p-4 bg-slate-50 border-2 border-slate-200 rounded-xl">
+    el.innerHTML = `
+      <div class="mb-4 flex justify-between items-center bg-amber-50 p-3 rounded-xl border border-amber-200">
+        <span class="text-xs text-amber-900 font-bold">Gerenciamento do Catálogo</span>
+        <button onclick="salvarManualFirebase()" class="px-4 py-2 gradient-gold text-slate-900 text-xs font-bold rounded-lg shadow-sm hover:opacity-90 flex items-center gap-1">
+          <i data-lucide="cloud" class="w-3.5 h-3.5"></i> Salvar na Nuvem
+        </button>
+      </div>
+    ` + products.map(p => `
+      <div class="flex justify-between items-center p-4 bg-slate-50 border-2 border-slate-200 rounded-xl mb-2">
         <div class="truncate flex-1"><p class="font-bold text-sm">${p.name}</p><p class="text-amber-600 font-bold">${p.price}</p></div>
         <button onclick="deleteProduct(${p.id})" class="p-2 text-red-500 hover:bg-red-50 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
       </div>
@@ -972,7 +991,7 @@
     lucide.createIcons();
   }
 
-  // 4. ADICIONAR E EXCLUIR PRODUTOS SALVANDO DIRETO NO FIREBASE
+  // ADICIONAR PRODUTO E SALVAR
   window.handleAddProduct = async function(e) {
     e.preventDefault();
     const newProduct = {
@@ -984,20 +1003,22 @@
     };
 
     products.push(newProduct);
-    await salvarNoFirebase();
+    const salvo = await salvarNoFirebase();
 
-    document.getElementById('adminProdName').value = '';
-    document.getElementById('adminProdPrice').value = '';
-    document.getElementById('adminProdImg').value = '';
-    document.getElementById('adminProdDesc').value = '';
-    alert('✅ Produto adicionado e salvo na nuvem com sucesso!');
+    if (salvo) {
+      document.getElementById('adminProdName').value = '';
+      document.getElementById('adminProdPrice').value = '';
+      document.getElementById('adminProdImg').value = '';
+      document.getElementById('adminProdDesc').value = '';
+      alert('✅ Produto adicionado e sincronizado com o Firebase!');
+    }
   }
 
   window.deleteProduct = async function(id) { 
     if (confirm('Excluir este produto?')) { 
       products = products.filter(p => p.id !== id); 
       await salvarNoFirebase(); 
-      alert('🗑️ Produto excluído da nuvem com sucesso!');
+      alert('🗑️ Produto excluído da nuvem!');
     } 
   }
 
