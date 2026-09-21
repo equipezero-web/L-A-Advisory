@@ -677,16 +677,16 @@
 
     <!-- JAVASCRIPT -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { 
     getFirestore, 
     doc, 
     setDoc, 
     onSnapshot 
-  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // 1. CREDENCIAIS FIREBASE
-  const firebaseConfig = {
+// 1. CREDENCIAIS E INICIALIZAÇÃO DO FIREBASE
+const firebaseConfig = {
     apiKey: "AIzaSyAGKRQoKeZpj4LBQPFYX0AqtqNUZjqkqCA",
     authDomain: "advisory-web.firebaseapp.com",
     projectId: "advisory-web",
@@ -694,231 +694,258 @@
     messagingSenderId: "28667188054",
     appId: "1:28667188054:web:eac7d4be6092b198fdfcf7",
     measurementId: "G-0M6LRHCQCD"
-  };
+};
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const catalogoRef = doc(db, "site", "catalogo");
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const catalogoRef = doc(db, "site", "catalogo");
 
-  const ADMIN_CREDENTIALS = { email: 'adm.la201@royaladvisory.com', password: 'm#vYBa0HvjEj' };
+const ADMIN_CREDENTIALS = { email: 'adm.la201@royaladvisory.com', password: 'm#vYBa0HvjEj' };
 
-  let products = [
+// ESTADOS DA APLICAÇÃO
+let products = [
     { id: 1, name: "Chrono Gold Royal", price: "R$ 1.850,00", desc: "Caixa em aço com ouro 18k.", img: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=400&q=80" },
     { id: 2, name: "Silver Executive", price: "R$ 2.100,00", desc: "Mostrador prateado safira.", img: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=400&q=80" },
     { id: 3, name: "Cufflinks Gold 18k", price: "R$ 650,00", desc: "Abotoaduras ouro artesanal.", img: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?auto=format&fit=crop&w=400&q=80" },
     { id: 4, name: "Leather Wallet", price: "R$ 380,00", desc: "Carteira couro RFID.", img: "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=400&q=80" }
-  ];
+];
 
-  let consultings = [
+let consultings = [
     { id: 1, title: "Consultoria Financeira", desc: "Gestão de capital e fluxo de caixa.", icon: "trending-up" },
     { id: 2, title: "Consultoria Administrativa", desc: "Otimização de processos.", icon: "briefcase" },
     { id: 3, title: "Planejamento Estratégico", desc: "Roadmap empresarial.", icon: "target" }
-  ];
+];
 
-  let receivedOrders = [];
-  let consultingRequests = [];
-  let isAdminLoggedIn = false;
-  let cart = [];
+let receivedOrders = [];
+let consultingRequests = [];
+let isAdminLoggedIn = false;
+let cart = [];
 
-  // 2. ESCUTADOR EM TEMPO REAL
-  onSnapshot(catalogoRef, (docSnap) => {
+// 2. SINCRONIZAÇÃO EM TEMPO REAL COM FIRESTORE
+onSnapshot(catalogoRef, (docSnap) => {
     if (docSnap.exists()) {
-      const data = docSnap.data();
-      if (data.products && Array.isArray(data.products)) {
-        products = data.products;
-      }
+        const data = docSnap.data();
+        if (data.products && Array.isArray(data.products)) {
+            products = data.products;
+        }
     } else {
-      salvarNoFirebase();
+        salvarNoFirebase();
     }
     renderProducts();
-  }, (error) => {
+}, (error) => {
     console.error("Erro ao ler do Firebase:", error);
-  });
+});
 
-  // FUNÇÃO DE SALVAMENTO NO FIREBASE
-  async function salvarNoFirebase() {
+// SALVAR DADOS NO FIREBASE
+async function salvarNoFirebase() {
     try {
-      await setDoc(catalogoRef, { 
-        products: products, 
-        updatedAt: new Date().toISOString() 
-      });
-      return true;
+        await setDoc(catalogoRef, { 
+            products: products, 
+            updatedAt: new Date().toISOString() 
+        });
+        return true;
     } catch (err) {
-      console.error("Erro ao salvar no Firebase:", err);
-      alert("❌ Erro ao salvar na nuvem: " + err.message);
-      return false;
+        console.error("Erro ao salvar no Firebase:", err);
+        alert("❌ Erro ao salvar na nuvem: " + err.message);
+        return false;
     }
-  }
+}
 
-  // BOTÃO MANUAL DE SALVAMENTO
-  window.salvarManualFirebase = async function() {
+// BOTÃO PARA SALVAMENTO MANUAL NO PAINEL ADM
+window.salvarManualFirebase = async function() {
     const ok = await salvarNoFirebase();
     if (ok) {
-      alert("☁️ Alterações salvas na nuvem com sucesso!");
+        alert("☁️ Alterações salvas na nuvem com sucesso!");
     }
-  };
+};
 
-  // 3. ADMIN & LOGIN
-  window.checkAdminAccess = function() {
+// 3. ADMIN & AUTENTICAÇÃO
+window.checkAdminAccess = function() {
     isAdminLoggedIn ? toggleAdminModal() : document.getElementById('loginModal').classList.remove('hidden');
-  }
+}
 
-  window.handleLogin = function(e) {
+window.handleLogin = function(e) {
     e.preventDefault();
     if (document.getElementById('adminEmail').value === ADMIN_CREDENTIALS.email && 
         document.getElementById('adminPassword').value === ADMIN_CREDENTIALS.password) {
-      isAdminLoggedIn = true;
-      closeLoginModal();
-      toggleAdminModal();
-      sessionStorage.setItem('adminSession', 'true');
-      alert('✅ Acesso autorizado!');
+        isAdminLoggedIn = true;
+        closeLoginModal();
+        toggleAdminModal();
+        sessionStorage.setItem('adminSession', 'true');
+        alert('✅ Acesso autorizado!');
     } else {
-      alert('❌ Credenciais inválidas!');
+        alert('❌ Credenciais inválidas!');
     }
-  }
+}
 
-  window.closeLoginModal = function() { document.getElementById('loginModal').classList.add('hidden'); }
-  window.logout = function() { isAdminLoggedIn = false; sessionStorage.removeItem('adminSession'); toggleAdminModal(); }
+window.closeLoginModal = function() { document.getElementById('loginModal').classList.add('hidden'); }
+window.logout = function() { isAdminLoggedIn = false; sessionStorage.removeItem('adminSession'); toggleAdminModal(); }
 
-  window.switchTab = function(tab) {
+window.switchTab = function(tab) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
     document.getElementById('content-' + tab).classList.remove('hidden');
     
     document.querySelectorAll('[id^="tab-"]').forEach(el => {
-      el.classList.remove('tab-active');
-      el.classList.add('tab-inactive');
+        el.classList.remove('tab-active');
+        el.classList.add('tab-inactive');
     });
     document.getElementById('tab-' + tab).classList.remove('tab-inactive');
     document.getElementById('tab-' + tab).classList.add('tab-active');
     
     if (tab === 'consultorias') updateConsultingDashboard();
     if (tab === 'financeiro') updateFinancialDashboard();
-  }
+}
 
-  // CARRINHO
-  window.addToCart = function(id) {
+// 4. CARRINHO DE COMPRAS
+window.addToCart = function(id) {
     cart.push(products.find(p => p.id === id));
     updateCartUI();
     alert('✅ Adicionado ao carrinho!');
-  }
+}
 
-  window.removeFromCart = function(i) { cart.splice(i, 1); updateCartUI(); }
+window.removeFromCart = function(i) { cart.splice(i, 1); updateCartUI(); }
 
-  function updateCartUI() {
+function updateCartUI() {
     document.getElementById('cartCount').textContent = cart.length;
     const items = document.getElementById('cartItems');
     const total = document.getElementById('cartTotal');
     
     if (cart.length === 0) {
-      items.innerHTML = '<p class="text-slate-500">Carrinho vazio</p>';
-      total.textContent = 'R$ 0,00';
+        items.innerHTML = '<p class="text-slate-500">Carrinho vazio</p>';
+        total.textContent = 'R$ 0,00';
     } else {
-      items.innerHTML = cart.map((p, i) => `
-        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-          <div><p class="font-bold text-sm">${p.name}</p><p class="text-xs text-amber-600">${p.price}</p></div>
-          <button onclick="removeFromCart(${i})" class="text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-        </div>
-      `).join('');
-      total.textContent = 'R$ ' + cart.reduce((s, p) => s + parseFloat(p.price.replace('R$ ', '').replace(',', '.')), 0).toFixed(2).replace('.', ',');
+        items.innerHTML = cart.map((p, i) => `
+            <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                <div><p class="font-bold text-sm">${p.name}</p><p class="text-xs text-amber-600">${p.price}</p></div>
+                <button onclick="removeFromCart(${i})" class="text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+            </div>
+        `).join('');
+        total.textContent = 'R$ ' + cart.reduce((s, p) => s + parseFloat(p.price.replace('R$ ', '').replace('.', '').replace(',', '.')), 0).toFixed(2).replace('.', ',');
     }
-    lucide.createIcons();
-  }
+    if (window.lucide) lucide.createIcons();
+}
 
-  window.toggleCart = function() {
+window.toggleCart = function() {
     const modal = document.getElementById('cartModal');
     modal.classList.contains('hidden') ? (modal.classList.remove('hidden'), updateCartUI()) : modal.classList.add('hidden');
-  }
+}
 
-  window.checkoutCart = function() {
+window.checkoutCart = function() {
     if (cart.length === 0) { alert('Carrinho vazio!'); return; }
-    const total = cart.reduce((s, p) => s + parseFloat(p.price.replace('R$ ', '').replace(',', '.')), 0);
+    const total = cart.reduce((s, p) => s + parseFloat(p.price.replace('R$ ', '').replace('.', '').replace(',', '.')), 0);
     const msg = `🛒 *NOVO PEDIDO*\n\nItens: ${cart.length}\n${cart.map(p => `- ${p.name} (${p.price})`).join('\n')}\n\n*Total: R$ ${total.toFixed(2).replace('.', ',')}*`;
     window.open(`https://wa.me/5581989492224?text=${encodeURIComponent(msg)}`, '_blank');
-  }
+}
 
-  // RENDERIZAÇÃO DE PRODUTOS
-  function renderProducts() {
+// 5. RENDERIZAÇÃO E INTERAÇÃO COM PRODUTOS
+function renderProducts() {
     const c = document.getElementById('carouselContainer');
     if (!c) return;
 
     c.innerHTML = products.map(p => `
-      <div class="flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-white border-2 border-slate-200 rounded-2xl overflow-hidden shadow-lg snap-start flex flex-col">
-        <div class="h-72 bg-slate-100"><img src="${p.img}" class="w-full h-full object-cover hover:scale-110 transition duration-700"></div>
-        <div class="p-6 flex-grow">
-          <h3 class="font-serif font-bold text-slate-900 text-xl mb-2">${p.name}</h3>
-          <p class="text-xs text-slate-500 mb-4">${p.desc}</p>
-          <p class="text-amber-600 font-bold text-2xl">${p.price}</p>
+        <div class="flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-white border-2 border-slate-200 rounded-2xl overflow-hidden shadow-lg snap-start flex flex-col">
+            <div class="h-72 bg-slate-100"><img src="${p.img}" class="w-full h-full object-cover hover:scale-110 transition duration-700"></div>
+            <div class="p-6 flex-grow">
+                <h3 class="font-serif font-bold text-slate-900 text-xl mb-2">${p.name}</h3>
+                <p class="text-xs text-slate-500 mb-4">${p.desc}</p>
+                <p class="text-amber-600 font-bold text-2xl">${p.price}</p>
+            </div>
+            <div class="p-6 pt-0 flex gap-2">
+                <button onclick="addToCart(${p.id})" class="flex-1 py-3 bg-slate-900 text-white text-sm font-bold rounded-xl flex items-center justify-center gap-2"><i data-lucide="shopping-cart" class="w-4 h-4"></i> Carrinho</button>
+                <button onclick="openOrderModal(${p.id})" class="flex-1 gradient-gold text-slate-900 text-sm font-bold rounded-xl flex items-center justify-center gap-2"><i data-lucide="zap" class="w-4 h-4"></i> Comprar</button>
+            </div>
         </div>
-        <div class="p-6 pt-0 flex gap-2">
-          <button onclick="addToCart(${p.id})" class="flex-1 py-3 bg-slate-900 text-white text-sm font-bold rounded-xl flex items-center justify-center gap-2"><i data-lucide="shopping-cart" class="w-4 h-4"></i> Carrinho</button>
-          <button onclick="openOrderModal(${p.id})" class="flex-1 gradient-gold text-slate-900 text-sm font-bold rounded-xl flex items-center justify-center gap-2"><i data-lucide="zap" class="w-4 h-4"></i> Comprar</button>
-        </div>
-      </div>
     `).join('') + `
-      <div class="flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-gradient-to-br from-slate-900 to-blue-950 text-white rounded-2xl shadow-xl snap-start flex flex-col items-center justify-center p-10 text-center border-2 border-dashed border-amber-400/40">
-        <div class="p-5 gradient-gold rounded-full mb-5"><i data-lucide="grid-3x3" class="w-10 h-10 text-slate-900"></i></div>
-        <h3 class="font-serif font-bold text-2xl mb-3">Catálogo Completo</h3>
-        <button class="px-8 py-3 gradient-gold text-slate-900 font-bold text-sm rounded-xl shadow-gold">Ver Coleção</button>
-      </div>
+        <div class="flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-gradient-to-br from-slate-900 to-blue-950 text-white rounded-2xl shadow-xl snap-start flex flex-col items-center justify-center p-10 text-center border-2 border-dashed border-amber-400/40">
+            <div class="p-5 gradient-gold rounded-full mb-5"><i data-lucide="grid-3x3" class="w-10 h-10 text-slate-900"></i></div>
+            <h3 class="font-serif font-bold text-2xl mb-3">Catálogo Completo</h3>
+            <button class="px-8 py-3 gradient-gold text-slate-900 font-bold text-sm rounded-xl shadow-gold">Ver Coleção</button>
+        </div>
     `;
-    lucide.createIcons();
+    if (window.lucide) lucide.createIcons();
     renderAdminProductsList();
-  }
+}
 
-  function renderConsultings() {
+function renderAdminProductsList() {
+    const el = document.getElementById('adminProductsList');
+    if (!el) return;
+
+    el.innerHTML = products.map(p => `
+        <div class="flex justify-between items-center p-4 bg-slate-50 border-2 border-slate-200 rounded-xl mb-2">
+            <div class="truncate flex-1"><p class="font-bold text-sm">${p.name}</p><p class="text-amber-600 font-bold">${p.price}</p></div>
+            <button onclick="deleteProduct(${p.id})" class="p-2 text-red-500 hover:bg-red-50 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+        </div>
+    `).join('');
+    if (window.lucide) lucide.createIcons();
+}
+
+window.handleAddProduct = async function(e) {
+    e.preventDefault();
+    const newProduct = {
+        id: Date.now(),
+        name: document.getElementById('adminProdName').value,
+        price: document.getElementById('adminProdPrice').value,
+        img: document.getElementById('adminProdImg').value || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80',
+        desc: document.getElementById('adminProdDesc').value || 'Produto exclusivo'
+    };
+
+    products.push(newProduct);
+    const salvo = await salvarNoFirebase();
+
+    if (salvo) {
+        document.getElementById('adminProdName').value = '';
+        document.getElementById('adminProdPrice').value = '';
+        document.getElementById('adminProdImg').value = '';
+        document.getElementById('adminProdDesc').value = '';
+        alert('✅ Produto adicionado e sincronizado com o Firebase!');
+    }
+}
+
+window.deleteProduct = async function(id) { 
+    if (confirm('Excluir este produto?')) { 
+        products = products.filter(p => p.id !== id); 
+        await salvarNoFirebase(); 
+        alert('🗑️ Produto excluído da nuvem!');
+    } 
+}
+
+window.openOrderModal = function(id) {
+    const p = products.find(x => x.id === id);
+    if (!p) return;
+    const msg = `🛒 *INTERESSE EM PRODUTO*\n\nProduto: ${p.name}\nValor: ${p.price}`;
+    window.open(`https://wa.me/5581989492224?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+// 6. DASHBOARDS E CONSULTORIAS
+function renderConsultings() {
     const el = document.getElementById('consultingContainer');
     if (!el) return;
 
     el.innerHTML = consultings.map(i => `
-      <div class="bg-slate-800/70 backdrop-blur border border-slate-700/60 p-8 rounded-2xl flex flex-col justify-between card-hover">
-        <div>
-          <div class="w-14 h-14 gradient-gold rounded-xl flex items-center justify-center mb-6 shadow-gold"><i data-lucide="${i.icon}" class="w-7 h-7 text-slate-900"></i></div>
-          <h3 class="font-serif text-2xl font-bold mb-4 text-white">${i.title}</h3>
-          <p class="text-slate-400 text-sm mb-6">${i.desc}</p>
+        <div class="bg-slate-800/70 backdrop-blur border border-slate-700/60 p-8 rounded-2xl flex flex-col justify-between card-hover">
+            <div>
+                <div class="w-14 h-14 gradient-gold rounded-xl flex items-center justify-center mb-6 shadow-gold"><i data-lucide="${i.icon}" class="w-7 h-7 text-slate-900"></i></div>
+                <h3 class="font-serif text-2xl font-bold mb-4 text-white">${i.title}</h3>
+                <p class="text-slate-400 text-sm mb-6">${i.desc}</p>
+            </div>
+            <button onclick="openConsultingModal('${i.title}')" class="w-full gradient-gold text-slate-900 font-bold rounded-xl py-4 hover:shadow-gold transition">Agendar Consultoria</button>
         </div>
-        <button onclick="openConsultingModal('${i.title}')" class="w-full gradient-gold text-slate-900 font-bold rounded-xl py-4 hover:shadow-gold transition">Agendar Consultoria</button>
-      </div>
     `).join('');
-    lucide.createIcons();
-  }
+    if (window.lucide) lucide.createIcons();
+}
 
-  window.openConsultingModal = function(title) {
-    document.getElementById('consultingType').value = title;
-    document.getElementById('consultingTypeDisplay').innerText = title;
-    document.getElementById('consultingModal').classList.remove('hidden');
-  }
+window.openConsultingModal = function(title) {
+    alert('Agendamento para: ' + title);
+}
 
-  window.closeConsultingModal = function() { document.getElementById('consultingModal').classList.add('hidden'); document.getElementById('consultingForm').reset(); }
-
-  window.handleConsultingSubmit = function(e) {
-    e.preventDefault();
-    const req = {
-      id: Date.now(),
-      company: document.getElementById('consultingCompany').value,
-      phone: document.getElementById('consultingPhone').value,
-      email: document.getElementById('consultingEmail').value,
-      date: document.getElementById('consultingDate').value,
-      time: document.getElementById('consultingTime').value,
-      type: document.getElementById('consultingType').value,
-      obs: document.getElementById('consultingObs').value || 'Nenhuma',
-      valor: (Math.random() * 5000 + 2000).toFixed(2)
-    };
-    consultingRequests.push(req);
-    
-    const msg = `📅 *NOVA CONSULTORIA*\n\n👤 ${req.company}\n📱 ${req.phone}\n💼 ${req.type}\n🗓️ ${new Date(req.date).toLocaleDateString('pt-BR')}\n⏰ ${req.time}`;
-    window.open(`https://wa.me/5581989492224?text=${encodeURIComponent(msg)}`, '_blank');
-    closeConsultingModal();
-    alert('✅ Solicitação enviada!');
-  }
-
-  function updateConsultingDashboard() {
+function updateConsultingDashboard() {
     document.getElementById('totalConsultorias').textContent = consultingRequests.length;
     document.getElementById('totalReceita').textContent = 'R$ ' + consultingRequests.reduce((s, r) => s + parseFloat(r.valor), 0).toFixed(2).replace('.', ',');
     document.getElementById('totalClientes').textContent = new Set(consultingRequests.map(r => r.company)).size;
     
     const byType = { Financeira: { count: 0, revenue: 0 }, Administrativa: { count: 0, revenue: 0 }, Estrategico: { count: 0, revenue: 0 } };
     consultingRequests.forEach(r => {
-      if (byType[r.type]) { byType[r.type].count++; byType[r.type].revenue += parseFloat(r.valor); }
+        if (byType[r.type]) { byType[r.type].count++; byType[r.type].revenue += parseFloat(r.valor); }
     });
     
     document.getElementById('countFinanceira').textContent = byType.Financeira.count;
@@ -930,144 +957,60 @@
     
     const clients = {};
     consultingRequests.forEach(r => {
-      if (!clients[r.company]) clients[r.company] = { count: 0, types: [] };
-      clients[r.company].count++;
-      if (!clients[r.company].types.includes(r.type)) clients[r.company].types.push(r.type);
+        if (!clients[r.company]) clients[r.company] = { count: 0, types: [] };
+        clients[r.company].count++;
+        if (!clients[r.company].types.includes(r.type)) clients[r.company].types.push(r.type);
     });
     
     document.getElementById('consultingClientsList').innerHTML = Object.entries(clients).map(([name, data]) => `
-      <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200">
-        <p class="font-bold text-slate-800">${name}</p>
-        <p class="text-xs text-slate-500">${data.count} solicitação(ões) • ${data.types.join(', ')}</p>
-      </div>
-    `).join('') || '<p class="text-slate-400">Nenhuma solicitação</p>';
-  }
+        <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200">
+            <p class="font-bold text-slate-800">${name}</p>
+            <p class="text-xs text-slate-500">${data.count} solicitação(ões) • ${data.types.join(', ')}</p>
+        </div>
+    `).join('') || '<p class="text-slate-400 text-sm">Nenhuma solicitação</p>';
+}
 
-  function updateFinancialDashboard() {
+function updateFinancialDashboard() {
     const byClient = {};
     const byMonth = {};
     
     consultingRequests.forEach(r => {
-      const val = parseFloat(r.valor);
-      if (!byClient[r.company]) byClient[r.company] = 0;
-      byClient[r.company] += val;
-      
-      const month = new Date(r.date).toLocaleString('pt-BR', { month: '2-digit', year: 'numeric' });
-      if (!byMonth[month]) byMonth[month] = 0;
-      byMonth[month] += val;
+        const val = parseFloat(r.valor);
+        if (!byClient[r.company]) byClient[r.company] = 0;
+        byClient[r.company] += val;
+        
+        const month = new Date(r.date).toLocaleString('pt-BR', { month: '2-digit', year: 'numeric' });
+        if (!byMonth[month]) byMonth[month] = 0;
+        byMonth[month] += val;
     });
     
     document.getElementById('ganhosPorCliente').innerHTML = Object.entries(byClient)
-      .sort((a, b) => b[1] - a[1])
-      .map(([name, val]) => `
-        <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200 flex justify-between items-center">
-          <span class="font-bold text-slate-800">${name}</span>
-          <span class="text-amber-600 font-bold">R$ ${val.toFixed(2).replace('.', ',')}</span>
-        </div>
-      `).join('') || '<p class="text-slate-400">Sem dados</p>';
+        .sort((a, b) => b[1] - a[1])
+        .map(([name, val]) => `
+            <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200 flex justify-between items-center">
+                <span class="font-bold text-slate-800">${name}</span>
+                <span class="text-amber-600 font-bold">R$ ${val.toFixed(2).replace('.', ',')}</span>
+            </div>
+        `).join('') || '<p class="text-slate-400 text-sm">Sem dados</p>';
     
     document.getElementById('ganhosPorMes').innerHTML = Object.entries(byMonth)
-      .sort()
-      .map(([month, val]) => `
-        <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200 flex justify-between items-center">
-          <span class="font-bold text-slate-800">${month}</span>
-          <span class="text-amber-600 font-bold">R$ ${val.toFixed(2).replace('.', ',')}</span>
-        </div>
-      `).join('') || '<p class="text-slate-400">Sem dados</p>';
-  }
+        .sort()
+        .map(([month, val]) => `
+            <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200 flex justify-between items-center">
+                <span class="font-bold text-slate-800">${month}</span>
+                <span class="text-amber-600 font-bold">R$ ${val.toFixed(2).replace('.', ',')}</span>
+            </div>
+        `).join('') || '<p class="text-slate-400 text-sm">Sem dados</p>';
+}
 
-  // LISTA DE PRODUTOS NO PAINEL ADM COM BOTÃO SALVAR MANUAL
-  function renderAdminProductsList() {
-    const el = document.getElementById('adminProductsList');
-    if (!el) return;
+window.toggleAdminModal = function() { document.getElementById('adminModal').classList.toggle('hidden'); }
 
-    el.innerHTML = `
-      <div class="mb-4 flex justify-between items-center bg-amber-50 p-3 rounded-xl border border-amber-200">
-        <span class="text-xs text-amber-900 font-bold">Gerenciamento do Catálogo</span>
-        <button onclick="salvarManualFirebase()" class="px-4 py-2 gradient-gold text-slate-900 text-xs font-bold rounded-lg shadow-sm hover:opacity-90 flex items-center gap-1">
-          <i data-lucide="cloud" class="w-3.5 h-3.5"></i> Salvar na Nuvem
-        </button>
-      </div>
-    ` + products.map(p => `
-      <div class="flex justify-between items-center p-4 bg-slate-50 border-2 border-slate-200 rounded-xl mb-2">
-        <div class="truncate flex-1"><p class="font-bold text-sm">${p.name}</p><p class="text-amber-600 font-bold">${p.price}</p></div>
-        <button onclick="deleteProduct(${p.id})" class="p-2 text-red-500 hover:bg-red-50 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-      </div>
-    `).join('');
-    lucide.createIcons();
-  }
-
-  // ADICIONAR PRODUTO E SALVAR
-  window.handleAddProduct = async function(e) {
-    e.preventDefault();
-    const newProduct = {
-      id: Date.now(),
-      name: document.getElementById('adminProdName').value,
-      price: document.getElementById('adminProdPrice').value,
-      img: document.getElementById('adminProdImg').value || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80',
-      desc: document.getElementById('adminProdDesc').value || 'Produto exclusivo'
-    };
-
-    products.push(newProduct);
-    const salvo = await salvarNoFirebase();
-
-    if (salvo) {
-      document.getElementById('adminProdName').value = '';
-      document.getElementById('adminProdPrice').value = '';
-      document.getElementById('adminProdImg').value = '';
-      document.getElementById('adminProdDesc').value = '';
-      alert('✅ Produto adicionado e sincronizado com o Firebase!');
-    }
-  }
-
-  window.deleteProduct = async function(id) { 
-    if (confirm('Excluir este produto?')) { 
-      products = products.filter(p => p.id !== id); 
-      await salvarNoFirebase(); 
-      alert('🗑️ Produto excluído da nuvem!');
-    } 
-  }
-
-  window.openOrderModal = function(id) {
-    const p = products.find(x => x.id === id);
-    if (!p) return;
-    document.getElementById('orderProductId').value = p.id;
-    document.getElementById('orderProductTitle').innerText = `${p.name} - ${p.price}`;
-    document.getElementById('orderModal').classList.remove('hidden');
-  }
-
-  window.closeOrderModal = function() { document.getElementById('orderModal').classList.add('hidden'); }
-
-  window.handleOrderSubmit = async function(e) {
-    e.preventDefault();
-    const id = `PED-${Math.floor(1000 + Math.random() * 9000)}`;
-    const order = {
-      id, 
-      product: products.find(p => p.id === parseInt(document.getElementById('orderProductId').value)).name,
-      price: products.find(p => p.id === parseInt(document.getElementById('orderProductId').value)).price,
-      recipient: document.getElementById('orderRecipient').value, 
-      phone: document.getElementById('orderPhone').value,
-      date: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-    };
-    receivedOrders.unshift(order);
-    document.getElementById('adminOrdersLog').innerHTML = receivedOrders.map(o => `
-      <div class="p-4 bg-slate-900 text-white rounded-xl text-xs"><p class="font-bold text-amber-400">${o.id} - ${o.product}</p><p>${o.recipient} - ${o.price}</p></div>
-    `).join('');
-    closeOrderModal();
-    document.getElementById('orderForm').reset();
-    alert(`✅ Pedido ${id} recebido!`);
-  }
-
-  window.scrollCarousel = function(d) { document.getElementById('carouselContainer').scrollBy({ left: d * document.getElementById('carouselContainer').clientWidth, behavior: 'smooth' }); }
-  window.openNavigationModal = function() { document.getElementById('navModal').classList.remove('hidden'); }
-  window.closeNavigationModal = function() { document.getElementById('navModal').classList.add('hidden'); }
-  window.toggleAdminModal = function() { document.getElementById('adminModal').classList.toggle('hidden'); }
-
-  window.addEventListener('DOMContentLoaded', () => {
+// INICIALIZAÇÃO
+window.addEventListener('DOMContentLoaded', () => {
     if (sessionStorage.getItem('adminSession') === 'true') isAdminLoggedIn = true;
     renderConsultings();
-    lucide.createIcons();
-  });
+    if (window.lucide) lucide.createIcons();
+});
 </script>
 </body>
 </html>
