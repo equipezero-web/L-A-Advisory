@@ -676,6 +676,7 @@
     </a>
 
     <!-- JAVASCRIPT -->
+<!-- JAVASCRIPT CORRIGIDO -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { 
@@ -711,9 +712,9 @@ let products = [
 ];
 
 let consultings = [
-    { id: 1, title: "Consultoria Financeira", desc: "Gestão de capital e fluxo de caixa.", icon: "trending-up" },
-    { id: 2, title: "Consultoria Administrativa", desc: "Otimização de processos.", icon: "briefcase" },
-    { id: 3, title: "Planejamento Estratégico", desc: "Roadmap empresarial.", icon: "target" }
+    { id: 1, title: "Consultoria Financeira", typeKey: "Financeira", valor: 2500, desc: "Gestão de capital e fluxo de caixa.", icon: "trending-up" },
+    { id: 2, title: "Consultoria Administrativa", typeKey: "Administrativa", valor: 3000, desc: "Otimização de processos.", icon: "briefcase" },
+    { id: 3, title: "Planejamento Estratégico", typeKey: "Estrategico", valor: 3500, desc: "Roadmap empresarial.", icon: "target" }
 ];
 
 let receivedOrders = [];
@@ -727,7 +728,7 @@ onSnapshot(catalogoRef, (docSnap) => {
         const data = docSnap.data();
         if (data.products && Array.isArray(data.products)) {
             products = data.products;
-            renderProducts(); // Atualiza a tela para qualquer visitante automaticamente
+            renderProducts();
         }
     } else {
         salvarNoFirebase();
@@ -736,7 +737,6 @@ onSnapshot(catalogoRef, (docSnap) => {
     console.error("Erro ao ler do Firebase:", error);
 });
 
-// SALVAR DADOS NO FIREBASE
 async function salvarNoFirebase() {
     try {
         await setDoc(catalogoRef, { 
@@ -751,7 +751,6 @@ async function salvarNoFirebase() {
     }
 }
 
-// BOTÃO PARA SALVAMENTO MANUAL NO PAINEL ADM
 window.salvarManualFirebase = async function() {
     const ok = await salvarNoFirebase();
     if (ok) {
@@ -759,16 +758,14 @@ window.salvarManualFirebase = async function() {
     }
 };
 
-// 3. ROLAGEM DO CARROSSEL (DESKTOP E MOBILE)
+// 3. ROLAGEM DO CARROSSEL
 window.scrollCarousel = function(direction) {
     const container = document.getElementById('carouselContainer');
     if (!container) return;
 
-    // Pega a largura do primeiro card visível + o espaçamento (gap)
     const firstCard = container.firstElementChild;
     const step = firstCard ? (firstCard.offsetWidth + 24) : 340;
 
-    // Aceita tanto 'left'/1 quanto 'right'/-1
     if (direction === 'left' || direction === -1) {
         container.scrollBy({ left: -step, behavior: 'smooth' });
     } else if (direction === 'right' || direction === 1) {
@@ -854,7 +851,7 @@ window.checkoutCart = function() {
     window.open(`https://wa.me/5581989492224?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
-// 6. RENDERIZAÇÃO E INTERAÇÃO COM PRODUTOS
+// 6. PRODUTOS
 function renderProducts() {
     const c = document.getElementById('carouselContainer');
     if (!c) return;
@@ -933,7 +930,7 @@ window.openOrderModal = function(id) {
     window.open(`https://wa.me/5581989492224?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
-// 7. DASHBOARDS E CONSULTORIAS
+// 7. CONSULTORIAS E AGENDAMENTOS (CORRIGIDOS)
 function renderConsultings() {
     const el = document.getElementById('consultingContainer');
     if (!el) return;
@@ -945,14 +942,63 @@ function renderConsultings() {
                 <h3 class="font-serif text-2xl font-bold mb-4 text-white">${i.title}</h3>
                 <p class="text-slate-400 text-sm mb-6">${i.desc}</p>
             </div>
-            <button onclick="openConsultingModal('${i.title}')" class="w-full gradient-gold text-slate-900 font-bold rounded-xl py-4 hover:shadow-gold transition">Agendar Consultoria</button>
+            <button onclick="openConsultingModal('${i.title}', '${i.typeKey}')" class="w-full gradient-gold text-slate-900 font-bold rounded-xl py-4 hover:shadow-gold transition">Agendar Consultoria</button>
         </div>
     `).join('');
     if (window.lucide) lucide.createIcons();
 }
 
-window.openConsultingModal = function(title) {
-    alert('Agendamento para: ' + title);
+window.openConsultingModal = function(title, typeKey) {
+    document.getElementById('consultingTypeDisplay').textContent = title;
+    document.getElementById('consultingType').value = typeKey || 'Financeira';
+    document.getElementById('consultingModal').classList.remove('hidden');
+}
+
+window.closeConsultingModal = function() {
+    document.getElementById('consultingModal').classList.add('hidden');
+    document.getElementById('consultingForm').reset();
+}
+
+window.handleConsultingSubmit = function(e) {
+    e.preventDefault();
+    
+    const company = document.getElementById('consultingCompany').value;
+    const phone = document.getElementById('consultingPhone').value;
+    const email = document.getElementById('consultingEmail').value;
+    const date = document.getElementById('consultingDate').value;
+    const time = document.getElementById('consultingTime').value;
+    const obs = document.getElementById('consultingObs').value;
+    const typeKey = document.getElementById('consultingType').value;
+    const title = document.getElementById('consultingTypeDisplay').textContent;
+
+    const item = consultings.find(c => c.typeKey === typeKey) || { valor: 2500 };
+    
+    const requestData = {
+        id: Date.now(),
+        company,
+        phone,
+        email,
+        date,
+        time,
+        obs,
+        type: typeKey,
+        title,
+        valor: item.valor
+    };
+
+    consultingRequests.push(requestData);
+
+    const msg = `📅 *SOLICITAÇÃO DE AGENDAMENTO*\n\n` +
+                `*Serviço:* ${title}\n` +
+                `*Cliente/Empresa:* ${company}\n` +
+                `*WhatsApp:* ${phone}\n` +
+                `*E-mail:* ${email}\n` +
+                `*Data Desejada:* ${date}\n` +
+                `*Horário:* ${time}\n` +
+                (obs ? `*Observações:* ${obs}` : '');
+
+    closeConsultingModal();
+    window.open(`https://wa.me/5581989492224?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
 function updateConsultingDashboard() {
