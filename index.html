@@ -764,13 +764,15 @@ window.scrollCarousel = function(direction) {
     const container = document.getElementById('carouselContainer');
     if (!container) return;
 
+    // Pega a largura do primeiro card visível + o espaçamento (gap)
     const firstCard = container.firstElementChild;
-    const amount = firstCard ? (firstCard.offsetWidth + 24) : 340;
+    const step = firstCard ? (firstCard.offsetWidth + 24) : 340;
 
-    if (direction === 'left') {
-        container.scrollBy({ left: -amount, behavior: 'smooth' });
-    } else {
-        container.scrollBy({ left: amount, behavior: 'smooth' });
+    // Aceita tanto 'left'/1 quanto 'right'/-1
+    if (direction === 'left' || direction === -1) {
+        container.scrollBy({ left: -step, behavior: 'smooth' });
+    } else if (direction === 'right' || direction === 1) {
+        container.scrollBy({ left: step, behavior: 'smooth' });
     }
 };
 
