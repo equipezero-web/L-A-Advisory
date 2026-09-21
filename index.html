@@ -392,7 +392,7 @@
         </div>
     </div>
 
-    <!-- PAINEL ADM COM ABAS -->
+ <!-- PAINEL ADM COM ABAS -->
     <div id="adminModal" class="fixed inset-0 bg-slate-950/90 z-50 hidden flex justify-end">
         <div class="bg-white text-slate-800 w-full max-w-5xl h-full shadow-2xl p-6 overflow-y-auto flex flex-col">
             <div class="flex justify-between items-center mb-6 pb-4 border-b-2 border-amber-400/30">
@@ -458,10 +458,15 @@
                         </div>
                         
                         <div>
-                            <h4 class="font-bold text-lg mb-4 flex items-center gap-2">
-                                <i data-lucide="list" class="w-5 h-5 text-amber-600"></i>
-                                Produtos Cadastrados
-                            </h4>
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="font-bold text-lg flex items-center gap-2">
+                                    <i data-lucide="list" class="w-5 h-5 text-amber-600"></i>
+                                    Produtos Cadastrados
+                                </h4>
+                                <button type="button" onclick="salvarManualFirebase()" class="px-3 py-1.5 gradient-gold text-slate-900 text-xs font-bold rounded-lg shadow-sm hover:opacity-90 flex items-center gap-1">
+                                    <i data-lucide="cloud" class="w-3.5 h-3.5"></i> Salvar na Nuvem
+                                </button>
+                            </div>
                             <div id="adminProductsList" class="space-y-2 max-h-96 overflow-y-auto"></div>
                         </div>
                     </div>
