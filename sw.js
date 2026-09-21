@@ -1,6 +1,6 @@
-const CACHE_NAME = 'la-advisory-v1';
+const CACHE_NAME = 'la-advisory-v3'; // Versão incrementada para forçar atualização em todos os aparelhos
 
-// Arquivos essenciais para a aplicação rodar offline
+// Arquivos essenciais estáticos
 const ASSETS = [
   './',
   './index.html',
@@ -9,18 +9,18 @@ const ASSETS = [
   './logo512.png'
 ];
 
-// Instalação do Service Worker e cache dos recursos
+// Instalação do Service Worker
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('SW: Cacheando arquivos locais');
+      console.log('SW: Cacheando arquivos essenciais');
       return cache.addAll(ASSETS);
     })
   );
 });
 
-// Ativação e limpeza de caches antigos
+// Ativação e limpeza imediata de caches antigos
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -31,26 +31,37 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Requisito obrigatório para o Chrome liberar a instalação do PWA
+// Estratégia Network-First para garantir dados sempre atualizados
 self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') return;
+  // Ignora requisições que não sejam GET e conexões do Firebase/Firestore
+  if (
+    event.request.method !== 'GET' || 
+    event.request.url.includes('firestore.googleapis.com') ||
+    event.request.url.includes('firebase')
+  ) {
+    return;
+  }
 
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200) {
+    fetch(event.request)
+      .then((networkResponse) => {
+        // Se a busca na rede funcionar, atualiza o cache e retorna a versão mais nova
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseToCache);
           });
         }
         return networkResponse;
-      }).catch(() => {
-        return caches.match('./index.html');
-      });
-    })
+      })
+      .catch(() => {
+        // Se estiver OFFLINE, busca a versão salva do cache local
+        return caches.match(event.request).then((cachedResponse) => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          return caches.match('./index.html');
+        });
+      })
   );
 });
