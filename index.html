@@ -6,19 +6,22 @@
     <title>L&A Royal Advisory</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0c1933">
+    
+    <!-- CDNs de Estilo e Ícones -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400,600,700&family=Lato:wght@300,400,600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     
-   <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then((reg) => console.log('Service Worker registrado com sucesso:', reg.scope))
-        .catch((err) => console.error('Erro ao registrar Service Worker:', err));
-    });
-  }
-</script>
+    <!-- Registro do Service Worker -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js')
+            .then((reg) => console.log('Service Worker registrado com sucesso:', reg.scope))
+            .catch((err) => console.error('Erro ao registrar Service Worker:', err));
+        });
+      }
+    </script>
     
     <style>
         * { scrollbar-width: thin; scrollbar-color: #1e3a5f #f1f5f9; }
@@ -48,7 +51,71 @@
         .tab-inactive { background: #f1f5f9; color: #64748b; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+<body class="bg-slate-900 text-white min-h-screen">
+
+    <!-- Exemplo de Container de Produtos -->
+    <section class="max-w-7xl mx-auto px-4 py-12">
+        <h2 class="font-serif text-3xl font-bold mb-8">Nossos Produtos</h2>
+        <div id="productsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+    </section>
+
+    <!-- Exemplo de Container de Consultorias -->
+    <section class="max-w-7xl mx-auto px-4 py-12">
+        <h2 class="font-serif text-3xl font-bold mb-8">Consultorias</h2>
+        <div id="consultingContainer" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+    </section>
+
+    <!-- MODAL DE AGENDAMENTO DE CONSULTORIA -->
+    <div id="consultingModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 relative shadow-2xl">
+            <button onclick="closeConsultingModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            
+            <h3 class="font-serif text-2xl font-bold mb-1 text-white" id="consultingTypeDisplay">Agendar Consultoria</h3>
+            <p class="text-slate-400 text-sm mb-6">Preencha os dados abaixo para solicitar seu agendamento via WhatsApp.</p>
+            
+            <form id="consultingForm" onsubmit="handleConsultingSubmit(event)" class="space-y-4">
+                <input type="hidden" id="consultingType" value="">
+                
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Empresa / Cliente</label>
+                    <input type="text" id="consultingCompany" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500" placeholder="Sua Empresa Ltda">
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">WhatsApp</label>
+                        <input type="tel" id="consultingPhone" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500" placeholder="(81) 98949-2224">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">E-mail</label>
+                        <input type="email" id="consultingEmail" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500" placeholder="contato@empresa.com">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Data Desejada</label>
+                        <input type="date" id="consultingDate" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Horário Preferencial</label>
+                        <input type="time" id="consultingTime" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Observações (Opcional)</label>
+                    <textarea id="consultingObs" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500" placeholder="Descreva brevemente o seu objetivo..."></textarea>
+                </div>
+
+                <button type="submit" class="w-full gradient-gold text-slate-900 font-bold py-4 rounded-xl hover:shadow-gold transition mt-2">
+                    Solicitar Agendamento
+                </button>
+            </form>
+        </div>
+    </div>
 
     <!-- BARRA SUPERIOR -->
     <div class="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-slate-300 px-4 py-2.5 flex justify-between items-center text-xs z-50 border-b border-blue-800/30">
@@ -608,72 +675,80 @@
         </div>
     </div>
 
-    <!-- MODAL AGENDAMENTO CONSULTORIA -->
-    <div id="consultingModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white text-slate-900 rounded-2xl max-w-lg w-full p-8 shadow-2xl relative border-2 border-amber-400/30 max-h-[90vh] overflow-y-auto">
-            <button onclick="closeConsultingModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
-                <i data-lucide="x" class="w-6 h-6"></i>
-            </button>
-            
-            <div class="text-center mb-8">
-                <div class="w-16 h-16 gradient-gold rounded-full flex items-center justify-center mx-auto mb-4 shadow-gold">
-                    <i data-lucide="calendar-check" class="w-8 h-8 text-slate-900"></i>
-                </div>
-                <h3 class="font-serif text-2xl font-bold text-slate-900">Agendar Consultoria</h3>
-                <p id="consultingTypeDisplay" class="text-sm font-semibold text-amber-600 mt-2"></p>
+<!-- MODAL DE CONSULTORIA COMPLETO E OTIMIZADO -->
+<div id="consultingModal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative border border-slate-200 my-8 max-h-[90vh] overflow-y-auto">
+        
+        <!-- Botão de Fechar (X) -->
+        <button type="button" onclick="closeConsultingModal()" aria-label="Fechar modal" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
+            <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+
+        <h3 class="font-serif text-2xl font-bold text-slate-900 mb-1">Agendar Consultoria</h3>
+        <p id="consultingTypeDisplay" class="text-amber-600 font-bold mb-6">Consultoria Financeira</p>
+
+        <form id="consultingForm" onsubmit="handleConsultingSubmit(event)" class="space-y-4">
+            <!-- Campo Oculto para armazenar o tipo da consultoria -->
+            <input type="hidden" id="consultingType" value="Financeira">
+
+            <div>
+                <label for="consultingCompany" class="block text-xs font-bold text-slate-700 uppercase mb-1">Empresa / Nome</label>
+                <input type="text" id="consultingCompany" required class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm">
             </div>
 
-            <form id="consultingForm" onsubmit="handleConsultingSubmit(event)" class="space-y-4">
-                <input type="hidden" id="consultingType">
-
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">Nome Empresarial ou Nome do Cliente *</label>
-                    <input type="text" id="consultingCompany" required placeholder="Ex: TechBrasil Ltda ou João Silva" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                    <label for="consultingPhone" class="block text-xs font-bold text-slate-700 uppercase mb-1">WhatsApp / Telefone</label>
+                    <input type="tel" id="consultingPhone" required placeholder="(81) 99999-9999" class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm">
                 </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">WhatsApp (DDD) *</label>
-                        <input type="tel" id="consultingPhone" required placeholder="(81) 99999-9999" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">E-mail *</label>
-                        <input type="email" id="consultingEmail" required placeholder="email@empresa.com" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">Data Preferida *</label>
-                        <input type="date" id="consultingDate" required class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">Horário Preferido *</label>
-                        <input type="time" id="consultingTime" required class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none">
-                    </div>
-                </div>
-
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">Observações</label>
-                    <textarea id="consultingObs" rows="3" placeholder="Descreva sua necessidade..." class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none"></textarea>
+                    <label for="consultingEmail" class="block text-xs font-bold text-slate-700 uppercase mb-1">E-mail</label>
+                    <input type="email" id="consultingEmail" required class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm">
                 </div>
+            </div>
 
-                <button type="submit" class="w-full gradient-gold text-slate-900 py-4 rounded-xl font-bold hover:shadow-gold transition btn-premium">
-                    <i data-lucide="send" class="w-5 h-5 inline mr-2"></i> Enviar Solicitação
-                </button>
-            </form>
-        </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="consultingDate" class="block text-xs font-bold text-slate-700 uppercase mb-1">Data Desejada</label>
+                    <input type="date" id="consultingDate" required class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm">
+                </div>
+                <div>
+                    <label for="consultingTime" class="block text-xs font-bold text-slate-700 uppercase mb-1">Horário Preferencial</label>
+                    <input type="time" id="consultingTime" required class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm">
+                </div>
+            </div>
+
+            <div>
+                <label for="consultingObs" class="block text-xs font-bold text-slate-700 uppercase mb-1">Observações / Objetivos</label>
+                <textarea id="consultingObs" rows="3" class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm resize-none"></textarea>
+            </div>
+
+            <div class="flex gap-3 pt-4">
+                <button type="button" onclick="closeConsultingModal()" class="flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition text-sm">Cancelar</button>
+                <button type="submit" class="flex-1 py-3 gradient-gold text-slate-900 font-bold rounded-xl shadow-gold hover:opacity-95 transition text-sm">Confirmar Agendamento</button>
+            </div>
+        </form>
     </div>
+</div>
 
- <!-- BOTÃO WHATSAPP -->
-    <a href="https://wa.me/5581989492224" target="_blank" class="fixed bottom-24 right-6 w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg hover:bg-green-600 transition z-50">
-        <i data-lucide="message-circle" class="w-7 h-7 text-white"></i>
-    </a>
+<!-- BOTÃO WHATSAPP FLUTUANTE CORRIGIDO -->
+<a href="https://wa.me/5581989492224?text=Ol%C3%A1!%20Gostaria%20de%20mais%20informa%C3%A7%C3%B5es." 
+   target="_blank" 
+   rel="noopener noreferrer" 
+   aria-label="Falar pelo WhatsApp" 
+   class="fixed bottom-24 right-6 w-14 h-14 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-lg transition duration-300 z-50 group">
+    
+    <i data-lucide="message-circle" class="w-7 h-7 text-white group-hover:scale-110 transition-transform"></i>
+</a>
 
-    <!-- NOVO BOTÃO (Abaixo do WhatsApp) -->
-    <a href="#" class="fixed bottom-6 right-6 w-14 h-14 gradient-gold rounded-full flex items-center justify-center shadow-lg hover:opacity-90 transition z-50">
-        <i data-lucide="sparkles" class="w-7 h-7 text-slate-900"></i>
-    </a>
+<!-- BOTÃO DOURADO (MODAL/AÇÃO) -->
+<button type="button" 
+        onclick="openSpecialFeatureModal()" 
+        aria-label="Abrir destaques e inteligência" 
+        class="fixed bottom-6 right-6 w-14 h-14 gradient-gold rounded-full flex items-center justify-center shadow-lg hover:opacity-90 transition duration-300 z-50 group">
+    
+    <i data-lucide="sparkles" class="w-7 h-7 text-slate-900 group-hover:scale-110 transition-transform"></i>
+</button>
 
     <!-- JAVASCRIPT -->
 <!-- JAVASCRIPT CORRIGIDO -->
@@ -703,7 +778,9 @@ const catalogoRef = doc(db, "site", "catalogo");
 
 const ADMIN_CREDENTIALS = { email: 'adm.la201@royaladvisory.com', password: 'm#vYBa0HvjEj' };
 
-// ESTADOS DA APLICAÇÃO
+// ==========================================
+// 1. ESTADOS DA APLICAÇÃO
+// ==========================================
 let products = [
     { id: 1, name: "Chrono Gold Royal", price: "R$ 1.850,00", desc: "Caixa em aço com ouro 18k.", img: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=400&q=80" },
     { id: 2, name: "Silver Executive", price: "R$ 2.100,00", desc: "Mostrador prateado safira.", img: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=400&q=80" },
@@ -722,6 +799,242 @@ let consultingRequests = [];
 let isAdminLoggedIn = false;
 let cart = [];
 
+// ==========================================
+// 2. PRODUTOS E PEDIDOS WHATSAPP
+// ==========================================
+function renderProducts() {
+    const container = document.getElementById('productsContainer');
+    if (!container) return;
+
+    container.innerHTML = products.map(p => `
+        <div class="bg-slate-800/70 backdrop-blur border border-slate-700/60 rounded-2xl overflow-hidden flex flex-col justify-between card-hover">
+            <img src="${p.img}" alt="${p.name}" class="w-full h-48 object-cover">
+            <div class="p-6 flex flex-col flex-grow justify-between">
+                <div>
+                    <h3 class="font-serif text-xl font-bold text-white mb-1">${p.name}</h3>
+                    <p class="text-slate-400 text-xs mb-4">${p.desc}</p>
+                </div>
+                <div>
+                    <p class="text-amber-500 font-bold text-lg mb-4">${p.price}</p>
+                    <button onclick="openOrderModal(${p.id})" class="w-full gradient-gold text-slate-900 font-bold py-3 rounded-xl hover:shadow-gold transition text-sm">Comprar pelo WhatsApp</button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+window.openOrderModal = function(id) {
+    const p = products.find(x => String(x.id) === String(id));
+    if (!p) return;
+    
+    const msg = `🛒 *INTERESSE EM PRODUTO*\n\n*Produto:* ${p.name}\n*Valor:* ${p.price}\n*Detalhes:* ${p.desc}\n\nOlá! Gostaria de saber mais sobre a disponibilidade deste item.`;
+    window.open(`https://wa.me/5581989492224?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+// ==========================================
+// 3. CONSULTORIAS E AGENDAMENTOS
+// ==========================================
+function renderConsultings() {
+    const el = document.getElementById('consultingContainer');
+    if (!el) return;
+
+    el.innerHTML = consultings.map(i => `
+        <div class="bg-slate-800/70 backdrop-blur border border-slate-700/60 p-8 rounded-2xl flex flex-col justify-between card-hover">
+            <div>
+                <div class="w-14 h-14 gradient-gold rounded-xl flex items-center justify-center mb-6 shadow-gold"><i data-lucide="${i.icon}" class="w-7 h-7 text-slate-900"></i></div>
+                <h3 class="font-serif text-2xl font-bold mb-4 text-white">${i.title}</h3>
+                <p class="text-slate-400 text-sm mb-6">${i.desc}</p>
+            </div>
+            <button onclick="openConsultingModal('${i.title}', '${i.typeKey}')" class="w-full gradient-gold text-slate-900 font-bold rounded-xl py-4 hover:shadow-gold transition">Agendar Consultoria</button>
+        </div>
+    `).join('');
+    if (window.lucide) lucide.createIcons();
+}
+
+window.openConsultingModal = function(title, typeKey) {
+    const today = new Date().toISOString().split('T')[0];
+    const dateInput = document.getElementById('consultingDate');
+    if (dateInput) dateInput.setAttribute('min', today);
+
+    document.getElementById('consultingTypeDisplay').textContent = title;
+    document.getElementById('consultingType').value = typeKey || 'Financeira';
+    document.getElementById('consultingModal').classList.remove('hidden');
+}
+
+window.closeConsultingModal = function() {
+    const modal = document.getElementById('consultingModal');
+    const form = document.getElementById('consultingForm');
+    if (modal) modal.classList.add('hidden');
+    if (form) form.reset();
+}
+
+window.handleConsultingSubmit = async function(e) {
+    e.preventDefault();
+    
+    const company = document.getElementById('consultingCompany').value.trim();
+    const phone = document.getElementById('consultingPhone').value.trim();
+    const email = document.getElementById('consultingEmail').value.trim();
+    const dateRaw = document.getElementById('consultingDate').value;
+    const time = document.getElementById('consultingTime').value;
+    const obs = document.getElementById('consultingObs').value.trim();
+    const typeKey = document.getElementById('consultingType').value;
+    const title = document.getElementById('consultingTypeDisplay').textContent;
+
+    const dateFormatted = dateRaw ? dateRaw.split('-').reverse().join('/') : dateRaw;
+
+    const item = consultings.find(c => c.typeKey === typeKey) || { valor: 2500 };
+    const numericValue = typeof item.valor === 'number' 
+        ? item.valor 
+        : parseFloat(String(item.valor).replace(/[^\d.-]/g, '')) || 0;
+
+    const requestData = {
+        id: Date.now(),
+        company,
+        phone,
+        email,
+        dateRaw,
+        date: dateFormatted,
+        time,
+        obs,
+        type: typeKey,
+        title,
+        valor: numericValue
+    };
+
+    consultingRequests.push(requestData);
+
+    updateConsultingDashboard();
+    updateFinancialDashboard();
+
+    const msg = `📅 *SOLICITAÇÃO DE AGENDAMENTO*\n\n` +
+                `*Serviço:* ${title}\n` +
+                `*Cliente/Empresa:* ${company}\n` +
+                `*WhatsApp:* ${phone}\n` +
+                `*E-mail:* ${email}\n` +
+                `*Data Desejada:* ${dateFormatted}\n` +
+                `*Horário:* ${time}\n` +
+                (obs ? `*Observações:* ${obs}` : '');
+
+    closeConsultingModal();
+    window.open(`https://wa.me/5581989492224?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+// ==========================================
+// 4. PAINÉIS E DASHBOARDS
+// ==========================================
+function updateConsultingDashboard() {
+    const totalEl = document.getElementById('totalConsultorias');
+    if (totalEl) totalEl.textContent = consultingRequests.length;
+    
+    const totalReceitaNum = consultingRequests.reduce((s, r) => s + (Number(r.valor) || 0), 0);
+    const receitaEl = document.getElementById('totalReceita');
+    if (receitaEl) receitaEl.textContent = 'R$ ' + totalReceitaNum.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    
+    const clientesEl = document.getElementById('totalClientes');
+    if (clientesEl) clientesEl.textContent = new Set(consultingRequests.map(r => r.company)).size;
+    
+    const byType = { 
+        Financeira: { count: 0, revenue: 0 }, 
+        Administrativa: { count: 0, revenue: 0 }, 
+        Estrategico: { count: 0, revenue: 0 } 
+    };
+
+    consultingRequests.forEach(r => {
+        const matchKey = Object.keys(byType).find(k => k.toLowerCase() === r.type.toLowerCase()) || 'Financeira';
+        byType[matchKey].count++; 
+        byType[matchKey].revenue += (Number(r.valor) || 0); 
+    });
+    
+    if (document.getElementById('countFinanceira')) document.getElementById('countFinanceira').textContent = byType.Financeira.count;
+    if (document.getElementById('receitaFinanceira')) document.getElementById('receitaFinanceira').textContent = 'R$ ' + byType.Financeira.revenue.toFixed(2).replace('.', ',');
+    
+    if (document.getElementById('countAdministrativa')) document.getElementById('countAdministrativa').textContent = byType.Administrativa.count;
+    if (document.getElementById('receitaAdministrativa')) document.getElementById('receitaAdministrativa').textContent = 'R$ ' + byType.Administrativa.revenue.toFixed(2).replace('.', ',');
+    
+    if (document.getElementById('countEstrategico')) document.getElementById('countEstrategico').textContent = byType.Estrategico.count;
+    if (document.getElementById('receitaEstrategico')) document.getElementById('receitaEstrategico').textContent = 'R$ ' + byType.Estrategico.revenue.toFixed(2).replace('.', ',');
+    
+    const clients = {};
+    consultingRequests.forEach(r => {
+        if (!clients[r.company]) clients[r.company] = { count: 0, types: [] };
+        clients[r.company].count++;
+        if (!clients[r.company].types.includes(r.type)) clients[r.company].types.push(r.type);
+    });
+    
+    const clientsListEl = document.getElementById('consultingClientsList');
+    if (clientsListEl) {
+        clientsListEl.innerHTML = Object.entries(clients).map(([name, data]) => `
+            <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200">
+                <p class="font-bold text-slate-800">${name}</p>
+                <p class="text-xs text-slate-500">${data.count} solicitação(ões) • ${data.types.join(', ')}</p>
+            </div>
+        `).join('') || '<p class="text-slate-400 text-sm">Nenhuma solicitação</p>';
+    }
+}
+
+function updateFinancialDashboard() {
+    const byClient = {};
+    const byMonth = {};
+    
+    consultingRequests.forEach(r => {
+        const val = parseFloat(r.valor) || 0;
+        if (!byClient[r.company]) byClient[r.company] = 0;
+        byClient[r.company] += val;
+        
+        const dateObj = r.dateRaw ? new Date(r.dateRaw + 'T00:00:00') : new Date();
+        const month = dateObj.toLocaleString('pt-BR', { month: '2-digit', year: 'numeric' });
+        
+        if (!byMonth[month]) byMonth[month] = 0;
+        byMonth[month] += val;
+    });
+    
+    const ganhosClienteEl = document.getElementById('ganhosPorCliente');
+    if (ganhosClienteEl) {
+        ganhosClienteEl.innerHTML = Object.entries(byClient)
+            .sort((a, b) => b[1] - a[1])
+            .map(([name, val]) => `
+                <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200 flex justify-between items-center">
+                    <span class="font-bold text-slate-800">${name}</span>
+                    <span class="text-amber-600 font-bold">R$ ${val.toFixed(2).replace('.', ',')}</span>
+                </div>
+            `).join('') || '<p class="text-slate-400 text-sm">Sem dados</p>';
+    }
+    
+    const ganhosMesEl = document.getElementById('ganhosPorMes');
+    if (ganhosMesEl) {
+        ganhosMesEl.innerHTML = Object.entries(byMonth)
+            .sort()
+            .map(([month, val]) => `
+                <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200 flex justify-between items-center">
+                    <span class="font-bold text-slate-800">${month}</span>
+                    <span class="text-amber-600 font-bold">R$ ${val.toFixed(2).replace('.', ',')}</span>
+                </div>
+            `).join('') || '<p class="text-slate-400 text-sm">Sem dados</p>';
+    }
+}
+
+window.toggleAdminModal = function() { 
+    document.getElementById('adminModal')?.classList.toggle('hidden'); 
+}
+
+// ==========================================
+// 5. INICIALIZAÇÃO
+// ==========================================
+window.addEventListener('DOMContentLoaded', () => {
+    if (sessionStorage.getItem('adminSession') === 'true') isAdminLoggedIn = true;
+    
+    renderProducts();
+    renderConsultings();
+    updateConsultingDashboard();
+    updateFinancialDashboard();
+    
+    // Fechar modal de consultoria ao clicar no fundo escuro
+    document.getElementById('consultingModal')?.addEventListener('click', function(e) {
+        if (e.target === this) closeConsultingModal();
+    });
+
+    if (window.lucide) lucide.createIcons();
+});
 // 2. SINCRONIZAÇÃO EM TEMPO REAL COM FIRESTORE
 onSnapshot(catalogoRef, (docSnap) => {
     if (docSnap.exists()) {
@@ -924,13 +1237,30 @@ window.deleteProduct = async function(id) {
 }
 
 window.openOrderModal = function(id) {
-    const p = products.find(x => x.id === id);
-    if (!p) return;
-    const msg = `🛒 *INTERESSE EM PRODUTO*\n\nProduto: ${p.name}\nValor: ${p.price}`;
-    window.open(`https://wa.me/5581989492224?text=${encodeURIComponent(msg)}`, '_blank');
+    // 1. Converte o ID para garantir a comparação correta (seja string ou número)
+    const p = products.find(x => String(x.id) === String(id));
+    
+    if (!p) {
+        console.error(`Produto com ID ${id} não foi encontrado.`);
+        alert('❌ Produto não encontrado!');
+        return;
+    }
+
+    // 2. Monta uma mensagem mais completa e estruturada
+    const msg = `🛒 *SOLICITAÇÃO DE COMPRA / INFORMAÇÕES*\n\n` +
+                `*Produto:* ${p.name}\n` +
+                `*Valor:* ${p.price}\n` +
+                (p.desc ? `*Detalhes:* ${p.desc}\n` : '') +
+                `\nOlá! Gostaria de prosseguir com a compra deste item.`;
+
+    // 3. Sanitiza o número de telefone garantindo apenas dígitos
+    const whatsappPhone = "5581989492224".replace(/\D/g, '');
+
+    // 4. Abre o WhatsApp em uma nova aba/aplicativo
+    window.open(`https://wa.me/${whatsappPhone}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
-// 7. CONSULTORIAS E AGENDAMENTOS (CORRIGIDOS)
+// 7. CONSULTORIAS E AGENDAMENTOS (CORRIGIDOS E OTIMIZADOS)
 function renderConsultings() {
     const el = document.getElementById('consultingContainer');
     if (!el) return;
@@ -949,51 +1279,70 @@ function renderConsultings() {
 }
 
 window.openConsultingModal = function(title, typeKey) {
+    const today = new Date().toISOString().split('T')[0];
+    const dateInput = document.getElementById('consultingDate');
+    if (dateInput) dateInput.setAttribute('min', today);
+
     document.getElementById('consultingTypeDisplay').textContent = title;
     document.getElementById('consultingType').value = typeKey || 'Financeira';
     document.getElementById('consultingModal').classList.remove('hidden');
 }
 
 window.closeConsultingModal = function() {
-    document.getElementById('consultingModal').classList.add('hidden');
-    document.getElementById('consultingForm').reset();
+    const modal = document.getElementById('consultingModal');
+    const form = document.getElementById('consultingForm');
+    if (modal) modal.classList.add('hidden');
+    if (form) form.reset();
 }
 
-window.handleConsultingSubmit = function(e) {
+window.handleConsultingSubmit = async function(e) {
     e.preventDefault();
     
-    const company = document.getElementById('consultingCompany').value;
-    const phone = document.getElementById('consultingPhone').value;
-    const email = document.getElementById('consultingEmail').value;
-    const date = document.getElementById('consultingDate').value;
+    const company = document.getElementById('consultingCompany').value.trim();
+    const phone = document.getElementById('consultingPhone').value.trim();
+    const email = document.getElementById('consultingEmail').value.trim();
+    const dateRaw = document.getElementById('consultingDate').value; // AAAA-MM-DD
     const time = document.getElementById('consultingTime').value;
-    const obs = document.getElementById('consultingObs').value;
+    const obs = document.getElementById('consultingObs').value.trim();
     const typeKey = document.getElementById('consultingType').value;
     const title = document.getElementById('consultingTypeDisplay').textContent;
 
+    // Formata a data para exibições e WhatsApp
+    const dateFormatted = dateRaw ? dateRaw.split('-').reverse().join('/') : dateRaw;
+
     const item = consultings.find(c => c.typeKey === typeKey) || { valor: 2500 };
     
+    // Garante valor numérico válido
+    const numericValue = typeof item.valor === 'number' 
+        ? item.valor 
+        : parseFloat(String(item.valor).replace(/[^\d.-]/g, '')) || 0;
+
     const requestData = {
         id: Date.now(),
         company,
         phone,
         email,
-        date,
+        dateRaw, // Guardado no formato ISO para leituras de data corretas
+        date: dateFormatted,
         time,
         obs,
         type: typeKey,
         title,
-        valor: item.valor
+        valor: numericValue
     };
 
     consultingRequests.push(requestData);
+
+    // Atualiza os painéis em tempo real
+    updateConsultingDashboard();
+    updateFinancialDashboard();
 
     const msg = `📅 *SOLICITAÇÃO DE AGENDAMENTO*\n\n` +
                 `*Serviço:* ${title}\n` +
                 `*Cliente/Empresa:* ${company}\n` +
                 `*WhatsApp:* ${phone}\n` +
                 `*E-mail:* ${email}\n` +
-                `*Data Desejada:* ${date}\n` +
+                `*Data Desejada:* ${dateFormatted}\n` +
                 `*Horário:* ${time}\n` +
                 (obs ? `*Observações:* ${obs}` : '');
 
@@ -1003,20 +1352,33 @@ window.handleConsultingSubmit = function(e) {
 
 function updateConsultingDashboard() {
     document.getElementById('totalConsultorias').textContent = consultingRequests.length;
-    document.getElementById('totalReceita').textContent = 'R$ ' + consultingRequests.reduce((s, r) => s + parseFloat(r.valor), 0).toFixed(2).replace('.', ',');
+    
+    const totalReceitaNum = consultingRequests.reduce((s, r) => s + (Number(r.valor) || 0), 0);
+    document.getElementById('totalReceita').textContent = 'R$ ' + totalReceitaNum.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    
     document.getElementById('totalClientes').textContent = new Set(consultingRequests.map(r => r.company)).size;
     
-    const byType = { Financeira: { count: 0, revenue: 0 }, Administrativa: { count: 0, revenue: 0 }, Estrategico: { count: 0, revenue: 0 } };
+    const byType = { 
+        Financeira: { count: 0, revenue: 0 }, 
+        Administrativa: { count: 0, revenue: 0 }, 
+        Estrategico: { count: 0, revenue: 0 } 
+    };
+
     consultingRequests.forEach(r => {
-        if (byType[r.type]) { byType[r.type].count++; byType[r.type].revenue += parseFloat(r.valor); }
+        // Normaliza a busca para corresponder à chave do tipo
+        const matchKey = Object.keys(byType).find(k => k.toLowerCase() === r.type.toLowerCase()) || 'Financeira';
+        byType[matchKey].count++; 
+        byType[matchKey].revenue += (Number(r.valor) || 0); 
     });
     
-    document.getElementById('countFinanceira').textContent = byType.Financeira.count;
-    document.getElementById('receitaFinanceira').textContent = 'R$ ' + byType.Financeira.revenue.toFixed(2).replace('.', ',');
-    document.getElementById('countAdministrativa').textContent = byType.Administrativa.count;
-    document.getElementById('receitaAdministrativa').textContent = 'R$ ' + byType.Administrativa.revenue.toFixed(2).replace('.', ',');
-    document.getElementById('countEstrategico').textContent = byType.Estrategico.count;
-    document.getElementById('receitaEstrategico').textContent = 'R$ ' + byType.Estrategico.revenue.toFixed(2).replace('.', ',');
+    if (document.getElementById('countFinanceira')) document.getElementById('countFinanceira').textContent = byType.Financeira.count;
+    if (document.getElementById('receitaFinanceira')) document.getElementById('receitaFinanceira').textContent = 'R$ ' + byType.Financeira.revenue.toFixed(2).replace('.', ',');
+    
+    if (document.getElementById('countAdministrativa')) document.getElementById('countAdministrativa').textContent = byType.Administrativa.count;
+    if (document.getElementById('receitaAdministrativa')) document.getElementById('receitaAdministrativa').textContent = 'R$ ' + byType.Administrativa.revenue.toFixed(2).replace('.', ',');
+    
+    if (document.getElementById('countEstrategico')) document.getElementById('countEstrategico').textContent = byType.Estrategico.count;
+    if (document.getElementById('receitaEstrategico')) document.getElementById('receitaEstrategico').textContent = 'R$ ' + byType.Estrategico.revenue.toFixed(2).replace('.', ',');
     
     const clients = {};
     consultingRequests.forEach(r => {
@@ -1025,12 +1387,15 @@ function updateConsultingDashboard() {
         if (!clients[r.company].types.includes(r.type)) clients[r.company].types.push(r.type);
     });
     
-    document.getElementById('consultingClientsList').innerHTML = Object.entries(clients).map(([name, data]) => `
-        <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200">
-            <p class="font-bold text-slate-800">${name}</p>
-            <p class="text-xs text-slate-500">${data.count} solicitação(ões) • ${data.types.join(', ')}</p>
-        </div>
-    `).join('') || '<p class="text-slate-400 text-sm">Nenhuma solicitação</p>';
+    const clientsListEl = document.getElementById('consultingClientsList');
+    if (clientsListEl) {
+        clientsListEl.innerHTML = Object.entries(clients).map(([name, data]) => `
+            <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200">
+                <p class="font-bold text-slate-800">${name}</p>
+                <p class="text-xs text-slate-500">${data.count} solicitação(ões) • ${data.types.join(', ')}</p>
+            </div>
+        `).join('') || '<p class="text-slate-400 text-sm">Nenhuma solicitação</p>';
+    }
 }
 
 function updateFinancialDashboard() {
@@ -1038,43 +1403,54 @@ function updateFinancialDashboard() {
     const byMonth = {};
     
     consultingRequests.forEach(r => {
-        const val = parseFloat(r.valor);
+        const val = parseFloat(r.valor) || 0;
         if (!byClient[r.company]) byClient[r.company] = 0;
         byClient[r.company] += val;
         
-        const month = new Date(r.date).toLocaleString('pt-BR', { month: '2-digit', year: 'numeric' });
+        // Utiliza a data bruta ISO (AAAA-MM-DD) para evitar erros de leitura
+        const dateObj = r.dateRaw ? new Date(r.dateRaw + 'T00:00:00') : new Date();
+        const month = dateObj.toLocaleString('pt-BR', { month: '2-digit', year: 'numeric' });
+        
         if (!byMonth[month]) byMonth[month] = 0;
         byMonth[month] += val;
     });
     
-    document.getElementById('ganhosPorCliente').innerHTML = Object.entries(byClient)
-        .sort((a, b) => b[1] - a[1])
-        .map(([name, val]) => `
-            <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200 flex justify-between items-center">
-                <span class="font-bold text-slate-800">${name}</span>
-                <span class="text-amber-600 font-bold">R$ ${val.toFixed(2).replace('.', ',')}</span>
-            </div>
-        `).join('') || '<p class="text-slate-400 text-sm">Sem dados</p>';
+    const ganhosClienteEl = document.getElementById('ganhosPorCliente');
+    if (ganhosClienteEl) {
+        ganhosClienteEl.innerHTML = Object.entries(byClient)
+            .sort((a, b) => b[1] - a[1])
+            .map(([name, val]) => `
+                <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200 flex justify-between items-center">
+                    <span class="font-bold text-slate-800">${name}</span>
+                    <span class="text-amber-600 font-bold">R$ ${val.toFixed(2).replace('.', ',')}</span>
+                </div>
+            `).join('') || '<p class="text-slate-400 text-sm">Sem dados</p>';
+    }
     
-    document.getElementById('ganhosPorMes').innerHTML = Object.entries(byMonth)
-        .sort()
-        .map(([month, val]) => `
-            <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200 flex justify-between items-center">
-                <span class="font-bold text-slate-800">${month}</span>
-                <span class="text-amber-600 font-bold">R$ ${val.toFixed(2).replace('.', ',')}</span>
-            </div>
-        `).join('') || '<p class="text-slate-400 text-sm">Sem dados</p>';
+    const ganhosMesEl = document.getElementById('ganhosPorMes');
+    if (ganhosMesEl) {
+        ganhosMesEl.innerHTML = Object.entries(byMonth)
+            .sort()
+            .map(([month, val]) => `
+                <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200 flex justify-between items-center">
+                    <span class="font-bold text-slate-800">${month}</span>
+                    <span class="text-amber-600 font-bold">R$ ${val.toFixed(2).replace('.', ',')}</span>
+                </div>
+            `).join('') || '<p class="text-slate-400 text-sm">Sem dados</p>';
+    }
 }
 
-window.toggleAdminModal = function() { document.getElementById('adminModal').classList.toggle('hidden'); }
+window.toggleAdminModal = function() { document.getElementById('adminModal')?.classList.toggle('hidden'); }
 
 // INICIALIZAÇÃO
 window.addEventListener('DOMContentLoaded', () => {
     if (sessionStorage.getItem('adminSession') === 'true') isAdminLoggedIn = true;
-    renderProducts();
+    if (typeof renderProducts === 'function') renderProducts();
     renderConsultings();
+    updateConsultingDashboard();
+    updateFinancialDashboard();
     if (window.lucide) lucide.createIcons();
 });
-</script>
+<script src="app.js"></script>
 </body>
 </html>
