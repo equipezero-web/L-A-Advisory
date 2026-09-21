@@ -4,9 +4,13 @@ const CACHE_NAME = 'la-advisory-v3'; // Versão incrementada para forçar atuali
 const ASSETS = [
   './',
   './index.html',
+  './app.js',
   './manifest.json',
   './logo192.png',
-  './logo512.png'
+  './logo512.png', // <--- Vírgula corrigida aqui
+  'https://cdn.tailwindcss.com',
+  'https://unpkg.com/lucide@latest',
+  'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;600&display=swap'
 ];
 
 // Instalação do Service Worker
@@ -14,21 +18,27 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('SW: Cacheando arquivos essenciais');
+      console.log('SW: Cache inicial guardado com sucesso.');
       return cache.addAll(ASSETS);
     })
   );
 });
 
-// Ativação e limpeza imediata de caches antigos
+// Ativação: Limpa caches antigos quando houver atualização de versão
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
+    caches.keys().then((cacheNames) => {
       return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) {
+            console.log('[SW] Removendo cache antigo:', cache);
+            return caches.delete(cache);
+          }
+        })
       );
-    }).then(() => self.clients.claim())
+    })
   );
+  self.clients.claim();
 });
 
 // Estratégia Network-First para garantir dados sempre atualizados
@@ -45,8 +55,12 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request)
       .then((networkResponse) => {
-        // Se a busca na rede funcionar, atualiza o cache e retorna a versão mais nova
-        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+        // Se a busca na rede funcionar (status 200/304 e tipo básico/cors), atualiza o cache
+        if (
+          networkResponse && 
+          networkResponse.status === 200 && 
+          (networkResponse.type === 'basic' || networkResponse.type === 'cors')
+        ) {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseToCache);
