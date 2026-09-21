@@ -49,73 +49,11 @@
         
         .tab-active { background: linear-gradient(135deg, #d4af37, #f4d03f); color: #0c1933; }
         .tab-inactive { background: #f1f5f9; color: #64748b; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-slate-900 text-white min-h-screen">
-
-    <!-- Exemplo de Container de Produtos -->
-    <section class="max-w-7xl mx-auto px-4 py-12">
-        <h2 class="font-serif text-3xl font-bold mb-8">Nossos Produtos</h2>
-        <div id="productsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
-    </section>
-
-    <!-- Exemplo de Container de Consultorias -->
-    <section class="max-w-7xl mx-auto px-4 py-12">
-        <h2 class="font-serif text-3xl font-bold mb-8">Consultorias</h2>
-        <div id="consultingContainer" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
-    </section>
-
-    <!-- MODAL DE AGENDAMENTO DE CONSULTORIA -->
-    <div id="consultingModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 relative shadow-2xl">
-            <button onclick="closeConsultingModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
-                <i data-lucide="x" class="w-6 h-6"></i>
-            </button>
-            
-            <h3 class="font-serif text-2xl font-bold mb-1 text-white" id="consultingTypeDisplay">Agendar Consultoria</h3>
-            <p class="text-slate-400 text-sm mb-6">Preencha os dados abaixo para solicitar seu agendamento via WhatsApp.</p>
-            
-            <form id="consultingForm" onsubmit="handleConsultingSubmit(event)" class="space-y-4">
-                <input type="hidden" id="consultingType" value="">
-                
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Empresa / Cliente</label>
-                    <input type="text" id="consultingCompany" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500" placeholder="Sua Empresa Ltda">
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">WhatsApp</label>
-                        <input type="tel" id="consultingPhone" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500" placeholder="(81) 98949-2224">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">E-mail</label>
-                        <input type="email" id="consultingEmail" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500" placeholder="contato@empresa.com">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Data Desejada</label>
-                        <input type="date" id="consultingDate" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Horário Preferencial</label>
-                        <input type="time" id="consultingTime" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Observações (Opcional)</label>
-                    <textarea id="consultingObs" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500" placeholder="Descreva brevemente o seu objetivo..."></textarea>
-                </div>
-
-                <button type="submit" class="w-full gradient-gold text-slate-900 font-bold py-4 rounded-xl hover:shadow-gold transition mt-2">
-                    Solicitar Agendamento
-                </button>
-            </form>
-        </div>
-    </div>
+<body class="bg-slate-900 text-white min-h-screen flex flex-col">
 
     <!-- BARRA SUPERIOR -->
     <div class="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-slate-300 px-4 py-2.5 flex justify-between items-center text-xs z-50 border-b border-blue-800/30">
@@ -155,28 +93,28 @@
     </header>
 
     <main class="flex-grow">
-<!-- LOJA VIRTUAL -->
-<section id="loja" class="py-16 bg-gradient-to-b from-white to-slate-100 border-b border-slate-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-end mb-10">
-            <div>
-                <span class="text-amber-600 font-bold uppercase text-xs tracking-[0.2em]">Coleção Exclusiva</span>
-                <h2 class="font-serif text-3xl sm:text-4xl font-bold text-slate-900 mt-2">Loja Premium</h2>
-                <div class="w-20 h-1 gradient-gold rounded mt-3"></div>
-            </div>
-            <div class="flex gap-2">
-                <button type="button" onclick="scrollCarousel('left')" class="p-3 rounded-full border-2 border-slate-300 hover:border-amber-500 text-slate-600 hover:text-amber-600 transition bg-white shadow-md hover:shadow-lg cursor-pointer">
-                    <i data-lucide="chevron-left" class="w-5 h-5"></i>
-                </button>
-                <button type="button" onclick="scrollCarousel('right')" class="p-3 rounded-full border-2 border-slate-300 hover:border-amber-500 text-slate-600 hover:text-amber-600 transition bg-white shadow-md hover:shadow-lg cursor-pointer">
-                    <i data-lucide="chevron-right" class="w-5 h-5"></i>
-                </button>
-            </div>
-        </div>
+        <!-- LOJA VIRTUAL -->
+        <section id="loja" class="py-16 bg-gradient-to-b from-white to-slate-100 border-b border-slate-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-end mb-10">
+                    <div>
+                        <span class="text-amber-600 font-bold uppercase text-xs tracking-[0.2em]">Coleção Exclusiva</span>
+                        <h2 class="font-serif text-3xl sm:text-4xl font-bold text-slate-900 mt-2">Loja Premium</h2>
+                        <div class="w-20 h-1 gradient-gold rounded mt-3"></div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="scrollCarousel('left')" class="p-3 rounded-full border-2 border-slate-300 hover:border-amber-500 text-slate-600 hover:text-amber-600 transition bg-white shadow-md hover:shadow-lg cursor-pointer">
+                            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                        </button>
+                        <button type="button" onclick="scrollCarousel('right')" class="p-3 rounded-full border-2 border-slate-300 hover:border-amber-500 text-slate-600 hover:text-amber-600 transition bg-white shadow-md hover:shadow-lg cursor-pointer">
+                            <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
 
-        <div id="carouselContainer" class="flex gap-6 overflow-x-auto pb-6 scroll-smooth snap-x snap-mandatory no-scrollbar"></div>
-    </div>
-</section>
+                <div id="carouselContainer" class="flex gap-6 overflow-x-auto pb-6 scroll-smooth snap-x snap-mandatory no-scrollbar"></div>
+            </div>
+        </section>
 
         <!-- CONSULTORIA -->
         <section id="consultoria" class="py-20 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white relative overflow-hidden">
@@ -353,69 +291,55 @@
         </div>
     </footer>
 
-    <!-- MODAL CHECKOUT -->
-    <div id="orderModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white text-slate-900 rounded-2xl max-w-lg w-full p-8 shadow-2xl relative border-2 border-amber-400/30 max-h-[90vh] overflow-y-auto">
-            <button onclick="closeOrderModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
+    <!-- MODAL DE CONSULTORIA -->
+    <div id="consultingModal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative border border-slate-200 my-8 max-h-[90vh] overflow-y-auto">
+            <button type="button" onclick="closeConsultingModal()" aria-label="Fechar modal" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
                 <i data-lucide="x" class="w-6 h-6"></i>
             </button>
-            
-            <div class="text-center mb-8">
-                <div class="w-16 h-16 gradient-gold rounded-full flex items-center justify-center mx-auto mb-4 shadow-gold">
-                    <i data-lucide="shopping-bag" class="w-8 h-8 text-slate-900"></i>
-                </div>
-                <h3 class="font-serif text-2xl font-bold text-slate-900">Finalizar Pedido</h3>
-                <p id="orderProductTitle" class="text-sm font-semibold text-amber-600 mt-2"></p>
-            </div>
 
-            <form id="orderForm" onsubmit="handleOrderSubmit(event)" class="space-y-5">
-                <input type="hidden" id="orderProductId">
+            <h3 class="font-serif text-2xl font-bold text-slate-900 mb-1">Agendar Consultoria</h3>
+            <p id="consultingTypeDisplay" class="text-amber-600 font-bold mb-6">Consultoria Financeira</p>
+
+            <form id="consultingForm" onsubmit="handleConsultingSubmit(event)" class="space-y-4">
+                <input type="hidden" id="consultingType" value="Financeira">
+
+                <div>
+                    <label for="consultingCompany" class="block text-xs font-bold text-slate-700 uppercase mb-1">Empresa / Nome</label>
+                    <input type="text" id="consultingCompany" required class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm">
+                </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">Destinatário *</label>
-                        <input type="text" id="orderRecipient" required placeholder="Nome completo" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                        <label for="consultingPhone" class="block text-xs font-bold text-slate-700 uppercase mb-1">WhatsApp / Telefone</label>
+                        <input type="tel" id="consultingPhone" required placeholder="(81) 99999-9999" class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">WhatsApp (DDD) *</label>
-                        <input type="tel" id="orderPhone" required placeholder="(81) 99999-9999" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                        <label for="consultingEmail" class="block text-xs font-bold text-slate-700 uppercase mb-1">E-mail</label>
+                        <input type="email" id="consultingEmail" required class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm">
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">CEP *</label>
-                        <input type="text" id="orderCep" required placeholder="50000-000" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                        <label for="consultingDate" class="block text-xs font-bold text-slate-700 uppercase mb-1">Data Desejada</label>
+                        <input type="date" id="consultingDate" required class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm">
                     </div>
-                    <div class="sm:col-span-2">
-                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">Endereço Completo *</label>
-                        <input type="text" id="orderAddress" required placeholder="Rua, Nº, Bairro" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                    <div>
+                        <label for="consultingTime" class="block text-xs font-bold text-slate-700 uppercase mb-1">Horário Preferencial</label>
+                        <input type="time" id="consultingTime" required class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-3 tracking-wide">Forma de Pagamento *</label>
-                    <div class="grid grid-cols-2 gap-4">
-                        <label class="border-2 border-slate-300 rounded-xl p-4 flex items-center gap-3 cursor-pointer hover:border-amber-500 has-[:checked]:border-amber-500 has-[:checked]:bg-amber-50 transition">
-                            <input type="radio" name="paymentType" value="PIX" checked class="w-5 h-5 text-amber-600 focus:ring-amber-500">
-                            <div class="flex items-center gap-2">
-                                <i data-lucide="qr-code" class="w-5 h-5 text-amber-600"></i>
-                                <span class="text-sm font-bold text-slate-800">Pix</span>
-                            </div>
-                        </label>
-                        <label class="border-2 border-slate-300 rounded-xl p-4 flex items-center gap-3 cursor-pointer hover:border-amber-500 has-[:checked]:border-amber-500 has-[:checked]:bg-amber-50 transition">
-                            <input type="radio" name="paymentType" value="Cartão de Crédito" class="w-5 h-5 text-amber-600 focus:ring-amber-500">
-                            <div class="flex items-center gap-2">
-                                <i data-lucide="credit-card" class="w-5 h-5 text-amber-600"></i>
-                                <span class="text-sm font-bold text-slate-800">Cartão</span>
-                            </div>
-                        </label>
-                    </div>
+                    <label for="consultingObs" class="block text-xs font-bold text-slate-700 uppercase mb-1">Observações / Objetivos</label>
+                    <textarea id="consultingObs" rows="3" class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm resize-none"></textarea>
                 </div>
 
-                <button type="submit" class="w-full gradient-gold text-slate-900 py-4 rounded-xl font-bold text-base hover:shadow-gold transition shadow-lg flex items-center justify-center gap-3 mt-6 btn-premium">
-                    <i data-lucide="circle-check" class="w-6 h-6"></i> Confirmar Pedido
-                </button>
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="closeConsultingModal()" class="flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition text-sm">Cancelar</button>
+                    <button type="submit" class="flex-1 py-3 gradient-gold text-slate-900 font-bold rounded-xl shadow-gold hover:opacity-95 transition text-sm">Confirmar Agendamento</button>
+                </div>
             </form>
         </div>
     </div>
@@ -494,19 +418,6 @@
             <div class="flex-grow">
                 <!-- ABA PRODUTOS -->
                 <div id="content-produtos" class="tab-content">
-                    <!-- CONFIG API WHATSAPP -->
-                    <div class="bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-xl p-5 mb-6">
-                        <h4 class="text-xs font-bold uppercase text-amber-700 tracking-wider mb-3 flex items-center gap-2">
-                            <i data-lucide="settings" class="w-4 h-4"></i> Configuração API WhatsApp
-                        </h4>
-                        <div class="space-y-3">
-                            <input type="text" id="whatsappToken" placeholder="Token da API (System User)" class="w-full px-3 py-2.5 border-2 border-amber-300 rounded-lg text-sm outline-none focus:border-amber-500">
-                            <input type="text" id="whatsappInstance" placeholder="Phone Number ID" class="w-full px-3 py-2.5 border-2 border-amber-300 rounded-lg text-sm outline-none focus:border-amber-500">
-                            <input type="text" id="whatsappBaseUrl" placeholder="URL Base (https://graph.facebook.com/v21.0)" class="w-full px-3 py-2.5 border-2 border-amber-300 rounded-lg text-sm outline-none focus:border-amber-500">
-                            <p class="text-xs text-amber-700">💡 Deixe vazio para modo demonstração</p>
-                        </div>
-                    </div>
-
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div>
                             <h4 class="font-bold text-lg mb-4 flex items-center gap-2">
@@ -530,22 +441,11 @@
                                     <i data-lucide="list" class="w-5 h-5 text-amber-600"></i>
                                     Produtos Cadastrados
                                 </h4>
-                                <!-- BOTÃO SALVAR NA NUVEM -->
                                 <button type="button" onclick="salvarManualFirebase()" class="px-3 py-1.5 gradient-gold text-slate-900 text-xs font-bold rounded-lg shadow-sm hover:opacity-90 flex items-center gap-1">
                                     <i data-lucide="cloud" class="w-3.5 h-3.5"></i> Salvar na Nuvem
                                 </button>
                             </div>
                             <div id="adminProductsList" class="space-y-2 max-h-96 overflow-y-auto"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-6">
-                        <h4 class="font-bold text-lg mb-4 flex items-center gap-2">
-                            <i data-lucide="shopping-cart" class="w-5 h-5 text-amber-600"></i>
-                            Pedidos de Produtos
-                        </h4>
-                        <div id="adminOrdersLog" class="space-y-2 max-h-64 overflow-y-auto">
-                            <p class="text-sm text-slate-400">Nenhum pedido recebido.</p>
                         </div>
                     </div>
                 </div>
@@ -675,782 +575,421 @@
         </div>
     </div>
 
-<!-- MODAL DE CONSULTORIA COMPLETO E OTIMIZADO -->
-<div id="consultingModal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative border border-slate-200 my-8 max-h-[90vh] overflow-y-auto">
-        
-        <!-- Botão de Fechar (X) -->
-        <button type="button" onclick="closeConsultingModal()" aria-label="Fechar modal" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
-            <i data-lucide="x" class="w-6 h-6"></i>
-        </button>
+    <!-- BOTÃO WHATSAPP FLUTUANTE -->
+    <a href="https://wa.me/5581989492224?text=Ol%C3%A1!%20Gostaria%20de%20mais%20informa%C3%A7%C3%B5es." 
+       target="_blank" 
+       rel="noopener noreferrer" 
+       aria-label="Falar pelo WhatsApp" 
+       class="fixed bottom-6 right-6 w-14 h-14 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-lg transition duration-300 z-50 group">
+        <i data-lucide="message-circle" class="w-7 h-7 text-white group-hover:scale-110 transition-transform"></i>
+    </a>
 
-        <h3 class="font-serif text-2xl font-bold text-slate-900 mb-1">Agendar Consultoria</h3>
-        <p id="consultingTypeDisplay" class="text-amber-600 font-bold mb-6">Consultoria Financeira</p>
+    <!-- LÓGICA EM JAVASCRIPT ES6/FIREBASE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        <form id="consultingForm" onsubmit="handleConsultingSubmit(event)" class="space-y-4">
-            <!-- Campo Oculto para armazenar o tipo da consultoria -->
-            <input type="hidden" id="consultingType" value="Financeira">
+        // CONFIGURAÇÕES FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyAGKRQoKeZpj4LBQPFYX0AqtqNUZjqkqCA",
+            authDomain: "advisory-web.firebaseapp.com",
+            projectId: "advisory-web",
+            storageBucket: "advisory-web.firebasestorage.app",
+            messagingSenderId: "28667188054",
+            appId: "1:28667188054:web:eac7d4be6092b198fdfcf7",
+            measurementId: "G-0M6LRHCQCD"
+        };
 
-            <div>
-                <label for="consultingCompany" class="block text-xs font-bold text-slate-700 uppercase mb-1">Empresa / Nome</label>
-                <input type="text" id="consultingCompany" required class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm">
-            </div>
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const catalogoRef = doc(db, "site", "catalogo");
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label for="consultingPhone" class="block text-xs font-bold text-slate-700 uppercase mb-1">WhatsApp / Telefone</label>
-                    <input type="tel" id="consultingPhone" required placeholder="(81) 99999-9999" class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm">
-                </div>
-                <div>
-                    <label for="consultingEmail" class="block text-xs font-bold text-slate-700 uppercase mb-1">E-mail</label>
-                    <input type="email" id="consultingEmail" required class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm">
-                </div>
-            </div>
+        const ADMIN_CREDENTIALS = { email: 'adm.la201@royaladvisory.com', password: 'm#vYBa0HvjEj' };
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label for="consultingDate" class="block text-xs font-bold text-slate-700 uppercase mb-1">Data Desejada</label>
-                    <input type="date" id="consultingDate" required class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm">
-                </div>
-                <div>
-                    <label for="consultingTime" class="block text-xs font-bold text-slate-700 uppercase mb-1">Horário Preferencial</label>
-                    <input type="time" id="consultingTime" required class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm">
-                </div>
-            </div>
+        // ESTADO GLOBAL DA APLICAÇÃO
+        let products = [
+            { id: 1, name: "Chrono Gold Royal", price: "R$ 1.850,00", desc: "Caixa em aço com ouro 18k.", img: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=400&q=80" },
+            { id: 2, name: "Silver Executive", price: "R$ 2.100,00", desc: "Mostrador prateado safira.", img: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=400&q=80" },
+            { id: 3, name: "Cufflinks Gold 18k", price: "R$ 650,00", desc: "Abotoaduras ouro artesanal.", img: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?auto=format&fit=crop&w=400&q=80" },
+            { id: 4, name: "Leather Wallet", price: "R$ 380,00", desc: "Carteira couro RFID.", img: "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=400&q=80" }
+        ];
 
-            <div>
-                <label for="consultingObs" class="block text-xs font-bold text-slate-700 uppercase mb-1">Observações / Objetivos</label>
-                <textarea id="consultingObs" rows="3" class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm resize-none"></textarea>
-            </div>
+        let consultings = [
+            { id: 1, title: "Consultoria Financeira", typeKey: "Financeira", valor: 2500, desc: "Gestão de capital e fluxo de caixa.", icon: "trending-up" },
+            { id: 2, title: "Consultoria Administrativa", typeKey: "Administrativa", valor: 3000, desc: "Otimização de processos.", icon: "briefcase" },
+            { id: 3, title: "Planejamento Estratégico", typeKey: "Estrategico", valor: 3500, desc: "Roadmap empresarial.", icon: "target" }
+        ];
 
-            <div class="flex gap-3 pt-4">
-                <button type="button" onclick="closeConsultingModal()" class="flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition text-sm">Cancelar</button>
-                <button type="submit" class="flex-1 py-3 gradient-gold text-slate-900 font-bold rounded-xl shadow-gold hover:opacity-95 transition text-sm">Confirmar Agendamento</button>
-            </div>
-        </form>
-    </div>
-</div>
+        let consultingRequests = [];
+        let isAdminLoggedIn = false;
+        let cart = [];
 
-<!-- BOTÃO WHATSAPP FLUTUANTE CORRIGIDO -->
-<a href="https://wa.me/5581989492224?text=Ol%C3%A1!%20Gostaria%20de%20mais%20informa%C3%A7%C3%B5es." 
-   target="_blank" 
-   rel="noopener noreferrer" 
-   aria-label="Falar pelo WhatsApp" 
-   class="fixed bottom-24 right-6 w-14 h-14 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-lg transition duration-300 z-50 group">
-    
-    <i data-lucide="message-circle" class="w-7 h-7 text-white group-hover:scale-110 transition-transform"></i>
-</a>
-
-<!-- BOTÃO DOURADO (MODAL/AÇÃO) -->
-<button type="button" 
-        onclick="openSpecialFeatureModal()" 
-        aria-label="Abrir destaques e inteligência" 
-        class="fixed bottom-6 right-6 w-14 h-14 gradient-gold rounded-full flex items-center justify-center shadow-lg hover:opacity-90 transition duration-300 z-50 group">
-    
-    <i data-lucide="sparkles" class="w-7 h-7 text-slate-900 group-hover:scale-110 transition-transform"></i>
-</button>
-
-    <!-- JAVASCRIPT -->
-<!-- JAVASCRIPT CORRIGIDO -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { 
-    getFirestore, 
-    doc, 
-    setDoc, 
-    onSnapshot 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-// 1. CREDENCIAIS E INICIALIZAÇÃO DO FIREBASE
-const firebaseConfig = {
-    apiKey: "AIzaSyAGKRQoKeZpj4LBQPFYX0AqtqNUZjqkqCA",
-    authDomain: "advisory-web.firebaseapp.com",
-    projectId: "advisory-web",
-    storageBucket: "advisory-web.firebasestorage.app",
-    messagingSenderId: "28667188054",
-    appId: "1:28667188054:web:eac7d4be6092b198fdfcf7",
-    measurementId: "G-0M6LRHCQCD"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const catalogoRef = doc(db, "site", "catalogo");
-
-const ADMIN_CREDENTIALS = { email: 'adm.la201@royaladvisory.com', password: 'm#vYBa0HvjEj' };
-
-// ==========================================
-// 1. ESTADOS DA APLICAÇÃO
-// ==========================================
-let products = [
-    { id: 1, name: "Chrono Gold Royal", price: "R$ 1.850,00", desc: "Caixa em aço com ouro 18k.", img: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=400&q=80" },
-    { id: 2, name: "Silver Executive", price: "R$ 2.100,00", desc: "Mostrador prateado safira.", img: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=400&q=80" },
-    { id: 3, name: "Cufflinks Gold 18k", price: "R$ 650,00", desc: "Abotoaduras ouro artesanal.", img: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?auto=format&fit=crop&w=400&q=80" },
-    { id: 4, name: "Leather Wallet", price: "R$ 380,00", desc: "Carteira couro RFID.", img: "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=400&q=80" }
-];
-
-let consultings = [
-    { id: 1, title: "Consultoria Financeira", typeKey: "Financeira", valor: 2500, desc: "Gestão de capital e fluxo de caixa.", icon: "trending-up" },
-    { id: 2, title: "Consultoria Administrativa", typeKey: "Administrativa", valor: 3000, desc: "Otimização de processos.", icon: "briefcase" },
-    { id: 3, title: "Planejamento Estratégico", typeKey: "Estrategico", valor: 3500, desc: "Roadmap empresarial.", icon: "target" }
-];
-
-let receivedOrders = [];
-let consultingRequests = [];
-let isAdminLoggedIn = false;
-let cart = [];
-
-// ==========================================
-// 2. PRODUTOS E PEDIDOS WHATSAPP
-// ==========================================
-function renderProducts() {
-    const container = document.getElementById('productsContainer');
-    if (!container) return;
-
-    container.innerHTML = products.map(p => `
-        <div class="bg-slate-800/70 backdrop-blur border border-slate-700/60 rounded-2xl overflow-hidden flex flex-col justify-between card-hover">
-            <img src="${p.img}" alt="${p.name}" class="w-full h-48 object-cover">
-            <div class="p-6 flex flex-col flex-grow justify-between">
-                <div>
-                    <h3 class="font-serif text-xl font-bold text-white mb-1">${p.name}</h3>
-                    <p class="text-slate-400 text-xs mb-4">${p.desc}</p>
-                </div>
-                <div>
-                    <p class="text-amber-500 font-bold text-lg mb-4">${p.price}</p>
-                    <button onclick="openOrderModal(${p.id})" class="w-full gradient-gold text-slate-900 font-bold py-3 rounded-xl hover:shadow-gold transition text-sm">Comprar pelo WhatsApp</button>
-                </div>
-            </div>
-        </div>
-    `).join('');
-}
-
-window.openOrderModal = function(id) {
-    const p = products.find(x => String(x.id) === String(id));
-    if (!p) return;
-    
-    const msg = `🛒 *INTERESSE EM PRODUTO*\n\n*Produto:* ${p.name}\n*Valor:* ${p.price}\n*Detalhes:* ${p.desc}\n\nOlá! Gostaria de saber mais sobre a disponibilidade deste item.`;
-    window.open(`https://wa.me/5581989492224?text=${encodeURIComponent(msg)}`, '_blank');
-}
-
-// ==========================================
-// 3. CONSULTORIAS E AGENDAMENTOS
-// ==========================================
-function renderConsultings() {
-    const el = document.getElementById('consultingContainer');
-    if (!el) return;
-
-    el.innerHTML = consultings.map(i => `
-        <div class="bg-slate-800/70 backdrop-blur border border-slate-700/60 p-8 rounded-2xl flex flex-col justify-between card-hover">
-            <div>
-                <div class="w-14 h-14 gradient-gold rounded-xl flex items-center justify-center mb-6 shadow-gold"><i data-lucide="${i.icon}" class="w-7 h-7 text-slate-900"></i></div>
-                <h3 class="font-serif text-2xl font-bold mb-4 text-white">${i.title}</h3>
-                <p class="text-slate-400 text-sm mb-6">${i.desc}</p>
-            </div>
-            <button onclick="openConsultingModal('${i.title}', '${i.typeKey}')" class="w-full gradient-gold text-slate-900 font-bold rounded-xl py-4 hover:shadow-gold transition">Agendar Consultoria</button>
-        </div>
-    `).join('');
-    if (window.lucide) lucide.createIcons();
-}
-
-window.openConsultingModal = function(title, typeKey) {
-    const today = new Date().toISOString().split('T')[0];
-    const dateInput = document.getElementById('consultingDate');
-    if (dateInput) dateInput.setAttribute('min', today);
-
-    document.getElementById('consultingTypeDisplay').textContent = title;
-    document.getElementById('consultingType').value = typeKey || 'Financeira';
-    document.getElementById('consultingModal').classList.remove('hidden');
-}
-
-window.closeConsultingModal = function() {
-    const modal = document.getElementById('consultingModal');
-    const form = document.getElementById('consultingForm');
-    if (modal) modal.classList.add('hidden');
-    if (form) form.reset();
-}
-
-window.handleConsultingSubmit = async function(e) {
-    e.preventDefault();
-    
-    const company = document.getElementById('consultingCompany').value.trim();
-    const phone = document.getElementById('consultingPhone').value.trim();
-    const email = document.getElementById('consultingEmail').value.trim();
-    const dateRaw = document.getElementById('consultingDate').value;
-    const time = document.getElementById('consultingTime').value;
-    const obs = document.getElementById('consultingObs').value.trim();
-    const typeKey = document.getElementById('consultingType').value;
-    const title = document.getElementById('consultingTypeDisplay').textContent;
-
-    const dateFormatted = dateRaw ? dateRaw.split('-').reverse().join('/') : dateRaw;
-
-    const item = consultings.find(c => c.typeKey === typeKey) || { valor: 2500 };
-    const numericValue = typeof item.valor === 'number' 
-        ? item.valor 
-        : parseFloat(String(item.valor).replace(/[^\d.-]/g, '')) || 0;
-
-    const requestData = {
-        id: Date.now(),
-        company,
-        phone,
-        email,
-        dateRaw,
-        date: dateFormatted,
-        time,
-        obs,
-        type: typeKey,
-        title,
-        valor: numericValue
-    };
-
-    consultingRequests.push(requestData);
-
-    updateConsultingDashboard();
-    updateFinancialDashboard();
-
-    const msg = `📅 *SOLICITAÇÃO DE AGENDAMENTO*\n\n` +
-                `*Serviço:* ${title}\n` +
-                `*Cliente/Empresa:* ${company}\n` +
-                `*WhatsApp:* ${phone}\n` +
-                `*E-mail:* ${email}\n` +
-                `*Data Desejada:* ${dateFormatted}\n` +
-                `*Horário:* ${time}\n` +
-                (obs ? `*Observações:* ${obs}` : '');
-
-    closeConsultingModal();
-    window.open(`https://wa.me/5581989492224?text=${encodeURIComponent(msg)}`, '_blank');
-}
-
-// ==========================================
-// 4. PAINÉIS E DASHBOARDS
-// ==========================================
-function updateConsultingDashboard() {
-    const totalEl = document.getElementById('totalConsultorias');
-    if (totalEl) totalEl.textContent = consultingRequests.length;
-    
-    const totalReceitaNum = consultingRequests.reduce((s, r) => s + (Number(r.valor) || 0), 0);
-    const receitaEl = document.getElementById('totalReceita');
-    if (receitaEl) receitaEl.textContent = 'R$ ' + totalReceitaNum.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    
-    const clientesEl = document.getElementById('totalClientes');
-    if (clientesEl) clientesEl.textContent = new Set(consultingRequests.map(r => r.company)).size;
-    
-    const byType = { 
-        Financeira: { count: 0, revenue: 0 }, 
-        Administrativa: { count: 0, revenue: 0 }, 
-        Estrategico: { count: 0, revenue: 0 } 
-    };
-
-    consultingRequests.forEach(r => {
-        const matchKey = Object.keys(byType).find(k => k.toLowerCase() === r.type.toLowerCase()) || 'Financeira';
-        byType[matchKey].count++; 
-        byType[matchKey].revenue += (Number(r.valor) || 0); 
-    });
-    
-    if (document.getElementById('countFinanceira')) document.getElementById('countFinanceira').textContent = byType.Financeira.count;
-    if (document.getElementById('receitaFinanceira')) document.getElementById('receitaFinanceira').textContent = 'R$ ' + byType.Financeira.revenue.toFixed(2).replace('.', ',');
-    
-    if (document.getElementById('countAdministrativa')) document.getElementById('countAdministrativa').textContent = byType.Administrativa.count;
-    if (document.getElementById('receitaAdministrativa')) document.getElementById('receitaAdministrativa').textContent = 'R$ ' + byType.Administrativa.revenue.toFixed(2).replace('.', ',');
-    
-    if (document.getElementById('countEstrategico')) document.getElementById('countEstrategico').textContent = byType.Estrategico.count;
-    if (document.getElementById('receitaEstrategico')) document.getElementById('receitaEstrategico').textContent = 'R$ ' + byType.Estrategico.revenue.toFixed(2).replace('.', ',');
-    
-    const clients = {};
-    consultingRequests.forEach(r => {
-        if (!clients[r.company]) clients[r.company] = { count: 0, types: [] };
-        clients[r.company].count++;
-        if (!clients[r.company].types.includes(r.type)) clients[r.company].types.push(r.type);
-    });
-    
-    const clientsListEl = document.getElementById('consultingClientsList');
-    if (clientsListEl) {
-        clientsListEl.innerHTML = Object.entries(clients).map(([name, data]) => `
-            <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200">
-                <p class="font-bold text-slate-800">${name}</p>
-                <p class="text-xs text-slate-500">${data.count} solicitação(ões) • ${data.types.join(', ')}</p>
-            </div>
-        `).join('') || '<p class="text-slate-400 text-sm">Nenhuma solicitação</p>';
-    }
-}
-
-function updateFinancialDashboard() {
-    const byClient = {};
-    const byMonth = {};
-    
-    consultingRequests.forEach(r => {
-        const val = parseFloat(r.valor) || 0;
-        if (!byClient[r.company]) byClient[r.company] = 0;
-        byClient[r.company] += val;
-        
-        const dateObj = r.dateRaw ? new Date(r.dateRaw + 'T00:00:00') : new Date();
-        const month = dateObj.toLocaleString('pt-BR', { month: '2-digit', year: 'numeric' });
-        
-        if (!byMonth[month]) byMonth[month] = 0;
-        byMonth[month] += val;
-    });
-    
-    const ganhosClienteEl = document.getElementById('ganhosPorCliente');
-    if (ganhosClienteEl) {
-        ganhosClienteEl.innerHTML = Object.entries(byClient)
-            .sort((a, b) => b[1] - a[1])
-            .map(([name, val]) => `
-                <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200 flex justify-between items-center">
-                    <span class="font-bold text-slate-800">${name}</span>
-                    <span class="text-amber-600 font-bold">R$ ${val.toFixed(2).replace('.', ',')}</span>
-                </div>
-            `).join('') || '<p class="text-slate-400 text-sm">Sem dados</p>';
-    }
-    
-    const ganhosMesEl = document.getElementById('ganhosPorMes');
-    if (ganhosMesEl) {
-        ganhosMesEl.innerHTML = Object.entries(byMonth)
-            .sort()
-            .map(([month, val]) => `
-                <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200 flex justify-between items-center">
-                    <span class="font-bold text-slate-800">${month}</span>
-                    <span class="text-amber-600 font-bold">R$ ${val.toFixed(2).replace('.', ',')}</span>
-                </div>
-            `).join('') || '<p class="text-slate-400 text-sm">Sem dados</p>';
-    }
-}
-
-window.toggleAdminModal = function() { 
-    document.getElementById('adminModal')?.classList.toggle('hidden'); 
-}
-
-// ==========================================
-// 5. INICIALIZAÇÃO
-// ==========================================
-window.addEventListener('DOMContentLoaded', () => {
-    if (sessionStorage.getItem('adminSession') === 'true') isAdminLoggedIn = true;
-    
-    renderProducts();
-    renderConsultings();
-    updateConsultingDashboard();
-    updateFinancialDashboard();
-    
-    // Fechar modal de consultoria ao clicar no fundo escuro
-    document.getElementById('consultingModal')?.addEventListener('click', function(e) {
-        if (e.target === this) closeConsultingModal();
-    });
-
-    if (window.lucide) lucide.createIcons();
-});
-// 2. SINCRONIZAÇÃO EM TEMPO REAL COM FIRESTORE
-onSnapshot(catalogoRef, (docSnap) => {
-    if (docSnap.exists()) {
-        const data = docSnap.data();
-        if (data.products && Array.isArray(data.products)) {
-            products = data.products;
-            renderProducts();
-        }
-    } else {
-        salvarNoFirebase();
-    }
-}, (error) => {
-    console.error("Erro ao ler do Firebase:", error);
-});
-
-async function salvarNoFirebase() {
-    try {
-        await setDoc(catalogoRef, { 
-            products: products, 
-            updatedAt: new Date().toISOString() 
+        // SINCRONIZAÇÃO EM TEMPO REAL (FIRESTORE)
+        onSnapshot(catalogoRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if (data.products && Array.isArray(data.products)) {
+                    products = data.products;
+                    renderProducts();
+                }
+            } else {
+                salvarNoFirebase();
+            }
+        }, (error) => {
+            console.error("Erro no Firebase:", error);
         });
-        return true;
-    } catch (err) {
-        console.error("Erro ao salvar no Firebase:", err);
-        alert("❌ Erro ao salvar na nuvem: " + err.message);
-        return false;
-    }
-}
 
-window.salvarManualFirebase = async function() {
-    const ok = await salvarNoFirebase();
-    if (ok) {
-        alert("☁️ Alterações salvas na nuvem com sucesso!");
-    }
-};
+        async function salvarNoFirebase() {
+            try {
+                await setDoc(catalogoRef, { products: products, updatedAt: new Date().toISOString() });
+                return true;
+            } catch (err) {
+                console.error("Erro ao salvar:", err);
+                alert("❌ Erro ao salvar na nuvem: " + err.message);
+                return false;
+            }
+        }
 
-// 3. ROLAGEM DO CARROSSEL
-window.scrollCarousel = function(direction) {
-    const container = document.getElementById('carouselContainer');
-    if (!container) return;
+        window.salvarManualFirebase = async function() {
+            if (await salvarNoFirebase()) alert("☁️ Alterações salvas na nuvem com sucesso!");
+        };
 
-    const firstCard = container.firstElementChild;
-    const step = firstCard ? (firstCard.offsetWidth + 24) : 340;
+        // RENDERIZAÇÃO E NAVEGAÇÃO DA LOJA
+        function renderProducts() {
+            const c = document.getElementById('carouselContainer');
+            if (!c) return;
 
-    if (direction === 'left' || direction === -1) {
-        container.scrollBy({ left: -step, behavior: 'smooth' });
-    } else if (direction === 'right' || direction === 1) {
-        container.scrollBy({ left: step, behavior: 'smooth' });
-    }
-};
-
-// 4. ADMIN & AUTENTICAÇÃO
-window.checkAdminAccess = function() {
-    isAdminLoggedIn ? toggleAdminModal() : document.getElementById('loginModal').classList.remove('hidden');
-}
-
-window.handleLogin = function(e) {
-    e.preventDefault();
-    if (document.getElementById('adminEmail').value === ADMIN_CREDENTIALS.email && 
-        document.getElementById('adminPassword').value === ADMIN_CREDENTIALS.password) {
-        isAdminLoggedIn = true;
-        closeLoginModal();
-        toggleAdminModal();
-        sessionStorage.setItem('adminSession', 'true');
-        alert('✅ Acesso autorizado!');
-    } else {
-        alert('❌ Credenciais inválidas!');
-    }
-}
-
-window.closeLoginModal = function() { document.getElementById('loginModal').classList.add('hidden'); }
-window.logout = function() { isAdminLoggedIn = false; sessionStorage.removeItem('adminSession'); toggleAdminModal(); }
-
-window.switchTab = function(tab) {
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-    document.getElementById('content-' + tab).classList.remove('hidden');
-    
-    document.querySelectorAll('[id^="tab-"]').forEach(el => {
-        el.classList.remove('tab-active');
-        el.classList.add('tab-inactive');
-    });
-    document.getElementById('tab-' + tab).classList.remove('tab-inactive');
-    document.getElementById('tab-' + tab).classList.add('tab-active');
-    
-    if (tab === 'consultorias') updateConsultingDashboard();
-    if (tab === 'financeiro') updateFinancialDashboard();
-}
-
-// 5. CARRINHO DE COMPRAS
-window.addToCart = function(id) {
-    cart.push(products.find(p => p.id === id));
-    updateCartUI();
-    alert('✅ Adicionado ao carrinho!');
-}
-
-window.removeFromCart = function(i) { cart.splice(i, 1); updateCartUI(); }
-
-function updateCartUI() {
-    document.getElementById('cartCount').textContent = cart.length;
-    const items = document.getElementById('cartItems');
-    const total = document.getElementById('cartTotal');
-    
-    if (cart.length === 0) {
-        items.innerHTML = '<p class="text-slate-500">Carrinho vazio</p>';
-        total.textContent = 'R$ 0,00';
-    } else {
-        items.innerHTML = cart.map((p, i) => `
-            <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                <div><p class="font-bold text-sm">${p.name}</p><p class="text-xs text-amber-600">${p.price}</p></div>
-                <button onclick="removeFromCart(${i})" class="text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-            </div>
-        `).join('');
-        total.textContent = 'R$ ' + cart.reduce((s, p) => s + parseFloat(p.price.replace('R$ ', '').replace('.', '').replace(',', '.')), 0).toFixed(2).replace('.', ',');
-    }
-    if (window.lucide) lucide.createIcons();
-}
-
-window.toggleCart = function() {
-    const modal = document.getElementById('cartModal');
-    modal.classList.contains('hidden') ? (modal.classList.remove('hidden'), updateCartUI()) : modal.classList.add('hidden');
-}
-
-window.checkoutCart = function() {
-    if (cart.length === 0) { alert('Carrinho vazio!'); return; }
-    const total = cart.reduce((s, p) => s + parseFloat(p.price.replace('R$ ', '').replace('.', '').replace(',', '.')), 0);
-    const msg = `🛒 *NOVO PEDIDO*\n\nItens: ${cart.length}\n${cart.map(p => `- ${p.name} (${p.price})`).join('\n')}\n\n*Total: R$ ${total.toFixed(2).replace('.', ',')}*`;
-    window.open(`https://wa.me/5581989492224?text=${encodeURIComponent(msg)}`, '_blank');
-}
-
-// 6. PRODUTOS
-function renderProducts() {
-    const c = document.getElementById('carouselContainer');
-    if (!c) return;
-
-    c.innerHTML = products.map(p => `
-        <div class="flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-white border-2 border-slate-200 rounded-2xl overflow-hidden shadow-lg snap-start flex flex-col">
-            <div class="h-72 bg-slate-100"><img src="${p.img}" class="w-full h-full object-cover hover:scale-110 transition duration-700"></div>
-            <div class="p-6 flex-grow">
-                <h3 class="font-serif font-bold text-slate-900 text-xl mb-2">${p.name}</h3>
-                <p class="text-xs text-slate-500 mb-4">${p.desc}</p>
-                <p class="text-amber-600 font-bold text-2xl">${p.price}</p>
-            </div>
-            <div class="p-6 pt-0 flex gap-2">
-                <button onclick="addToCart(${p.id})" class="flex-1 py-3 bg-slate-900 text-white text-sm font-bold rounded-xl flex items-center justify-center gap-2"><i data-lucide="shopping-cart" class="w-4 h-4"></i> Carrinho</button>
-                <button onclick="openOrderModal(${p.id})" class="flex-1 gradient-gold text-slate-900 text-sm font-bold rounded-xl flex items-center justify-center gap-2"><i data-lucide="zap" class="w-4 h-4"></i> Comprar</button>
-            </div>
-        </div>
-    `).join('') + `
-        <div class="flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-gradient-to-br from-slate-900 to-blue-950 text-white rounded-2xl shadow-xl snap-start flex flex-col items-center justify-center p-10 text-center border-2 border-dashed border-amber-400/40">
-            <div class="p-5 gradient-gold rounded-full mb-5"><i data-lucide="grid-3x3" class="w-10 h-10 text-slate-900"></i></div>
-            <h3 class="font-serif font-bold text-2xl mb-3">Catálogo Completo</h3>
-            <button class="px-8 py-3 gradient-gold text-slate-900 font-bold text-sm rounded-xl shadow-gold">Ver Coleção</button>
-        </div>
-    `;
-    if (window.lucide) lucide.createIcons();
-    renderAdminProductsList();
-}
-
-function renderAdminProductsList() {
-    const el = document.getElementById('adminProductsList');
-    if (!el) return;
-
-    el.innerHTML = products.map(p => `
-        <div class="flex justify-between items-center p-4 bg-slate-50 border-2 border-slate-200 rounded-xl mb-2">
-            <div class="truncate flex-1"><p class="font-bold text-sm">${p.name}</p><p class="text-amber-600 font-bold">${p.price}</p></div>
-            <button onclick="deleteProduct(${p.id})" class="p-2 text-red-500 hover:bg-red-50 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-        </div>
-    `).join('');
-    if (window.lucide) lucide.createIcons();
-}
-
-window.handleAddProduct = async function(e) {
-    e.preventDefault();
-    const newProduct = {
-        id: Date.now(),
-        name: document.getElementById('adminProdName').value,
-        price: document.getElementById('adminProdPrice').value,
-        img: document.getElementById('adminProdImg').value || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80',
-        desc: document.getElementById('adminProdDesc').value || 'Produto exclusivo'
-    };
-
-    products.push(newProduct);
-    const salvo = await salvarNoFirebase();
-
-    if (salvo) {
-        document.getElementById('adminProdName').value = '';
-        document.getElementById('adminProdPrice').value = '';
-        document.getElementById('adminProdImg').value = '';
-        document.getElementById('adminProdDesc').value = '';
-        alert('✅ Produto adicionado e sincronizado com o Firebase!');
-    }
-}
-
-window.deleteProduct = async function(id) { 
-    if (confirm('Excluir este produto?')) { 
-        products = products.filter(p => p.id !== id); 
-        await salvarNoFirebase(); 
-        alert('🗑️ Produto excluído da nuvem!');
-    } 
-}
-
-window.openOrderModal = function(id) {
-    // 1. Converte o ID para garantir a comparação correta (seja string ou número)
-    const p = products.find(x => String(x.id) === String(id));
-    
-    if (!p) {
-        console.error(`Produto com ID ${id} não foi encontrado.`);
-        alert('❌ Produto não encontrado!');
-        return;
-    }
-
-    // 2. Monta uma mensagem mais completa e estruturada
-    const msg = `🛒 *SOLICITAÇÃO DE COMPRA / INFORMAÇÕES*\n\n` +
-                `*Produto:* ${p.name}\n` +
-                `*Valor:* ${p.price}\n` +
-                (p.desc ? `*Detalhes:* ${p.desc}\n` : '') +
-                `\nOlá! Gostaria de prosseguir com a compra deste item.`;
-
-    // 3. Sanitiza o número de telefone garantindo apenas dígitos
-    const whatsappPhone = "5581989492224".replace(/\D/g, '');
-
-    // 4. Abre o WhatsApp em uma nova aba/aplicativo
-    window.open(`https://wa.me/${whatsappPhone}?text=${encodeURIComponent(msg)}`, '_blank');
-}
-
-// 7. CONSULTORIAS E AGENDAMENTOS (CORRIGIDOS E OTIMIZADOS)
-function renderConsultings() {
-    const el = document.getElementById('consultingContainer');
-    if (!el) return;
-
-    el.innerHTML = consultings.map(i => `
-        <div class="bg-slate-800/70 backdrop-blur border border-slate-700/60 p-8 rounded-2xl flex flex-col justify-between card-hover">
-            <div>
-                <div class="w-14 h-14 gradient-gold rounded-xl flex items-center justify-center mb-6 shadow-gold"><i data-lucide="${i.icon}" class="w-7 h-7 text-slate-900"></i></div>
-                <h3 class="font-serif text-2xl font-bold mb-4 text-white">${i.title}</h3>
-                <p class="text-slate-400 text-sm mb-6">${i.desc}</p>
-            </div>
-            <button onclick="openConsultingModal('${i.title}', '${i.typeKey}')" class="w-full gradient-gold text-slate-900 font-bold rounded-xl py-4 hover:shadow-gold transition">Agendar Consultoria</button>
-        </div>
-    `).join('');
-    if (window.lucide) lucide.createIcons();
-}
-
-window.openConsultingModal = function(title, typeKey) {
-    const today = new Date().toISOString().split('T')[0];
-    const dateInput = document.getElementById('consultingDate');
-    if (dateInput) dateInput.setAttribute('min', today);
-
-    document.getElementById('consultingTypeDisplay').textContent = title;
-    document.getElementById('consultingType').value = typeKey || 'Financeira';
-    document.getElementById('consultingModal').classList.remove('hidden');
-}
-
-window.closeConsultingModal = function() {
-    const modal = document.getElementById('consultingModal');
-    const form = document.getElementById('consultingForm');
-    if (modal) modal.classList.add('hidden');
-    if (form) form.reset();
-}
-
-window.handleConsultingSubmit = async function(e) {
-    e.preventDefault();
-    
-    const company = document.getElementById('consultingCompany').value.trim();
-    const phone = document.getElementById('consultingPhone').value.trim();
-    const email = document.getElementById('consultingEmail').value.trim();
-    const dateRaw = document.getElementById('consultingDate').value; // AAAA-MM-DD
-    const time = document.getElementById('consultingTime').value;
-    const obs = document.getElementById('consultingObs').value.trim();
-    const typeKey = document.getElementById('consultingType').value;
-    const title = document.getElementById('consultingTypeDisplay').textContent;
-
-    // Formata a data para exibições e WhatsApp
-    const dateFormatted = dateRaw ? dateRaw.split('-').reverse().join('/') : dateRaw;
-
-    const item = consultings.find(c => c.typeKey === typeKey) || { valor: 2500 };
-    
-    // Garante valor numérico válido
-    const numericValue = typeof item.valor === 'number' 
-        ? item.valor 
-        : parseFloat(String(item.valor).replace(/[^\d.-]/g, '')) || 0;
-
-    const requestData = {
-        id: Date.now(),
-        company,
-        phone,
-        email,
-        dateRaw, // Guardado no formato ISO para leituras de data corretas
-        date: dateFormatted,
-        time,
-        obs,
-        type: typeKey,
-        title,
-        valor: numericValue
-    };
-
-    consultingRequests.push(requestData);
-
-    // Atualiza os painéis em tempo real
-    updateConsultingDashboard();
-    updateFinancialDashboard();
-
-    const msg = `📅 *SOLICITAÇÃO DE AGENDAMENTO*\n\n` +
-                `*Serviço:* ${title}\n` +
-                `*Cliente/Empresa:* ${company}\n` +
-                `*WhatsApp:* ${phone}\n` +
-                `*E-mail:* ${email}\n` +
-                `*Data Desejada:* ${dateFormatted}\n` +
-                `*Horário:* ${time}\n` +
-                (obs ? `*Observações:* ${obs}` : '');
-
-    closeConsultingModal();
-    window.open(`https://wa.me/5581989492224?text=${encodeURIComponent(msg)}`, '_blank');
-}
-
-function updateConsultingDashboard() {
-    document.getElementById('totalConsultorias').textContent = consultingRequests.length;
-    
-    const totalReceitaNum = consultingRequests.reduce((s, r) => s + (Number(r.valor) || 0), 0);
-    document.getElementById('totalReceita').textContent = 'R$ ' + totalReceitaNum.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    
-    document.getElementById('totalClientes').textContent = new Set(consultingRequests.map(r => r.company)).size;
-    
-    const byType = { 
-        Financeira: { count: 0, revenue: 0 }, 
-        Administrativa: { count: 0, revenue: 0 }, 
-        Estrategico: { count: 0, revenue: 0 } 
-    };
-
-    consultingRequests.forEach(r => {
-        // Normaliza a busca para corresponder à chave do tipo
-        const matchKey = Object.keys(byType).find(k => k.toLowerCase() === r.type.toLowerCase()) || 'Financeira';
-        byType[matchKey].count++; 
-        byType[matchKey].revenue += (Number(r.valor) || 0); 
-    });
-    
-    if (document.getElementById('countFinanceira')) document.getElementById('countFinanceira').textContent = byType.Financeira.count;
-    if (document.getElementById('receitaFinanceira')) document.getElementById('receitaFinanceira').textContent = 'R$ ' + byType.Financeira.revenue.toFixed(2).replace('.', ',');
-    
-    if (document.getElementById('countAdministrativa')) document.getElementById('countAdministrativa').textContent = byType.Administrativa.count;
-    if (document.getElementById('receitaAdministrativa')) document.getElementById('receitaAdministrativa').textContent = 'R$ ' + byType.Administrativa.revenue.toFixed(2).replace('.', ',');
-    
-    if (document.getElementById('countEstrategico')) document.getElementById('countEstrategico').textContent = byType.Estrategico.count;
-    if (document.getElementById('receitaEstrategico')) document.getElementById('receitaEstrategico').textContent = 'R$ ' + byType.Estrategico.revenue.toFixed(2).replace('.', ',');
-    
-    const clients = {};
-    consultingRequests.forEach(r => {
-        if (!clients[r.company]) clients[r.company] = { count: 0, types: [] };
-        clients[r.company].count++;
-        if (!clients[r.company].types.includes(r.type)) clients[r.company].types.push(r.type);
-    });
-    
-    const clientsListEl = document.getElementById('consultingClientsList');
-    if (clientsListEl) {
-        clientsListEl.innerHTML = Object.entries(clients).map(([name, data]) => `
-            <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200">
-                <p class="font-bold text-slate-800">${name}</p>
-                <p class="text-xs text-slate-500">${data.count} solicitação(ões) • ${data.types.join(', ')}</p>
-            </div>
-        `).join('') || '<p class="text-slate-400 text-sm">Nenhuma solicitação</p>';
-    }
-}
-
-function updateFinancialDashboard() {
-    const byClient = {};
-    const byMonth = {};
-    
-    consultingRequests.forEach(r => {
-        const val = parseFloat(r.valor) || 0;
-        if (!byClient[r.company]) byClient[r.company] = 0;
-        byClient[r.company] += val;
-        
-        // Utiliza a data bruta ISO (AAAA-MM-DD) para evitar erros de leitura
-        const dateObj = r.dateRaw ? new Date(r.dateRaw + 'T00:00:00') : new Date();
-        const month = dateObj.toLocaleString('pt-BR', { month: '2-digit', year: 'numeric' });
-        
-        if (!byMonth[month]) byMonth[month] = 0;
-        byMonth[month] += val;
-    });
-    
-    const ganhosClienteEl = document.getElementById('ganhosPorCliente');
-    if (ganhosClienteEl) {
-        ganhosClienteEl.innerHTML = Object.entries(byClient)
-            .sort((a, b) => b[1] - a[1])
-            .map(([name, val]) => `
-                <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200 flex justify-between items-center">
-                    <span class="font-bold text-slate-800">${name}</span>
-                    <span class="text-amber-600 font-bold">R$ ${val.toFixed(2).replace('.', ',')}</span>
+            c.innerHTML = products.map(p => `
+                <div class="flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-white border-2 border-slate-200 rounded-2xl overflow-hidden shadow-lg snap-start flex flex-col">
+                    <div class="h-72 bg-slate-100"><img src="${p.img}" alt="${p.name}" class="w-full h-full object-cover hover:scale-110 transition duration-700"></div>
+                    <div class="p-6 flex-grow flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-serif font-bold text-slate-900 text-xl mb-2">${p.name}</h3>
+                            <p class="text-xs text-slate-500 mb-4">${p.desc}</p>
+                        </div>
+                        <p class="text-amber-600 font-bold text-2xl">${p.price}</p>
+                    </div>
+                    <div class="p-6 pt-0 flex gap-2">
+                        <button onclick="addToCart(${p.id})" class="flex-1 py-3 bg-slate-900 text-white text-sm font-bold rounded-xl flex items-center justify-center gap-2"><i data-lucide="shopping-cart" class="w-4 h-4"></i> Carrinho</button>
+                        <button onclick="openOrderModal(${p.id})" class="flex-1 gradient-gold text-slate-900 text-sm font-bold rounded-xl flex items-center justify-center gap-2"><i data-lucide="zap" class="w-4 h-4"></i> Comprar</button>
+                    </div>
                 </div>
-            `).join('') || '<p class="text-slate-400 text-sm">Sem dados</p>';
-    }
-    
-    const ganhosMesEl = document.getElementById('ganhosPorMes');
-    if (ganhosMesEl) {
-        ganhosMesEl.innerHTML = Object.entries(byMonth)
-            .sort()
-            .map(([month, val]) => `
-                <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200 flex justify-between items-center">
-                    <span class="font-bold text-slate-800">${month}</span>
-                    <span class="text-amber-600 font-bold">R$ ${val.toFixed(2).replace('.', ',')}</span>
+            `).join('') + `
+                <div class="flex-none w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-gradient-to-br from-slate-900 to-blue-950 text-white rounded-2xl shadow-xl snap-start flex flex-col items-center justify-center p-10 text-center border-2 border-dashed border-amber-400/40">
+                    <div class="p-5 gradient-gold rounded-full mb-5"><i data-lucide="grid-3x3" class="w-10 h-10 text-slate-900"></i></div>
+                    <h3 class="font-serif font-bold text-2xl mb-3">Catálogo Completo</h3>
+                    <button class="px-8 py-3 gradient-gold text-slate-900 font-bold text-sm rounded-xl shadow-gold">Ver Coleção</button>
                 </div>
-            `).join('') || '<p class="text-slate-400 text-sm">Sem dados</p>';
-    }
-}
+            `;
+            if (window.lucide) lucide.createIcons();
+            renderAdminProductsList();
+        }
 
-window.toggleAdminModal = function() { document.getElementById('adminModal')?.classList.toggle('hidden'); }
+        window.scrollCarousel = function(direction) {
+            const container = document.getElementById('carouselContainer');
+            if (!container) return;
+            const step = container.firstElementChild ? (container.firstElementChild.offsetWidth + 24) : 340;
+            container.scrollBy({ left: (direction === 'left' || direction === -1) ? -step : step, behavior: 'smooth' });
+        };
 
-// INICIALIZAÇÃO
-window.addEventListener('DOMContentLoaded', () => {
-    if (sessionStorage.getItem('adminSession') === 'true') isAdminLoggedIn = true;
-    if (typeof renderProducts === 'function') renderProducts();
-    renderConsultings();
-    updateConsultingDashboard();
-    updateFinancialDashboard();
-    if (window.lucide) lucide.createIcons();
-});
-<script src="app.js"></script>
+        // GESTÃO DE CARRINHO
+        window.addToCart = function(id) {
+            const prod = products.find(p => p.id === id);
+            if (prod) {
+                cart.push(prod);
+                updateCartUI();
+                alert('✅ Adicionado ao carrinho!');
+            }
+        };
+
+        window.removeFromCart = function(i) { cart.splice(i, 1); updateCartUI(); };
+
+        function updateCartUI() {
+            const countEl = document.getElementById('cartCount');
+            if (countEl) countEl.textContent = cart.length;
+
+            const items = document.getElementById('cartItems');
+            const total = document.getElementById('cartTotal');
+            if (!items || !total) return;
+
+            if (cart.length === 0) {
+                items.innerHTML = '<p class="text-slate-500">Carrinho vazio</p>';
+                total.textContent = 'R$ 0,00';
+            } else {
+                items.innerHTML = cart.map((p, i) => `
+                    <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                        <div><p class="font-bold text-sm text-slate-900">${p.name}</p><p class="text-xs text-amber-600">${p.price}</p></div>
+                        <button onclick="removeFromCart(${i})" class="text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                `).join('');
+                
+                const sum = cart.reduce((s, p) => s + (parseFloat(p.price.replace('R$ ', '').replace('.', '').replace(',', '.')) || 0), 0);
+                total.textContent = 'R$ ' + sum.toFixed(2).replace('.', ',');
+            }
+            if (window.lucide) lucide.createIcons();
+        }
+
+        window.toggleCart = function() {
+            const modal = document.getElementById('cartModal');
+            if (!modal) return;
+            modal.classList.contains('hidden') ? (modal.classList.remove('hidden'), updateCartUI()) : modal.classList.add('hidden');
+        };
+
+        window.checkoutCart = function() {
+            if (cart.length === 0) return alert('Carrinho vazio!');
+            const sum = cart.reduce((s, p) => s + (parseFloat(p.price.replace('R$ ', '').replace('.', '').replace(',', '.')) || 0), 0);
+            const msg = `🛒 *NOVO PEDIDO*\n\nItens: ${cart.length}\n${cart.map(p => `- ${p.name} (${p.price})`).join('\n')}\n\n*Total: R$ ${sum.toFixed(2).replace('.', ',')}*`;
+            window.open(`https://wa.me/5581989492224?text=${encodeURIComponent(msg)}`, '_blank');
+        };
+
+        window.openOrderModal = function(id) {
+            const p = products.find(x => String(x.id) === String(id));
+            if (!p) return alert('❌ Produto não encontrado!');
+
+            const msg = `🛒 *SOLICITAÇÃO DE COMPRA*\n\n*Produto:* ${p.name}\n*Valor:* ${p.price}\n` + (p.desc ? `*Detalhes:* ${p.desc}\n` : '') + `\nOlá! Gostaria de prosseguir com a compra deste item.`;
+            window.open(`https://wa.me/5581989492224?text=${encodeURIComponent(msg)}`, '_blank');
+        };
+
+        // CONSULTORIAS E AGENDAMENTOS
+        function renderConsultings() {
+            const el = document.getElementById('consultingContainer');
+            if (!el) return;
+
+            el.innerHTML = consultings.map(i => `
+                <div class="bg-slate-800/70 backdrop-blur border border-slate-700/60 p-8 rounded-2xl flex flex-col justify-between card-hover">
+                    <div>
+                        <div class="w-14 h-14 gradient-gold rounded-xl flex items-center justify-center mb-6 shadow-gold"><i data-lucide="${i.icon}" class="w-7 h-7 text-slate-900"></i></div>
+                        <h3 class="font-serif text-2xl font-bold mb-4 text-white">${i.title}</h3>
+                        <p class="text-slate-400 text-sm mb-6">${i.desc}</p>
+                    </div>
+                    <button onclick="openConsultingModal('${i.title}', '${i.typeKey}')" class="w-full gradient-gold text-slate-900 font-bold rounded-xl py-4 hover:shadow-gold transition">Agendar Consultoria</button>
+                </div>
+            `).join('');
+            if (window.lucide) lucide.createIcons();
+        }
+
+        window.openConsultingModal = function(title, typeKey) {
+            const today = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('consultingDate');
+            if (dateInput) dateInput.setAttribute('min', today);
+
+            document.getElementById('consultingTypeDisplay').textContent = title;
+            document.getElementById('consultingType').value = typeKey || 'Financeira';
+            document.getElementById('consultingModal').classList.remove('hidden');
+        };
+
+        window.closeConsultingModal = function() {
+            document.getElementById('consultingModal')?.classList.add('hidden');
+            document.getElementById('consultingForm')?.reset();
+        };
+
+        window.handleConsultingSubmit = function(e) {
+            e.preventDefault();
+            
+            const company = document.getElementById('consultingCompany').value.trim();
+            const phone = document.getElementById('consultingPhone').value.trim();
+            const email = document.getElementById('consultingEmail').value.trim();
+            const dateRaw = document.getElementById('consultingDate').value;
+            const time = document.getElementById('consultingTime').value;
+            const obs = document.getElementById('consultingObs').value.trim();
+            const typeKey = document.getElementById('consultingType').value;
+            const title = document.getElementById('consultingTypeDisplay').textContent;
+
+            const dateFormatted = dateRaw ? dateRaw.split('-').reverse().join('/') : dateRaw;
+            const item = consultings.find(c => c.typeKey === typeKey) || { valor: 2500 };
+            const numericValue = typeof item.valor === 'number' ? item.valor : parseFloat(String(item.valor).replace(/[^\d.-]/g, '')) || 0;
+
+            consultingRequests.push({
+                id: Date.now(), company, phone, email, dateRaw, date: dateFormatted, time, obs, type: typeKey, title, valor: numericValue
+            });
+
+            updateConsultingDashboard();
+            updateFinancialDashboard();
+
+            const msg = `📅 *SOLICITAÇÃO DE AGENDAMENTO*\n\n*Serviço:* ${title}\n*Cliente/Empresa:* ${company}\n*WhatsApp:* ${phone}\n*E-mail:* ${email}\n*Data Desejada:* ${dateFormatted}\n*Horário:* ${time}\n` + (obs ? `*Observações:* ${obs}` : '');
+
+            closeConsultingModal();
+            window.open(`https://wa.me/5581989492224?text=${encodeURIComponent(msg)}`, '_blank');
+        };
+
+        // ADMIN E METRICAS
+        window.checkAdminAccess = function() {
+            isAdminLoggedIn ? toggleAdminModal() : document.getElementById('loginModal').classList.remove('hidden');
+        };
+
+        window.handleLogin = function(e) {
+            e.preventDefault();
+            if (document.getElementById('adminEmail').value === ADMIN_CREDENTIALS.email && 
+                document.getElementById('adminPassword').value === ADMIN_CREDENTIALS.password) {
+                isAdminLoggedIn = true;
+                closeLoginModal();
+                toggleAdminModal();
+                sessionStorage.setItem('adminSession', 'true');
+            } else {
+                alert('❌ Credenciais inválidas!');
+            }
+        };
+
+        window.closeLoginModal = function() { document.getElementById('loginModal').classList.add('hidden'); };
+        window.openNavigationModal = function() { document.getElementById('navModal').classList.remove('hidden'); };
+        window.closeNavigationModal = function() { document.getElementById('navModal').classList.add('hidden'); };
+        window.toggleAdminModal = function() { document.getElementById('adminModal')?.classList.toggle('hidden'); };
+        window.logout = function() { isAdminLoggedIn = false; sessionStorage.removeItem('adminSession'); toggleAdminModal(); };
+
+        window.switchTab = function(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('content-' + tab)?.classList.remove('hidden');
+            
+            document.querySelectorAll('[id^="tab-"]').forEach(el => {
+                el.classList.remove('tab-active');
+                el.classList.add('tab-inactive');
+            });
+            document.getElementById('tab-' + tab)?.classList.remove('tab-inactive');
+            document.getElementById('tab-' + tab)?.classList.add('tab-active');
+            
+            if (tab === 'consultorias') updateConsultingDashboard();
+            if (tab === 'financeiro') updateFinancialDashboard();
+        };
+
+        function renderAdminProductsList() {
+            const el = document.getElementById('adminProductsList');
+            if (!el) return;
+
+            el.innerHTML = products.map(p => `
+                <div class="flex justify-between items-center p-4 bg-slate-50 border-2 border-slate-200 rounded-xl mb-2">
+                    <div class="truncate flex-1"><p class="font-bold text-sm text-slate-900">${p.name}</p><p class="text-amber-600 font-bold">${p.price}</p></div>
+                    <button onclick="deleteProduct(${p.id})" class="p-2 text-red-500 hover:bg-red-50 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+            `).join('');
+            if (window.lucide) lucide.createIcons();
+        }
+
+        window.handleAddProduct = async function(e) {
+            e.preventDefault();
+            const newProd = {
+                id: Date.now(),
+                name: document.getElementById('adminProdName').value,
+                price: document.getElementById('adminProdPrice').value,
+                img: document.getElementById('adminProdImg').value || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80',
+                desc: document.getElementById('adminProdDesc').value || 'Produto exclusivo'
+            };
+
+            products.push(newProd);
+            if (await salvarNoFirebase()) {
+                document.getElementById('adminProdName').value = '';
+                document.getElementById('adminProdPrice').value = '';
+                document.getElementById('adminProdImg').value = '';
+                document.getElementById('adminProdDesc').value = '';
+                alert('✅ Produto adicionado com sucesso!');
+            }
+        };
+
+        window.deleteProduct = async function(id) { 
+            if (confirm('Excluir este produto?')) { 
+                products = products.filter(p => p.id !== id); 
+                await salvarNoFirebase(); 
+            } 
+        };
+
+        function updateConsultingDashboard() {
+            const tot = document.getElementById('totalConsultorias');
+            if (tot) tot.textContent = consultingRequests.length;
+            
+            const totalReceitaNum = consultingRequests.reduce((s, r) => s + (Number(r.valor) || 0), 0);
+            const rec = document.getElementById('totalReceita');
+            if (rec) rec.textContent = 'R$ ' + totalReceitaNum.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            
+            const cli = document.getElementById('totalClientes');
+            if (cli) cli.textContent = new Set(consultingRequests.map(r => r.company)).size;
+            
+            const byType = { Financeira: { count: 0, revenue: 0 }, Administrativa: { count: 0, revenue: 0 }, Estrategico: { count: 0, revenue: 0 } };
+
+            consultingRequests.forEach(r => {
+                const matchKey = Object.keys(byType).find(k => k.toLowerCase() === r.type.toLowerCase()) || 'Financeira';
+                byType[matchKey].count++; 
+                byType[matchKey].revenue += (Number(r.valor) || 0); 
+            });
+            
+            if (document.getElementById('countFinanceira')) document.getElementById('countFinanceira').textContent = byType.Financeira.count;
+            if (document.getElementById('receitaFinanceira')) document.getElementById('receitaFinanceira').textContent = 'R$ ' + byType.Financeira.revenue.toFixed(2).replace('.', ',');
+            if (document.getElementById('countAdministrativa')) document.getElementById('countAdministrativa').textContent = byType.Administrativa.count;
+            if (document.getElementById('receitaAdministrativa')) document.getElementById('receitaAdministrativa').textContent = 'R$ ' + byType.Administrativa.revenue.toFixed(2).replace('.', ',');
+            if (document.getElementById('countEstrategico')) document.getElementById('countEstrategico').textContent = byType.Estrategico.count;
+            if (document.getElementById('receitaEstrategico')) document.getElementById('receitaEstrategico').textContent = 'R$ ' + byType.Estrategico.revenue.toFixed(2).replace('.', ',');
+            
+            const clients = {};
+            consultingRequests.forEach(r => {
+                if (!clients[r.company]) clients[r.company] = { count: 0, types: [] };
+                clients[r.company].count++;
+                if (!clients[r.company].types.includes(r.type)) clients[r.company].types.push(r.type);
+            });
+            
+            const clientsListEl = document.getElementById('consultingClientsList');
+            if (clientsListEl) {
+                clientsListEl.innerHTML = Object.entries(clients).map(([name, data]) => `
+                    <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200">
+                        <p class="font-bold text-slate-800">${name}</p>
+                        <p class="text-xs text-slate-500">${data.count} solicitação(ões) • ${data.types.join(', ')}</p>
+                    </div>
+                `).join('') || '<p class="text-slate-400 text-sm">Nenhuma solicitação</p>';
+            }
+        }
+
+        function updateFinancialDashboard() {
+            const byClient = {};
+            const byMonth = {};
+            
+            consultingRequests.forEach(r => {
+                const val = parseFloat(r.valor) || 0;
+                if (!byClient[r.company]) byClient[r.company] = 0;
+                byClient[r.company] += val;
+                
+                const dateObj = r.dateRaw ? new Date(r.dateRaw + 'T00:00:00') : new Date();
+                const month = dateObj.toLocaleString('pt-BR', { month: '2-digit', year: 'numeric' });
+                
+                if (!byMonth[month]) byMonth[month] = 0;
+                byMonth[month] += val;
+            });
+            
+            const ganhosClienteEl = document.getElementById('ganhosPorCliente');
+            if (ganhosClienteEl) {
+                ganhosClienteEl.innerHTML = Object.entries(byClient)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([name, val]) => `
+                        <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200 flex justify-between items-center">
+                            <span class="font-bold text-slate-800">${name}</span>
+                            <span class="text-amber-600 font-bold">R$ ${val.toFixed(2).replace('.', ',')}</span>
+                        </div>
+                    `).join('') || '<p class="text-slate-400 text-sm">Sem dados</p>';
+            }
+            
+            const ganhosMesEl = document.getElementById('ganhosPorMes');
+            if (ganhosMesEl) {
+                ganhosMesEl.innerHTML = Object.entries(byMonth)
+                    .sort()
+                    .map(([month, val]) => `
+                        <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200 flex justify-between items-center">
+                            <span class="font-bold text-slate-800">${month}</span>
+                            <span class="text-amber-600 font-bold">R$ ${val.toFixed(2).replace('.', ',')}</span>
+                        </div>
+                    `).join('') || '<p class="text-slate-400 text-sm">Sem dados</p>';
+            }
+        }
+
+        // INICIALIZAÇÃO ÚNICA DA PÁGINA
+        window.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem('adminSession') === 'true') isAdminLoggedIn = true;
+            renderProducts();
+            renderConsultings();
+            updateConsultingDashboard();
+            updateFinancialDashboard();
+            
+            document.getElementById('consultingModal')?.addEventListener('click', function(e) {
+                if (e.target === this) closeConsultingModal();
+            });
+
+            if (window.lucide) lucide.createIcons();
+        });
+    </script>
 </body>
 </html>
