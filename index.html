@@ -88,28 +88,28 @@
     </header>
 
     <main class="flex-grow">
-        <!-- LOJA VIRTUAL -->
-        <section id="loja" class="py-16 bg-gradient-to-b from-white to-slate-100 border-b border-slate-200">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-end mb-10">
-                    <div>
-                        <span class="text-amber-600 font-bold uppercase text-xs tracking-[0.2em]">Coleção Exclusiva</span>
-                        <h2 class="font-serif text-3xl sm:text-4xl font-bold text-slate-900 mt-2">Loja Premium</h2>
-                        <div class="w-20 h-1 gradient-gold rounded mt-3"></div>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="scrollCarousel(-1)" class="p-3 rounded-full border-2 border-slate-300 hover:border-amber-500 text-slate-600 hover:text-amber-600 transition bg-white shadow-md hover:shadow-lg">
-                            <i data-lucide="chevron-left" class="w-5 h-5"></i>
-                        </button>
-                        <button onclick="scrollCarousel(1)" class="p-3 rounded-full border-2 border-slate-300 hover:border-amber-500 text-slate-600 hover:text-amber-600 transition bg-white shadow-md hover:shadow-lg">
-                            <i data-lucide="chevron-right" class="w-5 h-5"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div id="carouselContainer" class="flex gap-6 overflow-x-auto pb-6 scroll-smooth snap-x"></div>
+<!-- LOJA VIRTUAL -->
+<section id="loja" class="py-16 bg-gradient-to-b from-white to-slate-100 border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-end mb-10">
+            <div>
+                <span class="text-amber-600 font-bold uppercase text-xs tracking-[0.2em]">Coleção Exclusiva</span>
+                <h2 class="font-serif text-3xl sm:text-4xl font-bold text-slate-900 mt-2">Loja Premium</h2>
+                <div class="w-20 h-1 gradient-gold rounded mt-3"></div>
             </div>
-        </section>
+            <div class="flex gap-2">
+                <button type="button" onclick="scrollCarousel('left')" class="p-3 rounded-full border-2 border-slate-300 hover:border-amber-500 text-slate-600 hover:text-amber-600 transition bg-white shadow-md hover:shadow-lg cursor-pointer">
+                    <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                </button>
+                <button type="button" onclick="scrollCarousel('right')" class="p-3 rounded-full border-2 border-slate-300 hover:border-amber-500 text-slate-600 hover:text-amber-600 transition bg-white shadow-md hover:shadow-lg cursor-pointer">
+                    <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="carouselContainer" class="flex gap-6 overflow-x-auto pb-6 scroll-smooth snap-x snap-mandatory no-scrollbar"></div>
+    </div>
+</section>
 
         <!-- CONSULTORIA -->
         <section id="consultoria" class="py-20 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white relative overflow-hidden">
