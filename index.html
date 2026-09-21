@@ -452,17 +452,30 @@
                         <div>
                             <h4 class="font-bold text-lg mb-4 flex items-center gap-2">
                                 <i data-lucide="circle-plus" class="w-5 h-5 text-amber-600"></i>
-                                Adicionar Produto
-                            </h4>
-                            <form onsubmit="handleAddProduct(event)" class="space-y-3">
-                                <input type="text" id="adminProdName" required placeholder="Nome do Produto" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500">
-                                <input type="text" id="adminProdPrice" required placeholder="Preço (R$ 1.850,00)" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500">
-                                <input type="url" id="adminProdImg" placeholder="URL da Imagem" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500">
-                                <textarea id="adminProdDesc" rows="3" placeholder="Descrição" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500"></textarea>
-                                <button type="submit" class="w-full gradient-gold text-slate-900 py-3 rounded-xl font-bold hover:shadow-gold transition">
-                                    Adicionar Produto
-                                </button>
-                            </form>
+ <h4 class="font-bold text-slate-900 text-lg mb-3">Adicionar Produto</h4>
+<form onsubmit="handleAddProduct(event)" class="space-y-3">
+    <input type="text" id="adminProdName" required placeholder="Nome do Produto" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500">
+    <input type="text" id="adminProdPrice" required placeholder="Preço (R$ 1.850,00)" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500">
+    
+    <!-- CAMPO DE SELEÇÃO DE CATEGORIA -->
+    <select id="adminProdCategory" required class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500 bg-white text-slate-700">
+        <option value="" disabled selected>Selecione a Categoria</option>
+        <option value="roupas-masculinas">Roupas Masculinas</option>
+        <option value="roupas-femininas">Roupas Femininas</option>
+        <option value="acessorios-masculinos">Acessórios Masculinos</option>
+        <option value="acessorios-femininos">Acessórios Femininos</option>
+        <option value="sapatos-masculinos">Sapatos Masculinos</option>
+        <option value="sapatos-femininos">Sapatos Femininos</option>
+        <option value="aparelhos">Aparelhos</option>
+    </select>
+
+    <input type="url" id="adminProdImg" placeholder="URL da Imagem" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500">
+    <textarea id="adminProdDesc" rows="3" placeholder="Descrição" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500"></textarea>
+    
+    <button type="submit" class="w-full gradient-gold text-slate-900 py-3 rounded-xl font-bold hover:shadow-gold transition cursor-pointer">
+        Adicionar Produto
+    </button>
+</form>
                         </div>
                         
                         <div>
@@ -923,27 +936,36 @@
             if (window.lucide) lucide.createIcons();
         }
 
-        window.handleAddProduct = async function(e) {
-            e.preventDefault();
-            const newProd = {
-                id: Date.now(),
-                name: document.getElementById('adminProdName').value,
-                price: document.getElementById('adminProdPrice').value,
-                category: document.getElementById('adminProdCategory')?.value || 'todas',
-                img: document.getElementById('adminProdImg').value || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80',
-                desc: document.getElementById('adminProdDesc').value || 'Produto exclusivo'
-            };
+window.handleAddProduct = async function(e) {
+    e.preventDefault();
 
-            products.push(newProd);
-            if (await salvarNoFirebase()) {
-                document.getElementById('adminProdName').value = '';
-                document.getElementById('adminProdPrice').value = '';
-                document.getElementById('adminProdImg').value = '';
-                document.getElementById('adminProdDesc').value = '';
-                if(document.getElementById('adminProdCategory')) document.getElementById('adminProdCategory').value = 'todas';
-                alert('✅ Produto adicionado com sucesso!');
-            }
-        };
+    // Captura os valores do formulário incluindo a nova categoria
+    const categorySelect = document.getElementById('adminProdCategory');
+    const selectedCategory = categorySelect ? categorySelect.value : 'todas';
+
+    const newProd = {
+        id: Date.now(),
+        name: document.getElementById('adminProdName').value,
+        price: document.getElementById('adminProdPrice').value,
+        category: selectedCategory, // <--- Categoria capturada do formulário
+        img: document.getElementById('adminProdImg').value || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80',
+        desc: document.getElementById('adminProdDesc').value || 'Produto exclusivo'
+    };
+
+    products.push(newProd);
+
+    // Salva na nuvem (Firestore)
+    if (await salvarNoFirebase()) {
+        // Limpa os campos do formulário
+        document.getElementById('adminProdName').value = '';
+        document.getElementById('adminProdPrice').value = '';
+        document.getElementById('adminProdImg').value = '';
+        document.getElementById('adminProdDesc').value = '';
+        if (categorySelect) categorySelect.selectedIndex = 0;
+
+        alert('✅ Produto adicionado e sincronizado na nuvem com sucesso!');
+    }
+};
 
         window.deleteProduct = async function(id) { 
             if (confirm('Excluir este produto?')) { 
