@@ -67,30 +67,42 @@
     </div>
 
     <!-- CABEÇALHO -->
-    <header class="bg-gradient-to-r from-blue-950 via-slate-900 to-blue-950 text-white shadow-2xl sticky top-0 z-40 border-b border-amber-500/20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-24 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-14 h-14 gradient-gold rounded-lg flex items-center justify-center text-slate-900 font-serif font-bold text-lg shadow-gold border-2 border-amber-300/50">
-                    L&A
-                </div>
-            </div>
+<header class="bg-gradient-to-r from-blue-950 via-slate-900 to-blue-950 text-white shadow-2xl sticky top-0 z-40 border-b border-amber-500/20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-24 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-14 h-14 gradient-gold rounded-lg flex items-center justify-center text-slate-900 font-serif font-bold text-lg shadow-gold border-2 border-amber-300/50">
+        L&A
+      </div>
+    </div>
 
-            <div class="text-center">
-                <h1 class="font-serif text-2xl sm:text-3xl font-bold tracking-widest text-white">ROYAL ADVISORY</h1>
-                <p class="text-[10px] tracking-[0.3em] text-amber-400 uppercase">Excellence in Every Detail</p>
-            </div>
+    <div class="text-center">
+      <h1 class="font-serif text-2xl sm:text-3xl font-bold tracking-widest text-white">ROYAL ADVISORY</h1>
+      <p class="text-[10px] tracking-[0.3em] text-amber-400 uppercase">Excellence in Every Detail</p>
+    </div>
 
-            <div class="flex items-center gap-3">
-                <button onclick="toggleCart()" class="relative p-2.5 rounded-full text-amber-400 hover:bg-amber-400/10 transition border border-amber-400/30 hover:border-amber-400/60">
-                    <i data-lucide="shopping-cart" class="w-5 h-5"></i>
-                    <span id="cartCount" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">0</span>
-                </button>
-                <button onclick="openNavigationModal()" class="p-2.5 rounded-full text-amber-400 hover:bg-amber-400/10 transition border border-amber-400/30 hover:border-amber-400/60">
-                    <i data-lucide="compass" class="w-5 h-5"></i>
-                </button>
-            </div>
-        </div>
-    </header>
+    <div class="flex items-center gap-3">
+      <!-- Links de navegação -->
+      <a href="loja.html" class="hidden sm:block text-amber-400 hover:text-amber-300 transition text-sm font-medium border border-amber-400/30 hover:border-amber-400/60 px-3 py-1.5 rounded-full">
+        Loja
+      </a>
+      <a href="carrinho.html" class="hidden sm:block text-amber-400 hover:text-amber-300 transition text-sm font-medium border border-amber-400/30 hover:border-amber-400/60 px-3 py-1.5 rounded-full">
+        Carrinho
+      </a>
+      <a href="checkout.html" class="hidden sm:block text-amber-400 hover:text-amber-300 transition text-sm font-medium border border-amber-400/30 hover:border-amber-400/60 px-3 py-1.5 rounded-full">
+        Checkout
+      </a>
+
+      <!-- Botões que você já tem -->
+      <button onclick="toggleCart()" class="relative p-2.5 rounded-full text-amber-400 hover:bg-amber-400/10 transition border border-amber-400/30 hover:border-amber-400/60">
+        <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+        <span id="cartCount" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">0</span>
+      </button>
+      <button onclick="openNavigationModal()" class="p-2.5 rounded-full text-amber-400 hover:bg-amber-400/10 transition border border-amber-400/30 hover:border-amber-400/60">
+        <i data-lucide="compass" class="w-5 h-5"></i>
+      </button>
+    </div>
+  </div>
+</header>
         
     <main class="flex-grow">
         <!-- LOJA VIRTUAL -->
