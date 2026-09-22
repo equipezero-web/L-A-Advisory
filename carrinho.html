@@ -1,64 +1,170 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>Carrinho — L&A Advisory</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="manifest" href="manifest.json" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrinho - Royal Advisory</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-  <header>
-    <h1>L&A Advisory</h1>
-    <nav>
-      <a href="index.html">Início</a>
-      <a href="loja.html">Loja</a>
-      <a href="carrinho.html">Carrinho</a>
-      <a href="checkout.html">Checkout</a>
-    </nav>
-  </header>
+    <!-- Cabeçalho -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <h1><i class="fas fa-crown"></i> Royal Advisory</h1>
+            </div>
+            <nav class="nav">
+                <a href="index.html">Início</a>
+                <a href="servicos.html">Serviços</a>
+                <a href="carrinho.html" class="active">Carrinho</a>
+                <a href="contato.html">Contato</a>
+            </nav>
+        </div>
+    </header>
 
-  <main>
-    <h2>Seu carrinho</h2>
-    <div id="itens-carrinho"></div>
-    <p><strong>Total:</strong> R$ <span id="total-carrinho">0,00</span></p>
-    <a href="checkout.html"><button>Ir para checkout</button></a>
-    <button id="btn-limpar">Limpar carrinho</button>
-  </main>
+    <!-- Conteúdo Principal -->
+    <main class="main-content">
+        <div class="container">
+            <h2 class="page-title"><i class="fas fa-shopping-cart"></i> Seu Carrinho</h2>
+            
+            <div class="cart-container">
+                <!-- Lista de Produtos -->
+                <div class="cart-items">
+                    <div class="cart-header">
+                        <div class="col-produto">Produto</div>
+                        <div class="col-preco">Preço</div>
+                        <div class="col-quantidade">Quantidade</div>
+                        <div class="col-subtotal">Subtotal</div>
+                        <div class="col-acao">Ação</div>
+                    </div>
 
-  <footer>
-    <p>&copy; 2026 L&A Advisory</p>
-  </footer>
+                    <!-- Item 1 -->
+                    <div class="cart-item" data-id="1">
+                        <div class="col-produto">
+                            <div class="produto-info">
+                                <div class="produto-imagem">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="produto-detalhes">
+                                    <h3>Consultoria Premium</h3>
+                                    <p class="produto-desc">Sessão de 1 hora com especialista</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-preco">R$ 500,00</div>
+                        <div class="col-quantidade">
+                            <div class="quantidade-controls">
+                                <button class="btn-quantidade" onclick="alterarQuantidade(1, -1)">-</button>
+                                <input type="number" value="1" min="1" id="qtd-1" onchange="atualizarQuantidade(1)">
+                                <button class="btn-quantidade" onclick="alterarQuantidade(1, 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="col-subtotal">R$ 500,00</div>
+                        <div class="col-acao">
+                            <button class="btn-remover" onclick="removerItem(1)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
 
-  <script src="js/carrinho.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const itensEl = document.getElementById('itens-carrinho');
-      const totalEl = document.getElementById('total-carrinho');
-      const btnLimpar = document.getElementById('btn-limpar');
+                    <!-- Item 2 -->
+                    <div class="cart-item" data-id="2">
+                        <div class="col-produto">
+                            <div class="produto-info">
+                                <div class="produto-imagem">
+                                    <i class="fas fa-briefcase"></i>
+                                </div>
+                                <div class="produto-detalhes">
+                                    <h3>Pacote Empresarial</h3>
+                                    <p class="produto-desc">Consultoria completa para empresas</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-preco">R$ 1.500,00</div>
+                        <div class="col-quantidade">
+                            <div class="quantidade-controls">
+                                <button class="btn-quantidade" onclick="alterarQuantidade(2, -1)">-</button>
+                                <input type="number" value="1" min="1" id="qtd-2" onchange="atualizarQuantidade(2)">
+                                <button class="btn-quantidade" onclick="alterarQuantidade(2, 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="col-subtotal">R$ 1.500,00</div>
+                        <div class="col-acao">
+                            <button class="btn-remover" onclick="removerItem(2)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
 
-      const carrinho = window.obterCarrinho();
+                    <!-- Cupom de Desconto -->
+                    <div class="cart-coupon">
+                        <h4><i class="fas fa-tag"></i> Cupom de Desconto</h4>
+                        <div class="coupon-form">
+                            <input type="text" id="codigo-cupom" placeholder="Digite seu cupom">
+                            <button class="btn-aplicar" onclick="aplicarCupom()">Aplicar</button>
+                        </div>
+                        <p class="cupom-mensagem" id="cupom-mensagem"></p>
+                    </div>
+                </div>
 
-      if (carrinho.length === 0) {
-        itensEl.innerHTML = '<p>Seu carrinho está vazio.</p>';
-      } else {
-        const total = carrinho.reduce((s, i) => s + i.preco * (i.quantidade || 1), 0);
-        itensEl.innerHTML = carrinho
-          .map(i => `<p>${i.nome} — ${i.quantidade || 1}x — R$ ${Number(i.preco).toFixed(2)}</p>`)
-          .join('');
-        totalEl.textContent = total.toFixed(2).replace('.', ',');
-      }
+                <!-- Resumo do Carrinho -->
+                <div class="cart-summary">
+                    <h3><i class="fas fa-receipt"></i> Resumo do Pedido</h3>
+                    
+                    <div class="summary-row">
+                        <span>Subtotal:</span>
+                        <span id="subtotal">R$ 2.000,00</span>
+                    </div>
+                    
+                    <div class="summary-row">
+                        <span>Desconto:</span>
+                        <span id="desconto">R$ 0,00</span>
+                    </div>
+                    
+                    <div class="summary-row">
+                        <span>Frete:</span>
+                        <span id="frete">Grátis</span>
+                    </div>
+                    
+                    <div class="summary-divider"></div>
+                    
+                    <div class="summary-row total">
+                        <span>Total:</span>
+                        <span id="total">R$ 2.000,00</span>
+                    </div>
 
-      btnLimpar.addEventListener('click', () => {
-        window.limparCarrinho();
-        location.reload();
-      });
-    });
-  </script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js');
-    }
-  </script>
+                    <button class="btn-checkout" onclick="finalizarCompra()">
+                        <i class="fas fa-lock"></i> Finalizar Compra
+                    </button>
+
+                    <div class="continuar-compras">
+                        <a href="index.html"><i class="fas fa-arrow-left"></i> Continuar Comprando</a>
+                    </div>
+
+                    <!-- Selos de Segurança -->
+                    <div class="security-badges">
+                        <div class="badge">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Compra Segura</span>
+                        </div>
+                        <div class="badge">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Parcelamento</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Royal Advisory. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="carrinho.js"></script>
 </body>
 </html>
