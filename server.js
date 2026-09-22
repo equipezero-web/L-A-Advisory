@@ -1,9 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import pagamentosRouter from './routes/pagamentos.js';
-import webhookRouter from './routes/webhook.js';
-
+import pagamentosRouter from './pagamentos.js';
+import webhookRouter from './webhook.js';
+import { enviarEmailNotificacao } from './email.js';
 dotenv.config();
 
 const app = express();
