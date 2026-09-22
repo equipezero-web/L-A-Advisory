@@ -1,0 +1,23 @@
+[
+  {
+    "id": "consultoria-basica",
+    "nome": "Consultoria Financeira Básica",
+    "descricao": "Análise inicial da sua situação financeira e plano de ação.",
+    "preco": 49.90,
+    "tipo": "servico"
+  },
+  {
+    "id": "consultoria-completa",
+    "nome": "Consultoria Financeira Completa",
+    "descricao": "Acompanhamento completo, planejamento e revisão mensal.",
+    "preco": 149.90,
+    "tipo": "servico"
+  },
+  {
+    "id": "ebook-investimentos",
+    "nome": "E‑book: Introdução aos Investimentos",
+    "descricao": "Guia em PDF para começar a investir do zero.",
+    "preco": 29.90,
+    "tipo": "produto"
+  }
+]

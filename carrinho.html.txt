@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Carrinho — L&A Advisory</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="manifest" href="manifest.json" />
+</head>
+<body>
+  <header>
+    <h1>L&A Advisory</h1>
+    <nav>
+      <a href="index.html">Início</a>
+      <a href="loja.html">Loja</a>
+      <a href="carrinho.html">Carrinho</a>
+      <a href="checkout.html">Checkout</a>
+    </nav>
+  </header>
+
+  <main>
+    <h2>Seu carrinho</h2>
+    <div id="itens-carrinho"></div>
+    <p><strong>Total:</strong> R$ <span id="total-carrinho">0,00</span></p>
+    <a href="checkout.html"><button>Ir para checkout</button></a>
+    <button id="btn-limpar">Limpar carrinho</button>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 L&A Advisory</p>
+  </footer>
+
+  <script src="js/carrinho.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const itensEl = document.getElementById('itens-carrinho');
+      const totalEl = document.getElementById('total-carrinho');
+      const btnLimpar = document.getElementById('btn-limpar');
+
+      const carrinho = window.obterCarrinho();
+
+      if (carrinho.length === 0) {
+        itensEl.innerHTML = '<p>Seu carrinho está vazio.</p>';
+      } else {
+        const total = carrinho.reduce((s, i) => s + i.preco * (i.quantidade || 1), 0);
+        itensEl.innerHTML = carrinho
+          .map(i => `<p>${i.nome} — ${i.quantidade || 1}x — R$ ${Number(i.preco).toFixed(2)}</p>`)
+          .join('');
+        totalEl.textContent = total.toFixed(2).replace('.', ',');
+      }
+
+      btnLimpar.addEventListener('click', () => {
+        window.limparCarrinho();
+        location.reload();
+      });
+    });
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
+</body>
+</html>

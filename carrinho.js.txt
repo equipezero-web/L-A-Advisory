@@ -1,0 +1,28 @@
+// Carrinho simples usando localStorage
+function obterCarrinho() {
+  try {
+    return JSON.parse(localStorage.getItem('carrinho') || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function adicionarAoCarrinho(produto) {
+  const carrinho = obterCarrinho();
+  const existente = carrinho.find(i => i.nome === produto.nome);
+  if (existente) {
+    existente.quantidade = (existente.quantidade || 1) + 1;
+  } else {
+    carrinho.push({ ...produto, quantidade: 1 });
+  }
+  localStorage.setItem('carrinho', JSON.stringify(carrinho));
+}
+
+function limparCarrinho() {
+  localStorage.removeItem('carrinho');
+}
+
+// Expõe para outros scripts
+window.obterCarrinho = obterCarrinho;
+window.adicionarAoCarrinho = adicionarAoCarrinho;
+window.limparCarrinho = limparCarrinho;
