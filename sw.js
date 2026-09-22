@@ -8,6 +8,14 @@ const ASSETS = [
   './manifest.json',
   './logo192.png',
   './logo512.png', // <--- Vírgula corrigida aqui
+  '/loja.html',
+  '/carrinho.html',
+  '/checkout.html',
+  '/css/style.css',
+  '/js/carrinho.js',
+  '/js/loja.js',
+  '/js/checkout.js',
+  '/produtos/produtos.json',
   'https://cdn.tailwindcss.com',
   'https://unpkg.com/lucide@latest',
   'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;600&display=swap'
