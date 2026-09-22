@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import { enviarEmailNotificacao } from './email.js';
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
