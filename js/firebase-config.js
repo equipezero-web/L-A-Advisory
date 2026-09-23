@@ -9,12 +9,13 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC1TLAnzW2ohEGKSvDCsBSCCTI2MwG_EJE",
-  authDomain: "royal-advisory.firebaseapp.com",
-  projectId: "royal-advisory",
-  storageBucket: "royal-advisory.firebasestorage.app",
-  messagingSenderId: "345964504076",
-  appId: "1:345964504076:web:db70a89cc00c52c5aeba29"
+  apiKey: "AIzaSyAGKRQoKeZpj4LBQPFYX0AqtqNUZjqkqCA",
+  authDomain: "advisory-web.firebaseapp.com",
+  projectId: "advisory-web",
+  storageBucket: "advisory-web.firebasestorage.app",
+  messagingSenderId: "28667188054",
+  appId: "1:28667188054:web:eac7d4be6092b198fdfcf7"
+  measurementID: "G-0M6LRHCQCD"
 };
 
 const app = initializeApp(firebaseConfig);
