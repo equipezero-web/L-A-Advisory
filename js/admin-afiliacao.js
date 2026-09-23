@@ -94,13 +94,15 @@ async function carregarSolicitacoes() {
   } catch (erro) {
     console.error("Erro ao buscar afiliados:", erro);
 
-    listaAfiliados.innerHTML = `
-      <div class="estado-vazio">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <h2>Erro ao carregar solicitações</h2>
-        <p>Verifique a conexão com o Firebase e as regras do Firestore.</p>
-      </div>
-    `;
+    if (listaAfiliados) {
+      listaAfiliados.innerHTML = `
+        <div class="estado-vazio">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <h2>Erro ao carregar solicitações</h2>
+          <p>Verifique a conexão com o Firebase e as regras do Firestore.</p>
+        </div>
+      `;
+    }
   }
 }
 
@@ -117,16 +119,25 @@ function atualizarEstatisticas() {
     (item) => item.status === "recusado"
   ).length;
 
-  document.getElementById("totalPendentes").textContent = pendentes;
-  document.getElementById("totalAprovados").textContent = aprovados;
-  document.getElementById("totalRecusados").textContent = recusados;
+  const totalPendentes = document.getElementById("totalPendentes");
+  const totalAprovados = document.getElementById("totalAprovados");
+  const totalRecusados = document.getElementById("totalRecusados");
+  const contadorPendentes = document.getElementById("contadorPendentes");
+  const contadorAprovados = document.getElementById("contadorAprovados");
+  const contadorRecusados = document.getElementById("contadorRecusados");
 
-  document.getElementById("contadorPendentes").textContent = pendentes;
-  document.getElementById("contadorAprovados").textContent = aprovados;
-  document.getElementById("contadorRecusados").textContent = recusados;
+  if (totalPendentes) totalPendentes.textContent = pendentes;
+  if (totalAprovados) totalAprovados.textContent = aprovados;
+  if (totalRecusados) totalRecusados.textContent = recusados;
+
+  if (contadorPendentes) contadorPendentes.textContent = pendentes;
+  if (contadorAprovados) contadorAprovados.textContent = aprovados;
+  if (contadorRecusados) contadorRecusados.textContent = recusados;
 }
 
 function renderizarLista() {
+  if (!listaAfiliados) return;
+
   const filtrados = solicitacoesAtuais.filter((item) => {
     return item.status === statusSelecionado;
   });
@@ -323,12 +334,6 @@ async function aprovarAfiliado(id) {
       analisadoEm: serverTimestamp()
     });
 
-    /*
-      Cria ou atualiza o perfil público do afiliado.
-
-      No futuro, quando usar Firebase Authentication, troque o ID abaixo
-      pelo UID verdadeiro do usuário autenticado.
-    */
     await setDoc(
       doc(db, "afiliados", candidato.email),
       {
