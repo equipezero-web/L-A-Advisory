@@ -1,26 +1,37 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Loja — L&A Advisory</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="manifest" href="manifest.json" />
+
+  <link rel="stylesheet" href="css/style.css">
+
+  <link rel="manifest" href="manifest.json">
+
+  <meta name="theme-color" content="#0c1933">
 </head>
+
 <body>
   <header>
     <h1>L&A Advisory</h1>
+
     <nav>
       <a href="index.html">Início</a>
       <a href="loja.html">Loja</a>
-      <a href="carrinho.html">Carrinho</a>
-      <a href="checkout.html">Checkout</a>
+      <a href="frontend/carrinho.html">Carrinho</a>
+      <a href="frontend/checkout.html">Checkout</a>
+      <a href="afiliado.html">Seja Afiliado</a>
     </nav>
   </header>
 
   <main>
     <h2>Loja</h2>
-    <div id="lista-produtos"></div>
+
+    <div id="lista-produtos">
+      <!-- Produtos serão inseridos pelo js/loja.js -->
+    </div>
   </main>
 
   <footer>
@@ -28,12 +39,23 @@
   </footer>
 
   <script src="js/carrinho.js"></script>
+
   <script src="js/loja.js"></script>
+
+  <script src="js/rastrear-afiliado.js"></script>
+
   <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js');
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js")
+          .then((registro) => {
+            console.log("Service Worker ativo:", registro.scope);
+          })
+          .catch((erro) => {
+            console.error("Erro no Service Worker:", erro);
+          });
+      });
     }
-    <script src="js/rastrear-afiliado.js"></script>
   </script>
 </body>
 </html>
