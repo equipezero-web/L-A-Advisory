@@ -1,88 +1,85 @@
-import express from 'express';
-import crypto from 'crypto';
-import mercadopago from 'mercadopago';
-import { enviarEmailNotificacao } from '../utils/email.js';
+import express from "express";
+
+import {
+  MercadoPagoConfig,
+  Payment,
+  WebhookSignatureValidator,
+  InvalidWebhookSignatureError
+} from "mercadopago";
+
+import { enviarEmailNotificacao } from "../services/email.js";
 
 const router = express.Router();
 
-const mp = new mercadopago.MercadoPago(process.env.MP_ACCESS_TOKEN, {
-  timeout: 5000
+const client = new MercadoPagoConfig({
+  accessToken: process.env.MP_ACCESS_TOKEN
 });
+
+const paymentClient = new Payment(client);
 
 const WEBHOOK_SECRET = process.env.MP_WEBHOOK_SECRET;
 
-function verifySignature(headers, rawBody) {
-  const sigHeader = headers['x-signature'];
-  if (!sigHeader || !WEBHOOK_SECRET) return false;
-
-  // formato: ts=..., v1=...
-  const parts = Object.fromEntries(
-    sigHeader.split(',').map(p => {
-      const [k, v] = p.split('=');
-      return [k.trim(), v.trim()];
-    })
-  );
-
-  const ts = parts.ts;
-  const v1 = parts.v1;
-  if (!ts || !v1) return false;
-
-  const manifest = `${ts}.${rawBody.toString('utf8')}`;
-  const expected = crypto
-    .createHmac('sha256', WEBHOOK_SECRET)
-    .update(manifest)
-    .digest('hex');
-
+router.post("/", async (req, res) => {
   try {
-    return crypto.timingSafeEqual(
-      Buffer.from(expected, 'hex'),
-      Buffer.from(v1, 'hex')
-    );
-  } catch {
-    return false;
-  }
-}
+    const dataId =
+      req.query["data.id"] ||
+      req.body?.data?.id;
 
-router.post(
-  '/',
-  express.raw({ type: 'application/json' }),
-  async (req, res) => {
-    const rawBody = req.body;
-
-    if (!verifySignature(req.headers, rawBody)) {
-      return res.status(401).send('Assinatura inválida');
-    }
-
-    let event;
-    try {
-      event = JSON.parse(rawBody.toString('utf8'));
-    } catch {
-      return res.status(400).send('JSON inválido');
-    }
-
-    const paymentId = event.data?.id;
-    if (!paymentId) {
-      return res.status(400).send('ID do pagamento não encontrado');
+    if (!dataId) {
+      return res.status(400).send("ID do pagamento não encontrado");
     }
 
     try {
-      const paymentResp = await mp.payment.findById(paymentId);
-      const payment = paymentResp.body;
+      WebhookSignatureValidator.validate({
+        xSignature: req.headers["x-signature"],
+        xRequestId: req.headers["x-request-id"],
+        dataId: String(dataId),
+        secret: WEBHOOK_SECRET
+      });
+    } catch (erro) {
+      if (erro instanceof InvalidWebhookSignatureError) {
+        return res.status(401).send("Assinatura inválida");
+      }
 
-      const status = payment.status; // approved, pending, rejected...
-      const externalRef = payment.external_reference; // PEDIDO_...
+      console.error("Erro ao validar assinatura:", erro);
+      return res.status(401).send("Não foi possível validar o webhook");
+    }
 
-      // Aqui você poderia salvar em banco de dados, se quiser
-      // await salvarPedidoNoBanco(externalRef, payment);
+    const payment = await paymentClient.get({
+      id: String(dataId)
+    });
 
+    const externalRef = payment.external_reference || `MP_${payment.id}`;
+
+    /*
+      IMPORTANTE:
+      Só envie o e-mail de venda quando o pagamento for aprovado.
+      Webhooks também chegam para pending, rejected, cancelled e refunded.
+    */
+    if (payment.status === "approved") {
       await enviarEmailNotificacao(externalRef, payment);
 
-      res.status(200).send('OK');
-    } catch (err) {
-      console.error('Erro ao processar webhook:', err);
-      res.status(500).send('Erro ao processar webhook');
+      /*
+        PRÓXIMA ETAPA:
+        Aqui será salvo o pedido no Firebase.
+
+        await salvarPedidoFirebase({
+          paymentId: payment.id,
+          externalReference: externalRef,
+          statusPagamento: payment.status,
+          valorPago: payment.transaction_amount,
+          codigoAfiliado: payment.metadata?.codigoAfiliado || null
+        });
+      */
     }
+
+    return res.status(200).send("OK");
+
+  } catch (erro) {
+    console.error("Erro ao processar webhook:", erro);
+
+    return res.status(500).send("Erro ao processar webhook");
   }
-);
+});
 
 export default router;
