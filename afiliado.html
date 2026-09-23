@@ -1,0 +1,63 @@
+<form id="formAfiliado">
+  <div class="form-group">
+    <label for="nomeAfiliado">Nome completo *</label>
+    <input type="text" id="nomeAfiliado" required>
+  </div>
+
+  <div class="form-group">
+    <label for="emailAfiliado">E-mail *</label>
+    <input type="email" id="emailAfiliado" required>
+  </div>
+
+  <div class="form-group">
+    <label for="telefoneAfiliado">Telefone *</label>
+    <input type="tel" id="telefoneAfiliado" required>
+  </div>
+
+  <div class="form-group">
+    <label for="nascimentoAfiliado">Data de nascimento *</label>
+    <input type="date" id="nascimentoAfiliado" required>
+  </div>
+
+  <div class="form-group">
+    <label for="motivacaoAfiliado">
+      Por que quer se tornar um afiliado da Royal Advisory? *
+    </label>
+    <textarea
+      id="motivacaoAfiliado"
+      rows="6"
+      required
+      minlength="20"
+      placeholder="Conte um pouco sobre você, sua audiência e como pretende divulgar os produtos."
+    ></textarea>
+  </div>
+
+  <button type="submit" class="btn-afiliado">
+    Enviar solicitação
+  </button>
+</form>
+<div class="modal-overlay" id="modalVerificacao">
+  <div class="modal-verificacao">
+    <button
+      type="button"
+      class="modal-fechar"
+      id="fecharModal"
+      aria-label="Fechar"
+    >
+      ×
+    </button>
+
+    <div class="modal-icone">✓</div>
+
+    <h2>Verificação em andamento</h2>
+
+    <p>
+      Logo mais, o ADM LA Advisory estará a verificar o seu pedido de
+      afiliado. Dentro de 2 horas, no máximo, será verificado.
+    </p>
+
+    <button type="button" class="btn-modal" id="continuarNavegando">
+      Continuar navegando
+    </button>
+  </div>
+</div>
