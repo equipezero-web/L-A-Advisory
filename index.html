@@ -1354,6 +1354,14 @@ body {
     <button type="submit" class="w-full gradient-gold text-slate-900 py-3 rounded-xl font-bold hover:shadow-gold transition cursor-pointer">
         Adicionar Produto
     </button>
+    <button
+    onclick="switchTab('afiliados')"
+    id="tab-afiliados"
+    class="flex-1 py-3 px-4 rounded-xl font-bold text-sm tab-inactive transition"
+>
+    <i data-lucide="crown" class="w-4 h-4 inline mr-2"></i>
+    Afiliados
+</button>
 </form>
                         </div>
                         
@@ -1371,6 +1379,27 @@ body {
                         </div>
                     </div>
                 </div>
+                <div class="flex gap-2 mb-6">
+    
+    <button
+        onclick="switchTab('financeiro')"
+        id="tab-financeiro"
+        class="flex-1 py-3 px-4 rounded-xl font-bold text-sm tab-inactive transition"
+    >
+        <i data-lucide="trending-up" class="w-4 h-4 inline mr-2"></i>
+        Financeiro
+    </button>
+
+    <button
+        onclick="switchTab('afiliados')"
+        id="tab-afiliados"
+        class="flex-1 py-3 px-4 rounded-xl font-bold text-sm tab-inactive transition"
+    >
+        <i data-lucide="crown" class="w-4 h-4 inline mr-2"></i>
+        Afiliados
+    </button>
+
+</div>
 
                 <!-- ABA CONSULTORIAS -->
                 <div id="content-consultorias" class="tab-content hidden">
@@ -1457,6 +1486,101 @@ body {
         </div>
     </div>
 
+                    <!-- ABA AFILIADO -->
+    <section id="content-afiliados" class="tab-content hidden">
+
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-slate-900">
+            <i data-lucide="crown" class="w-6 h-6 inline mr-2 text-yellow-500"></i>
+            Gestão de Afiliados
+        </h2>
+
+        <p class="text-sm text-slate-500 mt-1">
+            Analise solicitações, aprove afiliados e acompanhe o programa.
+        </p>
+    </div>
+
+    <!-- Cards de resumo -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-slate-500">Solicitações pendentes</p>
+                    <h3 id="totalPendentes" class="text-3xl font-bold text-slate-900 mt-1">
+                        0
+                    </h3>
+                </div>
+
+                <div class="w-12 h-12 rounded-xl bg-yellow-100 text-yellow-700 flex items-center justify-center">
+                    <i data-lucide="clock-3" class="w-6 h-6"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-slate-500">Afiliados aprovados</p>
+                    <h3 id="totalAprovados" class="text-3xl font-bold text-slate-900 mt-1">
+                        0
+                    </h3>
+                </div>
+
+                <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-900 flex items-center justify-center">
+                    <i data-lucide="crown" class="w-6 h-6"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-slate-500">Comissões pendentes</p>
+                    <h3 id="totalComissoes" class="text-3xl font-bold text-slate-900 mt-1">
+                        R$ 0,00
+                    </h3>
+                </div>
+
+                <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                    <i data-lucide="wallet" class="w-6 h-6"></i>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Título e filtros -->
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+
+        <div class="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-5">
+            <div>
+                <h3 class="font-bold text-lg text-slate-900">
+                    Solicitações de afiliação
+                </h3>
+
+                <p class="text-sm text-slate-500">
+                    Aceite ou recuse os pedidos de novos afiliados.
+                </p>
+            </div>
+
+            <select
+                id="filtroAfiliados"
+                onchange="filtrarAfiliados()"
+                class="border border-slate-300 rounded-xl px-4 py-2 text-sm outline-none focus:border-yellow-500"
+            >
+                <option value="pendente">Pendentes</option>
+                <option value="aprovado">Aprovados</option>
+                <option value="recusado">Recusados</option>
+                <option value="todos">Todos</option>
+            </select>
+        </div>
+
+        <!-- Os cards dos candidatos serão adicionados pelo JavaScript -->
+        <div id="listaAfiliados" class="space-y-4"></div>
+
+    </div>
+</section>
     <!-- MODAL NAVEGAÇÃO -->
     <div id="navModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white text-slate-900 rounded-2xl max-w-md w-full p-8 shadow-2xl relative border-2 border-amber-400/30">
@@ -2030,6 +2154,50 @@ document
   statusComissao: "pendente", // pendente | aprovada | paga | cancelada
   criadoEm: "2026-09-23T12:00:00.000Z"
 }
+
+    function switchTab(tab) {
+    const tabs = [
+        "dashboard",
+        "produtos",
+        "pedidos",
+        "financeiro",
+        "afiliados"
+    ];
+
+    tabs.forEach((item) => {
+        const botao = document.getElementById(`tab-${item}`);
+        const conteudo = document.getElementById(`content-${item}`);
+
+        if (botao) {
+            botao.classList.remove("tab-active");
+            botao.classList.add("tab-inactive");
+        }
+
+        if (conteudo) {
+            conteudo.classList.add("hidden");
+        }
+    });
+
+    const botaoAtivo = document.getElementById(`tab-${tab}`);
+    const conteudoAtivo = document.getElementById(`content-${tab}`);
+
+    if (botaoAtivo) {
+        botaoAtivo.classList.remove("tab-inactive");
+        botaoAtivo.classList.add("tab-active");
+    }
+
+    if (conteudoAtivo) {
+        conteudoAtivo.classList.remove("hidden");
+    }
+
+    if (tab === "afiliados") {
+        renderizarAfiliados();
+    }
+
+    if (typeof lucide !== "undefined") {
+        lucide.createIcons();
+    }
+}
     
         // INICIALIZAÇÃO ÚNICA DA PÁGINA
         window.addEventListener('DOMContentLoaded', () => {
@@ -2046,5 +2214,109 @@ document
             if (window.lucide) lucide.createIcons();
         });
     </script>
+    function obterSolicitacoesAfiliados() {
+    const dados = localStorage.getItem("royal_solicitacoes_afiliados");
+
+    return dados ? JSON.parse(dados) : [];
+}
+
+function filtrarAfiliados() {
+    const filtro = document.getElementById("filtroAfiliados").value;
+    renderizarAfiliados(filtro);
+}
+
+function renderizarAfiliados(status = "pendente") {
+    const lista = document.getElementById("listaAfiliados");
+
+    if (!lista) return;
+
+    const solicitacoes = obterSolicitacoesAfiliados();
+
+    const filtrados = status === "todos"
+        ? solicitacoes
+        : solicitacoes.filter((afiliado) => afiliado.status === status);
+
+    const pendentes = solicitacoes.filter((item) => item.status === "pendente");
+    const aprovados = solicitacoes.filter((item) => item.status === "aprovado");
+
+    document.getElementById("totalPendentes").textContent = pendentes.length;
+    document.getElementById("totalAprovados").textContent = aprovados.length;
+
+    if (filtrados.length === 0) {
+        lista.innerHTML = `
+            <div class="text-center py-12 text-slate-500">
+                <i data-lucide="folder-open" class="w-12 h-12 mx-auto mb-3 text-yellow-500"></i>
+                <p class="font-semibold">Nenhuma solicitação encontrada.</p>
+            </div>
+        `;
+
+        lucide.createIcons();
+        return;
+    }
+
+    lista.innerHTML = filtrados.map((afiliado) => `
+        <article class="border border-slate-200 rounded-2xl p-5">
+
+            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+
+                <div>
+                    <span class="inline-flex px-3 py-1 rounded-full text-xs font-bold ${
+                        afiliado.status === "pendente"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : afiliado.status === "aprovado"
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-red-100 text-red-700"
+                    }">
+                        ${afiliado.status}
+                    </span>
+
+                    <h4 class="text-lg font-bold text-slate-900 mt-2">
+                        ${afiliado.nome}
+                    </h4>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3 text-sm text-slate-600">
+                        <p><strong>E-mail:</strong> ${afiliado.email}</p>
+                        <p><strong>Telefone:</strong> ${afiliado.telefone}</p>
+                        <p><strong>Nascimento:</strong> ${afiliado.nascimento}</p>
+                        <p><strong>Solicitado em:</strong> ${new Date(afiliado.criadoEm).toLocaleDateString("pt-BR")}</p>
+                    </div>
+                </div>
+
+                ${afiliado.status === "pendente" ? `
+                    <div class="flex gap-2">
+                        <button
+                            onclick="aprovarAfiliado('${afiliado.id}')"
+                            class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-bold transition"
+                        >
+                            <i data-lucide="check" class="w-4 h-4 inline mr-1"></i>
+                            Aceitar
+                        </button>
+
+                        <button
+                            onclick="recusarAfiliado('${afiliado.id}')"
+                            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-bold transition"
+                        >
+                            <i data-lucide="x" class="w-4 h-4 inline mr-1"></i>
+                            Recusar
+                        </button>
+                    </div>
+                ` : ""}
+            </div>
+
+            <div class="bg-slate-50 border-l-4 border-yellow-500 p-4 rounded-r-xl mt-4">
+                <p class="font-bold text-sm text-slate-800 mb-1">
+                    Por que deseja ser afiliado?
+                </p>
+
+                <p class="text-sm text-slate-600">
+                    ${afiliado.motivacao}
+                </p>
+            </div>
+
+        </article>
+    `).join("");
+
+    lucide.createIcons();
+}
 </body>
 </html>
