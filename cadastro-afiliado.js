@@ -1,4 +1,13 @@
-const CHAVE_SOLICITACOES = "royal_solicitacoes_afiliados";
+import { db } from "./firebase-config.js";
+
+import {
+  collection,
+  addDoc,
+  query,
+  where,
+  getDocs,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const formAfiliado = document.getElementById("formAfiliado");
 const telefoneAfiliado = document.getElementById("telefoneAfiliado");
@@ -7,20 +16,6 @@ const contadorMotivacao = document.getElementById("contadorMotivacao");
 const modalVerificacao = document.getElementById("modalVerificacao");
 const fecharModal = document.getElementById("fecharModal");
 const continuarNavegando = document.getElementById("continuarNavegando");
-
-function gerarId(prefixo = "id") {
-  const codigoAleatorio = Math.random().toString(36).substring(2, 10);
-  return `${prefixo}_${Date.now()}_${codigoAleatorio}`;
-}
-
-function obterSolicitacoes() {
-  const dados = localStorage.getItem(CHAVE_SOLICITACOES);
-  return dados ? JSON.parse(dados) : [];
-}
-
-function salvarSolicitacoes(solicitacoes) {
-  localStorage.setItem(CHAVE_SOLICITACOES, JSON.stringify(solicitacoes));
-}
 
 function abrirModal() {
   modalVerificacao.classList.add("ativo");
@@ -46,12 +41,16 @@ telefoneAfiliado.addEventListener("input", (event) => {
 });
 
 motivacaoAfiliado.addEventListener("input", () => {
-  const total = motivacaoAfiliado.value.trim().length;
-  contadorMotivacao.textContent = `${total} / mínimo de 20 caracteres`;
+  const quantidade = motivacaoAfiliado.value.trim().length;
+
+  contadorMotivacao.textContent =
+    `${quantidade} / mínimo de 20 caracteres`;
 });
 
-formAfiliado.addEventListener("submit", (event) => {
+formAfiliado.addEventListener("submit", async (event) => {
   event.preventDefault();
+
+  const botaoEnviar = formAfiliado.querySelector('button[type="submit"]');
 
   const nome = document.getElementById("nomeAfiliado").value.trim();
   const email = document.getElementById("emailAfiliado").value.trim().toLowerCase();
@@ -60,61 +59,73 @@ formAfiliado.addEventListener("submit", (event) => {
   const motivacao = motivacaoAfiliado.value.trim();
 
   if (motivacao.length < 20) {
-    alert("A resposta precisa ter pelo menos 20 caracteres.");
+    alert("A resposta precisa conter pelo menos 20 caracteres.");
     motivacaoAfiliado.focus();
     return;
   }
 
-  const solicitacoes = obterSolicitacoes();
+  try {
+    botaoEnviar.disabled = true;
+    botaoEnviar.innerHTML = `
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      Enviando solicitação...
+    `;
 
-  const existeSolicitacaoPendente = solicitacoes.some((solicitacao) => {
-    return solicitacao.email === email && solicitacao.status === "pendente";
-  });
+    const consultaEmail = query(
+      collection(db, "solicitacoesAfiliados"),
+      where("email", "==", email)
+    );
 
-  if (existeSolicitacaoPendente) {
-    alert("Já existe uma solicitação pendente para este e-mail.");
-    return;
-  }
+    const resultados = await getDocs(consultaEmail);
 
-  const novaSolicitacao = {
-    id: gerarId("sol"),
-    nome,
-    email,
-    telefone,
-    nascimento,
-    motivacao,
-    status: "pendente",
-    criadoEm: new Date().toISOString(),
-    analisadoEm: null,
-    analisadoPor: null,
-    codigoAfiliado: null
-  };
-
-  solicitacoes.unshift(novaSolicitacao);
-  salvarSolicitacoes(solicitacoes);
-
-  console.log("Solicitação criada:", novaSolicitacao);
-
-  /*
-    Quando houver backend, envie os dados para sua API:
-
-    await fetch("https://seu-backend.com/api/afiliados/solicitacoes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(novaSolicitacao)
+    const jaExistePendente = resultados.docs.some((documento) => {
+      return documento.data().status === "pendente";
     });
 
-    O BACKEND deverá enviar o e-mail para:
-    lucaalves17.20@gmail.com
-  */
+    if (jaExistePendente) {
+      alert("Já existe uma solicitação pendente para este e-mail.");
+      return;
+    }
 
-  formAfiliado.reset();
-  contadorMotivacao.textContent = "0 / mínimo de 20 caracteres";
+    await addDoc(collection(db, "solicitacoesAfiliados"), {
+      nome,
+      email,
+      telefone,
+      nascimento,
+      motivacao,
 
-  abrirModal();
+      status: "pendente",
+
+      codigoAfiliado: null,
+      analisadoEm: null,
+      analisadoPor: null,
+
+      criadoEm: serverTimestamp()
+    });
+
+    formAfiliado.reset();
+    contadorMotivacao.textContent = "0 / mínimo de 20 caracteres";
+
+    abrirModal();
+
+  } catch (erro) {
+    console.error("Erro ao salvar solicitação:", erro);
+
+    alert(
+      "Não foi possível enviar sua solicitação. Verifique a conexão e tente novamente."
+    );
+
+  } finally {
+    botaoEnviar.disabled = false;
+    botaoEnviar.innerHTML = `
+      <i class="fa-solid fa-paper-plane"></i>
+      Enviar solicitação
+    `;
+  }
 });
 
 fecharModal.addEventListener("click", fecharModalVerificacao);
+
 continuarNavegando.addEventListener("click", fecharModalVerificacao);
 
 modalVerificacao.addEventListener("click", (event) => {
