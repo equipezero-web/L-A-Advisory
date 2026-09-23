@@ -1950,6 +1950,86 @@ document.getElementById("fecharModal").addEventListener("click", fecharModalVeri
 document
   .getElementById("continuarNavegando")
   .addEventListener("click", fecharModalVerificacao);
+
+            // INICIALIZAÇÃO ÚNICA DA PÁGINA
+    usuarios = {
+  id: "user_001",
+  nome: "João Silva",
+  email: "joao@email.com",
+  telefone: "(81) 99999-9999",
+  senhaHash: "senha_criptografada_no_servidor",
+  perfil: "cliente", // cliente | afiliado | admin
+  criadoEm: "2026-09-23T12:00:00.000Z"
+}
+
+            // TABELA DE USUÁRIOS
+    solicitacoesAfiliacao = {
+  id: "sol_001",
+  nome: "João Silva",
+  email: "joao@email.com",
+  telefone: "(81) 99999-9999",
+  nascimento: "2000-08-15",
+  motivacao: "Quero divulgar os produtos para a minha audiência...",
+  status: "pendente", // pendente | aprovado | recusado
+  criadoEm: "2026-09-23T12:00:00.000Z",
+  analisadoEm: null,
+  analisadoPor: null
+}
+
+            // TABELA DE SOLICITAÇÕES
+    produtos = {
+  id: "prod_001",
+  nome: "Curso Royal Advisory",
+  descricao: "Curso completo de estratégia e posicionamento.",
+  precoFinal: 697.00,
+  valorBruto: 350.00,
+  comissaoPercentual: 20,
+  comissaoValor: 70.00,
+  tipo: "loja", // loja | consultoria
+  afiliavel: true,
+  ativo: true,
+  imagem: "curso-royal.jpg"
+}
+
+                // PRODUTOS DA LOJA
+    produtos = {
+  id: "prod_001",
+  nome: "Curso Royal Advisory",
+  descricao: "Curso completo de estratégia e posicionamento.",
+  precoFinal: 697.00,
+  valorBruto: 350.00,
+  comissaoPercentual: 20,
+  comissaoValor: 70.00,
+  tipo: "loja", // loja | consultoria
+  afiliavel: true,
+  ativo: true,
+  imagem: "curso-royal.jpg"
+}
+
+                    // PARA CONSULTORIAS
+    {
+  id: "serv_001",
+  nome: "Consultoria Estratégica",
+  precoFinal: 1500.00,
+  tipo: "consultoria",
+  afiliavel: false
+}
+
+                        // VENDAS RASTREADAS
+    pedidos = {
+  id: "pedido_001",
+  clienteId: "cliente_001",
+  produtoId: "prod_001",
+  afiliadoId: "user_020",
+  codigoAfiliado: "ROYAL-JOAO-8K2M",
+  valorPago: 697.00,
+  valorBrutoProduto: 350.00,
+  percentualComissao: 20,
+  valorComissao: 70.00,
+  statusPagamento: "pago", // pendente | pago | cancelado | reembolsado
+  statusComissao: "pendente", // pendente | aprovada | paga | cancelada
+  criadoEm: "2026-09-23T12:00:00.000Z"
+}
     
         // INICIALIZAÇÃO ÚNICA DA PÁGINA
         window.addEventListener('DOMContentLoaded', () => {
