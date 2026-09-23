@@ -3,9 +3,6 @@ import { db } from "./firebase-config.js";
 import {
   collection,
   addDoc,
-  query,
-  where,
-  getDocs,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
@@ -53,39 +50,34 @@ formAfiliado.addEventListener("submit", async (event) => {
   const botaoEnviar = formAfiliado.querySelector('button[type="submit"]');
 
   const nome = document.getElementById("nomeAfiliado").value.trim();
-  const email = document.getElementById("emailAfiliado").value.trim().toLowerCase();
+
+  const email = document
+    .getElementById("emailAfiliado")
+    .value
+    .trim()
+    .toLowerCase();
+
   const telefone = telefoneAfiliado.value.trim();
+
   const nascimento = document.getElementById("nascimentoAfiliado").value;
+
   const motivacao = motivacaoAfiliado.value.trim();
 
   if (motivacao.length < 20) {
     alert("A resposta precisa conter pelo menos 20 caracteres.");
+
     motivacaoAfiliado.focus();
+
     return;
   }
 
   try {
     botaoEnviar.disabled = true;
+
     botaoEnviar.innerHTML = `
       <i class="fa-solid fa-spinner fa-spin"></i>
       Enviando solicitação...
     `;
-
-    const consultaEmail = query(
-      collection(db, "solicitacoesAfiliados"),
-      where("email", "==", email)
-    );
-
-    const resultados = await getDocs(consultaEmail);
-
-    const jaExistePendente = resultados.docs.some((documento) => {
-      return documento.data().status === "pendente";
-    });
-
-    if (jaExistePendente) {
-      alert("Já existe uma solicitação pendente para este e-mail.");
-      return;
-    }
 
     await addDoc(collection(db, "solicitacoesAfiliados"), {
       nome,
@@ -104,7 +96,9 @@ formAfiliado.addEventListener("submit", async (event) => {
     });
 
     formAfiliado.reset();
-    contadorMotivacao.textContent = "0 / mínimo de 20 caracteres";
+
+    contadorMotivacao.textContent =
+      "0 / mínimo de 20 caracteres";
 
     abrirModal();
 
@@ -112,11 +106,12 @@ formAfiliado.addEventListener("submit", async (event) => {
     console.error("Erro ao salvar solicitação:", erro);
 
     alert(
-      "Não foi possível enviar sua solicitação. Verifique a conexão e tente novamente."
+      "Não foi possível enviar sua solicitação. Verifique sua conexão e tente novamente."
     );
 
   } finally {
     botaoEnviar.disabled = false;
+
     botaoEnviar.innerHTML = `
       <i class="fa-solid fa-paper-plane"></i>
       Enviar solicitação
