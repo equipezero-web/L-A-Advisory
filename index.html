@@ -13,14 +13,63 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <!-- Registro do Service Worker -->
-   <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then((reg) => console.log('Service Worker registrado com sucesso:', reg.scope))
-        .catch((err) => console.error('Erro ao registrar Service Worker:', err));
-    });
-  }
+<script>
+    if ("serviceWorker" in navigator) {
+        window.addEventListener("load", async () => {
+            try {
+                const registro = await navigator.serviceWorker.register("./sw.js");
+
+                console.log(
+                    "Service Worker registrado com sucesso:",
+                    registro.scope
+                );
+
+                await registro.update();
+
+                if (registro.waiting) {
+                    registro.waiting.postMessage({
+                        tipo: "ATUALIZAR_AGORA"
+                    });
+                }
+
+                registro.addEventListener("updatefound", () => {
+                    const novoWorker = registro.installing;
+
+                    if (!novoWorker) return;
+
+                    novoWorker.addEventListener("statechange", () => {
+                        if (
+                            novoWorker.state === "installed" &&
+                            navigator.serviceWorker.controller
+                        ) {
+                            novoWorker.postMessage({
+                                tipo: "ATUALIZAR_AGORA"
+                            });
+                        }
+                    });
+                });
+
+                let atualizandoPagina = false;
+
+                navigator.serviceWorker.addEventListener(
+                    "controllerchange",
+                    () => {
+                        if (atualizandoPagina) return;
+
+                        atualizandoPagina = true;
+
+                        window.location.reload();
+                    }
+                );
+
+            } catch (erro) {
+                console.error(
+                    "Erro ao registrar o Service Worker:",
+                    erro
+                );
+            }
+        });
+    }
 </script>
     
     <style>
