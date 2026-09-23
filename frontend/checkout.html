@@ -1,274 +1,301 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout - Royal Advisory</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Checkout — Royal Advisory</title>
+
+  <link rel="stylesheet" href="../css/checkout.css">
+  <link rel="stylesheet" href="../css/afiliados.css">
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+  >
 </head>
+
 <body>
-    <!-- Cabeçalho -->
-    <header class="header">
-        <div class="container">
-            <div class="logo">
-                <h1><i class="fas fa-crown"></i> Royal Advisory</h1>
-            </div>
-            <nav class="nav">
-                <a href="index.html">Início</a>
-                <a href="servicos.html">Serviços</a>
-                <a href="carrinho.html">Carrinho</a>
-                <a href="contato.html">Contato</a>
-            </nav>
-        </div>
-    </header>
+  <header class="topo-principal">
+    <div class="container navbar">
+      <a href="../index.html" class="logo-royal">
+        <i class="fa-solid fa-crown"></i>
+        <span>Royal Advisory</span>
+      </a>
 
-    <!-- Barra de Progresso -->
-    <div class="checkout-progress">
-        <div class="container">
-            <div class="progress-steps">
-                <div class="step active">
-                    <div class="step-icon"><i class="fas fa-shopping-cart"></i></div>
-                    <span>Carrinho</span>
-                </div>
-                <div class="step-line"></div>
-                <div class="step active current">
-                    <div class="step-icon"><i class="fas fa-credit-card"></i></div>
-                    <span>Checkout</span>
-                </div>
-                <div class="step-line"></div>
-                <div class="step">
-                    <div class="step-icon"><i class="fas fa-check"></i></div>
-                    <span>Confirmação</span>
-                </div>
-            </div>
-        </div>
+      <nav class="menu-principal">
+        <a href="../index.html">Início</a>
+        <a href="../index.html#loja">Loja</a>
+        <a href="carrinho.html">Carrinho</a>
+        <a href="../afiliado.html">Seja Afiliado</a>
+      </nav>
     </div>
+  </header>
 
-    <!-- Conteúdo Principal -->
-    <main class="main-content">
-        <div class="container">
-            <h2 class="page-title"><i class="fas fa-lock"></i> Finalizar Compra</h2>
-            
-            <div class="checkout-container">
-                <!-- Formulário de Checkout -->
-                <div class="checkout-form">
-                    <!-- Dados Pessoais -->
-                    <section class="checkout-section">
-                        <h3><i class="fas fa-user"></i> Dados Pessoais</h3>
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label for="nome">Nome Completo *</label>
-                                <input type="text" id="nome" required placeholder="Seu nome completo">
-                            </div>
-                            <div class="form-group">
-                                <label for="email">E-mail *</label>
-                                <input type="email" id="email" required placeholder="seu@email.com">
-                            </div>
-                            <div class="form-group">
-                                <label for="telefone">Telefone *</label>
-                                <input type="tel" id="telefone" required placeholder="(81) 99999-9999">
-                            </div>
-                            <div class="form-group">
-                                <label for="cpf">CPF *</label>
-                                <input type="text" id="cpf" required placeholder="000.000.000-00">
-                            </div>
-                        </div>
-                    </section>
+  <main class="main-content">
+    <div class="container">
+      <div class="titulo-pagina">
+        <i class="fa-solid fa-lock"></i>
+        <h1>Finalizar compra</h1>
+      </div>
 
-                    <!-- Endereço -->
-                    <section class="checkout-section">
-                        <h3><i class="fas fa-map-marker-alt"></i> Endereço</h3>
-                        <div class="form-grid">
-                            <div class="form-group full-width">
-                                <label for="cep">CEP *</label>
-                                <input type="text" id="cep" required placeholder="00000-000">
-                            </div>
-                            <div class="form-group full-width">
-                                <label for="endereco">Endereço *</label>
-                                <input type="text" id="endereco" required placeholder="Rua, número, complemento">
-                            </div>
-                            <div class="form-group">
-                                <label for="cidade">Cidade *</label>
-                                <input type="text" id="cidade" required placeholder="Sua cidade">
-                            </div>
-                            <div class="form-group">
-                                <label for="estado">Estado *</label>
-                                <select id="estado" required>
-                                    <option value="">Selecione</option>
-                                    <option value="PE">Pernambuco</option>
-                                    <option value="SP">São Paulo</option>
-                                    <option value="RJ">Rio de Janeiro</option>
-                                    <option value="MG">Minas Gerais</option>
-                                    <!-- Adicione outros estados -->
-                                </select>
-                            </div>
-                        </div>
-                    </section>
+      <div class="checkout-grid">
+        <!-- Formulário -->
+        <section class="checkout-form-section">
+          <form id="formCheckout" class="checkout-form" novalidate>
+            <!-- Dados pessoais -->
+            <section class="checkout-section">
+              <h2 class="checkout-section-title">
+                <i class="fa-solid fa-user"></i>
+                Dados pessoais
+              </h2>
 
-                    <!-- Pagamento -->
-                    <section class="checkout-section">
-                        <h3><i class="fas fa-credit-card"></i> Forma de Pagamento</h3>
-                        
-                        <div class="payment-methods">
-                            <label class="payment-option">
-                                <input type="radio" name="pagamento" value="cartao" checked onchange="mostrarFormularioPagamento('cartao')">
-                                <div class="payment-card">
-                                    <i class="fas fa-credit-card"></i>
-                                    <span>Cartão de Crédito</span>
-                                </div>
-                            </label>
-                            
-                            <label class="payment-option">
-                                <input type="radio" name="pagamento" value="pix" onchange="mostrarFormularioPagamento('pix')">
-                                <div class="payment-card">
-                                    <i class="fas fa-qrcode"></i>
-                                    <span>PIX</span>
-                                </div>
-                            </label>
-                            
-                            <label class="payment-option">
-                                <input type="radio" name="pagamento" value="boleto" onchange="mostrarFormularioPagamento('boleto')">
-                                <div class="payment-card">
-                                    <i class="fas fa-barcode"></i>
-                                    <span>Boleto</span>
-                                </div>
-                            </label>
-                        </div>
-
-                        <!-- Formulário Cartão -->
-                        <div id="form-cartao" class="payment-form">
-                            <div class="form-group">
-                                <label for="numero-cartao">Número do Cartão *</label>
-                                <input type="text" id="numero-cartao" placeholder="0000 0000 0000 0000">
-                            </div>
-                            <div class="form-group">
-                                <label for="nome-cartao">Nome no Cartão *</label>
-                                <input type="text" id="nome-cartao" placeholder="Como está no cartão">
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="validade">Validade *</label>
-                                    <input type="text" id="validade" placeholder="MM/AA">
-                                </div>
-                                <div class="form-group">
-                                    <label for="cvv">CVV *</label>
-                                    <input type="text" id="cvv" placeholder="123">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="parcelas">Parcelas *</label>
-                                <select id="parcelas">
-                                    <option value="1">1x de R$ 2.000,00 (sem juros)</option>
-                                    <option value="2">2x de R$ 1.000,00 (sem juros)</option>
-                                    <option value="3">3x de R$ 666,67 (sem juros)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- PIX -->
-                        <div id="form-pix" class="payment-form" style="display: none;">
-                            <div class="pix-info">
-                                <i class="fas fa-qrcode"></i>
-                                <p>O QR Code do PIX será gerado após a confirmação do pedido.</p>
-                            </div>
-                        </div>
-
-                        <!-- Boleto -->
-                        <div id="form-boleto" class="payment-form" style="display: none;">
-                            <div class="boleto-info">
-                                <i class="fas fa-barcode"></i>
-                                <p>O boleto será gerado após a confirmação do pedido.</p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Botão Finalizar -->
-                    <button class="btn-finalizar" onclick="confirmarCompra()">
-                        <i class="fas fa-check-circle"></i> Confirmar Pedido
-                    </button>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="nome">Nome completo *</label>
+                  <input
+                    type="text"
+                    id="nome"
+                    name="nome"
+                    required
+                    minlength="3"
+                    placeholder="Seu nome completo"
+                  >
                 </div>
 
-                <!-- Resumo do Pedido -->
-                <div class="order-summary">
-                    <h3><i class="fas fa-file-invoice"></i> Resumo do Pedido</h3>
-                    
-                    <div class="order-items">
-                        <div class="order-item">
-                            <div class="item-icon">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                            <div class="item-info">
-                                <h4>Consultoria Premium</h4>
-                                <p>1x R$ 500,00</p>
-                            </div>
-                        </div>
-                        
-                        <div class="order-item">
-                            <div class="item-icon">
-                                <i class="fas fa-briefcase"></i>
-                            </div>
-                            <div class="item-info">
-                                <h4>Pacote Empresarial</h4>
-                                <p>1x R$ 1.500,00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="summary-divider"></div>
-
-                    <div class="summary-row">
-                        <span>Subtotal:</span>
-                        <span>R$ 2.000,00</span>
-                    </div>
-                    <div class="summary-row">
-                        <span>Desconto:</span>
-                        <span>R$ 0,00</span>
-                    </div>
-                    <div class="summary-row">
-                        <span>Frete:</span>
-                        <span>Grátis</span>
-                    </div>
-
-                    <div class="summary-divider"></div>
-
-                    <div class="summary-row total">
-                        <span>Total:</span>
-                        <span>R$ 2.000,00</span>
-                    </div>
-
-                    <!-- Segurança -->
-                    <div class="security-info">
-                        <div class="security-item">
-                            <i class="fas fa-lock"></i>
-                            <span>Site 100% Seguro</span>
-                        </div>
-                        <div class="security-item">
-                            <i class="fas fa-shield-alt"></i>
-                            <span>Dados Protegidos</span>
-                        </div>
-                        <div class="security-item">
-                            <i class="fas fa-credit-card"></i>
-                            <span>Até 12x no Cartão</span>
-                        </div>
-                    </div>
-
-                    <!-- Voltar -->
-                    <a href="carrinho.html" class="btn-voltar">
-                        <i class="fas fa-arrow-left"></i> Voltar ao Carrinho
-                    </a>
+                <div class="form-group">
+                  <label for="email">E-mail *</label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    required
+                    placeholder="seu@email.com"
+                  >
                 </div>
+
+                <div class="form-group">
+                  <label for="telefone">Telefone *</label>
+                  <input
+                    type="tel"
+                    id="telefone"
+                    name="telefone"
+                    required
+                    placeholder="(81) 99999-9999"
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label for="cpf">CPF *</label>
+                  <input
+                    type="text"
+                    id="cpf"
+                    name="cpf"
+                    required
+                    placeholder="000.000.000-00"
+                  >
+                </div>
+              </div>
+            </section>
+
+            <!-- Endereço -->
+            <section class="checkout-section">
+              <h2 class="checkout-section-title">
+                <i class="fa-solid fa-map-location-dot"></i>
+                Endereço
+              </h2>
+
+              <div class="form-grid">
+                <div class="form-group full-width">
+                  <label for="cep">CEP *</label>
+                  <input
+                    type="text"
+                    id="cep"
+                    name="cep"
+                    required
+                    placeholder="00000-000"
+                  >
+                </div>
+
+                <div class="form-group full-width">
+                  <label for="endereco">Endereço *</label>
+                  <input
+                    type="text"
+                    id="endereco"
+                    name="endereco"
+                    required
+                    placeholder="Rua, número, complemento"
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label for="cidade">Cidade *</label>
+                  <input
+                    type="text"
+                    id="cidade"
+                    name="cidade"
+                    required
+                    placeholder="Sua cidade"
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label for="estado">Estado *</label>
+                  <select id="estado" name="estado" required>
+                    <option value="">Selecione</option>
+                    <option value="PE">Pernambuco</option>
+                    <option value="SP">São Paulo</option>
+                    <option value="RJ">Rio de Janeiro</option>
+                    <option value="MG">Minas Gerais</option>
+                    <option value="RS">Rio Grande do Sul</option>
+                    <option value="PR">Paraná</option>
+                    <option value="SC">Santa Catarina</option>
+                    <option value="BA">Bahia</option>
+                    <option value="CE">Ceará</option>
+                  </select>
+                </div>
+              </div>
+            </section>
+
+            <!-- Pagamento -->
+            <section class="checkout-section">
+              <h2 class="checkout-section-title">
+                <i class="fa-solid fa-credit-card"></i>
+                Forma de pagamento
+              </h2>
+
+              <div class="payment-methods">
+                <label class="payment-option">
+                  <input
+                    type="radio"
+                    name="pagamento"
+                    value="cartao"
+                    checked
+                  >
+                  <div class="payment-card">
+                    <i class="fa-solid fa-credit-card"></i>
+                    <span>Cartão de crédito</span>
+                  </div>
+                </label>
+
+                <label class="payment-option">
+                  <input
+                    type="radio"
+                    name="pagamento"
+                    value="pix"
+                  >
+                  <div class="payment-card">
+                    <i class="fa-solid fa-qrcode"></i>
+                    <span>PIX</span>
+                  </div>
+                </label>
+
+                <label class="payment-option">
+                  <input
+                    type="radio"
+                    name="pagamento"
+                    value="boleto"
+                  >
+                  <div class="payment-card">
+                    <i class="fa-solid fa-barcode"></i>
+                    <span>Boleto</span>
+                  </div>
+                </label>
+              </div>
+
+              <div class="payment-info">
+                <i class="fa-solid fa-circle-info"></i>
+                <p>
+                  O pagamento será processado de forma segura pelo Mercado Pago.
+                </p>
+              </div>
+            </section>
+
+            <button
+              type="submit"
+              id="btnFinalizarPagamento"
+              class="btn-finalizar"
+              disabled
+            >
+              <i class="fa-solid fa-lock"></i>
+              Ir para pagamento seguro
+            </button>
+          </form>
+        </section>
+
+        <!-- Resumo -->
+        <aside class="checkout-summary">
+          <h2 class="checkout-summary-title">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+            Resumo do pedido
+          </h2>
+
+          <div
+            id="checkoutItens"
+            class="checkout-items"
+          >
+            <!-- Itens reais do carrinho entram aqui via checkout.js -->
+          </div>
+
+          <div class="summary-divider"></div>
+
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span id="checkoutSubtotal">R$ 0,00</span>
+          </div>
+
+          <div class="summary-row">
+            <span>Desconto</span>
+            <span id="checkoutDesconto">R$ 0,00</span>
+          </div>
+
+          <div class="summary-row">
+            <span>Frete</span>
+            <span id="checkoutFrete">Grátis</span>
+          </div>
+
+          <div class="summary-divider"></div>
+
+          <div class="summary-row total">
+            <span>Total</span>
+            <span id="checkoutTotal">R$ 0,00</span>
+          </div>
+
+          <div class="security-info">
+            <div class="security-item">
+              <i class="fa-solid fa-lock"></i>
+              <span>Pagamento seguro via Mercado Pago</span>
             </div>
-        </div>
-    </main>
 
-    <!-- Rodapé -->
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2026 Royal Advisory. Todos os direitos reservados.</p>
-        </div>
-    </footer>
+            <div class="security-item">
+              <i class="fa-solid fa-shield-halved"></i>
+              <span>Dados protegidos</span>
+            </div>
 
-    <script src="checkout.js"></script>
+            <div class="security-item">
+              <i class="fa-solid fa-credit-card"></i>
+              <span>Até 12x no cartão</span>
+            </div>
+          </div>
+
+          <a
+            href="carrinho.html"
+            class="btn-voltar"
+          >
+            <i class="fa-solid fa-arrow-left"></i>
+            Voltar ao carrinho
+          </a>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <footer class="rodape">
+    <div class="container">
+      <p>© 2026 Royal Advisory. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="../js/checkout.js"></script>
 </body>
 </html>
