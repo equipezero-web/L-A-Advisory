@@ -208,6 +208,15 @@ function confirmarCompra() {
         alert('✅ Pedido confirmado com sucesso!\n\nEm breve você receberá um e-mail com os detalhes da compra.');
         window.location.href = 'confirmacao.html';
     }, 2000);
+
+  const referenciaAfiliado = obterReferenciaAfiliadoValida();
+
+const pedido = {
+  cliente: dadosDoCliente,
+  itens: carrinho,
+  codigoAfiliado: referenciaAfiliado?.codigoAfiliado || null,
+  produtoIndicado: referenciaAfiliado?.produtoId || null
+};
 }
   });
 });
