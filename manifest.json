@@ -1,14 +1,16 @@
 {
+  "id": "./",
   "name": "L&A Royal Advisory",
   "short_name": "L&A Royal",
-  "description": "Loja Premium e Consultoria Empresarial",
+  "description": "Loja premium e consultoria empresarial.",
   "categories": ["finance", "business", "shopping"],
-  "start_url": "./index.html",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0c1933",
   "theme_color": "#0c1933",
   "orientation": "portrait-primary",
-  "scope": "./",
   "icons": [
     {
       "src": "./logo192.png",
@@ -17,22 +19,10 @@
       "purpose": "any maskable"
     },
     {
-      "src": "./logo192.png",
-      "sizes": "192x192",
+      "src": "./logo512.png",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    },
-    {
-      "src": "./logo512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "./logo512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
     }
   ]
 }
