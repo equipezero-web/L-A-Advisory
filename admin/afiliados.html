@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Afiliados | Painel ADM Royal Advisory</title>
+  <title>Minha Afiliação | Royal Advisory</title>
 
-  <link rel="stylesheet" href="../css/afiliados.css">
+  <link rel="stylesheet" href="css/afiliados.css">
 
   <link
     rel="stylesheet"
@@ -14,143 +14,139 @@
   >
 </head>
 
-<body class="pagina-admin">
-  <header class="topo-admin">
+<body>
+  <header class="topo-principal">
     <div class="container navbar">
-      <a href="../index.html" class="logo-royal">
+      <a href="index.html" class="logo-royal">
         <i class="fa-solid fa-crown"></i>
         <span>Royal Advisory</span>
       </a>
 
-      <span class="identificacao-admin">
-        <i class="fa-solid fa-user-shield"></i>
-        Painel Administrativo
-      </span>
+      <nav class="menu-principal">
+        <a href="index.html">Início</a>
+        <a href="loja.html">Loja</a>
+        <a href="afiliacao.html" class="ativo">Afiliação</a>
+      </nav>
     </div>
   </header>
 
-  <main class="conteudo-admin">
-    <div class="container">
-      <div class="titulo-admin">
-        <div>
-          <span class="titulo-secao-mini">GESTÃO ROYAL ADVISORY</span>
-          <h1>Programa de Afiliados</h1>
-          <p>Analise solicitações, aprove afiliados e acompanhe o programa.</p>
-        </div>
-
-        <a href="../afiliado.html" class="botao-secundario">
-          <i class="fa-solid fa-arrow-up-right-from-square"></i>
-          Abrir página pública
-        </a>
-      </div>
-
-      <nav class="menu-admin">
-        <a href="index.html">
-          <i class="fa-solid fa-chart-pie"></i>
-          Dashboard
-        </a>
-
-        <a href="produtos.html">
-          <i class="fa-solid fa-box"></i>
-          Produtos
-        </a>
-
-        <a href="financeiro.html">
-          <i class="fa-solid fa-wallet"></i>
-          Financeiro
-        </a>
-
-        <a href="afiliados.html" class="ativo">
+  <main>
+    <section class="acesso-afiliado" id="telaAcessoAfiliado">
+      <div class="card-acesso">
+        <div class="card-comissao-icone">
           <i class="fa-solid fa-crown"></i>
-          Afiliados
-        </a>
-      </nav>
-
-      <section class="cards-estatisticas">
-        <article class="card-estatistica">
-          <div class="icone-estatistica azul">
-            <i class="fa-solid fa-hourglass-half"></i>
-          </div>
-          <div>
-            <span>Solicitações pendentes</span>
-            <strong id="totalPendentes">0</strong>
-          </div>
-        </article>
-
-        <article class="card-estatistica">
-          <div class="icone-estatistica dourado">
-            <i class="fa-solid fa-crown"></i>
-          </div>
-          <div>
-            <span>Afiliados aprovados</span>
-            <strong id="totalAprovados">0</strong>
-          </div>
-        </article>
-
-        <article class="card-estatistica">
-          <div class="icone-estatistica vermelho">
-            <i class="fa-solid fa-ban"></i>
-          </div>
-          <div>
-            <span>Solicitações recusadas</span>
-            <strong id="totalRecusados">0</strong>
-          </div>
-        </article>
-      </section>
-
-      <section class="painel-lista">
-        <div class="abas-afiliados">
-          <button class="aba-afiliado ativa" data-status="pendente">
-            Pendentes
-            <span id="contadorPendentes">0</span>
-          </button>
-
-          <button class="aba-afiliado" data-status="aprovado">
-            Aprovados
-            <span id="contadorAprovados">0</span>
-          </button>
-
-          <button class="aba-afiliado" data-status="recusado">
-            Recusados
-            <span id="contadorRecusados">0</span>
-          </button>
         </div>
 
-        <div id="listaAfiliados" class="lista-afiliados"></div>
-      </section>
-    </div>
-  </main>
+        <h1>Área de Afiliação</h1>
 
-  <div class="modal-overlay" id="modalConfirmacao" aria-hidden="true">
-    <section class="modal-verificacao modal-confirmacao">
-      <button
-        type="button"
-        class="modal-fechar"
-        id="fecharModalConfirmacao"
-        aria-label="Fechar"
-      >
-        ×
-      </button>
+        <p>
+          Informe o e-mail aprovado pelo administrador para acessar sua área
+          exclusiva.
+        </p>
 
-      <div class="modal-icone">
-        <i class="fa-solid fa-circle-question"></i>
-      </div>
+        <form id="formAcessoAfiliado">
+          <div class="campo-formulario">
+            <label for="emailAcessoAfiliado">E-mail de afiliado</label>
+            <input
+              type="email"
+              id="emailAcessoAfiliado"
+              placeholder="seuemail@email.com"
+              required
+            >
+          </div>
 
-      <h2 id="tituloConfirmacao">Confirmar ação</h2>
-      <p id="textoConfirmacao"></p>
+          <button type="submit" class="botao-principal">
+            <i class="fa-solid fa-right-to-bracket"></i>
+            Acessar área
+          </button>
+        </form>
 
-      <div class="botoes-confirmacao">
-        <button type="button" class="botao-secundario" id="cancelarAcao">
-          Cancelar
-        </button>
-
-        <button type="button" class="botao-principal" id="confirmarAcao">
-          Confirmar
-        </button>
+        <p class="mensagem-erro" id="mensagemAcesso"></p>
       </div>
     </section>
-  </div>
 
-<script type="module" src="../js/admin-afiliados.js"></script>
+    <section class="painel-afiliado oculto" id="painelAfiliado">
+      <div class="container">
+        <div class="boas-vindas-afiliado">
+          <div>
+            <span class="titulo-secao-mini">PAINEL EXCLUSIVO</span>
+            <h1>Olá, <span id="nomeAfiliadoPainel">Afiliado</span>.</h1>
+            <p>
+              Gere links exclusivos, divulgue produtos e acompanhe os seus
+              resultados.
+            </p>
+          </div>
+
+          <button type="button" id="sairAfiliado" class="botao-secundario">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            Sair
+          </button>
+        </div>
+
+        <section class="codigo-afiliado-box">
+          <div>
+            <span>Seu código exclusivo de afiliado</span>
+            <strong id="codigoAfiliadoPainel">ROYAL-XXXXX</strong>
+          </div>
+
+          <button type="button" id="copiarCodigoAfiliado" class="botao-copiar">
+            <i class="fa-solid fa-copy"></i>
+            Copiar código
+          </button>
+        </section>
+
+        <section class="cards-estatisticas afiliado-estatisticas">
+          <article class="card-estatistica">
+            <div class="icone-estatistica azul">
+              <i class="fa-solid fa-arrow-pointer"></i>
+            </div>
+            <div>
+              <span>Cliques rastreados</span>
+              <strong id="totalCliques">0</strong>
+            </div>
+          </article>
+
+          <article class="card-estatistica">
+            <div class="icone-estatistica dourado">
+              <i class="fa-solid fa-bag-shopping"></i>
+            </div>
+            <div>
+              <span>Pedidos atribuídos</span>
+              <strong id="totalPedidos">0</strong>
+            </div>
+          </article>
+
+          <article class="card-estatistica">
+            <div class="icone-estatistica verde">
+              <i class="fa-solid fa-coins"></i>
+            </div>
+            <div>
+              <span>Comissão pendente</span>
+              <strong id="comissaoPendente">R$ 0,00</strong>
+            </div>
+          </article>
+        </section>
+
+        <section class="secao-catalogo">
+          <div class="cabecalho-catalogo">
+            <div>
+              <span class="titulo-secao-mini">CATÁLOGO EXCLUSIVO</span>
+              <h2>Produtos disponíveis para divulgação</h2>
+            </div>
+
+            <p>
+              Sua comissão é de 20% sobre o valor bruto de cada produto.
+            </p>
+          </div>
+
+          <div class="grade-produtos-afiliado" id="catalogoAfiliado"></div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toastMensagem"></div>
+
+  <script src="js/afiliacao.js"></script>
 </body>
 </html>
