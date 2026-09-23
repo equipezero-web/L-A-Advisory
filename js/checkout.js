@@ -1,222 +1,475 @@
-// URL do seu backend (ajuste depois que colocar no ar)
-const API_BASE = 'https://api.laadvisory.com.br/api';
+const API_BASE = "https://api.laadvisory.com.br/api";
 
-document.addEventListener('DOMContentLoaded', () => {
-  const itensPedidoEl = document.getElementById('itens-pedido');
-  const totalPedidoEl = document.getElementById('total-pedido');
-  const btnFinalizar = document.getElementById('btn-finalizar');
-  const pixArea = document.getElementById('pix-area');
-  const pixQr = document.getElementById('pix-qr');
-  const pixCopiaCola = document.getElementById('pix-copia-cola');
+const CHAVE_CARRINHO = "royal_carrinho";
+const CHAVE_DESCONTO = "royal_desconto";
+const CHAVE_REFERENCIA_AFILIADO = "royal_referencia_afiliado";
 
-  const carrinho = window.obterCarrinho();
+const formCheckout = document.getElementById("formCheckout");
+
+const checkoutItens = document.getElementById("checkoutItens");
+
+const checkoutSubtotal = document.getElementById("checkoutSubtotal");
+const checkoutDesconto = document.getElementById("checkoutDesconto");
+const checkoutFrete = document.getElementById("checkoutFrete");
+const checkoutTotal = document.getElementById("checkoutTotal");
+
+const btnFinalizarPagamento = document.getElementById(
+  "btnFinalizarPagamento"
+);
+
+let carrinho = obterCarrinho();
+let descontoPercentual = Number(
+  localStorage.getItem(CHAVE_DESCONTO) || 0
+);
+
+function obterCarrinho() {
+  try {
+    const dados = JSON.parse(
+      localStorage.getItem(CHAVE_CARRINHO) || "[]"
+    );
+
+    return Array.isArray(dados) ? dados : [];
+
+  } catch {
+    return [];
+  }
+}
+
+function formatarMoeda(valor) {
+  return Number(valor || 0).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL"
+  });
+}
+
+function converterPrecoParaNumero(preco) {
+  if (typeof preco === "number") {
+    return preco;
+  }
+
+  return Number(
+    String(preco || "0")
+      .replace("R$", "")
+      .replace(/\./g, "")
+      .replace(",", ".")
+      .trim()
+  ) || 0;
+}
+
+function escaparHTML(texto = "") {
+  const elemento = document.createElement("div");
+
+  elemento.textContent = texto;
+
+  return elemento.innerHTML;
+}
+
+function calcularResumo() {
+  const subtotal = carrinho.reduce((total, item) => {
+    const preco = converterPrecoParaNumero(item.preco);
+
+    const quantidade = Number(item.quantidade || 1);
+
+    return total + preco * quantidade;
+  }, 0);
+
+  const desconto = subtotal * (descontoPercentual / 100);
+
+  const total = subtotal - desconto;
+
+  return {
+    subtotal,
+    desconto,
+    total
+  };
+}
+
+function renderizarResumoPedido() {
+  if (!checkoutItens) return;
 
   if (carrinho.length === 0) {
-    itensPedidoEl.innerHTML = '<p>Seu carrinho está vazio.</p>';
-    btnFinalizar.disabled = true;
+    checkoutItens.innerHTML = `
+      <div class="checkout-empty">
+        <i class="fa-solid fa-cart-shopping"></i>
+        <p>Seu carrinho está vazio.</p>
+        <a href="carrinho.html">Voltar ao carrinho</a>
+      </div>
+    `;
+
+    checkoutSubtotal.textContent = "R$ 0,00";
+    checkoutDesconto.textContent = "R$ 0,00";
+    checkoutFrete.textContent = "Grátis";
+    checkoutTotal.textContent = "R$ 0,00";
+
+    btnFinalizarPagamento.disabled = true;
+
     return;
   }
 
-  const total = carrinho.reduce((sum, i) => sum + i.preco * (i.quantidade || 1), 0);
-  itensPedidoEl.innerHTML = carrinho
-    .map(i => `<p>${i.nome} — ${i.quantidade || 1}x — R$ ${Number(i.preco).toFixed(2)}</p>`)
-    .join('');
-  totalPedidoEl.textContent = total.toFixed(2).replace('.', ',');
+  checkoutItens.innerHTML = carrinho.map((item) => {
+    const preco = converterPrecoParaNumero(item.preco);
 
-  btnFinalizar.addEventListener('click', async () => {
-    const nome = document.getElementById('nome').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const cpf = document.getElementById('cpf').value.trim();
-    const telefoneRaw = document.getElementById('telefone').value.trim();
+    const quantidade = Number(item.quantidade || 1);
 
-    if (!nome || !email || !cpf || !telefoneRaw) {
-      alert('Preencha todos os dados do cliente.');
-      return;
-    }
+    const imagem = item.imagem || item.img
+      ? `
+        <img
+          src="${escaparHTML(item.imagem || item.img)}"
+          alt="${escaparHTML(item.nome || item.name)}"
+          class="checkout-item-image"
+        >
+      `
+      : `
+        <div class="checkout-item-icon">
+          <i class="fa-solid fa-crown"></i>
+        </div>
+      `;
 
-    const numeros = telefoneRaw.replace(/\D/g, '');
-    if (numeros.length < 10 || numeros.length > 11) {
-      alert('Telefone inválido.');
-      return;
-    }
-    const ddd = numeros.slice(0, 2);
-    const telefone = numeros.slice(2);
+    return `
+      <article class="order-item">
+        ${imagem}
 
-    const formaPagamento = document.querySelector('input[name="forma"]:checked').value;
+        <div class="item-info">
+          <h4>${escaparHTML(item.nome || item.name || "Produto")}</h4>
 
-    btnFinalizar.disabled = true;
-    btnFinalizar.textContent = 'PROCESSANDO...';
+          <p>
+            ${quantidade}x ${formatarMoeda(preco)}
+          </p>
+        </div>
 
-    try {
-      const res = await fetch(`${API_BASE}/pagamentos/criar-pagamento`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          itens: carrinho.map(i => ({
-            nome: i.nome,
-            preco: i.preco,
-            quantidade: i.quantidade || 1
-          })),
-          cliente: { nome, email, cpf, ddd, telefone },
-          formaPagamento
-        })
-      });
+        <strong class="checkout-item-total">
+          ${formatarMoeda(preco * quantidade)}
+        </strong>
+      </article>
+    `;
+  }).join("");
 
-      const data = await res.json();
+  const resumo = calcularResumo();
 
-      if (!res.ok) {
-        throw new Error(data.error || 'Erro ao criar pagamento');
-      }
+  checkoutSubtotal.textContent = formatarMoeda(resumo.subtotal);
 
-      if (formaPagamento === 'pix') {
-        pixArea.style.display = 'block';
-        if (data.pix?.qrCodeBase64) {
-          pixQr.src = `data:image/png;base64,${data.pix.qrCodeBase64}`;
-        }
-        if (data.pix?.qrCode) {
-          pixCopiaCola.value = data.pix.qrCode;
-        } else {
-          pixCopiaCola.value = 'QR Code não disponível. Tente cartão.';
-        }
-        btnFinalizar.textContent = 'AGUARDANDO PAGAMENTO...';
-      } else {
-        window.location.href = data.initPoint;
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Erro ao iniciar pagamento. Tente novamente.');
-      btnFinalizar.disabled = false;
-      btnFinalizar.textContent = 'FINALIZAR PAGAMENTO';
-    }
-    // Mostrar formulário de pagamento
-function mostrarFormularioPagamento(metodo) {
-    // Esconder todos
-    document.getElementById('form-cartao').style.display = 'none';
-    document.getElementById('form-pix').style.display = 'none';
-    document.getElementById('form-boleto').style.display = 'none';
-    
-    // Mostrar selecionado
-    document.getElementById(`form-${metodo}`).style.display = 'block';
+  checkoutDesconto.textContent = formatarMoeda(resumo.desconto);
+
+  checkoutFrete.textContent = "Grátis";
+
+  checkoutTotal.textContent = formatarMoeda(resumo.total);
+
+  btnFinalizarPagamento.disabled = false;
 }
 
-// Máscaras de input
-document.addEventListener('DOMContentLoaded', () => {
-    // Máscara CPF
-    const cpfInput = document.getElementById('cpf');
-    if (cpfInput) {
-        cpfInput.addEventListener('input', (e) => {
-            let value = e.target.value.replace(/\D/g, '');
-            value = value.replace(/(\d{3})(\d)/, '$1.$2');
-            value = value.replace(/(\d{3})(\d)/, '$1.$2');
-            value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-            e.target.value = value;
-        });
-    }
-    
-    // Máscara Telefone
-    const telInput = document.getElementById('telefone');
-    if (telInput) {
-        telInput.addEventListener('input', (e) => {
-            let value = e.target.value.replace(/\D/g, '');
-            value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
-            value = value.replace(/(\d)(\d{4})$/, '$1-$2');
-            e.target.value = value;
-        });
-    }
-    
-    // Máscara CEP
-    const cepInput = document.getElementById('cep');
-    if (cepInput) {
-        cepInput.addEventListener('input', (e) => {
-            let value = e.target.value.replace(/\D/g, '');
-            value = value.replace(/^(\d{5})(\d)/, '$1-$2');
-            e.target.value = value;
-        });
-        
-        // Buscar CEP
-        cepInput.addEventListener('blur', async (e) => {
-            const cep = e.target.value.replace(/\D/g, '');
-            if (cep.length === 8) {
-                try {
-                    const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-                    const data = await response.json();
-                    if (data.erro) {
-                        alert('CEP não encontrado!');
-                        return;
-                    }
-                    document.getElementById('endereco').value = `${data.logradouro}, ${data.localidade} - ${data.uf}`;
-                    document.getElementById('cidade').value = data.localidade;
-                    document.getElementById('estado').value = data.uf;
-                } catch (error) {
-                    console.error('Erro ao buscar CEP:', error);
-                }
-            }
-        });
-    }
-    
-    // Máscara Cartão
-    const cartaoInput = document.getElementById('numero-cartao');
-    if (cartaoInput) {
-        cartaoInput.addEventListener('input', (e) => {
-            let value = e.target.value.replace(/\D/g, '');
-            value = value.replace(/(\d{4})(\d)/, '$1 $2');
-            value = value.replace(/(\d{4})(\d)/, '$1 $2');
-            value = value.replace(/(\d{4})(\d)/, '$1 $2');
-            e.target.value = value.substring(0, 19);
-        });
-    }
-    
-    // Máscara Validade
-    const validadeInput = document.getElementById('validade');
-    if (validadeInput) {
-        validadeInput.addEventListener('input', (e) => {
-            let value = e.target.value.replace(/\D/g, '');
-            value = value.replace(/^(\d{2})(\d)/, '$1/$2');
-            e.target.value = value.substring(0, 5);
-        });
-    }
-});
+function obterReferenciaAfiliadoValida() {
+  try {
+    const referencia = JSON.parse(
+      localStorage.getItem(CHAVE_REFERENCIA_AFILIADO) || "null"
+    );
 
-// Confirmar compra
-function confirmarCompra() {
-    // Validação básica
-    const nome = document.getElementById('nome').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const telefone = document.getElementById('telefone').value.trim();
-    const cpf = document.getElementById('cpf').value.trim();
-    const cep = document.getElementById('cep').value.trim();
-    const endereco = document.getElementById('endereco').value.trim();
-    
-    if (!nome || !email || !telefone || !cpf || !cep || !endereco) {
-        alert('Por favor, preencha todos os campos obrigatórios!');
-        return;
+    if (!referencia?.codigoAfiliado) {
+      return null;
     }
-    
-    // Validação de email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        alert('Por favor, digite um e-mail válido!');
-        return;
+
+    if (
+      referencia.expiraEm &&
+      new Date(referencia.expiraEm) < new Date()
+    ) {
+      localStorage.removeItem(CHAVE_REFERENCIA_AFILIADO);
+
+      return null;
     }
-    
-    // Simular processamento
-    const btnFinalizar = document.querySelector('.btn-finalizar');
-    btnFinalizar.disabled = true;
-    btnFinalizar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
-    
-    setTimeout(() => {
-        alert('✅ Pedido confirmado com sucesso!\n\nEm breve você receberá um e-mail com os detalhes da compra.');
-        window.location.href = 'confirmacao.html';
-    }, 2000);
+
+    return referencia;
+
+  } catch {
+    return null;
+  }
+}
+
+function aplicarMascaraTelefone(input) {
+  let valor = input.value.replace(/\D/g, "");
+
+  if (valor.length > 11) {
+    valor = valor.substring(0, 11);
+  }
+
+  valor = valor.replace(/^(\d{2})(\d)/g, "($1) $2");
+
+  valor = valor.replace(/(\d)(\d{4})$/, "$1-$2");
+
+  input.value = valor;
+}
+
+function aplicarMascaraCPF(input) {
+  let valor = input.value.replace(/\D/g, "");
+
+  if (valor.length > 11) {
+    valor = valor.substring(0, 11);
+  }
+
+  valor = valor.replace(/(\d{3})(\d)/, "$1.$2");
+  valor = valor.replace(/(\d{3})(\d)/, "$1.$2");
+  valor = valor.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+
+  input.value = valor;
+}
+
+function aplicarMascaraCEP(input) {
+  let valor = input.value.replace(/\D/g, "");
+
+  if (valor.length > 8) {
+    valor = valor.substring(0, 8);
+  }
+
+  valor = valor.replace(/^(\d{5})(\d)/, "$1-$2");
+
+  input.value = valor;
+}
+
+async function buscarCEP() {
+  const inputCEP = document.getElementById("cep");
+
+  const cep = inputCEP.value.replace(/\D/g, "");
+
+  if (cep.length !== 8) {
+    return;
+  }
+
+  try {
+    const resposta = await fetch(
+      `https://viacep.com.br/ws/${cep}/json/`
+    );
+
+    const endereco = await resposta.json();
+
+    if (endereco.erro) {
+      alert("CEP não encontrado.");
+
+      return;
+    }
+
+    document.getElementById("endereco").value =
+      `${endereco.logradouro || ""}${endereco.bairro ? ` - ${endereco.bairro}` : ""}`;
+
+    document.getElementById("cidade").value =
+      endereco.localidade || "";
+
+    document.getElementById("estado").value =
+      endereco.uf || "";
+
+  } catch (erro) {
+    console.error("Erro ao buscar CEP:", erro);
+  }
+}
+
+function validarFormulario() {
+  const nome = document.getElementById("nome").value.trim();
+
+  const email = document.getElementById("email").value.trim();
+
+  const telefone = document
+    .getElementById("telefone")
+    .value
+    .replace(/\D/g, "");
+
+  const cpf = document
+    .getElementById("cpf")
+    .value
+    .replace(/\D/g, "");
+
+  const cep = document
+    .getElementById("cep")
+    .value
+    .replace(/\D/g, "");
+
+  const endereco = document
+    .getElementById("endereco")
+    .value
+    .trim();
+
+  const cidade = document
+    .getElementById("cidade")
+    .value
+    .trim();
+
+  const estado = document
+    .getElementById("estado")
+    .value
+    .trim();
+
+  if (
+    !nome ||
+    !email ||
+    !telefone ||
+    !cpf ||
+    !cep ||
+    !endereco ||
+    !cidade ||
+    !estado
+  ) {
+    alert("Preencha todos os campos obrigatórios.");
+
+    return false;
+  }
+
+  if (telefone.length < 10 || telefone.length > 11) {
+    alert("Informe um telefone válido.");
+
+    return false;
+  }
+
+  if (cpf.length !== 11) {
+    alert("Informe um CPF válido.");
+
+    return false;
+  }
+
+  if (cep.length !== 8) {
+    alert("Informe um CEP válido.");
+
+    return false;
+  }
+
+  return true;
+}
+
+async function criarPagamento(event) {
+  event.preventDefault();
+
+  if (carrinho.length === 0) {
+    alert("Seu carrinho está vazio.");
+
+    return;
+  }
+
+  if (!validarFormulario()) {
+    return;
+  }
+
+  const nome = document.getElementById("nome").value.trim();
+
+  const email = document
+    .getElementById("email")
+    .value
+    .trim()
+    .toLowerCase();
+
+  const telefoneNumeros = document
+    .getElementById("telefone")
+    .value
+    .replace(/\D/g, "");
+
+  const cpf = document
+    .getElementById("cpf")
+    .value
+    .replace(/\D/g, "");
+
+  const formaPagamento = document.querySelector(
+    'input[name="pagamento"]:checked'
+  ).value;
 
   const referenciaAfiliado = obterReferenciaAfiliadoValida();
 
-const pedido = {
-  cliente: dadosDoCliente,
-  itens: carrinho,
-  codigoAfiliado: referenciaAfiliado?.codigoAfiliado || null,
-  produtoIndicado: referenciaAfiliado?.produtoId || null
-};
+  const textoOriginalBotao = btnFinalizarPagamento.innerHTML;
+
+  try {
+    btnFinalizarPagamento.disabled = true;
+
+    btnFinalizarPagamento.innerHTML = `
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      Criando pagamento seguro...
+    `;
+
+    const resposta = await fetch(
+      `${API_BASE}/pagamentos/criar-pagamento`,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          itens: carrinho.map((item) => {
+            return {
+              id: item.id,
+
+              nome: item.nome || item.name,
+
+              preco: converterPrecoParaNumero(item.preco),
+
+              quantidade: Number(item.quantidade || 1)
+            };
+          }),
+
+          cliente: {
+            nome,
+            email,
+            cpf,
+            ddd: telefoneNumeros.slice(0, 2),
+            telefone: telefoneNumeros.slice(2)
+          },
+
+          formaPagamento,
+
+          codigoAfiliado:
+            referenciaAfiliado?.codigoAfiliado || null,
+
+          produtoIndicado:
+            referenciaAfiliado?.produtoId || null
+        })
+      }
+    );
+
+    const dados = await resposta.json();
+
+    if (!resposta.ok) {
+      throw new Error(
+        dados.error || "Não foi possível criar o pagamento."
+      );
+    }
+
+    if (!dados.initPoint) {
+      throw new Error(
+        "O Mercado Pago não retornou o link de pagamento."
+      );
+    }
+
+    window.location.href = dados.initPoint;
+
+  } catch (erro) {
+    console.error("Erro ao criar pagamento:", erro);
+
+    alert(
+      erro.message ||
+      "Erro ao iniciar o pagamento. Tente novamente."
+    );
+
+    btnFinalizarPagamento.disabled = false;
+
+    btnFinalizarPagamento.innerHTML = textoOriginalBotao;
+  }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderizarResumoPedido();
+
+  const inputTelefone = document.getElementById("telefone");
+
+  const inputCPF = document.getElementById("cpf");
+
+  const inputCEP = document.getElementById("cep");
+
+  inputTelefone.addEventListener("input", () => {
+    aplicarMascaraTelefone(inputTelefone);
   });
+
+  inputCPF.addEventListener("input", () => {
+    aplicarMascaraCPF(inputCPF);
+  });
+
+  inputCEP.addEventListener("input", () => {
+    aplicarMascaraCEP(inputCEP);
+  });
+
+  inputCEP.addEventListener("blur", buscarCEP);
+
+  formCheckout.addEventListener("submit", criarPagamento);
 });
