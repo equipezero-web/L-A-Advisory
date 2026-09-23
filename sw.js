@@ -1,107 +1,109 @@
-const VERSAO_CACHE = "royal-advisory-v4";
+const VERSAO_CACHE = "royal-advisory-v5";
 
 const ARQUIVOS_INICIAIS = [
-    "./",
-    "./index.html",
-    "./manifest.json"
+  "./",
+  "./index.html",
+  "./manifest.json",
+  "./logo192.png",
+  "./logo512.png"
 ];
 
-self.addEventListener("install", (event) => {
-    event.waitUntil(
-        caches.open(VERSAO_CACHE)
-            .then((cache) => {
-                console.log("Instalando cache:", VERSAO_CACHE);
+const ORIGEM_ATUAL = self.location.origin;
 
-                return cache.addAll(ARQUIVOS_INICIAIS);
-            })
-            .then(() => {
-                return self.skipWaiting();
-            })
-    );
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches
+      .open(VERSAO_CACHE)
+      .then((cache) => cache.addAll(ARQUIVOS_INICIAIS))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener("activate", (event) => {
-    event.waitUntil(
-        caches.keys()
-            .then((nomesDosCaches) => {
-                return Promise.all(
-                    nomesDosCaches.map((nomeDoCache) => {
-                        if (nomeDoCache !== VERSAO_CACHE) {
-                            console.log("Apagando cache antigo:", nomeDoCache);
+  event.waitUntil(
+    caches
+      .keys()
+      .then((nomesDosCaches) =>
+        Promise.all(
+          nomesDosCaches.map((nomeDoCache) => {
+            if (nomeDoCache !== VERSAO_CACHE) {
+              return caches.delete(nomeDoCache);
+            }
 
-                            return caches.delete(nomeDoCache);
-                        }
-
-                        return null;
-                    })
-                );
-            })
-            .then(() => {
-                return self.clients.claim();
-            })
-    );
+            return null;
+          })
+        )
+      )
+      .then(() => self.clients.claim())
+  );
 });
 
 self.addEventListener("message", (event) => {
-    if (event.data && event.data.tipo === "ATUALIZAR_AGORA") {
-        self.skipWaiting();
-    }
+  if (event.data?.tipo === "ATUALIZAR_AGORA") {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener("fetch", (event) => {
-    if (event.request.method !== "GET") {
-        return;
-    }
+  const requisicao = event.request;
+  const url = new URL(requisicao.url);
 
-    if (event.request.url.includes("firestore.googleapis.com")) {
-        return;
-    }
+  if (requisicao.method !== "GET") {
+    return;
+  }
 
-    if (event.request.url.includes("firebase.googleapis.com")) {
-        return;
-    }
+  if (url.origin !== ORIGEM_ATUAL) {
+    return;
+  }
 
-    if (event.request.url.includes("identitytoolkit.googleapis.com")) {
-        return;
-    }
+  if (
+    url.pathname.includes("/api/") ||
+    url.hostname.includes("firestore.googleapis.com") ||
+    url.hostname.includes("firebase.googleapis.com") ||
+    url.hostname.includes("identitytoolkit.googleapis.com")
+  ) {
+    return;
+  }
 
-    event.respondWith(
-        fetch(event.request)
-            .then((respostaDaRede) => {
-                if (!respostaDaRede || respostaDaRede.status !== 200) {
-                    return respostaDaRede;
-                }
+  event.respondWith(
+    fetch(requisicao)
+      .then((respostaDaRede) => {
+        if (
+          !respostaDaRede ||
+          respostaDaRede.status !== 200 ||
+          respostaDaRede.type !== "basic"
+        ) {
+          return respostaDaRede;
+        }
 
-                const copiaResposta = respostaDaRede.clone();
+        const copiaResposta = respostaDaRede.clone();
 
-                caches.open(VERSAO_CACHE)
-                    .then((cache) => {
-                        cache.put(event.request, copiaResposta);
-                    });
+        caches.open(VERSAO_CACHE).then((cache) => {
+          cache.put(requisicao, copiaResposta);
+        });
 
-                return respostaDaRede;
-            })
-            .catch(() => {
-                return caches.match(event.request)
-                    .then((respostaDoCache) => {
-                        if (respostaDoCache) {
-                            return respostaDoCache;
-                        }
+        return respostaDaRede;
+      })
+      .catch(async () => {
+        const respostaDoCache = await caches.match(requisicao);
 
-                        if (event.request.mode === "navigate") {
-                            return caches.match("./index.html");
-                        }
+        if (respostaDoCache) {
+          return respostaDoCache;
+        }
 
-                        return new Response(
-                            "Você está offline e este conteúdo não está salvo.",
-                            {
-                                status: 503,
-                                headers: {
-                                    "Content-Type": "text/plain; charset=utf-8"
-                                }
-                            }
-                        );
-                    });
-            })
-    );
+        if (requisicao.mode === "navigate") {
+          return caches.match("./index.html");
+        }
+
+        return new Response(
+          "Você está offline e este conteúdo ainda não foi salvo neste dispositivo.",
+          {
+            status: 503,
+            headers: {
+              "Content-Type": "text/plain; charset=utf-8"
+            }
+          }
+        );
+      })
+  );
 });
