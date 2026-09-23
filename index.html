@@ -1864,7 +1864,20 @@ window.handleAddProduct = async function(e) {
                     `).join('') || '<p class="text-slate-400 text-sm">Sem dados</p>';
             }
         }
+function abrirModalVerificacao() {
+  document.getElementById("modalVerificacao").classList.add("ativo");
+}
 
+function fecharModalVerificacao() {
+  document.getElementById("modalVerificacao").classList.remove("ativo");
+}
+
+document.getElementById("fecharModal").addEventListener("click", fecharModalVerificacao);
+
+document
+  .getElementById("continuarNavegando")
+  .addEventListener("click", fecharModalVerificacao);
+    
         // INICIALIZAÇÃO ÚNICA DA PÁGINA
         window.addEventListener('DOMContentLoaded', () => {
             if (sessionStorage.getItem('adminSession') === 'true') isAdminLoggedIn = true;
