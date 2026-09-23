@@ -154,9 +154,19 @@
 
     <div class="flex items-center gap-3">
       <!-- Links de navegação -->
-      <a href="loja.html" class="hidden sm:block text-amber-400 hover:text-amber-300 transition text-sm font-medium border border-amber-400/30 hover:border-amber-400/60 px-3 py-1.5 rounded-full">
-        Loja
-      </a>
+     <a
+    href="#loja"
+    class="hidden sm:block text-amber-400 hover:text-amber-300 transition text-sm font-medium border border-amber-400/30 hover:border-amber-400/60 px-3 py-1.5 rounded-full"
+>
+    Loja
+</a>
+        <a
+    href="afiliado.html"
+    class="hidden sm:block text-amber-400 hover:text-amber-300 transition text-sm font-medium border border-amber-400/30 hover:border-amber-400/60 px-3 py-1.5 rounded-full"
+>
+    <i data-lucide="crown" class="w-4 h-4 inline mr-1"></i>
+    Seja Afiliado
+</a>
       <a href="carrinho.html" class="hidden sm:block text-amber-400 hover:text-amber-300 transition text-sm font-medium border border-amber-400/30 hover:border-amber-400/60 px-3 py-1.5 rounded-full">
         Carrinho
       </a>
@@ -515,18 +525,50 @@
                 </div>
             </div>
 
-            <!-- ABAS -->
-            <div class="flex gap-2 mb-6">
-                <button onclick="switchTab('produtos')" id="tab-produtos" class="flex-1 py-3 px-4 rounded-xl font-bold text-sm tab-active transition">
-                    <i data-lucide="package" class="w-4 h-4 inline mr-2"></i>Produtos
-                </button>
-                <button onclick="switchTab('consultorias')" id="tab-consultorias" class="flex-1 py-3 px-4 rounded-xl font-bold text-sm tab-inactive transition">
-                    <i data-lucide="briefcase" class="w-4 h-4 inline mr-2"></i>Consultorias
-                </button>
-                <button onclick="switchTab('financeiro')" id="tab-financeiro" class="flex-1 py-3 px-4 rounded-xl font-bold text-sm tab-inactive transition">
-                    <i data-lucide="trending-up" class="w-4 h-4 inline mr-2"></i>Financeiro
-                </button>
-            </div>
+<!-- ABAS DO PAINEL ADMINISTRATIVO -->
+<div class="flex gap-2 mb-6 overflow-x-auto pb-1">
+
+    <button
+        type="button"
+        onclick="switchTab('produtos')"
+        id="tab-produtos"
+        class="flex-1 min-w-max py-3 px-4 rounded-xl font-bold text-sm tab-active transition"
+    >
+        <i data-lucide="package" class="w-4 h-4 inline mr-2"></i>
+        Produtos
+    </button>
+
+    <button
+        type="button"
+        onclick="switchTab('consultorias')"
+        id="tab-consultorias"
+        class="flex-1 min-w-max py-3 px-4 rounded-xl font-bold text-sm tab-inactive transition"
+    >
+        <i data-lucide="briefcase" class="w-4 h-4 inline mr-2"></i>
+        Consultorias
+    </button>
+
+    <button
+        type="button"
+        onclick="switchTab('financeiro')"
+        id="tab-financeiro"
+        class="flex-1 min-w-max py-3 px-4 rounded-xl font-bold text-sm tab-inactive transition"
+    >
+        <i data-lucide="trending-up" class="w-4 h-4 inline mr-2"></i>
+        Financeiro
+    </button>
+
+    <button
+        type="button"
+        onclick="switchTab('afiliados')"
+        id="tab-afiliados"
+        class="flex-1 min-w-max py-3 px-4 rounded-xl font-bold text-sm tab-inactive transition"
+    >
+        <i data-lucide="crown" class="w-4 h-4 inline mr-2"></i>
+        Afiliados
+    </button>
+
+</div>
 
             <!-- CONTEÚDO -->
             <div class="flex-grow">
@@ -534,12 +576,35 @@
                 <div id="content-produtos" class="tab-content">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div>
-                            <h4 class="font-bold text-lg mb-4 flex items-center gap-2">
-                                <i data-lucide="circle-plus" class="w-5 h-5 text-amber-600"></i>
- <h4 class="font-bold text-slate-900 text-lg mb-3">Adicionar Produto</h4>
+                            <h4 class="font-bold text-slate-900 text-lg mb-3 flex items-center gap-2">
+    <i data-lucide="circle-plus" class="w-5 h-5 text-amber-600"></i>
+    Adicionar Produto
+</h4>
 <form onsubmit="handleAddProduct(event)" class="space-y-3">
     <input type="text" id="adminProdName" required placeholder="Nome do Produto" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500">
     <input type="text" id="adminProdPrice" required placeholder="Preço (R$ 1.850,00)" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500">
+    <input
+    type="number"
+    id="adminProdGrossValue"
+    required
+    min="0"
+    step="0.01"
+    placeholder="Valor bruto para afiliado (ex: 100.00)"
+    class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500"
+>
+    <select
+    id="adminProdAffiliateEnabled"
+    required
+    class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500 bg-white text-slate-700"
+>
+    <option value="true" selected>
+        Produto disponível para afiliados
+    </option>
+
+    <option value="false">
+        Produto não participa do programa de afiliados
+    </option>
+</select>
     
     <!-- CAMPO DE SELEÇÃO DE CATEGORIA -->
     <select id="adminProdCategory" required class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500 bg-white text-slate-700">
@@ -584,27 +649,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="flex gap-2 mb-6">
-    
-    <button
-        onclick="switchTab('financeiro')"
-        id="tab-financeiro"
-        class="flex-1 py-3 px-4 rounded-xl font-bold text-sm tab-inactive transition"
-    >
-        <i data-lucide="trending-up" class="w-4 h-4 inline mr-2"></i>
-        Financeiro
-    </button>
-
-    <button
-        onclick="switchTab('afiliados')"
-        id="tab-afiliados"
-        class="flex-1 py-3 px-4 rounded-xl font-bold text-sm tab-inactive transition"
-    >
-        <i data-lucide="crown" class="w-4 h-4 inline mr-2"></i>
-        Afiliados
-    </button>
-
-</div>
 
                 <!-- ABA CONSULTORIAS -->
                 <div id="content-consultorias" class="tab-content hidden">
@@ -657,15 +701,11 @@
                                     </div>
                                     <div class="text-sm text-slate-500">Receita: <span id="receitaEstrategico" class="font-bold">R$ 0</span></div>
                                 </div>
-                            </div>
-                        </div>
-
+                                
                         <div>
                             <h4 class="font-bold text-lg mb-4">Empresas/Clientes que Solicitaram</h4>
                             <div id="consultingClientsList" class="space-y-2 max-h-96 overflow-y-auto"></div>
                         </div>
-                    </div>
-                </div>
 
                 <!-- ABA FINANCEIRO -->
                 <div id="content-financeiro" class="tab-content hidden">
@@ -687,9 +727,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
 
                     <!-- ABA AFILIADO -->
     <section id="content-afiliados" class="tab-content hidden">
@@ -805,7 +842,9 @@
             </div>
         </div>
     </div>
-
+  </div>
+</div>
+                        
     <!-- MODAL CARRINHO -->
     <div id="cartModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white text-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl relative border-2 border-amber-400/30">
@@ -854,8 +893,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const catalogoRef = doc(db, "site", "catalogo");
-
-        const ADMIN_CREDENTIALS = { email: 'adm.la201@royaladvisory.com', password: 'm#vYBa0HvjEj' };
 
         // ESTADO GLOBAL DA APLICAÇÃO (COM PROPRIEDADE CATEGORY)
         let products = [
@@ -1097,19 +1134,6 @@
             isAdminLoggedIn ? toggleAdminModal() : document.getElementById('loginModal').classList.remove('hidden');
         };
 
-        window.handleLogin = function(e) {
-            e.preventDefault();
-            if (document.getElementById('adminEmail').value === ADMIN_CREDENTIALS.email && 
-                document.getElementById('adminPassword').value === ADMIN_CREDENTIALS.password) {
-                isAdminLoggedIn = true;
-                closeLoginModal();
-                toggleAdminModal();
-                sessionStorage.setItem('adminSession', 'true');
-            } else {
-                alert('❌ Credenciais inválidas!');
-            }
-        };
-
         window.closeLoginModal = function() { document.getElementById('loginModal').classList.add('hidden'); };
         window.openNavigationModal = function() { document.getElementById('navModal').classList.remove('hidden'); };
         window.closeNavigationModal = function() { document.getElementById('navModal').classList.add('hidden'); };
@@ -1279,99 +1303,18 @@ document.getElementById("fecharModal").addEventListener("click", fecharModalVeri
 document
   .getElementById("continuarNavegando")
   .addEventListener("click", fecharModalVerificacao);
-
-            // INICIALIZAÇÃO ÚNICA DA PÁGINA
-    usuarios = {
-  id: "user_001",
-  nome: "João Silva",
-  email: "joao@email.com",
-  telefone: "(81) 99999-9999",
-  senhaHash: "senha_criptografada_no_servidor",
-  perfil: "cliente", // cliente | afiliado | admin
-  criadoEm: "2026-09-23T12:00:00.000Z"
-}
-
-            // TABELA DE USUÁRIOS
-    solicitacoesAfiliacao = {
-  id: "sol_001",
-  nome: "João Silva",
-  email: "joao@email.com",
-  telefone: "(81) 99999-9999",
-  nascimento: "2000-08-15",
-  motivacao: "Quero divulgar os produtos para a minha audiência...",
-  status: "pendente", // pendente | aprovado | recusado
-  criadoEm: "2026-09-23T12:00:00.000Z",
-  analisadoEm: null,
-  analisadoPor: null
-}
-
-            // TABELA DE SOLICITAÇÕES
-    produtos = {
-  id: "prod_001",
-  nome: "Curso Royal Advisory",
-  descricao: "Curso completo de estratégia e posicionamento.",
-  precoFinal: 697.00,
-  valorBruto: 350.00,
-  comissaoPercentual: 20,
-  comissaoValor: 70.00,
-  tipo: "loja", // loja | consultoria
-  afiliavel: true,
-  ativo: true,
-  imagem: "curso-royal.jpg"
-}
-
-                // PRODUTOS DA LOJA
-    produtos = {
-  id: "prod_001",
-  nome: "Curso Royal Advisory",
-  descricao: "Curso completo de estratégia e posicionamento.",
-  precoFinal: 697.00,
-  valorBruto: 350.00,
-  comissaoPercentual: 20,
-  comissaoValor: 70.00,
-  tipo: "loja", // loja | consultoria
-  afiliavel: true,
-  ativo: true,
-  imagem: "curso-royal.jpg"
-}
-
-                    // PARA CONSULTORIAS
-    {
-  id: "serv_001",
-  nome: "Consultoria Estratégica",
-  precoFinal: 1500.00,
-  tipo: "consultoria",
-  afiliavel: false
-}
-
-                        // VENDAS RASTREADAS
-    pedidos = {
-  id: "pedido_001",
-  clienteId: "cliente_001",
-  produtoId: "prod_001",
-  afiliadoId: "user_020",
-  codigoAfiliado: "ROYAL-JOAO-8K2M",
-  valorPago: 697.00,
-  valorBrutoProduto: 350.00,
-  percentualComissao: 20,
-  valorComissao: 70.00,
-  statusPagamento: "pago", // pendente | pago | cancelado | reembolsado
-  statusComissao: "pendente", // pendente | aprovada | paga | cancelada
-  criadoEm: "2026-09-23T12:00:00.000Z"
-}
-
-    function switchTab(tab) {
-    const tabs = [
-        "dashboard",
+    
+window.switchTab = function(tab) {
+    const abas = [
         "produtos",
-        "pedidos",
+        "consultorias",
         "financeiro",
         "afiliados"
     ];
 
-    tabs.forEach((item) => {
-        const botao = document.getElementById(`tab-${item}`);
-        const conteudo = document.getElementById(`content-${item}`);
+    abas.forEach((nomeAba) => {
+        const botao = document.getElementById(`tab-${nomeAba}`);
+        const conteudo = document.getElementById(`content-${nomeAba}`);
 
         if (botao) {
             botao.classList.remove("tab-active");
@@ -1395,14 +1338,22 @@ document
         conteudoAtivo.classList.remove("hidden");
     }
 
-    if (tab === "afiliados") {
-        renderizarAfiliados();
+    if (tab === "consultorias") {
+        updateConsultingDashboard();
     }
 
-    if (typeof lucide !== "undefined") {
+    if (tab === "financeiro") {
+        updateFinancialDashboard();
+    }
+
+    if (tab === "afiliados") {
+        carregarAfiliadosFirebase();
+    }
+
+    if (window.lucide) {
         lucide.createIcons();
     }
-}
+};
     
         // INICIALIZAÇÃO ÚNICA DA PÁGINA
         window.addEventListener('DOMContentLoaded', () => {
@@ -1418,110 +1369,8 @@ document
 
             if (window.lucide) lucide.createIcons();
         });
-    </script>
-    function obterSolicitacoesAfiliados() {
-    const dados = localStorage.getItem("royal_solicitacoes_afiliados");
-
-    return dados ? JSON.parse(dados) : [];
-}
-
-function filtrarAfiliados() {
-    const filtro = document.getElementById("filtroAfiliados").value;
-    renderizarAfiliados(filtro);
-}
-
-function renderizarAfiliados(status = "pendente") {
-    const lista = document.getElementById("listaAfiliados");
-
-    if (!lista) return;
-
-    const solicitacoes = obterSolicitacoesAfiliados();
-
-    const filtrados = status === "todos"
-        ? solicitacoes
-        : solicitacoes.filter((afiliado) => afiliado.status === status);
-
-    const pendentes = solicitacoes.filter((item) => item.status === "pendente");
-    const aprovados = solicitacoes.filter((item) => item.status === "aprovado");
-
-    document.getElementById("totalPendentes").textContent = pendentes.length;
-    document.getElementById("totalAprovados").textContent = aprovados.length;
-
-    if (filtrados.length === 0) {
-        lista.innerHTML = `
-            <div class="text-center py-12 text-slate-500">
-                <i data-lucide="folder-open" class="w-12 h-12 mx-auto mb-3 text-yellow-500"></i>
-                <p class="font-semibold">Nenhuma solicitação encontrada.</p>
-            </div>
-        `;
-
-        lucide.createIcons();
-        return;
-    }
 
     lista.innerHTML = filtrados.map((afiliado) => `
-        <article class="border border-slate-200 rounded-2xl p-5">
-
-            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-
-                <div>
-                    <span class="inline-flex px-3 py-1 rounded-full text-xs font-bold ${
-                        afiliado.status === "pendente"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : afiliado.status === "aprovado"
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-red-100 text-red-700"
-                    }">
-                        ${afiliado.status}
-                    </span>
-
-                    <h4 class="text-lg font-bold text-slate-900 mt-2">
-                        ${afiliado.nome}
-                    </h4>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3 text-sm text-slate-600">
-                        <p><strong>E-mail:</strong> ${afiliado.email}</p>
-                        <p><strong>Telefone:</strong> ${afiliado.telefone}</p>
-                        <p><strong>Nascimento:</strong> ${afiliado.nascimento}</p>
-                        <p><strong>Solicitado em:</strong> ${new Date(afiliado.criadoEm).toLocaleDateString("pt-BR")}</p>
-                    </div>
-                </div>
-
-                ${afiliado.status === "pendente" ? `
-                    <div class="flex gap-2">
-                        <button
-                            onclick="aprovarAfiliado('${afiliado.id}')"
-                            class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-bold transition"
-                        >
-                            <i data-lucide="check" class="w-4 h-4 inline mr-1"></i>
-                            Aceitar
-                        </button>
-
-                        <button
-                            onclick="recusarAfiliado('${afiliado.id}')"
-                            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-bold transition"
-                        >
-                            <i data-lucide="x" class="w-4 h-4 inline mr-1"></i>
-                            Recusar
-                        </button>
-                    </div>
-                ` : ""}
-            </div>
-
-            <div class="bg-slate-50 border-l-4 border-yellow-500 p-4 rounded-r-xl mt-4">
-                <p class="font-bold text-sm text-slate-800 mb-1">
-                    Por que deseja ser afiliado?
-                </p>
-
-                <p class="text-sm text-slate-600">
-                    ${afiliado.motivacao}
-                </p>
-            </div>
-
-        </article>
-    `).join("");
-
-    lucide.createIcons();
-}
+    </script>
 </body>
 </html>
