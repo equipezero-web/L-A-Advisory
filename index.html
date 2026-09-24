@@ -3530,11 +3530,11 @@
                             </p>
 
                             <p
-                                id="userMenuEmail"
-                                class="text-xs text-slate-300 mt-1"
-                            >
-                                usuario@email.com
-                            </p>
+    id="userMenuEmail"
+    class="text-xs text-slate-300 mt-1"
+>
+    usuario@email.com
+</p>
                         </div>
                     </div>
 
@@ -3667,12 +3667,12 @@
                         Meu Perfil
                     </h3>
 
-                    <p
-                        id="profileHeaderEmail"
-                        class="text-sm text-slate-500 mt-1"
-                    >
-                        usuario@email.com
-                    </p>
+                   <p
+    id="profileHeaderEmail"
+    class="text-sm text-slate-500 mt-1"
+>
+    usuario@email.com
+</p>
                 </div>
             </div>
 
@@ -4270,12 +4270,12 @@
                             Painel do Afiliado
                         </h3>
 
-                        <p
-                            id="affiliateHeaderEmail"
-                            class="text-sm text-slate-500 mt-1"
-                        >
-                            afiliado@email.com
-                        </p>
+                       <p
+    id="affiliateHeaderEmail"
+    class="text-sm text-slate-500 mt-1"
+>
+    afiliado@email.com
+</p>
                     </div>
                 </div>
 
@@ -4901,12 +4901,12 @@
                             Painel Administrativo
                         </h3>
 
-                        <p
-                            id="adminHeaderEmail"
-                            class="text-sm text-slate-500 mt-1"
-                        >
-                            admin@laroyaladvisory.com
-                        </p>
+                       <p
+    id="adminHeaderEmail"
+    class="text-sm text-slate-500 mt-1"
+>
+    admin@laroyaladvisory.com
+</p>
                     </div>
                 </div>
 
@@ -4928,7 +4928,7 @@
             <div class="flex flex-wrap gap-2 mb-6 border-b border-slate-200 pb-2">
                 <button
                     type="button"
-                    onclick="switchAdminTab('admin-dashboard')"
+                    onclick="switchAdminTab('admin-dashboard', this)"
                     class="admin-tab px-4 py-2 rounded-lg text-sm font-bold bg-slate-900 text-amber-400"
                 >
                     <i
@@ -4941,7 +4941,7 @@
 
                 <button
                     type="button"
-                    onclick="switchAdminTab('admin-users')"
+                    onclick="switchAdminTab('admin-users', this)"
                     class="admin-tab px-4 py-2 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-50"
                 >
                     <i
@@ -4954,7 +4954,7 @@
 
                 <button
                     type="button"
-                    onclick="switchAdminTab('admin-products')"
+                    onclick="switchAdminTab('admin-products', this)"
                     class="admin-tab px-4 py-2 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-50"
                 >
                     <i
@@ -4967,7 +4967,7 @@
 
                 <button
                     type="button"
-                    onclick="switchAdminTab('admin-orders')"
+                    onclick="switchAdminTab('admin-orders', this)"
                     class="admin-tab px-4 py-2 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-50"
                 >
                     <i
@@ -4980,7 +4980,7 @@
 
                 <button
                     type="button"
-                    onclick="switchAdminTab('admin-affiliates')"
+                    onclick="switchAdminTab('admin-affiliates', this)"
                     class="admin-tab px-4 py-2 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-50"
                 >
                     <i
@@ -4993,7 +4993,7 @@
 
                 <button
                     type="button"
-                    onclick="switchAdminTab('admin-reports')"
+                    onclick="switchAdminTab('admin-reports', this)"
                     class="admin-tab px-4 py-2 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-50"
                 >
                     <i
@@ -5006,7 +5006,7 @@
 
                 <button
                     type="button"
-                    onclick="switchAdminTab('admin-settings')"
+                    onclick="switchAdminTab('admin-settings', this)"
                     class="admin-tab px-4 py-2 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-50"
                 >
                     <i
@@ -5229,10 +5229,11 @@
             </section>
 
             <!-- PEDIDOS -->
-            <section
-                id="admin-orders"
-                class="admin-section hidden space-y-5"
-            >
+          <select
+    id="adminOrdersFilter"
+    onchange="refreshAdminOrders()"
+    class="px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-amber-500 bg-white"
+>
                 <div class="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
                     <h4 class="font-bold text-xl text-slate-900">
                         Gestão de Pedidos
@@ -5329,10 +5330,11 @@
                     </h4>
 
                     <div class="flex gap-2">
-                        <select
-                            id="adminAffiliatesFilter"
-                            class="px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-amber-500 bg-white"
-                        >
+                       <select
+    id="adminAffiliatesFilter"
+    onchange="refreshAdminAffiliates()"
+    class="px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-amber-500 bg-white"
+>
                             <option value="all">
                                 Todos
                             </option>
@@ -5757,15 +5759,15 @@
                             Comissão de afiliado (%)
                         </label>
 
-                        <input
-                            type="number"
-                            id="adminProductCommission"
-                            required
-                            min="0"
-                            max="100"
-                            step="0.01"
-                            class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-amber-500"
-                        >
+                     <input
+    type="number"
+    id="adminProductCommission"
+    min="0"
+    max="100"
+    step="0.01"
+    value="0"
+    class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-amber-500"
+>
                     </div>
 
                     <div class="sm:col-span-2">
@@ -6407,10 +6409,10 @@
                     </div>
                 </div>
 
-                <div
-                      id="adminUserMessage"
-                    class="hidden p-4 rounded-xl text-sm"
-                ></div>
+              <div
+    id="adminUserMessage"
+    class="hidden p-4 rounded-xl text-sm"
+></div>
 
                 <div class="flex flex-col sm:flex-row gap-3 pt-2">
                     <button
@@ -6502,16 +6504,57 @@
             }
         }
 
-        function initializeApp() {
-            if (!state.products || state.products.length === 0) {
-                initializeDefaultProducts();
-            }
+        function initializeDefaultAdmin() {
+    const adminEmail = 'SEU_EMAIL_ADMIN@EXEMPLO.COM'.toLowerCase();
 
-            updateCartIcon();
-            updateAuthUI();
-            handleCookieConsent();
-            setupScrollListener();
+    const existingAdmin = state.users.find(user =>
+        user.email?.toLowerCase() === adminEmail &&
+        user.role === 'admin'
+    );
+
+    if (existingAdmin) {
+        return;
+    }
+
+    const defaultAdmin = {
+        id: 'admin_default',
+        fullName: 'Administrador L&A',
+        email: admin@laroyaladvisory.com,
+        password: 'Admin8924',
+        phone: '',
+        cpf: '',
+        role: 'admin',
+        status: 'active',
+        createdAt: new Date().toISOString(),
+        lastAccess: null,
+        address: {
+            zipCode: '',
+            street: '',
+            number: '',
+            complement: '',
+            neighborhood: '',
+            city: '',
+            state: ''
         }
+    };
+
+    state.users.push(defaultAdmin);
+    saveStateToStorage();
+}
+
+function initializeApp() {
+    initializeDefaultAdmin();
+
+    if (!state.products || state.products.length === 0) {
+        initializeDefaultProducts();
+    }
+
+    renderCatalog();
+    updateCartIcon();
+    updateAuthUI();
+    handleCookieConsent();
+    setupScrollListener();
+}
 
         function initializeDefaultProducts() {
             state.products = [
@@ -7019,13 +7062,23 @@
             );
 
             if (user) {
-                state.currentUser = { ...user, password: undefined };
-                saveStateToStorage();
-                updateAuthUI();
-                closeAuthModal();
-                openAdminDashboard();
-                showAuthMessage('Login administrativo realizado!', 'success');
-            } else {
+    state.currentUser = { ...user, password: undefined };
+    state.currentUser.lastAccess = new Date().toISOString();
+
+    const savedUserIndex = state.users.findIndex(savedUser => savedUser.id === user.id);
+
+    if (savedUserIndex !== -1) {
+        state.users[savedUserIndex].lastAccess = state.currentUser.lastAccess;
+    }
+
+    saveStateToStorage();
+    updateAuthUI();
+    closeAuthModal();
+    openAdminDashboard();
+
+    alert('Login administrativo realizado com sucesso.');
+}
+            else {
                 showAuthMessage('Credenciais administrativas inválidas.', 'error');
             }
         }
@@ -7510,12 +7563,22 @@
                 const div = document.createElement('div');
                 div.className = 'flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200';
                 div.innerHTML = `
-                    <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg">
+    <img
+        src="${escapeAttribute(item.image)}"
+        alt="${escapeAttribute(item.name)}"
+        class="w-16 h-16 object-cover rounded-lg"
+    >
 
-                    <div class="flex-1 min-w-0">
-                        <p class="font-bold text-sm text-slate-900 truncate">${item.name}</p>
-                        <p class="text-xs text-slate-500">${formatCurrency(item.price)} un.</p>
-                    </div>
+    <div class="flex-1 min-w-0">
+        <p class="font-bold text-sm text-slate-900 truncate">
+            ${escapeHtml(item.name)}
+        </p>
+
+        <p class="text-xs text-slate-500">
+            ${formatCurrency(item.price)} un.
+        </p>
+    </div>
+`;
 
                     <div class="flex items-center gap-2">
                         <button type="button" onclick="updateCartItemQuantity('${item.id}', ${item.quantity - 1})" class="w-7 h-7 rounded-lg bg-slate-200 hover:bg-slate-300 flex items-center justify-center">
@@ -7541,9 +7604,13 @@
 
         function updateCartIcon() {
             const countEl = document.getElementById('cartCount');
-            if (countEl) {
-                const totalItems = state.cart.reduce((sum, item) => sum + item.quantity, 0);
-                countEl.textContent = totalItems;
+            const totalQuantity = state.cart.reduce((sum, item) => {
+    return sum + Number(item.quantity || 0);
+}, 0);
+
+if (countEl) {
+    countEl.textContent = `${totalQuantity} ${totalQuantity === 1 ? 'item' : 'itens'}`;
+}
 
                 if (totalItems > 0) {
                     countEl.classList.remove('hidden');
