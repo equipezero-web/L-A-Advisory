@@ -1,7 +1,7 @@
 const CHAVE_CARRINHO = "laRoyalAdvisoryCart";
 const CHAVE_AFILIADO = "laRoyalAffiliateCode";
 
-const API_URL = "https://la-royal-advisory-api.onrender.com";
+const API_URL = "";
 
 const checkoutForm = document.getElementById("checkoutForm");
 const buyerName = document.getElementById("buyerName");
@@ -186,7 +186,7 @@ function validarDadosDoFormulario() {
   return true;
 }
 
-async function criarPagamento(event) {
+function criarPagamento(event) {
   event.preventDefault();
 
   limparMensagem();
@@ -197,6 +197,71 @@ async function criarPagamento(event) {
     mostrarMensagem(
       "Seu carrinho está vazio. Adicione um produto antes de continuar."
     );
+
+    return;
+  }
+
+  if (!validarDadosDoFormulario()) {
+    return;
+  }
+
+  const codigoAfiliado = normalizarCodigoAfiliado(
+    affiliateCode.value
+  );
+
+  if (codigoAfiliado) {
+    localStorage.setItem(
+      CHAVE_AFILIADO,
+      codigoAfiliado
+    );
+  } else {
+    localStorage.removeItem(CHAVE_AFILIADO);
+  }
+
+  const resumo = calcularResumo(carrinho);
+
+  const pedidoDemonstracao = {
+    id: `PED-${Date.now()}`,
+    status: "aguardando_pagamento",
+    criadoEm: new Date().toISOString(),
+    cliente: {
+      nome: buyerName.value.trim(),
+      email: buyerEmail.value.trim().toLowerCase()
+    },
+    afiliado: codigoAfiliado || null,
+    itens: carrinho,
+    quantidade: resumo.quantidade,
+    total: resumo.total
+  };
+
+  const pedidosSalvos = JSON.parse(
+    localStorage.getItem("laRoyalOrders") || "[]"
+  );
+
+  pedidosSalvos.push(pedidoDemonstracao);
+
+  localStorage.setItem(
+    "laRoyalOrders",
+    JSON.stringify(pedidosSalvos)
+  );
+
+  sessionStorage.setItem(
+    "laRoyalPendingOrder",
+    JSON.stringify(pedidoDemonstracao)
+  );
+
+  mostrarMensagem(
+    `Pedido ${pedidoDemonstracao.id} registrado com sucesso. O pagamento real será configurado depois.`,
+    "sucesso"
+  );
+
+  payButton.disabled = true;
+  payButtonText.textContent = "Pedido registrado";
+
+  window.setTimeout(() => {
+    window.location.href = "./index.html?pedido=registrado";
+  }, 1800);
+}
 
     return;
   }
