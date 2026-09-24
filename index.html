@@ -9236,16 +9236,34 @@
     </script>
 
         <!-- INICIALIZAÇÃO FINAL -->
-    <script>
-        // Renderiza os produtos ao carregar a página
-        document.addEventListener('DOMContentLoaded', () => {
-            // Pequeno delay para garantir que o DOM está pronto
-            setTimeout(() => {
-                if (typeof renderProducts === 'function') {
-                    renderProducts();
-                }
-            }, 100);
+   <!-- INICIALIZAÇÃO FINAL E PWA -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+            if (typeof renderProducts === 'function') {
+                renderProducts();
+            }
+        }, 100);
+    });
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker
+                .register('./sw.js')
+                .then(registration => {
+                    console.log(
+                        'Service Worker registrado com sucesso:',
+                        registration.scope
+                    );
+                })
+                .catch(error => {
+                    console.error(
+                        'Erro ao registrar o Service Worker:',
+                        error
+                    );
+                });
         });
-    </script>
+    }
+</script>
 </body>
 </html>
