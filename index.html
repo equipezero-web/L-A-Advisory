@@ -17,6 +17,10 @@
         name="theme-color"
         content="#020617"
     >
+    <link
+    rel="manifest"
+    href="./manifest.json"
+>
 
     <meta
         name="mobile-web-app-capable"
@@ -3563,6 +3567,30 @@
         window.approveAffiliate = approveAffiliate;
         window.markConsultingRequestDone = markConsultingRequestDone;
 
+                </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker
+                    .register('./sw.js')
+                    .then(registration => {
+                        console.log(
+                            'Service Worker registrado:',
+                            registration.scope
+                        );
+                    })
+                    .catch(error => {
+                        console.error(
+                            'Erro ao registrar Service Worker:',
+                            error
+                        );
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
     </script>
 </body>
 </html>
