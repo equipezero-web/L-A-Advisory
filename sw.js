@@ -1,4 +1,4 @@
-const VERSAO_CACHE = "royal-advisory-v5";
+const VERSAO_CACHE = "la-royal-advisory-v1";
 
 const ARQUIVOS_INICIAIS = [
   "./",
@@ -8,14 +8,16 @@ const ARQUIVOS_INICIAIS = [
   "./logo512.png"
 ];
 
-const ORIGEM_ATUAL = self.location.origin;
-
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(VERSAO_CACHE)
-      .then((cache) => cache.addAll(ARQUIVOS_INICIAIS))
-      .then(() => self.skipWaiting())
+      .then((cache) => {
+        return cache.addAll(ARQUIVOS_INICIAIS);
+      })
+      .then(() => {
+        return self.skipWaiting();
+      })
   );
 });
 
@@ -23,8 +25,8 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((nomesDosCaches) =>
-        Promise.all(
+      .then((nomesDosCaches) => {
+        return Promise.all(
           nomesDosCaches.map((nomeDoCache) => {
             if (nomeDoCache !== VERSAO_CACHE) {
               return caches.delete(nomeDoCache);
@@ -32,9 +34,11 @@ self.addEventListener("activate", (event) => {
 
             return null;
           })
-        )
-      )
-      .then(() => self.clients.claim())
+        );
+      })
+      .then(() => {
+        return self.clients.claim();
+      })
   );
 });
 
@@ -52,16 +56,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (url.origin !== ORIGEM_ATUAL) {
-    return;
-  }
-
-  if (
-    url.pathname.includes("/api/") ||
-    url.hostname.includes("firestore.googleapis.com") ||
-    url.hostname.includes("firebase.googleapis.com") ||
-    url.hostname.includes("identitytoolkit.googleapis.com")
-  ) {
+  if (url.origin !== self.location.origin) {
     return;
   }
 
@@ -96,7 +91,7 @@ self.addEventListener("fetch", (event) => {
         }
 
         return new Response(
-          "Você está offline e este conteúdo ainda não foi salvo neste dispositivo.",
+          "Você está offline. Conecte-se à internet para acessar este conteúdo.",
           {
             status: 503,
             headers: {
