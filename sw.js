@@ -1,95 +1,104 @@
-const CACHE_NAME = 'la-royal-advisory-v9';
+const VERSAO_CACHE = "la-royal-advisory-v7";
 
-const APP_FILES = [
-    './',
-    './index.html',
-    './manifest.json'
+const ARQUIVOS_INICIAIS = [
+  "./",
+  "./index.html",
+  "./manifest.json",
+  "./logo192.png",
+  "./logo512.png"
 ];
 
-self.addEventListener('install', event => {
-    event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => {
-                return cache.addAll(APP_FILES);
-            })
-            .then(() => {
-                return self.skipWaiting();
-            })
-    );
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches
+      .open(VERSAO_CACHE)
+      .then((cache) => {
+        return cache.addAll(ARQUIVOS_INICIAIS);
+      })
+      .then(() => {
+        return self.skipWaiting();
+      })
+  );
 });
 
-self.addEventListener('activate', event => {
-    event.waitUntil(
-        caches.keys()
-            .then(cacheNames => {
-                return Promise.all(
-                    cacheNames
-                        .filter(cacheName => {
-                            return cacheName !== CACHE_NAME;
-                        })
-                        .map(cacheName => {
-                            return caches.delete(cacheName);
-                        })
-                );
-            })
-            .then(() => {
-                return self.clients.claim();
-            })
-    );
-});
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches
+      .keys()
+      .then((nomesDosCaches) => {
+        return Promise.all(
+          nomesDosCaches.map((nomeDoCache) => {
+            if (nomeDoCache !== VERSAO_CACHE) {
+              return caches.delete(nomeDoCache);
+            }
 
-self.addEventListener('fetch', event => {
-    if (event.request.method !== 'GET') {
-        return;
-    }
-
-    if (event.request.mode === 'navigate') {
-        event.respondWith(
-            fetch(event.request)
-                .then(networkResponse => {
-                    const responseClone = networkResponse.clone();
-
-                    caches.open(CACHE_NAME)
-                        .then(cache => {
-                            cache.put('./index.html', responseClone);
-                        });
-
-                    return networkResponse;
-                })
-                .catch(() => {
-                    return caches.match('./index.html');
-                })
+            return null;
+          })
         );
+      })
+      .then(() => {
+        return self.clients.claim();
+      })
+  );
+});
 
-        return;
-    }
+self.addEventListener("message", (event) => {
+  if (event.data?.tipo === "ATUALIZAR_AGORA") {
+    self.skipWaiting();
+  }
+});
 
-    event.respondWith(
-        caches.match(event.request)
-            .then(cachedResponse => {
-                if (cachedResponse) {
-                    return cachedResponse;
-                }
+self.addEventListener("fetch", (event) => {
+  const requisicao = event.request;
+  const url = new URL(requisicao.url);
 
-                return fetch(event.request)
-                    .then(networkResponse => {
-                        if (
-                            !networkResponse ||
-                            networkResponse.status !== 200 ||
-                            networkResponse.type !== 'basic'
-                        ) {
-                            return networkResponse;
-                        }
+  if (requisicao.method !== "GET") {
+    return;
+  }
 
-                        const responseClone = networkResponse.clone();
+  if (url.origin !== self.location.origin) {
+    return;
+  }
 
-                        caches.open(CACHE_NAME)
-                            .then(cache => {
-                                cache.put(event.request, responseClone);
-                            });
+  event.respondWith(
+    fetch(requisicao)
+      .then((respostaDaRede) => {
+        if (
+          !respostaDaRede ||
+          respostaDaRede.status !== 200 ||
+          respostaDaRede.type !== "basic"
+        ) {
+          return respostaDaRede;
+        }
 
-                        return networkResponse;
-                    });
-            })
-    );
+        const copiaResposta = respostaDaRede.clone();
+
+        caches.open(VERSAO_CACHE).then((cache) => {
+          cache.put(requisicao, copiaResposta);
+        });
+
+        return respostaDaRede;
+      })
+      .catch(async () => {
+        const respostaDoCache = await caches.match(requisicao);
+
+        if (respostaDoCache) {
+          return respostaDoCache;
+        }
+
+        if (requisicao.mode === "navigate") {
+          return caches.match("./index.html");
+        }
+
+        return new Response(
+          "Você está offline. Conecte-se à internet para acessar este conteúdo.",
+          {
+            status: 503,
+            headers: {
+              "Content-Type": "text/plain; charset=utf-8"
+            }
+          }
+        );
+      })
+  );
 });
