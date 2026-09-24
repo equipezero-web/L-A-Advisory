@@ -9,68 +9,68 @@
     
     <!-- CDNs de Estilo e Ícones -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400,600,700&family=Lato:wght@300,400,600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600,700&family=Lato:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <!-- Registro do Service Worker -->
-<script>
-    if ("serviceWorker" in navigator) {
-        window.addEventListener("load", async () => {
-            try {
-                const registro = await navigator.serviceWorker.register("./sw.js");
+    <script>
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", async () => {
+                try {
+                    const registro = await navigator.serviceWorker.register("./sw.js");
 
-                console.log(
-                    "Service Worker registrado com sucesso:",
-                    registro.scope
-                );
+                    console.log(
+                        "Service Worker registrado com sucesso:",
+                        registro.scope
+                    );
 
-                await registro.update();
+                    await registro.update();
 
-                if (registro.waiting) {
-                    registro.waiting.postMessage({
-                        tipo: "ATUALIZAR_AGORA"
-                    });
-                }
-
-                registro.addEventListener("updatefound", () => {
-                    const novoWorker = registro.installing;
-
-                    if (!novoWorker) return;
-
-                    novoWorker.addEventListener("statechange", () => {
-                        if (
-                            novoWorker.state === "installed" &&
-                            navigator.serviceWorker.controller
-                        ) {
-                            novoWorker.postMessage({
-                                tipo: "ATUALIZAR_AGORA"
-                            });
-                        }
-                    });
-                });
-
-                let atualizandoPagina = false;
-
-                navigator.serviceWorker.addEventListener(
-                    "controllerchange",
-                    () => {
-                        if (atualizandoPagina) return;
-
-                        atualizandoPagina = true;
-
-                        window.location.reload();
+                    if (registro.waiting) {
+                        registro.waiting.postMessage({
+                            tipo: "ATUALIZAR_AGORA"
+                        });
                     }
-                );
 
-            } catch (erro) {
-                console.error(
-                    "Erro ao registrar o Service Worker:",
-                    erro
-                );
-            }
-        });
-    }
-</script>
+                    registro.addEventListener("updatefound", () => {
+                        const novoWorker = registro.installing;
+
+                        if (!novoWorker) return;
+
+                        novoWorker.addEventListener("statechange", () => {
+                            if (
+                                novoWorker.state === "installed" &&
+                                navigator.serviceWorker.controller
+                            ) {
+                                novoWorker.postMessage({
+                                    tipo: "ATUALIZAR_AGORA"
+                                });
+                            }
+                        });
+                    });
+
+                    let atualizandoPagina = false;
+
+                    navigator.serviceWorker.addEventListener(
+                        "controllerchange",
+                        () => {
+                            if (atualizandoPagina) return;
+
+                            atualizandoPagina = true;
+
+                            window.location.reload();
+                        }
+                    );
+
+                } catch (erro) {
+                    console.error(
+                        "Erro ao registrar o Service Worker:",
+                        erro
+                    );
+                }
+            });
+        }
+    </script>
     
     <style>
         * { scrollbar-width: thin; scrollbar-color: #1e3a5f #f1f5f9; }
@@ -95,34 +95,42 @@
         
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
+        
         .tab-active {
-    border: 1px solid #d4af37;
-    background: linear-gradient(135deg, #d4af37, #f4d03f);
-    color: #0c1933;
-    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.25);
-}
+            border: 1px solid #d4af37;
+            background: linear-gradient(135deg, #d4af37, #f4d03f);
+            color: #0c1933;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.25);
+        }
 
-.tab-inactive {
-    border: 1px solid #e2e8f0;
-    background: #f1f5f9;
-    color: #64748b;
-}
+        .tab-inactive {
+            border: 1px solid #e2e8f0;
+            background: #f1f5f9;
+            color: #64748b;
+        }
 
-.tab-inactive:hover {
-    border-color: #d4af37;
-    background: #ffffff;
-    color: #0c1933;
-}
+        .tab-inactive:hover {
+            border-color: #d4af37;
+            background: #ffffff;
+            color: #0c1933;
+        }
+        
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        /* ========================================
-   RESET E VARIÁVEIS
-   ======================================== */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Lato', sans-serif;
+        }
+
+        h1, h2, h3, h4, .font-serif {
+            font-family: 'Playfair Display', serif;
+        }
     </style>
 </head>
 <body class="bg-slate-900 text-white min-h-screen flex flex-col">
@@ -139,52 +147,34 @@
     </div>
 
     <!-- CABEÇALHO -->
-<header class="bg-gradient-to-r from-blue-950 via-slate-900 to-blue-950 text-white shadow-2xl sticky top-0 z-40 border-b border-amber-500/20">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-24 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <div class="w-14 h-14 gradient-gold rounded-lg flex items-center justify-center text-slate-900 font-serif font-bold text-lg shadow-gold border-2 border-amber-300/50">
-        L&A
+    <header class="bg-gradient-to-r from-blue-950 via-slate-900 to-blue-950 text-white shadow-2xl sticky top-0 z-40 border-b border-amber-500/20">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-24 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-14 h-14 gradient-gold rounded-lg flex items-center justify-center text-slate-900 font-serif font-bold text-lg shadow-gold border-2 border-amber-300/50">
+            L&A
+          </div>
+        </div>
+
+        <div class="text-center">
+          <h1 class="font-serif text-2xl sm:text-3xl font-bold tracking-widest text-white">ROYAL ADVISORY</h1>
+          <p class="text-[10px] tracking-[0.3em] text-amber-400 uppercase">Excellence in Every Detail</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <a href="#loja" class="hidden sm:block text-amber-400 hover:text-amber-300 transition text-sm font-medium border border-amber-400/30 hover:border-amber-400/60 px-3 py-1.5 rounded-full">Loja</a>
+          <a href="#consultoria" class="hidden sm:block text-amber-400 hover:text-amber-300 transition text-sm font-medium border border-amber-400/30 hover:border-amber-400/60 px-3 py-1.5 rounded-full">Consultoria</a>
+          <a href="#afiliados" class="hidden sm:block text-amber-400 hover:text-amber-300 transition text-sm font-medium border border-amber-400/30 hover:border-amber-400/60 px-3 py-1.5 rounded-full">Afiliados</a>
+
+          <button onclick="toggleCart()" class="relative p-2.5 rounded-full text-amber-400 hover:bg-amber-400/10 transition border border-amber-400/30 hover:border-amber-400/60">
+            <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+            <span id="cartCount" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">0</span>
+          </button>
+          <button onclick="openNavigationModal()" class="p-2.5 rounded-full text-amber-400 hover:bg-amber-400/10 transition border border-amber-400/30 hover:border-amber-400/60">
+            <i data-lucide="compass" class="w-5 h-5"></i>
+          </button>
+        </div>
       </div>
-    </div>
-
-    <div class="text-center">
-      <h1 class="font-serif text-2xl sm:text-3xl font-bold tracking-widest text-white">ROYAL ADVISORY</h1>
-      <p class="text-[10px] tracking-[0.3em] text-amber-400 uppercase">Excellence in Every Detail</p>
-    </div>
-
-    <div class="flex items-center gap-3">
-      <!-- Links de navegação -->
-     <a
-    href="#loja"
-    class="hidden sm:block text-amber-400 hover:text-amber-300 transition text-sm font-medium border border-amber-400/30 hover:border-amber-400/60 px-3 py-1.5 rounded-full"
->
-    Loja
-</a>
-        <a
-    href="afiliado.html"
-    class="hidden sm:block text-amber-400 hover:text-amber-300 transition text-sm font-medium border border-amber-400/30 hover:border-amber-400/60 px-3 py-1.5 rounded-full"
->
-    <i data-lucide="crown" class="w-4 h-4 inline mr-1"></i>
-    Seja Afiliado
-</a>
-      <a href="carrinho.html" class="hidden sm:block text-amber-400 hover:text-amber-300 transition text-sm font-medium border border-amber-400/30 hover:border-amber-400/60 px-3 py-1.5 rounded-full">
-        Carrinho
-      </a>
-      <a href="checkout.html" class="hidden sm:block text-amber-400 hover:text-amber-300 transition text-sm font-medium border border-amber-400/30 hover:border-amber-400/60 px-3 py-1.5 rounded-full">
-        Checkout
-      </a>
-
-      <!-- Botões que você já tem -->
-      <button onclick="toggleCart()" class="relative p-2.5 rounded-full text-amber-400 hover:bg-amber-400/10 transition border border-amber-400/30 hover:border-amber-400/60">
-        <i data-lucide="shopping-cart" class="w-5 h-5"></i>
-        <span id="cartCount" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">0</span>
-      </button>
-      <button onclick="openNavigationModal()" class="p-2.5 rounded-full text-amber-400 hover:bg-amber-400/10 transition border border-amber-400/30 hover:border-amber-400/60">
-        <i data-lucide="compass" class="w-5 h-5"></i>
-      </button>
-    </div>
-  </div>
-</header>
+    </header>
         
     <main class="flex-grow">
         <!-- LOJA VIRTUAL -->
@@ -199,14 +189,12 @@
                         <div class="w-20 h-1 gradient-gold rounded mt-3"></div>
                     </div>
 
-                    <!-- Botão para Expandir Categorias -->
                     <div id="inicio-container">
                         <button id="btn-ver-catalogo" onclick="abrirCatalogo()" class="gradient-gold text-slate-900 px-6 py-3 rounded-lg font-bold text-sm shadow-md hover:shadow-gold transition flex items-center gap-2 cursor-pointer">
                             <i data-lucide="grid" class="w-4 h-4"></i> Ver Catálogo
                         </button>
                     </div>
 
-                    <!-- Botões de Navegação Lateral (Setas) -->
                     <div class="flex gap-2">
                         <button type="button" onclick="scrollCarousel('left')" class="p-3 rounded-full border-2 border-slate-300 hover:border-amber-500 text-slate-600 hover:text-amber-600 transition bg-white shadow-md hover:shadow-lg cursor-pointer">
                             <i data-lucide="chevron-left" class="w-5 h-5"></i>
@@ -234,13 +222,13 @@
 
                 <!-- CARROSSEL / GRELHA DE PRODUTOS -->
                 <div id="carouselContainer" class="flex gap-6 overflow-x-auto pb-6 scroll-smooth snap-x snap-mandatory no-scrollbar">
-                    <!-- Os produtos serão inseridos aqui via JS ou diretamente como HTML -->
+                    <!-- Os produtos serão inseridos aqui via JS -->
                 </div>
 
             </div>
         </section>
 
-        <!-- CONSULTORIA -->
+                <!-- CONSULTORIA -->
         <section id="consultoria" class="py-20 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white relative overflow-hidden">
             <div class="absolute inset-0 opacity-10">
                 <div class="absolute top-20 left-10 w-72 h-72 bg-amber-400 rounded-full blur-3xl"></div>
@@ -394,6 +382,95 @@
                 </div>
             </div>
         </section>
+
+        <!-- AFILIADOS -->
+        <section id="afiliados" class="py-16 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white relative overflow-hidden border-t border-amber-500/20">
+            <div class="absolute inset-0 opacity-10">
+                <div class="absolute top-20 right-10 w-80 h-80 bg-amber-400 rounded-full blur-3xl"></div>
+                <div class="absolute bottom-20 left-10 w-96 h-96 bg-blue-600 rounded-full blur-3xl"></div>
+            </div>
+
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <span class="text-amber-400 font-bold uppercase text-xs tracking-[0.2em]">Programa Exclusivo</span>
+                    <h2 class="font-serif text-4xl font-bold mt-3 text-white">Seja um Afiliado L&A</h2>
+                    <div class="w-24 h-1 gradient-gold mx-auto mt-5 rounded"></div>
+                    <p class="text-slate-400 mt-6 text-lg">Indique nossos produtos e receba comissões atrativas</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                    <div class="bg-slate-800/70 backdrop-blur border border-slate-700/60 p-8 rounded-2xl flex flex-col items-center text-center card-hover">
+                        <div class="w-16 h-16 gradient-gold rounded-xl flex items-center justify-center mb-6 shadow-gold">
+                            <i data-lucide="user-plus" class="w-8 h-8 text-slate-900"></i>
+                        </div>
+                        <h3 class="font-serif text-xl font-bold mb-3 text-white">Cadastre-se</h3>
+                        <p class="text-slate-400 text-sm">Preencha seus dados e receba seu código exclusivo de afiliado.</p>
+                    </div>
+
+                    <div class="bg-slate-800/70 backdrop-blur border border-slate-700/60 p-8 rounded-2xl flex flex-col items-center text-center card-hover">
+                        <div class="w-16 h-16 gradient-gold rounded-xl flex items-center justify-center mb-6 shadow-gold">
+                            <i data-lucide="share-2" class="w-8 h-8 text-slate-900"></i>
+                        </div>
+                        <h3 class="font-serif text-xl font-bold mb-3 text-white">Compartilhe</h3>
+                        <p class="text-slate-400 text-sm">Divulgue seu link personalizado em redes sociais e contatos.</p>
+                    </div>
+
+                    <div class="bg-slate-800/70 backdrop-blur border border-slate-700/60 p-8 rounded-2xl flex flex-col items-center text-center card-hover">
+                        <div class="w-16 h-16 gradient-gold rounded-xl flex items-center justify-center mb-6 shadow-gold">
+                            <i data-lucide="gift" class="w-8 h-8 text-slate-900"></i>
+                        </div>
+                        <h3 class="font-serif text-xl font-bold mb-3 text-white">Receba</h3>
+                        <p class="text-slate-400 text-sm">Acompanhe suas indicações e receba comissões por venda aprovada.</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800/70 backdrop-blur border border-slate-700/60 p-8 rounded-2xl max-w-2xl mx-auto">
+                    <h3 class="font-serif text-2xl font-bold mb-6 text-white text-center">Formulário de Inscrição</h3>
+
+                    <form id="affiliateForm" onsubmit="submitAffiliate(event)" class="space-y-4">
+                        <div>
+                            <label for="affiliateName" class="block text-xs font-bold text-amber-400 uppercase mb-2">Nome Completo / Empresa</label>
+                            <input type="text" id="affiliateName" required class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-white text-sm">
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="affiliatePhone" class="block text-xs font-bold text-amber-400 uppercase mb-2">WhatsApp</label>
+                                <input type="tel" id="affiliatePhone" required placeholder="(81) 99999-9999" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-white text-sm">
+                            </div>
+                            <div>
+                                <label for="affiliateEmail" class="block text-xs font-bold text-amber-400 uppercase mb-2">E-mail</label>
+                                <input type="email" id="affiliateEmail" required class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-white text-sm">
+                            </div>
+                        </div>
+
+                        <div id="affiliateMessage" class="hidden p-4 rounded-xl bg-emerald-900/30 border border-emerald-500/30 text-emerald-300 text-sm"></div>
+
+                        <button type="submit" class="w-full gradient-gold text-slate-900 font-bold rounded-xl py-4 hover:shadow-gold transition btn-premium">
+                            <i data-lucide="crown" class="w-5 h-5 inline mr-2"></i> Gerar Meu Código de Afiliado
+                        </button>
+                    </form>
+
+                    <div id="affiliateResult" class="hidden mt-6 p-6 bg-slate-900 rounded-xl border border-amber-500/30">
+                        <p class="text-amber-400 font-bold mb-3">Seu código de afiliado:</p>
+                        <div class="flex gap-3 mb-4">
+                            <input type="text" id="affiliateCodeDisplay" readonly class="flex-1 px-4 py-3 bg-slate-800 border border-amber-500/30 rounded-xl text-amber-400 font-bold text-center tracking-wider">
+                            <button type="button" onclick="copyAffiliateCode()" class="px-6 py-3 bg-amber-500 text-slate-900 font-bold rounded-xl hover:bg-amber-400 transition">Copiar</button>
+                        </div>
+
+                        <p class="text-amber-400 font-bold mb-3">Seu link de indicação:</p>
+                        <div class="flex gap-3 mb-4">
+                            <input type="text" id="affiliateLinkDisplay" readonly class="flex-1 px-4 py-3 bg-slate-800 border border-amber-500/30 rounded-xl text-amber-300 text-xs">
+                            <button type="button" onclick="copyAffiliateLink()" class="px-6 py-3 bg-amber-500 text-slate-900 font-bold rounded-xl hover:bg-amber-400 transition">Copiar</button>
+                        </div>
+
+                        <a id="affiliateWhatsAppLink" href="#" target="_blank" class="block w-full text-center py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-500 transition">
+                            <i data-lucide="message-circle" class="w-5 h-5 inline mr-2"></i> Enviar Cadastro no WhatsApp
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- FOOTER -->
@@ -507,322 +584,6 @@
         </div>
     </div>
 
-    <!-- PAINEL ADM COM ABAS -->
-    <div id="adminModal" class="fixed inset-0 bg-slate-950/90 z-50 hidden flex justify-end">
-        <div class="bg-white text-slate-800 w-full max-w-5xl h-full shadow-2xl p-6 overflow-y-auto flex flex-col">
-            <div class="flex justify-between items-center mb-6 pb-4 border-b-2 border-amber-400/30">
-                <div class="flex items-center gap-2">
-                    <i data-lucide="crown" class="w-6 h-6 text-amber-600"></i>
-                    <h3 class="font-bold text-xl text-slate-900">Painel Real ADM</h3>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="logout()" class="p-2 text-slate-400 hover:text-red-500">
-                        <i data-lucide="log-out" class="w-5 h-5"></i>
-                    </button>
-                    <button onclick="toggleAdminModal()" class="text-slate-400 hover:text-slate-600">
-                        <i data-lucide="x" class="w-6 h-6"></i>
-                    </button>
-                </div>
-            </div>
-
-<!-- ABAS DO PAINEL ADMINISTRATIVO -->
-<div class="flex gap-2 mb-6 overflow-x-auto pb-1">
-
-    <button
-        type="button"
-        onclick="switchTab('produtos')"
-        id="tab-produtos"
-        class="flex-1 min-w-max py-3 px-4 rounded-xl font-bold text-sm tab-active transition"
-    >
-        <i data-lucide="package" class="w-4 h-4 inline mr-2"></i>
-        Produtos
-    </button>
-
-    <button
-        type="button"
-        onclick="switchTab('consultorias')"
-        id="tab-consultorias"
-        class="flex-1 min-w-max py-3 px-4 rounded-xl font-bold text-sm tab-inactive transition"
-    >
-        <i data-lucide="briefcase" class="w-4 h-4 inline mr-2"></i>
-        Consultorias
-    </button>
-
-    <button
-        type="button"
-        onclick="switchTab('financeiro')"
-        id="tab-financeiro"
-        class="flex-1 min-w-max py-3 px-4 rounded-xl font-bold text-sm tab-inactive transition"
-    >
-        <i data-lucide="trending-up" class="w-4 h-4 inline mr-2"></i>
-        Financeiro
-    </button>
-
-    <button
-        type="button"
-        onclick="switchTab('afiliados')"
-        id="tab-afiliados"
-        class="flex-1 min-w-max py-3 px-4 rounded-xl font-bold text-sm tab-inactive transition"
-    >
-        <i data-lucide="crown" class="w-4 h-4 inline mr-2"></i>
-        Afiliados
-    </button>
-
-</div>
-
-            <!-- CONTEÚDO -->
-            <div class="flex-grow">
-                <!-- ABA PRODUTOS -->
-                <div id="content-produtos" class="tab-content">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div>
-                            <h4 class="font-bold text-slate-900 text-lg mb-3 flex items-center gap-2">
-    <i data-lucide="circle-plus" class="w-5 h-5 text-amber-600"></i>
-    Adicionar Produto
-</h4>
-<form onsubmit="handleAddProduct(event)" class="space-y-3">
-    <input type="text" id="adminProdName" required placeholder="Nome do Produto" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500">
-    <input type="text" id="adminProdPrice" required placeholder="Preço (R$ 1.850,00)" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500">
-    <input
-    type="number"
-    id="adminProdGrossValue"
-    required
-    min="0"
-    step="0.01"
-    placeholder="Valor bruto para afiliado (ex: 100.00)"
-    class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500"
->
-    <select
-    id="adminProdAffiliateEnabled"
-    required
-    class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500 bg-white text-slate-700"
->
-    <option value="true" selected>
-        Produto disponível para afiliados
-    </option>
-
-    <option value="false">
-        Produto não participa do programa de afiliados
-    </option>
-</select>
-    
-    <!-- CAMPO DE SELEÇÃO DE CATEGORIA -->
-    <select id="adminProdCategory" required class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500 bg-white text-slate-700">
-        <option value="" disabled selected>Selecione a Categoria</option>
-        <option value="roupas-masculinas">Roupas Masculinas</option>
-        <option value="roupas-femininas">Roupas Femininas</option>
-        <option value="acessorios-masculinos">Acessórios Masculinos</option>
-        <option value="acessorios-femininos">Acessórios Femininos</option>
-        <option value="sapatos-masculinos">Sapatos Masculinos</option>
-        <option value="sapatos-femininos">Sapatos Femininos</option>
-        <option value="aparelhos">Aparelhos</option>
-    </select>
-
-    <input type="url" id="adminProdImg" placeholder="URL da Imagem" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500">
-    <textarea id="adminProdDesc" rows="3" placeholder="Descrição" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500"></textarea>
-    
-    <button type="submit" class="w-full gradient-gold text-slate-900 py-3 rounded-xl font-bold hover:shadow-gold transition cursor-pointer">
-        Adicionar Produto
-    </button>
-    <button
-    onclick="switchTab('afiliados')"
-    id="tab-afiliados"
-    class="flex-1 py-3 px-4 rounded-xl font-bold text-sm tab-inactive transition"
->
-    <i data-lucide="crown" class="w-4 h-4 inline mr-2"></i>
-    Afiliados
-</button>
-</form>
-                        </div>
-                        
-                        <div>
-                            <div class="flex justify-between items-center mb-4">
-                                <h4 class="font-bold text-lg flex items-center gap-2">
-                                    <i data-lucide="list" class="w-5 h-5 text-amber-600"></i>
-                                    Produtos Cadastrados
-                                </h4>
-                                <button type="button" onclick="salvarManualFirebase()" class="px-3 py-1.5 gradient-gold text-slate-900 text-xs font-bold rounded-lg shadow-sm hover:opacity-90 flex items-center gap-1">
-                                    <i data-lucide="cloud" class="w-3.5 h-3.5"></i> Salvar na Nuvem
-                                </button>
-                            </div>
-                            <div id="adminProductsList" class="space-y-2 max-h-96 overflow-y-auto"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ABA CONSULTORIAS -->
-                <div id="content-consultorias" class="tab-content hidden">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <div class="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-6 rounded-2xl">
-                            <div class="flex items-center justify-between mb-2">
-                                <i data-lucide="trending-up" class="w-8 h-8"></i>
-                                <span class="text-3xl font-bold" id="totalConsultorias">0</span>
-                            </div>
-                            <p class="text-sm opacity-90">Total de Consultorias</p>
-                        </div>
-                        <div class="bg-gradient-to-br from-amber-500 to-amber-700 text-white p-6 rounded-2xl">
-                            <div class="flex items-center justify-between mb-2">
-                                <i data-lucide="dollar-sign" class="w-8 h-8"></i>
-                                <span class="text-3xl font-bold" id="totalReceita">R$ 0</span>
-                            </div>
-                            <p class="text-sm opacity-90">Receita Total</p>
-                        </div>
-                        <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 text-white p-6 rounded-2xl">
-                            <div class="flex items-center justify-between mb-2">
-                                <i data-lucide="building" class="w-8 h-8"></i>
-                                <span class="text-3xl font-bold" id="totalClientes">0</span>
-                            </div>
-                            <p class="text-sm opacity-90">Clientes Únicos</p>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div>
-                            <h4 class="font-bold text-lg mb-4">Por Tipo de Consultoria</h4>
-                            <div class="space-y-3">
-                                <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200">
-                                    <div class="flex justify-between items-center mb-2">
-                                        <span class="font-bold text-slate-700">Financeira</span>
-                                        <span class="text-amber-600 font-bold" id="countFinanceira">0</span>
-                                    </div>
-                                    <div class="text-sm text-slate-500">Receita: <span id="receitaFinanceira" class="font-bold">R$ 0</span></div>
-                                </div>
-                                <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200">
-                                    <div class="flex justify-between items-center mb-2">
-                                        <span class="font-bold text-slate-700">Administrativa</span>
-                                        <span class="text-amber-600 font-bold" id="countAdministrativa">0</span>
-                                    </div>
-                                    <div class="text-sm text-slate-500">Receita: <span id="receitaAdministrativa" class="font-bold">R$ 0</span></div>
-                                </div>
-                                <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200">
-                                    <div class="flex justify-between items-center mb-2">
-                                        <span class="font-bold text-slate-700">Estratégico</span>
-                                        <span class="text-amber-600 font-bold" id="countEstrategico">0</span>
-                                    </div>
-                                    <div class="text-sm text-slate-500">Receita: <span id="receitaEstrategico" class="font-bold">R$ 0</span></div>
-                                </div>
-                                
-                        <div>
-                            <h4 class="font-bold text-lg mb-4">Empresas/Clientes que Solicitaram</h4>
-                            <div id="consultingClientsList" class="space-y-2 max-h-96 overflow-y-auto"></div>
-                        </div>
-
-                <!-- ABA FINANCEIRO -->
-                <div id="content-financeiro" class="tab-content hidden">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div>
-                            <h4 class="font-bold text-lg mb-4 flex items-center gap-2">
-                                <i data-lucide="building-2" class="w-5 h-5 text-amber-600"></i>
-                                Ganhos por Cliente/Empresa
-                            </h4>
-                            <div id="ganhosPorCliente" class="space-y-2 max-h-96 overflow-y-auto"></div>
-                        </div>
-
-                        <div>
-                            <h4 class="font-bold text-lg mb-4 flex items-center gap-2">
-                                <i data-lucide="calendar" class="w-5 h-5 text-amber-600"></i>
-                                Ganhos por Mês
-                            </h4>
-                            <div id="ganhosPorMes" class="space-y-2 max-h-96 overflow-y-auto"></div>
-                        </div>
-                    </div>
-                </div>
-
-                    <!-- ABA AFILIADO -->
-    <section id="content-afiliados" class="tab-content hidden">
-
-    <div class="mb-6">
-        <h2 class="text-2xl font-bold text-slate-900">
-            <i data-lucide="crown" class="w-6 h-6 inline mr-2 text-yellow-500"></i>
-            Gestão de Afiliados
-        </h2>
-
-        <p class="text-sm text-slate-500 mt-1">
-            Analise solicitações, aprove afiliados e acompanhe o programa.
-        </p>
-    </div>
-
-    <!-- Cards de resumo -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-
-        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-slate-500">Solicitações pendentes</p>
-                    <h3 id="totalPendentes" class="text-3xl font-bold text-slate-900 mt-1">
-                        0
-                    </h3>
-                </div>
-
-                <div class="w-12 h-12 rounded-xl bg-yellow-100 text-yellow-700 flex items-center justify-center">
-                    <i data-lucide="clock-3" class="w-6 h-6"></i>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-slate-500">Afiliados aprovados</p>
-                    <h3 id="totalAprovados" class="text-3xl font-bold text-slate-900 mt-1">
-                        0
-                    </h3>
-                </div>
-
-                <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-900 flex items-center justify-center">
-                    <i data-lucide="crown" class="w-6 h-6"></i>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-slate-500">Comissões pendentes</p>
-                    <h3 id="totalComissoes" class="text-3xl font-bold text-slate-900 mt-1">
-                        R$ 0,00
-                    </h3>
-                </div>
-
-                <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
-                    <i data-lucide="wallet" class="w-6 h-6"></i>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Título e filtros -->
-    <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-
-        <div class="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-5">
-            <div>
-                <h3 class="font-bold text-lg text-slate-900">
-                    Solicitações de afiliação
-                </h3>
-
-                <p class="text-sm text-slate-500">
-                    Aceite ou recuse os pedidos de novos afiliados.
-                </p>
-            </div>
-
-            <select
-                id="filtroAfiliados"
-                onchange="filtrarAfiliados()"
-                class="border border-slate-300 rounded-xl px-4 py-2 text-sm outline-none focus:border-yellow-500"
-            >
-                <option value="pendente">Pendentes</option>
-                <option value="aprovado">Aprovados</option>
-                <option value="recusado">Recusados</option>
-                <option value="todos">Todos</option>
-            </select>
-        </div>
-
-        <!-- Os cards dos candidatos serão adicionados pelo JavaScript -->
-        <div id="listaAfiliados" class="space-y-4"></div>
-
-    </div>
-</section>
     <!-- MODAL NAVEGAÇÃO -->
     <div id="navModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white text-slate-900 rounded-2xl max-w-md w-full p-8 shadow-2xl relative border-2 border-amber-400/30">
@@ -839,11 +600,13 @@
                     <div class="p-4 gradient-gold rounded-xl"><i data-lucide="briefcase" class="w-7 h-7 text-slate-900"></i></div>
                     <div><h4 class="font-bold text-lg">Consultoria</h4><p class="text-xs text-slate-500">Soluções Empresariais</p></div>
                 </a>
+                <a href="#afiliados" onclick="closeNavigationModal()" class="p-5 rounded-xl border-2 border-slate-200 hover:border-amber-500 bg-slate-50 flex items-center gap-5">
+                    <div class="p-4 gradient-gold rounded-xl"><i data-lucide="crown" class="w-7 h-7 text-slate-900"></i></div>
+                    <div><h4 class="font-bold text-lg">Afiliados</h4><p class="text-xs text-slate-500">Programa de Indicação</p></div>
+                </a>
             </div>
         </div>
     </div>
-  </div>
-</div>
                         
     <!-- MODAL CARRINHO -->
     <div id="cartModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
@@ -874,33 +637,170 @@
         <i data-lucide="message-circle" class="w-7 h-7 text-white group-hover:scale-110 transition-transform"></i>
     </a>
 
-    <!-- LÓGICA EM JAVASCRIPT ES6/FIREBASE -->
-<script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { auth, db } from "./firebase.js";
+        <!-- PAINEL ADM COM ABAS -->
+    <div id="adminModal" class="fixed inset-0 bg-slate-950/90 z-50 hidden flex justify-end">
+        <div class="bg-white text-slate-800 w-full max-w-5xl h-full shadow-2xl p-6 overflow-y-auto flex flex-col">
+            <div class="flex justify-between items-center mb-6 pb-4 border-b-2 border-amber-400/30">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="crown" class="w-6 h-6 text-amber-600"></i>
+                    <h3 class="font-bold text-xl text-slate-900">Painel Real ADM</h3>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="logout()" class="p-2 text-slate-400 hover:text-red-500">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                    </button>
+                    <button onclick="toggleAdminModal()" class="text-slate-400 hover:text-slate-600">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
 
-        // CONFIGURAÇÕES FIREBASE
-        const firebaseConfig = {
-            apiKey: "AIzaSyAGKRQoKeZpj4LBQPFYX0AqtqNUZjqkqCA",
-            authDomain: "advisory-web.firebaseapp.com",
-            projectId: "advisory-web",
-            storageBucket: "advisory-web.firebasestorage.app",
-            messagingSenderId: "28667188054",
-            appId: "1:28667188054:web:eac7d4be6092b198fdfcf7",
-            measurementId: "G-0M6LRHCQCD"
-        };
+            <!-- ABAS DO PAINEL ADMINISTRATIVO -->
+            <div class="flex gap-2 mb-6 overflow-x-auto pb-1">
+                <button type="button" onclick="switchTab('produtos')" id="tab-produtos" class="flex-1 min-w-max py-3 px-4 rounded-xl font-bold text-sm tab-active transition">
+                    <i data-lucide="package" class="w-4 h-4 inline mr-2"></i> Produtos
+                </button>
+                <button type="button" onclick="switchTab('consultorias')" id="tab-consultorias" class="flex-1 min-w-max py-3 px-4 rounded-xl font-bold text-sm tab-inactive transition">
+                    <i data-lucide="briefcase" class="w-4 h-4 inline mr-2"></i> Consultorias
+                </button>
+                <button type="button" onclick="switchTab('financeiro')" id="tab-financeiro" class="flex-1 min-w-max py-3 px-4 rounded-xl font-bold text-sm tab-inactive transition">
+                    <i data-lucide="trending-up" class="w-4 h-4 inline mr-2"></i> Financeiro
+                </button>
+                <button type="button" onclick="switchTab('afiliados')" id="tab-afiliados" class="flex-1 min-w-max py-3 px-4 rounded-xl font-bold text-sm tab-inactive transition">
+                    <i data-lucide="crown" class="w-4 h-4 inline mr-2"></i> Afiliados
+                </button>
+            </div>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const catalogoRef = doc(db, "site", "catalogo");
+            <!-- CONTEÚDO -->
+            <div class="flex-grow">
+                <!-- ABA PRODUTOS -->
+                <div id="content-produtos" class="tab-content">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-lg mb-3 flex items-center gap-2">
+                                <i data-lucide="circle-plus" class="w-5 h-5 text-amber-600"></i>
+                                Adicionar Produto
+                            </h4>
+                            <form onsubmit="handleAddProduct(event)" class="space-y-3">
+                                <input type="text" id="adminProdName" required placeholder="Nome do Produto" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500">
+                                <input type="text" id="adminProdPrice" required placeholder="Preço (R$ 1.850,00)" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500">
+                                <select id="adminProdCategory" required class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500 bg-white text-slate-700">
+                                    <option value="" disabled selected>Selecione a Categoria</option>
+                                    <option value="roupas-masculinas">Roupas Masculinas</option>
+                                    <option value="roupas-femininas">Roupas Femininas</option>
+                                    <option value="acessorios-masculinos">Acessórios Masculinos</option>
+                                    <option value="acessorios-femininos">Acessórios Femininos</option>
+                                    <option value="sapatos-masculinos">Sapatos Masculinos</option>
+                                    <option value="sapatos-femininos">Sapatos Femininos</option>
+                                    <option value="aparelhos">Aparelhos</option>
+                                </select>
+                                <input type="url" id="adminProdImg" placeholder="URL da Imagem" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500">
+                                <textarea id="adminProdDesc" rows="3" placeholder="Descrição" class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500"></textarea>
+                                <button type="submit" class="w-full gradient-gold text-slate-900 py-3 rounded-xl font-bold hover:shadow-gold transition cursor-pointer">
+                                    Adicionar Produto
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="font-bold text-lg flex items-center gap-2">
+                                    <i data-lucide="list" class="w-5 h-5 text-amber-600"></i>
+                                    Produtos Cadastrados
+                                </h4>
+                            </div>
+                            <div id="adminProductsList" class="space-y-2 max-h-96 overflow-y-auto"></div>
+                        </div>
+                    </div>
+                </div>
 
-        // ESTADO GLOBAL DA APLICAÇÃO (COM PROPRIEDADE CATEGORY)
+                <!-- ABA CONSULTORIAS -->
+                <div id="content-consultorias" class="tab-content hidden">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-slate-900">
+                            <i data-lucide="briefcase" class="w-6 h-6 inline mr-2 text-amber-600"></i>
+                            Gestão de Consultorias
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">Acompanhe todas as solicitações de agendamento.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                            <p class="text-sm text-slate-500">Total de solicitações</p>
+                            <h3 id="totalConsultorias" class="text-3xl font-bold text-slate-900 mt-1">0</h3>
+                        </div>
+                        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                            <p class="text-sm text-slate-500">Receita estimada</p>
+                            <h3 id="totalReceita" class="text-3xl font-bold text-amber-600 mt-1">R$ 0,00</h3>
+                        </div>
+                        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                            <p class="text-sm text-slate-500">Clientes únicos</p>
+                            <h3 id="totalClientes" class="text-3xl font-bold text-slate-900 mt-1">0</h3>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                        <h3 class="font-bold text-lg text-slate-900 mb-4">Solicitações Recebidas</h3>
+                        <div id="consultingRequestsList" class="space-y-3"></div>
+                    </div>
+                </div>
+
+                <!-- ABA FINANCEIRO -->
+                <div id="content-financeiro" class="tab-content hidden">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-slate-900">
+                            <i data-lucide="trending-up" class="w-6 h-6 inline mr-2 text-amber-600"></i>
+                            Visão Financeira
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">Receitas estimadas por consultoria.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                            <p class="text-sm text-slate-500">Financeira</p>
+                            <h3 id="countFinanceira" class="text-2xl font-bold text-slate-900 mt-1">0</h3>
+                            <p id="receitaFinanceira" class="text-amber-600 font-bold mt-1">R$ 0,00</p>
+                        </div>
+                        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                            <p class="text-sm text-slate-500">Administrativa</p>
+                            <h3 id="countAdministrativa" class="text-2xl font-bold text-slate-900 mt-1">0</h3>
+                            <p id="receitaAdministrativa" class="text-amber-600 font-bold mt-1">R$ 0,00</p>
+                        </div>
+                        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                            <p class="text-sm text-slate-500">Estratégica</p>
+                            <h3 id="countEstrategico" class="text-2xl font-bold text-slate-900 mt-1">0</h3>
+                            <p id="receitaEstrategico" class="text-amber-600 font-bold mt-1">R$ 0,00</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA AFILIADOS -->
+                <div id="content-afiliados" class="tab-content hidden">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-slate-900">
+                            <i data-lucide="crown" class="w-6 h-6 inline mr-2 text-amber-600"></i>
+                            Gestão de Afiliados
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">Acompanhe os afiliados cadastrados.</p>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                        <h3 class="font-bold text-lg text-slate-900 mb-4">Afiliados Cadastrados</h3>
+                        <div id="affiliatesList" class="space-y-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LÓGICA EM JAVASCRIPT -->
+    <script>
+        // ESTADO GLOBAL
         let products = [
-            { id: 1, name: "Chrono Gold Royal", price: "R$ 1.850,00", desc: "Caixa em aço com ouro 18k.", category: "acessorios-masculinos", img: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=400&q=80" },
-            { id: 2, name: "Silver Executive", price: "R$ 2.100,00", desc: "Mostrador prateado safira.", category: "acessorios-masculinos", img: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=400&q=80" },
-            { id: 3, name: "Cufflinks Gold 18k", price: "R$ 650,00", desc: "Abotoaduras ouro artesanal.", category: "acessorios-masculinos", img: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?auto=format&fit=crop&w=400&q=80" },
-            { id: 4, name: "Leather Wallet", price: "R$ 380,00", desc: "Carteira couro RFID.", category: "acessorios-masculinos", img: "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=400&q=80" }
+            { id: 1, name: "Chrono Gold Royal", price: "R$ 1.850,00", category: "acessorios-masculinos", img: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=400&q=80", desc: "Relógio premium com detalhes em ouro." },
+            { id: 2, name: "Silver Executive", price: "R$ 2.100,00", category: "acessorios-masculinos", img: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=400&q=80", desc: "Mostrador prateado e pulseira de couro." },
+            { id: 3, name: "Cufflinks Gold 18k", price: "R$ 650,00", category: "acessorios-masculinos", img: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?auto=format&fit=crop&w=400&q=80", desc: "Abotoaduras artesanais em ouro 18k." },
+            { id: 4, name: "Leather Wallet", price: "R$ 380,00", category: "acessorios-masculinos", img: "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=400&q=80", desc: "Carteira de couro legítimo com RFID." }
         ];
 
         let consultings = [
@@ -910,69 +810,11 @@
         ];
 
         let consultingRequests = [];
+        let affiliates = [];
         let isAdminLoggedIn = false;
         let cart = [];
 
-        // SINCRONIZAÇÃO EM TEMPO REAL (FIRESTORE)
-        onSnapshot(catalogoRef, (docSnap) => {
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                if (data.products && Array.isArray(data.products)) {
-                    products = data.products;
-                    renderProducts();
-                }
-            } else {
-                salvarNoFirebase();
-            }
-        }, (error) => {
-            console.error("Erro no Firebase:", error);
-        });
-
-        async function salvarNoFirebase() {
-            try {
-                await setDoc(catalogoRef, { products: products, updatedAt: new Date().toISOString() });
-                return true;
-            } catch (err) {
-                console.error("Erro ao salvar:", err);
-                alert("❌ Erro ao salvar na nuvem: " + err.message);
-                return false;
-            }
-        }
-
-        window.salvarManualFirebase = async function() {
-            if (await salvarNoFirebase()) alert("☁️ Alterações salvas na nuvem com sucesso!");
-        };
-
-        // FUNÇÕES DO SISTEMA DE CATEGORIAS E FILTROS
-        window.abrirCatalogo = function() {
-            const painel = document.getElementById('painel-categorias');
-            const btn = document.getElementById('btn-ver-catalogo');
-            if (painel) painel.classList.remove('hidden');
-            if (btn) btn.classList.add('hidden');
-        };
-
-        window.filtrarCategoria = function(categoria, event) {
-            const botoes = document.querySelectorAll('.btn-cat');
-            botoes.forEach(btn => {
-                btn.className = "btn-cat px-4 py-2 rounded-lg text-xs font-bold transition bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700";
-            });
-
-            if (event) {
-                event.currentTarget.className = "btn-cat px-4 py-2 rounded-lg text-xs font-bold transition bg-amber-500 text-slate-900 shadow-md";
-            }
-
-            const items = document.querySelectorAll('#carouselContainer > .item-produto-card');
-            items.forEach(item => {
-                const itemCat = item.getAttribute('data-categoria');
-                if (categoria === 'todas' || itemCat === categoria) {
-                    item.style.display = 'flex';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        };
-
-        // RENDERIZAÇÃO E NAVEGAÇÃO DA LOJA
+        // LOJA
         function renderProducts() {
             const c = document.getElementById('carouselContainer');
             if (!c) return;
@@ -1003,6 +845,34 @@
             renderAdminProductsList();
         }
 
+        window.abrirCatalogo = function() {
+            const painel = document.getElementById('painel-categorias');
+            const btn = document.getElementById('btn-ver-catalogo');
+            if (painel) painel.classList.remove('hidden');
+            if (btn) btn.classList.add('hidden');
+        };
+
+        window.filtrarCategoria = function(categoria, event) {
+            const botoes = document.querySelectorAll('.btn-cat');
+            botoes.forEach(btn => {
+                btn.className = "btn-cat px-4 py-2 rounded-lg text-xs font-bold transition bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700";
+            });
+
+            if (event) {
+                event.currentTarget.className = "btn-cat px-4 py-2 rounded-lg text-xs font-bold transition bg-amber-500 text-slate-900 shadow-md";
+            }
+
+            const items = document.querySelectorAll('#carouselContainer > .item-produto-card');
+            items.forEach(item => {
+                const itemCat = item.getAttribute('data-categoria');
+                if (categoria === 'todas' || itemCat === categoria) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        };
+
         window.scrollCarousel = function(direction) {
             const container = document.getElementById('carouselContainer');
             if (!container) return;
@@ -1010,7 +880,7 @@
             container.scrollBy({ left: (direction === 'left' || direction === -1) ? -step : step, behavior: 'smooth' });
         };
 
-        // GESTÃO DE CARRINHO
+        // CARRINHO
         window.addToCart = function(id) {
             const prod = products.find(p => p.id === id);
             if (prod) {
@@ -1068,7 +938,7 @@
             window.open(`https://wa.me/5581989492224?text=${encodeURIComponent(msg)}`, '_blank');
         };
 
-        // CONSULTORIAS E AGENDAMENTOS
+        // CONSULTORIAS
         function renderConsultings() {
             const el = document.getElementById('consultingContainer');
             if (!el) return;
@@ -1122,7 +992,6 @@
             });
 
             updateConsultingDashboard();
-            updateFinancialDashboard();
 
             const msg = `📅 *SOLICITAÇÃO DE AGENDAMENTO*\n\n*Serviço:* ${title}\n*Cliente/Empresa:* ${company}\n*WhatsApp:* ${phone}\n*E-mail:* ${email}\n*Data Desejada:* ${dateFormatted}\n*Horário:* ${time}\n` + (obs ? `*Observações:* ${obs}` : '');
 
@@ -1130,7 +999,7 @@
             window.open(`https://wa.me/5581989492224?text=${encodeURIComponent(msg)}`, '_blank');
         };
 
-        // ADMIN E METRICAS
+        // ADMIN
         window.checkAdminAccess = function() {
             isAdminLoggedIn ? toggleAdminModal() : document.getElementById('loginModal').classList.remove('hidden');
         };
@@ -1154,6 +1023,7 @@
             
             if (tab === 'consultorias') updateConsultingDashboard();
             if (tab === 'financeiro') updateFinancialDashboard();
+            if (tab === 'afiliados') renderAffiliatesList();
         };
 
         function renderAdminProductsList() {
@@ -1169,41 +1039,37 @@
             if (window.lucide) lucide.createIcons();
         }
 
-window.handleAddProduct = async function(e) {
-    e.preventDefault();
+        window.handleAddProduct = function(e) {
+            e.preventDefault();
 
-    // Captura os valores do formulário incluindo a nova categoria
-    const categorySelect = document.getElementById('adminProdCategory');
-    const selectedCategory = categorySelect ? categorySelect.value : 'todas';
+            const categorySelect = document.getElementById('adminProdCategory');
+            const selectedCategory = categorySelect ? categorySelect.value : 'todas';
 
-    const newProd = {
-        id: Date.now(),
-        name: document.getElementById('adminProdName').value,
-        price: document.getElementById('adminProdPrice').value,
-        category: selectedCategory, // <--- Categoria capturada do formulário
-        img: document.getElementById('adminProdImg').value || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80',
-        desc: document.getElementById('adminProdDesc').value || 'Produto exclusivo'
-    };
+            const newProd = {
+                id: Date.now(),
+                name: document.getElementById('adminProdName').value,
+                price: document.getElementById('adminProdPrice').value,
+                category: selectedCategory,
+                img: document.getElementById('adminProdImg').value || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80',
+                desc: document.getElementById('adminProdDesc').value || 'Produto exclusivo'
+            };
 
-    products.push(newProd);
+            products.push(newProd);
+            renderProducts();
 
-    // Salva na nuvem (Firestore)
-    if (await salvarNoFirebase()) {
-        // Limpa os campos do formulário
-        document.getElementById('adminProdName').value = '';
-        document.getElementById('adminProdPrice').value = '';
-        document.getElementById('adminProdImg').value = '';
-        document.getElementById('adminProdDesc').value = '';
-        if (categorySelect) categorySelect.selectedIndex = 0;
+            document.getElementById('adminProdName').value = '';
+            document.getElementById('adminProdPrice').value = '';
+            document.getElementById('adminProdImg').value = '';
+            document.getElementById('adminProdDesc').value = '';
+            if (categorySelect) categorySelect.selectedIndex = 0;
 
-        alert('✅ Produto adicionado e sincronizado na nuvem com sucesso!');
-    }
-};
+            alert('✅ Produto adicionado com sucesso!');
+        };
 
-        window.deleteProduct = async function(id) { 
+        window.deleteProduct = function(id) { 
             if (confirm('Excluir este produto?')) { 
                 products = products.filter(p => p.id !== id); 
-                await salvarNoFirebase(); 
+                renderProducts(); 
             } 
         };
 
@@ -1217,7 +1083,20 @@ window.handleAddProduct = async function(e) {
             
             const cli = document.getElementById('totalClientes');
             if (cli) cli.textContent = new Set(consultingRequests.map(r => r.company)).size;
-            
+
+            const requestsList = document.getElementById('consultingRequestsList');
+            if (requestsList) {
+                requestsList.innerHTML = consultingRequests.length ? consultingRequests.map(r => `
+                    <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200">
+                        <p class="font-bold text-slate-800">${r.title}</p>
+                        <p class="text-xs text-slate-500">${r.company} • ${r.date} às ${r.time}</p>
+                        <p class="text-xs text-slate-500">${r.phone} • ${r.email}</p>
+                    </div>
+                `).join('') : '<p class="text-slate-400 text-sm">Nenhuma solicitação</p>';
+            }
+        }
+
+        function updateFinancialDashboard() {
             const byType = { Financeira: { count: 0, revenue: 0 }, Administrativa: { count: 0, revenue: 0 }, Estrategico: { count: 0, revenue: 0 } };
 
             consultingRequests.forEach(r => {
@@ -1232,131 +1111,91 @@ window.handleAddProduct = async function(e) {
             if (document.getElementById('receitaAdministrativa')) document.getElementById('receitaAdministrativa').textContent = 'R$ ' + byType.Administrativa.revenue.toFixed(2).replace('.', ',');
             if (document.getElementById('countEstrategico')) document.getElementById('countEstrategico').textContent = byType.Estrategico.count;
             if (document.getElementById('receitaEstrategico')) document.getElementById('receitaEstrategico').textContent = 'R$ ' + byType.Estrategico.revenue.toFixed(2).replace('.', ',');
-            
-            const clients = {};
-            consultingRequests.forEach(r => {
-                if (!clients[r.company]) clients[r.company] = { count: 0, types: [] };
-                clients[r.company].count++;
-                if (!clients[r.company].types.includes(r.type)) clients[r.company].types.push(r.type);
+        }
+
+        // AFILIADOS
+        window.submitAffiliate = function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('affiliateName').value.trim();
+            const phone = document.getElementById('affiliatePhone').value.trim();
+            const email = document.getElementById('affiliateEmail').value.trim().toLowerCase();
+
+            const code = 'ROYAL-' + name.replace(/[^A-Za-z]/g, '').slice(0, 6).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+
+            affiliates.push({
+                id: Date.now(),
+                name,
+                phone,
+                email,
+                code,
+                status: 'pendente',
+                created: new Date().toISOString()
             });
-            
-            const clientsListEl = document.getElementById('consultingClientsList');
-            if (clientsListEl) {
-                clientsListEl.innerHTML = Object.entries(clients).map(([name, data]) => `
-                    <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200">
-                        <p class="font-bold text-slate-800">${name}</p>
-                        <p class="text-xs text-slate-500">${data.count} solicitação(ões) • ${data.types.join(', ')}</p>
-                    </div>
-                `).join('') || '<p class="text-slate-400 text-sm">Nenhuma solicitação</p>';
+
+            const link = window.location.origin + window.location.pathname + '?ref=' + encodeURIComponent(code);
+
+            document.getElementById('affiliateCodeDisplay').value = code;
+            document.getElementById('affiliateLinkDisplay').value = link;
+            document.getElementById('affiliateResult').classList.remove('hidden');
+
+            const msg = `👑 *NOVO AFILIADO*\n\n*Nome:* ${name}\n*WhatsApp:* ${phone}\n*E-mail:* ${email}\n*Código:* ${code}\n\nAguardo validação.`;
+
+            document.getElementById('affiliateWhatsAppLink').href = 'https://wa.me/5581989492224?text=' + encodeURIComponent(msg);
+
+            document.getElementById('affiliateForm').reset();
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.copyAffiliateCode = function() {
+            const field = document.getElementById('affiliateCodeDisplay');
+            field.select();
+            navigator.clipboard?.writeText(field.value);
+            alert('Código copiado!');
+        };
+
+        window.copyAffiliateLink = function() {
+            const field = document.getElementById('affiliateLinkDisplay');
+            field.select();
+            navigator.clipboard?.writeText(field.value);
+            alert('Link copiado!');
+        };
+
+        function renderAffiliatesList() {
+            const el = document.getElementById('affiliatesList');
+            if (!el) return;
+
+            el.innerHTML = affiliates.length ? affiliates.map(a => `
+                <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200">
+                    <p class="font-bold text-slate-800">${a.name}</p>
+                    <p class="text-xs text-slate-500">${a.email} • ${a.phone}</p>
+                    <p class="text-xs text-amber-600 font-bold mt-1">Código: ${a.code}</p>
+                    <p class="text-xs text-slate-500">Status: ${a.status}</p>
+                </div>
+            `).join('') : '<p class="text-slate-400 text-sm">Nenhum afiliado cadastrado</p>';
+
+            if (window.lucide) lucide.createIcons();
+        }
+
+        // LOGIN
+        window.handleLogin = function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('adminEmail').value.trim();
+            const password = document.getElementById('adminPassword').value;
+
+            if (email === 'adm@royaladvisory.com' && password === 'admin123') {
+                isAdminLoggedIn = true;
+                sessionStorage.setItem('adminSession', 'true');
+                closeLoginModal();
+                toggleAdminModal();
+                alert('✅ Acesso autorizado!');
+            } else {
+                alert('❌ Email ou senha incorretos.');
             }
-        }
+        };
 
-        function updateFinancialDashboard() {
-            const byClient = {};
-            const byMonth = {};
-            
-            consultingRequests.forEach(r => {
-                const val = parseFloat(r.valor) || 0;
-                if (!byClient[r.company]) byClient[r.company] = 0;
-                byClient[r.company] += val;
-                
-                const dateObj = r.dateRaw ? new Date(r.dateRaw + 'T00:00:00') : new Date();
-                const month = dateObj.toLocaleString('pt-BR', { month: '2-digit', year: 'numeric' });
-                
-                if (!byMonth[month]) byMonth[month] = 0;
-                byMonth[month] += val;
-            });
-            
-            const ganhosClienteEl = document.getElementById('ganhosPorCliente');
-            if (ganhosClienteEl) {
-                ganhosClienteEl.innerHTML = Object.entries(byClient)
-                    .sort((a, b) => b[1] - a[1])
-                    .map(([name, val]) => `
-                        <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200 flex justify-between items-center">
-                            <span class="font-bold text-slate-800">${name}</span>
-                            <span class="text-amber-600 font-bold">R$ ${val.toFixed(2).replace('.', ',')}</span>
-                        </div>
-                    `).join('') || '<p class="text-slate-400 text-sm">Sem dados</p>';
-            }
-            
-            const ganhosMesEl = document.getElementById('ganhosPorMes');
-            if (ganhosMesEl) {
-                ganhosMesEl.innerHTML = Object.entries(byMonth)
-                    .sort()
-                    .map(([month, val]) => `
-                        <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-200 flex justify-between items-center">
-                            <span class="font-bold text-slate-800">${month}</span>
-                            <span class="text-amber-600 font-bold">R$ ${val.toFixed(2).replace('.', ',')}</span>
-                        </div>
-                    `).join('') || '<p class="text-slate-400 text-sm">Sem dados</p>';
-            }
-        }
-function abrirModalVerificacao() {
-  document.getElementById("modalVerificacao").classList.add("ativo");
-}
-
-function fecharModalVerificacao() {
-  document.getElementById("modalVerificacao").classList.remove("ativo");
-}
-
-document.getElementById("fecharModal").addEventListener("click", fecharModalVerificacao);
-
-document
-  .getElementById("continuarNavegando")
-  .addEventListener("click", fecharModalVerificacao);
-    
-window.switchTab = function(tab) {
-    const abas = [
-        "produtos",
-        "consultorias",
-        "financeiro",
-        "afiliados"
-    ];
-
-    abas.forEach((nomeAba) => {
-        const botao = document.getElementById(`tab-${nomeAba}`);
-        const conteudo = document.getElementById(`content-${nomeAba}`);
-
-        if (botao) {
-            botao.classList.remove("tab-active");
-            botao.classList.add("tab-inactive");
-        }
-
-        if (conteudo) {
-            conteudo.classList.add("hidden");
-        }
-    });
-
-    const botaoAtivo = document.getElementById(`tab-${tab}`);
-    const conteudoAtivo = document.getElementById(`content-${tab}`);
-
-    if (botaoAtivo) {
-        botaoAtivo.classList.remove("tab-inactive");
-        botaoAtivo.classList.add("tab-active");
-    }
-
-    if (conteudoAtivo) {
-        conteudoAtivo.classList.remove("hidden");
-    }
-
-    if (tab === "consultorias") {
-        updateConsultingDashboard();
-    }
-
-    if (tab === "financeiro") {
-        updateFinancialDashboard();
-    }
-
-    if (tab === "afiliados") {
-        carregarAfiliadosFirebase();
-    }
-
-    if (window.lucide) {
-        lucide.createIcons();
-    }
-};
-    
-        // INICIALIZAÇÃO ÚNICA DA PÁGINA
+        // INICIALIZAÇÃO
         window.addEventListener('DOMContentLoaded', () => {
             if (sessionStorage.getItem('adminSession') === 'true') isAdminLoggedIn = true;
             renderProducts();
@@ -1364,16 +1203,8 @@ window.switchTab = function(tab) {
             updateConsultingDashboard();
             updateFinancialDashboard();
             
-            document.getElementById('consultingModal')?.addEventListener('click', function(e) {
-                if (e.target === this) closeConsultingModal();
-            });
-
             if (window.lucide) lucide.createIcons();
         });
-
-    lista.innerHTML = filtrados.map((afiliado) => `
-    <script src="js/carrinho.js"></script>
-<script type="module" src="js/loja.js"></script>
     </script>
 </body>
 </html>
