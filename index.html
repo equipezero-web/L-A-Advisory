@@ -226,6 +226,48 @@
         .auth-required-overlay {
             backdrop-filter: blur(6px);
         }
+        /* Modo de alto contraste */
+.high-contrast-mode {
+    filter: contrast(1.35) saturate(0.9);
+}
+
+.high-contrast-mode body {
+    background: #000000 !important;
+    color: #ffffff !important;
+}
+
+.high-contrast-mode .bg-white,
+.high-contrast-mode .bg-slate-50,
+.high-contrast-mode .bg-slate-100 {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+}
+
+.high-contrast-mode .text-slate-900,
+.high-contrast-mode .text-slate-800,
+.high-contrast-mode .text-slate-700,
+.high-contrast-mode .text-slate-600 {
+    color: #ffffff !important;
+}
+
+.high-contrast-mode .text-slate-500,
+.high-contrast-mode .text-slate-400 {
+    color: #e5e7eb !important;
+}
+
+.high-contrast-mode .border-slate-200,
+.high-contrast-mode .border-slate-300,
+.high-contrast-mode .border-slate-700 {
+    border-color: #fbbf24 !important;
+}
+
+.high-contrast-mode input,
+.high-contrast-mode textarea,
+.high-contrast-mode select {
+    background: #000000 !important;
+    color: #ffffff !important;
+    border-color: #fbbf24 !important;
+}
     </style>
 
     <!-- Registro do Service Worker -->
@@ -9148,6 +9190,220 @@
             lucide.createIcons();
         }
 
+        <script>
+    // =====================================================
+    // FUNÇÕES ADICIONAIS: FILTROS, CARROSSEL E ACESSIBILIDADE
+    // =====================================================
+
+    let accessibilityFontSize = 100;
+    let highContrastEnabled = false;
+
+    function openCatalogFilters() {
+        const filters = document.getElementById('catalogFilters');
+        const modal = document.getElementById('catalogFiltersModal');
+
+        // Caso você tenha criado um modal específico de filtros
+        if (modal) {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+            return;
+        }
+
+        // Caso a área de filtros esteja na própria página
+        if (filters) {
+            filters.classList.toggle('hidden');
+
+            if (!filters.classList.contains('hidden')) {
+                filters.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }
+
+            return;
+        }
+
+        // Alternativa segura: informa que não há filtro cadastrado
+        alert('Os filtros do catálogo ainda não foram configurados nesta versão.');
+    }
+
+    function closeCatalogFilters() {
+        const modal = document.getElementById('catalogFiltersModal');
+
+        if (modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+    }
+
+    function scrollCarousel(direction = 1) {
+        const carousel =
+            document.getElementById('productCarousel') ||
+            document.getElementById('carousel') ||
+            document.querySelector('.product-carousel') ||
+            document.querySelector('[data-carousel]');
+
+        if (!carousel) {
+            console.warn('Carrossel não encontrado no HTML.');
+            return;
+        }
+
+        const scrollAmount = carousel.clientWidth * 0.8;
+
+        carousel.scrollBy({
+            left: direction * scrollAmount,
+            behavior: 'smooth'
+        });
+    }
+
+    function requireAuthForAction(action = 'continuar') {
+        if (state.currentUser) {
+            return true;
+        }
+
+        openAuthModal('customer-login');
+
+        setTimeout(() => {
+            alert('Faça login ou crie uma conta para ' + action + '.');
+        }, 200);
+
+        return false;
+    }
+
+    function increaseFontSize() {
+        if (accessibilityFontSize >= 130) {
+            alert('O tamanho máximo da fonte já foi atingido.');
+            return;
+        }
+
+        accessibilityFontSize += 10;
+
+        document.documentElement.style.fontSize =
+            accessibilityFontSize + '%';
+
+        localStorage.setItem(
+            'laAccessibilityFontSize',
+            accessibilityFontSize
+        );
+
+        showAccessibilityFeedback(
+            'Fonte aumentada para ' + accessibilityFontSize + '%.'
+        );
+    }
+
+    function decreaseFontSize() {
+        if (accessibilityFontSize <= 80) {
+            alert('O tamanho mínimo da fonte já foi atingido.');
+            return;
+        }
+
+        accessibilityFontSize -= 10;
+
+        document.documentElement.style.fontSize =
+            accessibilityFontSize + '%';
+
+        localStorage.setItem(
+            'laAccessibilityFontSize',
+            accessibilityFontSize
+        );
+
+        showAccessibilityFeedback(
+            'Fonte reduzida para ' + accessibilityFontSize + '%.'
+        );
+    }
+
+    function toggleHighContrast() {
+        highContrastEnabled = !highContrastEnabled;
+
+        document.documentElement.classList.toggle(
+            'high-contrast-mode',
+            highContrastEnabled
+        );
+
+        localStorage.setItem(
+            'laHighContrast',
+            highContrastEnabled ? 'true' : 'false'
+        );
+
+        showAccessibilityFeedback(
+            highContrastEnabled
+                ? 'Alto contraste ativado.'
+                : 'Alto contraste desativado.'
+        );
+    }
+
+    function resetAccessibility() {
+        accessibilityFontSize = 100;
+        highContrastEnabled = false;
+
+        document.documentElement.style.fontSize = '100%';
+
+        document.documentElement.classList.remove(
+            'high-contrast-mode'
+        );
+
+        localStorage.removeItem('laAccessibilityFontSize');
+        localStorage.removeItem('laHighContrast');
+
+        showAccessibilityFeedback(
+            'Configurações de acessibilidade restauradas.'
+        );
+    }
+
+    function loadAccessibilitySettings() {
+        const savedFontSize = parseInt(
+            localStorage.getItem('laAccessibilityFontSize') || '100',
+            10
+        );
+
+        const savedContrast =
+            localStorage.getItem('laHighContrast') === 'true';
+
+        accessibilityFontSize = savedFontSize;
+        highContrastEnabled = savedContrast;
+
+        document.documentElement.style.fontSize =
+            accessibilityFontSize + '%';
+
+        if (highContrastEnabled) {
+            document.documentElement.classList.add(
+                'high-contrast-mode'
+            );
+        }
+    }
+
+    function showAccessibilityFeedback(message) {
+        let feedback = document.getElementById(
+            'accessibilityFeedback'
+        );
+
+        if (!feedback) {
+            feedback = document.createElement('div');
+            feedback.id = 'accessibilityFeedback';
+            feedback.className =
+                'fixed bottom-6 left-1/2 -translate-x-1/2 z-[999] ' +
+                'bg-slate-950 text-white border border-amber-400/40 ' +
+                'px-5 py-3 rounded-xl shadow-2xl text-sm font-bold ' +
+                'transition opacity-0 pointer-events-none';
+
+            document.body.appendChild(feedback);
+        }
+
+        feedback.textContent = message;
+        feedback.classList.remove('opacity-0');
+
+        clearTimeout(window.accessibilityFeedbackTimeout);
+
+        window.accessibilityFeedbackTimeout = setTimeout(() => {
+            feedback.classList.add('opacity-0');
+        }, 2500);
+    }
+
+    // Carrega as preferências de acessibilidade salvas.
+    document.addEventListener('DOMContentLoaded', () => {
+        loadAccessibilitySettings();
+    });
        
         // Expor funções globalmente
         window.openAuthModal = openAuthModal;
@@ -9233,9 +9489,17 @@
         window.lookupProfileZipCode = lookupProfileZipCode;
         window.scrollToTop = scrollToTop;
         window.renderProducts = renderProducts;
+    
+    window.openCatalogFilters = openCatalogFilters;
+window.closeCatalogFilters = closeCatalogFilters;
+window.scrollCarousel = scrollCarousel;
+window.requireAuthForAction = requireAuthForAction;
+window.increaseFontSize = increaseFontSize;
+window.decreaseFontSize = decreaseFontSize;
+window.toggleHighContrast = toggleHighContrast;
+window.resetAccessibility = resetAccessibility;
     </script>
 
-        <!-- INICIALIZAÇÃO FINAL -->
    <!-- INICIALIZAÇÃO FINAL E PWA -->
 <script>
     document.addEventListener('DOMContentLoaded', () => {
