@@ -70,7 +70,7 @@ function definirCarregamento(ativo) {
   payButton.disabled = ativo;
 
   if (ativo) {
-    payButtonText.textContent = "Criando pagamento անվտանգ...";
+    payButtonText.textContent = "Criando pagamento...";
     return;
   }
 
