@@ -2,15 +2,20 @@
   "id": "./",
   "name": "L&A Royal Advisory",
   "short_name": "L&A Royal",
-  "description": "Loja premium e consultoria empresarial.",
-  "categories": ["finance", "business", "shopping"],
+  "description": "Loja premium, consultoria empresarial e programa de afiliados.",
   "lang": "pt-BR",
+  "dir": "ltr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#0c1933",
   "theme_color": "#0c1933",
   "orientation": "portrait-primary",
+  "categories": [
+    "business",
+    "finance",
+    "shopping"
+  ],
   "icons": [
     {
       "src": "./logo192.png",
