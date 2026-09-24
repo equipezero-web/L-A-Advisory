@@ -1,4 +1,4 @@
-const VERSAO_CACHE = "la-royal-advisory-v1";
+const VERSAO_CACHE = "la-royal-advisory-v6";
 
 const ARQUIVOS_INICIAIS = [
   "./",
