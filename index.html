@@ -6541,9 +6541,42 @@
     state.users.push(defaultAdmin);
     saveStateToStorage();
 }
+function captureAffiliateReferral() {
+    const params = new URLSearchParams(window.location.search);
+    const referralCode = params.get('ref')?.trim().toUpperCase();
 
+    if (!referralCode) {
+        return;
+    }
+
+    const affiliate = state.affiliates.find(item =>
+        item.code === referralCode &&
+        item.status === 'active'
+    );
+
+    if (affiliate) {
+        sessionStorage.setItem('laAffiliateReferralCode', affiliate.code);
+    }
+}
+
+function getAffiliateReferralCode() {
+    const referralCode = sessionStorage.getItem('laAffiliateReferralCode');
+
+    if (!referralCode) {
+        return null;
+    }
+
+    const affiliate = state.affiliates.find(item =>
+        item.code === referralCode &&
+        item.status === 'active'
+    );
+
+    return affiliate ? affiliate.code : null;
+}
+        
 function initializeApp() {
     initializeDefaultAdmin();
+    captureAffiliateReferral();
 
     if (!state.products || state.products.length === 0) {
         initializeDefaultProducts();
@@ -6555,7 +6588,6 @@ function initializeApp() {
     handleCookieConsent();
     setupScrollListener();
 }
-
         function initializeDefaultProducts() {
             state.products = [
                 {
@@ -8481,24 +8513,29 @@ if (countEl) {
             }
         }
 
-        function switchAdminTab(tabId) {
-            document.querySelectorAll('.admin-section').forEach(el => el.classList.add('hidden'));
-            document.getElementById(tabId)?.classList.remove('hidden');
+  function switchAdminTab(tabId, button) {
+    document.querySelectorAll('.admin-section').forEach(section => {
+        section.classList.add('hidden');
+    });
 
-            document.querySelectorAll('.admin-tab').forEach(tab => {
-                tab.classList.remove('bg-slate-900', 'text-amber-400');
-                tab.classList.add('text-slate-600');
-            });
+    document.getElementById(tabId)?.classList.remove('hidden');
 
-            event.currentTarget.classList.remove('text-slate-600');
-            event.currentTarget.classList.add('bg-slate-900', 'text-amber-400');
+    document.querySelectorAll('.admin-tab').forEach(tab => {
+        tab.classList.remove('bg-slate-900', 'text-amber-400');
+        tab.classList.add('text-slate-600');
+    });
 
-            if (tabId === 'admin-dashboard') loadAdminDashboard();
-            if (tabId === 'admin-users') loadAdminUsers();
-            if (tabId === 'admin-products') loadAdminProducts();
-            if (tabId === 'admin-orders') loadAdminOrders();
-            if (tabId === 'admin-affiliates') loadAdminAffiliates();
-        }
+    if (button) {
+        button.classList.remove('text-slate-600');
+        button.classList.add('bg-slate-900', 'text-amber-400');
+    }
+
+    if (tabId === 'admin-dashboard') loadAdminDashboard();
+    if (tabId === 'admin-users') loadAdminUsers();
+    if (tabId === 'admin-products') loadAdminProducts();
+    if (tabId === 'admin-orders') loadAdminOrders();
+    if (tabId === 'admin-affiliates') loadAdminAffiliates();
+}
 
         function loadAdminDashboard() {
             document.getElementById('adminDashUsers').textContent = state.users.length;
@@ -8687,9 +8724,28 @@ if (countEl) {
             const image = document.getElementById('adminProductImage')?.value.trim();
             const category = document.getElementById('adminProductCategory')?.value.trim();
 
-            if (!name || !description || !price || !image || !category) {
-                showAdminProductMessage('Preencha todos os campos obrigatórios.', 'error');
-                return;
+            if (
+    !name ||
+    !description ||
+    !image ||
+    !category ||
+    !Number.isFinite(price) ||
+    price < 0 ||
+    !Number.isFinite(discount) ||
+    discount < 0 ||
+    discount > 100 ||
+    !Number.isInteger(stock) ||
+    stock < 0 ||
+    !Number.isFinite(commission) ||
+    commission < 0 ||
+    commission > 100
+) {
+    showAdminProductMessage(
+        'Revise os dados do produto. Preço, desconto, estoque e comissão devem ser valores válidos.',
+        'error'
+    );
+    return;
+}
             }
 
             if (id) {
@@ -8721,9 +8777,10 @@ if (countEl) {
                 });
             }
 
-            saveStateToStorage();
-            showAdminProductMessage('Produto salvo com sucesso!', 'success');
-            loadAdminProducts();
+saveStateToStorage();
+renderCatalog();
+loadAdminProducts();
+showAdminProductMessage('Produto salvo com sucesso!', 'success');
         }
 
         function showAdminProductMessage(message, type) {
@@ -8748,9 +8805,14 @@ if (countEl) {
         function deleteProduct(productId) {
             if (!confirm('Tem certeza que deseja excluir este produto?')) return;
 
-            state.products = state.products.filter(p => p.id !== productId);
-            saveStateToStorage();
-            loadAdminProducts();
+           state.products = state.products.filter(p => p.id !== productId);
+
+state.cart = state.cart.filter(item => item.id !== productId);
+
+saveStateToStorage();
+renderCatalog();
+updateCartIcon();
+loadAdminProducts();
         }
 
         function openAdminOrderForm(orderId) {
@@ -8977,8 +9039,8 @@ if (countEl) {
                 return;
             }
 
-            const start = new Date(startDate);
-            const end = new Date(endDate);
+            const start = new Date(`${startDate}T00:00:00`);
+            const end = new Date(`${endDate}T23:59:59.999`);
 
             const filteredOrders = state.orders.filter(o => {
                 const orderDate = new Date(o.createdAt);
@@ -9013,8 +9075,8 @@ if (countEl) {
                 return;
             }
 
-            const start = new Date(startDate);
-            const end = new Date(endDate);
+             const start = new Date(`${startDate}T00:00:00`);
+             const end = new Date(`${endDate}T23:59:59.999`);
 
             const filteredOrders = state.orders.filter(o => {
                 const orderDate = new Date(o.createdAt);
@@ -9051,6 +9113,148 @@ if (countEl) {
         // =====================================================
         // UTILITÁRIOS
         // =====================================================
+        function calculateFinalPrice(product) {
+    const price = Number(product?.price) || 0;
+    const discount = Math.min(Math.max(Number(product?.discount) || 0, 0), 100);
+
+    return price * (1 - discount / 100);
+}
+
+function renderCatalog() {
+    const container =
+        document.getElementById('catalogContainer') ||
+        document.getElementById('productsGrid');
+
+    if (!container) {
+        console.warn(
+            'Nenhum container de produtos foi encontrado. ' +
+            'Use id="catalogContainer" ou id="productsGrid".'
+        );
+        return;
+    }
+
+    const availableProducts = state.products.filter(product => {
+        return Number(product.stock) > 0;
+    });
+
+    if (availableProducts.length === 0) {
+        container.innerHTML = `
+            <div class="col-span-full p-8 bg-slate-50 border border-slate-200 rounded-2xl text-center">
+                <i
+                    data-lucide="package-open"
+                    class="w-12 h-12 text-slate-400 mx-auto mb-3"
+                ></i>
+
+                <p class="font-bold text-slate-700">
+                    Nenhum produto disponível no momento.
+                </p>
+
+                <p class="text-sm text-slate-500 mt-1">
+                    Em breve teremos novas soluções para você.
+                </p>
+            </div>
+        `;
+
+        lucide.createIcons();
+        return;
+    }
+
+    container.innerHTML = availableProducts.map(product => {
+        const originalPrice = Number(product.price) || 0;
+        const discount = Number(product.discount) || 0;
+        const finalPrice = calculateFinalPrice(product);
+
+        return `
+            <article class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col">
+                <div class="relative h-56 bg-slate-100 overflow-hidden">
+                    <img
+                        src="${escapeAttribute(product.image)}"
+                        alt="${escapeAttribute(product.name)}"
+                        class="w-full h-full object-cover hover:scale-105 transition duration-500"
+                        loading="lazy"
+                    >
+
+                    <span class="absolute top-3 left-3 px-3 py-1 rounded-full bg-slate-900/90 text-amber-400 text-xs font-bold">
+                        ${escapeHtml(product.category || 'Produto')}
+                    </span>
+
+                    ${discount > 0 ? `
+                        <span class="absolute top-3 right-3 px-3 py-1 rounded-full bg-amber-400 text-slate-900 text-xs font-extrabold">
+                            ${formatPercentage(discount)}% OFF
+                        </span>
+                    ` : ''}
+                </div>
+
+                <div class="p-5 flex flex-col flex-1">
+                    <h3 class="font-serif text-xl font-bold text-slate-900">
+                        ${escapeHtml(product.name)}
+                    </h3>
+
+                    <p class="text-sm text-slate-600 leading-relaxed mt-2 flex-1">
+                        ${escapeHtml(product.description)}
+                    </p>
+
+                    <div class="mt-5">
+                        ${discount > 0 ? `
+                            <p class="text-sm text-slate-400 line-through">
+                                ${formatCurrency(originalPrice)}
+                            </p>
+                        ` : ''}
+
+                        <p class="text-2xl font-bold text-slate-900">
+                            ${formatCurrency(finalPrice)}
+                        </p>
+
+                        <p class="text-xs text-slate-500 mt-1">
+                            ${Number(product.stock)} ${
+                                Number(product.stock) === 1
+                                    ? 'unidade disponível'
+                                    : 'unidades disponíveis'
+                            }
+                        </p>
+                    </div>
+
+                    <button
+                        type="button"
+                        onclick="addToCart('${escapeAttribute(product.id)}')"
+                        class="w-full mt-5 gradient-gold text-slate-900 py-3 rounded-xl font-bold hover:shadow-gold transition"
+                    >
+                        <i
+                            data-lucide="shopping-cart"
+                            class="w-4 h-4 inline mr-1"
+                        ></i>
+
+                        Adicionar ao carrinho
+                    </button>
+                </div>
+            </article>
+        `;
+    }).join('');
+
+    lucide.createIcons();
+}
+
+function formatPercentage(value) {
+    return new Intl.NumberFormat(APP_CONFIG.locale, {
+        maximumFractionDigits: 2
+    }).format(Number(value) || 0);
+}
+
+function escapeHtml(value) {
+    const element = document.createElement('div');
+    element.textContent = String(value ?? '');
+    return element.innerHTML;
+}
+
+function escapeAttribute(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+        
         function formatCurrency(value) {
             return new Intl.NumberFormat('pt-BR', {
                 style: 'currency',
@@ -9062,13 +9266,6 @@ if (countEl) {
             if (!isoString) return '-';
             const date = new Date(isoString);
             return date.toLocaleDateString('pt-BR');
-        }
-
-        function calculateFinalPrice(product) {
-            if (!product.discount || product.discount <= 0) {
-                return product.price;
-            }
-            return product.price * (1 - product.discount / 100);
         }
 
         function handleCookieConsent() {
@@ -9164,98 +9361,6 @@ if (countEl) {
                     }
                 })
                 .catch(() => {});
-        }
-
-        function renderProducts() {
-            const container = document.getElementById('productsGrid');
-            if (!container) return;
-
-            container.innerHTML = state.products.map(product => {
-                const finalPrice = calculateFinalPrice(product);
-                const hasDiscount = product.discount && product.discount > 0;
-                const isOutOfStock = product.stock <= 0;
-
-                return `
-                    <div class="bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden hover:border-amber-500/50 transition group">
-                        <div class="relative overflow-hidden">
-                            <img
-                                src="${product.image}"
-                                alt="${product.name}"
-                                class="w-full h-56 object-cover group-hover:scale-105 transition duration-500"
-                            >
-
-                            ${hasDiscount ? `
-                                <div class="absolute top-3 left-3 px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full">
-                                    -${product.discount}%
-                                </div>
-                            ` : ''}
-
-                            ${isOutOfStock ? `
-                                <div class="absolute inset-0 bg-slate-950/70 flex items-center justify-center">
-                                    <span class="px-4 py-2 bg-red-500 text-white text-sm font-bold rounded-full">
-                                        Esgotado
-                                    </span>
-                                </div>
-                            ` : ''}
-                        </div>
-
-                        <div class="p-5">
-                            <p class="text-xs text-amber-400 font-bold uppercase tracking-wider mb-2">
-                                ${product.category}
-                            </p>
-
-                            <h3 class="font-serif text-xl font-bold text-white mb-2">
-                                ${product.name}
-                            </h3>
-
-                            <p class="text-sm text-slate-400 mb-4 line-clamp-2">
-                                ${product.description}
-                            </p>
-
-                            <div class="flex items-end justify-between mb-4">
-                                <div>
-                                    ${hasDiscount ? `
-                                        <p class="text-xs text-slate-500 line-through">
-                                            ${formatCurrency(product.price)}
-                                        </p>
-                                    ` : ''}
-
-                                    <p class="text-2xl font-bold text-amber-400">
-                                        ${formatCurrency(finalPrice)}
-                                    </p>
-                                </div>
-
-                                <p class="text-xs text-slate-400">
-                                    ${product.stock} disponíveis
-                                </p>
-                            </div>
-
-                            <div class="flex gap-2">
-                                <button
-                                    type="button"
-                                    onclick="addToCart('${product.id}')"
-                                    ${isOutOfStock ? 'disabled' : ''}
-                                    class="flex-1 gradient-gold text-slate-900 py-3 rounded-xl font-bold hover:shadow-gold transition disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    ${isOutOfStock ? 'Sem estoque' : 'Adicionar'}
-                                </button>
-
-                                ${isOutOfStock ? `
-                                    <button
-                                        type="button"
-                                        onclick="openStockAlertModal('${product.id}', '${product.name}')"
-                                        class="px-4 py-3 border border-amber-400/50 text-amber-300 rounded-xl font-bold hover:bg-amber-400/10 transition"
-                                    >
-                                        <i data-lucide="bell" class="w-5 h-5"></i>
-                                    </button>
-                                ` : ''}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            lucide.createIcons();
         }
         
     // =====================================================
