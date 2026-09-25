@@ -430,7 +430,7 @@
                 <!-- Carrinho -->
                 <button
                     type="button"
-                    onclick="requireAuthForAction('cart')"
+                    onclick="openCartModal()"
                     class="relative p-2.5 rounded-full text-amber-400 hover:bg-amber-400/10 transition border border-amber-400/30 hover:border-amber-400/60"
                     aria-label="Abrir carrinho"
                 >
@@ -6508,6 +6508,11 @@
                     const remoteState = snapshot.data();
                     state = { ...state, ...remoteState };
                 }
+                if (!Array.isArray(state.cart)) state.cart = [];
+                if (!Array.isArray(state.products)) state.products = [];
+                if (!Array.isArray(state.orders)) state.orders = [];
+                if (!Array.isArray(state.users)) state.users = [];
+                if (!Array.isArray(state.affiliates)) state.affiliates = [];
                 firebaseReady = true;
                 console.log('L&A Royal Advisory conectado ao Firebase/Firestore.');
             } catch (e) {
@@ -6522,6 +6527,7 @@
                 products: state.products || [],
                 orders: state.orders || [],
                 affiliates: state.affiliates || [],
+                cart: state.cart || [],
                 cookiePreferences: state.cookiePreferences || {},
                 updatedAt: new Date().toISOString()
             };
@@ -7362,8 +7368,7 @@ function initializeApp() {
 
             renderCartItems();
 
-            const total = state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            if (totalEl) totalEl.textContent = formatCurrency(total);
+            updateCartTotal();
 
             modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
@@ -7619,7 +7624,9 @@ function initializeApp() {
 
             item.quantity = newQuantity;
             saveStateToStorage();
+            updateCartIcon();
             renderCartItems();
+            updateCartTotal();
         }
 
         function renderCartItems() {
@@ -7649,6 +7656,15 @@ function initializeApp() {
                 container.appendChild(div);
             });
             lucide.createIcons();
+        }
+
+        function updateCartTotal() {
+            const totalEl = document.getElementById('cartTotal');
+            if (!totalEl) return;
+            const total = state.cart.reduce((sum, item) => {
+                return sum + (Number(item.price) || 0) * (Number(item.quantity) || 0);
+            }, 0);
+            totalEl.textContent = formatCurrency(total);
         }
 
         function updateCartIcon() {
