@@ -274,7 +274,20 @@
     color: #ffffff !important;
     border-color: #fbbf24 !important;
 }
-    </style>
+    
+        /* MODO EXCLUSIVO DO AFILIADO */
+        body.affiliate-mode #inicio,
+        body.affiliate-mode #sobre,
+        body.affiliate-mode #consultoria,
+        body.affiliate-mode #afiliados,
+        body.affiliate-mode #depoimentos,
+        body.affiliate-mode #faq,
+        body.affiliate-mode footer,
+        body.affiliate-mode > section:not(#loja) { display: none !important; }
+        body.affiliate-mode #loja { min-height: calc(100vh - 90px); }
+        body.affiliate-mode #loja > div > div:first-child p { max-width: none; }
+
+</style>
 
     <!-- Registro do Service Worker -->
     <script>
@@ -3150,6 +3163,10 @@
                             >
                         </div>
 
+                        <div class="flex justify-end mb-2">
+                            <button type="button" onclick="sendPasswordReset()" class="text-xs font-bold text-amber-700 hover:text-amber-600">Esqueci minha senha</button>
+                        </div>
+
                         <div>
                             <label
                                 for="affiliateLoginPassword"
@@ -4576,6 +4593,15 @@
                     <!-- Vendas carregadas pelo JavaScript -->
                 </div>
             </div>
+
+            <!-- LINKS GERADOS PELO AFILIADO -->
+            <section id="affiliateGeneratedLinksSection" class="mt-6 p-5 bg-white border border-slate-200 rounded-xl shadow-sm">
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <div><h4 class="font-bold text-slate-900">Links gerados</h4><p class="text-xs text-slate-500">Links de divulgação registrados nesta conta.</p></div>
+                    <i data-lucide="link" class="w-5 h-5 text-amber-600"></i>
+                </div>
+                <div id="affiliateGeneratedLinksList" class="space-y-2"></div>
+            </section>
         </div>
     </div>
 
@@ -6473,6 +6499,7 @@
         const firebaseAuth = firebase.auth();
         const firebaseDb = firebase.firestore();
         const FIREBASE_STATE_REF = firebaseDb.collection('app_state').doc('main');
+        const MERCADO_PAGO_API_BASE = '/api';
 
         let state = {
             currentUser: null,
@@ -6480,6 +6507,7 @@
             products: [],
             orders: [],
             affiliates: [],
+            affiliateLinks: [],
             cart: [],
             cookiePreferences: {
                 necessary: true,
@@ -6513,6 +6541,7 @@
                 if (!Array.isArray(state.orders)) state.orders = [];
                 if (!Array.isArray(state.users)) state.users = [];
                 if (!Array.isArray(state.affiliates)) state.affiliates = [];
+                if (!Array.isArray(state.affiliateLinks)) state.affiliateLinks = [];
                 firebaseReady = true;
                 console.log('L&A Royal Advisory conectado ao Firebase/Firestore.');
             } catch (e) {
@@ -6527,6 +6556,7 @@
                 products: state.products || [],
                 orders: state.orders || [],
                 affiliates: state.affiliates || [],
+                affiliateLinks: state.affiliateLinks || [],
                 cart: state.cart || [],
                 cookiePreferences: state.cookiePreferences || {},
                 updatedAt: new Date().toISOString()
@@ -6624,8 +6654,54 @@ firebaseAuth.onAuthStateChanged(async (user) => {
     if (saved) {
         state.currentUser = { ...saved, id: user.uid };
         updateAuthUI();
+        if (state.currentUser.role === 'affiliate' && state.currentUser.affiliateStatus === 'active') enterAffiliateMode();
     }
 });
+
+function setupOrderRealtimeSync() {
+    FIREBASE_STATE_REF.onSnapshot(snapshot => {
+        if (!snapshot.exists()) return;
+        const remote = snapshot.data();
+        if (Array.isArray(remote.orders)) state.orders = remote.orders;
+        if (Array.isArray(remote.affiliates)) state.affiliates = remote.affiliates;
+        if (Array.isArray(remote.affiliateLinks)) state.affiliateLinks = remote.affiliateLinks;
+        if (state.currentUser?.role === 'affiliate') { const a = state.affiliates.find(x => x.userId === state.currentUser.id); if (a) { updateAffiliateSummary(a); renderAffiliateSales(a); renderAffiliateGeneratedLinks(a); } }
+        checkPendingPaymentConfirmation();
+    });
+}
+
+function handlePaymentReturn() {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get('status') || params.get('payment');
+    const externalReference = params.get('external_reference');
+    if (!status && !externalReference) return;
+    if (externalReference) sessionStorage.setItem('laPendingPaymentOrder', externalReference);
+    const order = state.orders.find(o => o.id === externalReference || o.code === externalReference);
+    if (status === 'success' && order?.status === 'paid') {
+        alert('Pagamento confirmado! Seu pedido ' + order.code + ' foi confirmado dentro do site.');
+        sessionStorage.removeItem('laPendingPaymentOrder');
+    } else if (status === 'failure' || status === 'rejected') {
+        alert('O pagamento não foi aprovado. Você pode tentar novamente.');
+        sessionStorage.removeItem('laPendingPaymentOrder');
+    } else if (status === 'pending') {
+        alert('Pagamento pendente. O site atualizará o pedido automaticamente quando o Mercado Pago confirmar a transação.');
+    }
+    const clean = window.location.origin + window.location.pathname;
+    window.history.replaceState({}, document.title, clean);
+}
+
+function checkPendingPaymentConfirmation() {
+    const orderId = sessionStorage.getItem('laPendingPaymentOrder');
+    if (!orderId) return;
+    const order = state.orders.find(o => o.id === orderId || o.code === orderId);
+    if (!order) return;
+    if (order.status === 'paid') {
+        sessionStorage.removeItem('laPendingPaymentOrder');
+        alert('Pagamento confirmado! Seu pedido ' + order.code + ' está confirmado dentro do site.');
+    } else if (['rejected','canceled','refunded'].includes(order.status)) {
+        sessionStorage.removeItem('laPendingPaymentOrder');
+    }
+}
 
 function initializeApp() {
     initializeDefaultAdmin();
@@ -6640,6 +6716,8 @@ function initializeApp() {
     updateAuthUI();
     handleCookieConsent();
     setupScrollListener();
+    setupOrderRealtimeSync();
+    handlePaymentReturn();
 }
         function initializeDefaultProducts() {
             state.products = [
@@ -7015,7 +7093,7 @@ function initializeApp() {
                 updateAuthUI();
                 closeAuthModal();
                 if (user.affiliateStatus === 'pending') alert('Sua solicitação de afiliado está em análise.');
-                else if (user.affiliateStatus === 'active') openAffiliateDashboard();
+                else if (user.affiliateStatus === 'active') { enterAffiliateMode(); openAffiliateDashboard(); }
                 showAuthMessage('Login realizado com sucesso!', 'success');
             } catch (error) {
                 console.error(error);
@@ -7162,8 +7240,31 @@ function initializeApp() {
             }
         }
 
-        function sendPasswordReset() {
-            alert('Funcionalidade de recuperação de senha será implementada com backend.');
+        async function sendPasswordReset() {
+            const customerInput = document.getElementById('customerLoginEmail');
+            const affiliateInput = document.getElementById('affiliateLoginEmail');
+            const raw = (affiliateInput && !affiliateInput.closest('.hidden') ? affiliateInput.value : customerInput?.value || '').trim();
+            if (!raw) {
+                showAuthMessage('Informe seu e-mail para receber o link de recuperação.', 'error');
+                return;
+            }
+            let email = raw;
+            if (!raw.includes('@')) {
+                const found = state.users.find(u => u.cpf === raw);
+                email = found?.email || '';
+            }
+            if (!email || !email.includes('@')) {
+                showAuthMessage('Para recuperar a senha, informe o e-mail cadastrado.', 'error');
+                return;
+            }
+            try {
+                await firebaseAuth.sendPasswordResetEmail(email.toLowerCase());
+                showAuthMessage('Link de recuperação enviado. Verifique seu e-mail e a caixa de spam.', 'success');
+            } catch (error) {
+                console.error(error);
+                const msg = error.code === 'auth/user-not-found' ? 'Não encontramos uma conta com esse e-mail.' : 'Não foi possível enviar o link de recuperação.';
+                showAuthMessage(msg, 'error');
+            }
         }
 
         function signInWithGoogle() {
@@ -7466,47 +7567,36 @@ function initializeApp() {
             if (totalEl) totalEl.textContent = formatCurrency(total);
         }
 
-        function createCheckoutOrder(event) {
+        async function createCheckoutOrder(event) {
             event.preventDefault();
-
             const fullName = document.getElementById('checkoutFullName')?.value.trim();
             const cpf = document.getElementById('checkoutCpf')?.value.trim();
             const phone = document.getElementById('checkoutPhone')?.value.trim();
             const email = document.getElementById('checkoutEmail')?.value.trim();
             const addressText = document.getElementById('checkoutAddress')?.value.trim();
-
-            if (!fullName || !cpf || !phone || !email || !addressText) {
-                alert('Preencha todos os campos obrigatórios.');
-                return;
-            }
-
+            if (!fullName || !cpf || !phone || !email || !addressText) { alert('Preencha todos os campos obrigatórios.'); return; }
+            if (!state.cart.length) { alert('Seu carrinho está vazio.'); return; }
             const order = {
                 id: 'order_' + Date.now(),
                 code: 'ORD' + Math.random().toString(36).substring(2, 8).toUpperCase(),
-                userId: state.currentUser?.id,
-                customerName: fullName,
-                customerCpf: cpf,
-                customerPhone: phone,
-                customerEmail: email,
-                address: addressText,
-                items: [...state.cart],
-                total: state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-                status: 'pending',
-                paymentMethod: null,
-                trackingCode: '',
-                carrier: '',
-                observations: '',
-                affiliateCode: getAffiliateReferralCode(),
-                createdAt: new Date().toISOString()
+                userId: state.currentUser?.id, customerName: fullName, customerCpf: cpf, customerPhone: phone, customerEmail: email, address: addressText,
+                items: [...state.cart], total: state.cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0),
+                status: 'pending', paymentStatus: 'pending', paymentMethod: 'mercado_pago', paymentId: null,
+                trackingCode: '', carrier: '', observations: '', affiliateCode: getAffiliateReferralCode(), createdAt: new Date().toISOString()
             };
-
             state.orders.push(order);
-            state.cart = [];
-            saveStateToStorage();
-
-            closeCheckoutModal();
-            updateCartIcon();
-            alert('Pedido criado com sucesso! Status: Pendente de pagamento.');
+            await saveStateToFirebase();
+            try {
+                const response = await fetch(MERCADO_PAGO_API_BASE + '/create-payment', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ order }) });
+                const data = await response.json();
+                if (!response.ok || !data.init_point) throw new Error(data.error || 'Não foi possível criar o pagamento.');
+                state.cart = []; await saveStateToFirebase(); updateCartIcon(); closeCheckoutModal();
+                window.location.href = data.init_point;
+            } catch (error) {
+                console.error(error);
+                state.orders = state.orders.filter(o => o.id !== order.id); await saveStateToFirebase();
+                alert('Não foi possível iniciar o pagamento no Mercado Pago. Verifique a configuração do servidor Firebase Functions.');
+            }
         }
 
         function openStockAlertModal(productId, productName) {
@@ -8141,6 +8231,31 @@ function initializeApp() {
         // =====================================================
         // AFILIADOS
         // =====================================================
+        function enterAffiliateMode() {
+            document.body.classList.add('affiliate-mode');
+            const banner = document.getElementById('affiliateCatalogStatus');
+            if (banner) banner.classList.remove('hidden');
+            renderCatalog();
+        }
+
+        function exitAffiliateMode() {
+            document.body.classList.remove('affiliate-mode');
+        }
+
+        function buyNow(productId) {
+            const product = state.products.find(p => p.id === productId);
+            if (!product || Number(product.stock) <= 0) { alert('Produto sem estoque disponível.'); return; }
+            const existing = state.cart.find(i => i.id === productId);
+            if (!existing) {
+                state.cart.push({ id: product.id, name: product.name, price: calculateFinalPrice(product), quantity: 1, image: product.image });
+            } else if (existing.quantity < product.stock) {
+                existing.quantity = 1;
+            }
+            saveStateToStorage();
+            updateCartIcon();
+            startCheckout();
+        }
+
         function openAffiliateDashboard() {
             const user = state.currentUser;
             if (!user || user.role !== 'affiliate') {
@@ -8211,6 +8326,7 @@ function initializeApp() {
                 if (codeInput) codeInput.value = affiliate.code;
 
                 updateAffiliateSummary(affiliate);
+                renderAffiliateGeneratedLinks(affiliate);
 
             } else if (affiliate.status === 'blocked') {
                 if (statusIcon) {
@@ -8252,7 +8368,7 @@ function initializeApp() {
 
         function updateAffiliateSummary(affiliate) {
             const sales = state.orders.filter(o => o.affiliateCode === affiliate.code && o.status !== 'canceled');
-            const totalSales = sales.length;
+            const totalSales = sales.filter(o => ['paid','shipped','delivered'].includes(o.status)).length;
 
             const pendingCommission = sales
                 .filter(o => o.status === 'paid' || o.status === 'shipped')
@@ -8282,7 +8398,7 @@ function initializeApp() {
             const container = document.getElementById('affiliateSalesList');
             if (!container) return;
 
-            const sales = state.orders.filter(o => o.affiliateCode === affiliate.code);
+            const sales = state.orders.filter(o => o.affiliateCode === affiliate.code && ['paid','shipped','delivered'].includes(o.status));
             sales.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
             if (sales.length === 0) {
@@ -8307,13 +8423,23 @@ function initializeApp() {
             `).join('');
         }
 
+        function recordAffiliateLink(url, productId = null) {
+            const affiliate = state.affiliates.find(a => a.userId === state.currentUser?.id && a.status === 'active');
+            if (!affiliate) return;
+            if (!Array.isArray(state.affiliateLinks)) state.affiliateLinks = [];
+            const existing = state.affiliateLinks.find(x => x.affiliateCode === affiliate.code && x.url === url);
+            if (!existing) state.affiliateLinks.push({ id: 'alink_' + Date.now() + '_' + Math.random().toString(36).slice(2,7), affiliateCode: affiliate.code, productId, url, createdAt: new Date().toISOString(), clicks: 0 });
+            else existing.lastUsedAt = new Date().toISOString();
+            saveStateToStorage();
+        }
+
         function copyAffiliateLink(inputId) {
             const input = document.getElementById(inputId);
             if (!input) return;
-
+            recordAffiliateLink(input.value, null);
             input.select();
             document.execCommand('copy');
-            alert('Link copiado!');
+            alert('Link copiado e registrado no seu painel!');
         }
 
         function openAffiliateCatalog() {
@@ -8366,6 +8492,17 @@ function initializeApp() {
             }
         }
 
+        function renderAffiliateGeneratedLinks(affiliate) {
+            const container = document.getElementById('affiliateGeneratedLinksList');
+            if (!container) return;
+            const links = (state.affiliateLinks || []).filter(x => x.affiliateCode === affiliate.code).sort((a,b) => new Date(b.createdAt)-new Date(a.createdAt));
+            if (!links.length) { container.innerHTML = '<p class="text-sm text-slate-500">Nenhum link gerado ainda.</p>'; return; }
+            container.innerHTML = links.map(link => {
+                const product = state.products.find(p => p.id === link.productId);
+                return `<div class="p-3 bg-slate-50 border border-slate-200 rounded-xl"><div class="flex justify-between gap-3"><p class="text-xs font-bold text-slate-800 truncate">${escapeHtml(product?.name || 'Link principal')}</p><span class="text-[10px] text-slate-500">${formatDate(link.createdAt)}</span></div><p class="text-[11px] text-slate-500 mt-1 break-all">${escapeHtml(link.url)}</p></div>`;
+            }).join('');
+        }
+
         function copyProductLink(productId) {
             const affiliate = state.affiliates.find(a => a.userId === state.currentUser?.id);
             if (!affiliate) {
@@ -8374,6 +8511,7 @@ function initializeApp() {
             }
 
             const link = window.location.origin + '?ref=' + affiliate.code + '&prod=' + productId;
+            recordAffiliateLink(link, productId);
             navigator.clipboard.writeText(link).then(() => {
                 alert('Link do produto copiado!');
             }).catch(() => {
@@ -9236,11 +9374,25 @@ function renderCatalog() {
                         </p>
                     </div>
 
-                    <button
-                        type="button"
-                        onclick="addToCart('${escapeAttribute(product.id)}')"
-                        class="w-full mt-5 gradient-gold text-slate-900 py-3 rounded-xl font-bold hover:shadow-gold transition"
-                    >
+                    <div class="grid grid-cols-2 gap-2 mt-5">
+                        <button
+                            type="button"
+                            onclick="addToCart('${escapeAttribute(product.id)}')"
+                            class="w-full gradient-gold text-slate-900 py-3 rounded-xl font-bold hover:shadow-gold transition text-sm"
+                        >
+                            <i data-lucide="shopping-cart" class="w-4 h-4 inline mr-1"></i>
+                            Adicionar
+                        </button>
+
+                        <button
+                            type="button"
+                            onclick="buyNow('${escapeAttribute(product.id)}')"
+                            class="w-full bg-slate-900 text-amber-400 py-3 rounded-xl font-bold hover:bg-slate-800 transition text-sm border border-slate-700"
+                        >
+                            <i data-lucide="credit-card" class="w-4 h-4 inline mr-1"></i>
+                            Comprar agora
+                        </button>
+                    </div>
                         <i
                             data-lucide="shopping-cart"
                             class="w-4 h-4 inline mr-1"
