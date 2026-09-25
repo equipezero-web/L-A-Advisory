@@ -6438,7 +6438,3240 @@
             </form>
         </div>
     </div>
+
+    <!-- JAVASCRIPT DA APLICAÇÃO -->
+    <script>
+        // =====================================================
+        // CONFIGURAÇÕES GERAIS
+        // =====================================================
+        const APP_CONFIG = {
+            siteName: 'L&A Royal Advisory',
+            supportPhone: '5581989492224',
+            currency: 'BRL',
+            locale: 'pt-BR'
+        };
+
+        // =====================================================
+        // ESTADO GLOBAL (SIMULANDO BACKEND)
+        // =====================================================
+        let state = {
+            currentUser: null,
+            users: [],
+            products: [],
+            orders: [],
+            affiliates: [],
+            cart: [],
+            cookiePreferences: {
+                necessary: true,
+                preferences: false,
+                analytics: false
+            }
+        };
+
+        // =====================================================
+        // INICIALIZAÇÃO
+        // =====================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStateFromStorage();
+            initializeApp();
+            updateYear();
+            lucide.createIcons();
+        });
+
+        function loadStateFromStorage() {
+            try {
+                const savedState = localStorage.getItem('laRoyalAdvisoryState');
+                if (savedState) {
+                    const parsed = JSON.parse(savedState);
+                    state = { ...state, ...parsed };
+                }
+
+                const savedCookies = localStorage.getItem('laCookiePreferences');
+                if (savedCookies) {
+                    state.cookiePreferences = JSON.parse(savedCookies);
+                }
+            } catch (e) {
+                console.error('Erro ao carregar estado:', e);
+            }
+        }
+
+        function saveStateToStorage() {
+            try {
+                localStorage.setItem('laRoyalAdvisoryState', JSON.stringify(state));
+                localStorage.setItem('laCookiePreferences', JSON.stringify(state.cookiePreferences));
+            } catch (e) {
+                console.error('Erro ao salvar estado:', e);
+            }
+        }
+
+        function initializeDefaultAdmin() {
+    const adminEmail = 'SEU_EMAIL_ADMIN@EXEMPLO.COM'.toLowerCase();
+
+    const existingAdmin = state.users.find(user =>
+        user.email?.toLowerCase() === adminEmail &&
+        user.role === 'admin'
+    );
+
+    if (existingAdmin) {
+        return;
+    }
+
+    const defaultAdmin = {
+        id: 'admin_default',
+        fullName: 'Administrador L&A',
+        email: admin@laroyaladvisory.com,
+        password: 'Admin8924',
+        phone: '',
+        cpf: '',
+        role: 'admin',
+        status: 'active',
+        createdAt: new Date().toISOString(),
+        lastAccess: null,
+        address: {
+            zipCode: '',
+            street: '',
+            number: '',
+            complement: '',
+            neighborhood: '',
+            city: '',
+            state: ''
+        }
+    };
+
+    state.users.push(defaultAdmin);
+    saveStateToStorage();
+}
+function captureAffiliateReferral() {
+    const params = new URLSearchParams(window.location.search);
+    const referralCode = params.get('ref')?.trim().toUpperCase();
+
+    if (!referralCode) {
+        return;
+    }
+
+    const affiliate = state.affiliates.find(item =>
+        item.code === referralCode &&
+        item.status === 'active'
+    );
+
+    if (affiliate) {
+        sessionStorage.setItem('laAffiliateReferralCode', affiliate.code);
+    }
+}
+
+function getAffiliateReferralCode() {
+    const referralCode = sessionStorage.getItem('laAffiliateReferralCode');
+
+    if (!referralCode) {
+        return null;
+    }
+
+    const affiliate = state.affiliates.find(item =>
+        item.code === referralCode &&
+        item.status === 'active'
+    );
+
+    return affiliate ? affiliate.code : null;
+}
+        
+function initializeApp() {
+    initializeDefaultAdmin();
+    captureAffiliateReferral();
+
+    if (!state.products || state.products.length === 0) {
+        initializeDefaultProducts();
+    }
+
+    renderCatalog();
+    updateCartIcon();
+    updateAuthUI();
+    handleCookieConsent();
+    setupScrollListener();
+}
+        function initializeDefaultProducts() {
+            state.products = [
+                {
+                    id: 'prod_001',
+                    name: 'Consultoria Premium Individual',
+                    description: 'Sessão exclusiva de 60 minutos com especialista sênior.',
+                    price: 497.00,
+                    discount: 0,
+                    stock: 50,
+                    commission: 15,
+                    image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&q=80',
+                    category: 'Consultoria'
+                },
+                {
+                    id: 'prod_002',
+                    name: 'Mentoria Executiva Mensal',
+                    description: 'Acompanhamento contínuo com 4 encontros mensais.',
+                    price: 1497.00,
+                    discount: 10,
+                    stock: 20,
+                    commission: 20,
+                    image: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&q=80',
+                    category: 'Mentoria'
+                },
+                {
+                    id: 'prod_003',
+                    name: 'Workshop de Liderança',
+                    description: 'Imersão prática de 8 horas sobre liderança de alta performance.',
+                    price: 897.00,
+                    discount: 5,
+                    stock: 100,
+                    commission: 12,
+                    image: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=800&q=80',
+                    category: 'Workshop'
+                },
+                {
+                    id: 'prod_004',
+                    name: 'Diagnóstico Empresarial',
+                    description: 'Análise completa da saúde do seu negócio com plano de ação.',
+                    price: 2497.00,
+                    discount: 0,
+                    stock: 15,
+                    commission: 18,
+                    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80',
+                    category: 'Consultoria'
+                },
+                {
+                    id: 'prod_005',
+                    name: 'Programa de Desenvolvimento de Equipes',
+                    description: 'Treinamento customizado para sua equipe de líderes.',
+                    price: 4997.00,
+                    discount: 15,
+                    stock: 10,
+                    commission: 25,
+                    image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80',
+                    category: 'Treinamento'
+                },
+                {
+                    id: 'prod_006',
+                    name: 'Plano de Sucessão Familiar',
+                    description: 'Estruturação completa para transição geracional.',
+                    price: 7997.00,
+                    discount: 0,
+                    stock: 5,
+                    commission: 22,
+                    image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80',
+                    category: 'Consultoria'
+                }
+            ];
+
+            saveStateToStorage();
+        }
+
+        function updateYear() {
+            const yearEl = document.getElementById('currentYear');
+            if (yearEl) {
+                yearEl.textContent = new Date().getFullYear();
+            }
+        }
+
+        function setupScrollListener() {
+            const backToTopBtn = document.getElementById('backToTop');
+            if (!backToTopBtn) return;
+
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 400) {
+                    backToTopBtn.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+                } else {
+                    backToTopBtn.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+                }
+            });
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // =====================================================
+        // AUTENTICAÇÃO
+        // =====================================================
+        function openAuthModal(screen = 'customer-login') {
+            const modal = document.getElementById('authModal');
+            if (!modal) return;
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+
+            switchAuthScreen(screen);
+        }
+
+        function closeAuthModal() {
+            const modal = document.getElementById('authModal');
+            if (!modal) return;
+
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+
+            clearAuthForms();
+        }
+
+        function switchAuthScreen(screen) {
+            const loginForm = document.getElementById('customerLoginForm');
+            const registerForm = document.getElementById('customerRegisterForm');
+            const affiliateLoginForm = document.getElementById('affiliateLoginForm');
+            const affiliateRegisterForm = document.getElementById('affiliateRegisterForm');
+            const adminLoginForm = document.getElementById('adminLoginForm');
+
+            const loginTab = document.getElementById('authLoginTab');
+            const registerTab = document.getElementById('authRegisterTab');
+
+            const visualTitle = document.getElementById('authVisualTitle');
+            const visualDesc = document.getElementById('authVisualDescription');
+            const visualBadge = document.getElementById('authVisualBadge');
+
+            const formTitle = document.getElementById('authFormTitle');
+            const formDesc = document.getElementById('authFormDescription');
+            const formBadge = document.getElementById('authFormBadge');
+
+            hideAllAuthForms();
+
+            switch (screen) {
+                case 'customer-login':
+                    loginForm?.classList.remove('hidden');
+                    loginTab?.classList.add('bg-white', 'text-slate-900', 'shadow-sm');
+                    loginTab?.classList.remove('text-slate-500');
+                    registerTab?.classList.remove('bg-white', 'text-slate-900', 'shadow-sm');
+                    registerTab?.classList.add('text-slate-500');
+
+                    if (visualTitle) visualTitle.textContent = 'Sua experiência começa com uma conta.';
+                    if (visualDesc) visualDesc.textContent = 'Crie seu perfil para comprar com mais rapidez, preencher dados automaticamente e acompanhar seus pedidos.';
+                    if (formTitle) formTitle.textContent = 'Bem-vindo de volta';
+                    if (formDesc) formDesc.textContent = 'Entre para acessar seu perfil, carrinho, pedidos e dados preenchidos automaticamente.';
+                    if (formBadge) {
+                        formBadge.innerHTML = '<i data-lucide="user-round" class="w-4 h-4"></i> Área do cliente';
+                        lucide.createIcons();
+                    }
+                    break;
+
+                case 'customer-register':
+                    registerForm?.classList.remove('hidden');
+                    registerTab?.classList.add('bg-white', 'text-slate-900', 'shadow-sm');
+                    registerTab?.classList.remove('text-slate-500');
+                    loginTab?.classList.remove('bg-white', 'text-slate-900', 'shadow-sm');
+                    loginTab?.classList.add('text-slate-500');
+
+                    if (visualTitle) visualTitle.textContent = 'Crie sua conta em minutos.';
+                    if (visualDesc) visualDesc.textContent = 'Cadastre-se para acessar produtos exclusivos, condições especiais e acompanhamento completo.';
+                    if (formTitle) formTitle.textContent = 'Criar conta de cliente';
+                    if (formDesc) formDesc.textContent = 'Preencha seus dados para criar sua conta na L&A Royal Advisory.';
+                    if (formBadge) {
+                        formBadge.innerHTML = '<i data-lucide="user-plus" class="w-4 h-4"></i> Novo cliente';
+                        lucide.createIcons();
+                    }
+                    break;
+
+                case 'affiliate-login':
+                    affiliateLoginForm?.classList.remove('hidden');
+                    if (visualTitle) visualTitle.textContent = 'Acesse seu painel de afiliado.';
+                    if (visualDesc) visualDesc.textContent = 'Gerencie seus links, acompanhe vendas e receba suas comissões.';
+                    if (formTitle) formTitle.textContent = 'Entrar como afiliado';
+                    if (formDesc) formDesc.textContent = 'Use os mesmos dados da sua conta. O sistema verificará seu status de afiliado.';
+                    if (formBadge) {
+                        formBadge.innerHTML = '<i data-lucide="crown" class="w-4 h-4"></i> Área de afiliado';
+                        lucide.createIcons();
+                    }
+                    break;
+
+                case 'affiliate-register':
+                    affiliateRegisterForm?.classList.remove('hidden');
+                    if (visualTitle) visualTitle.textContent = 'Torne-se um afiliado.';
+                    if (visualDesc) visualDesc.textContent = 'Divulgue produtos premium e ganhe comissões atrativas sobre cada venda.';
+                    if (formTitle) formTitle.textContent = 'Solicitar afiliação';
+                    if (formDesc) formDesc.textContent = 'Preencha seus dados e dados bancários para análise.';
+                    if (formBadge) {
+                        formBadge.innerHTML = '<i data-lucide="handshake" class="w-4 h-4"></i> Novo afiliado';
+                        lucide.createIcons();
+                    }
+                    break;
+
+                case 'admin-login':
+                    adminLoginForm?.classList.remove('hidden');
+                    if (visualTitle) visualTitle.textContent = 'Acesso administrativo.';
+                    if (visualDesc) visualDesc.textContent = 'Ambiente restrito para gestão da plataforma.';
+                    if (formTitle) formTitle.textContent = 'Portal Administrativo';
+                    if (formDesc) formDesc.textContent = 'Acesso exclusivo para gestores autorizados.';
+                    if (formBadge) {
+                        formBadge.innerHTML = '<i data-lucide="shield-check" class="w-4 h-4"></i> Administrador';
+                        lucide.createIcons();
+                    }
+                    break;
+            }
+
+            lucide.createIcons();
+        }
+
+        function hideAllAuthForms() {
+            ['customerLoginForm', 'customerRegisterForm', 'affiliateLoginForm', 'affiliateRegisterForm', 'adminLoginForm'].forEach(id => {
+                document.getElementById(id)?.classList.add('hidden');
+            });
+        }
+
+        function clearAuthForms() {
+            ['customerLoginForm', 'customerRegisterForm', 'affiliateLoginForm', 'affiliateRegisterForm', 'adminLoginForm'].forEach(id => {
+                const form = document.getElementById(id);
+                if (form) form.reset();
+            });
+
+            hideAuthMessage();
+        }
+
+        function showAuthMessage(message, type = 'error') {
+            const msgEl = document.getElementById('authMessage');
+            if (!msgEl) return;
+
+            msgEl.textContent = message;
+            msgEl.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'text-emerald-800', 'bg-red-50', 'border-red-200', 'text-red-800');
+
+            if (type === 'success') {
+                msgEl.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-800');
+            } else {
+                msgEl.classList.add('bg-red-50', 'border-red-200', 'text-red-800');
+            }
+
+            msgEl.classList.remove('hidden');
+        }
+
+        function hideAuthMessage() {
+            const msgEl = document.getElementById('authMessage');
+            if (msgEl) msgEl.classList.add('hidden');
+        }
+
+        function handleCustomerLogin(event) {
+            event.preventDefault();
+
+            const emailInput = document.getElementById('customerLoginEmail');
+            const passwordInput = document.getElementById('customerLoginPassword');
+
+            if (!emailInput || !passwordInput) return;
+
+            const emailOrCpf = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            const user = state.users.find(u =>
+                (u.email.toLowerCase() === emailOrCpf.toLowerCase() || u.cpf === emailOrCpf) &&
+                u.password === password &&
+                u.role === 'customer' &&
+                u.status === 'active'
+            );
+
+            if (user) {
+                state.currentUser = { ...user, password: undefined };
+                saveStateToStorage();
+                updateAuthUI();
+                closeAuthModal();
+                showAuthMessage('Login realizado com sucesso!', 'success');
+            } else {
+                showAuthMessage('E-mail/CPF ou senha inválidos. Verifique seus dados.', 'error');
+            }
+        }
+
+        function handleCustomerRegister(event) {
+            event.preventDefault();
+
+            const fullName = document.getElementById('registerFullName')?.value.trim();
+            const email = document.getElementById('registerEmail')?.value.trim();
+            const phone = document.getElementById('registerPhone')?.value.trim();
+            const cpf = document.getElementById('registerCpf')?.value.trim();
+            const zipCode = document.getElementById('registerZipCode')?.value.trim();
+            const street = document.getElementById('registerStreet')?.value.trim();
+            const number = document.getElementById('registerNumber')?.value.trim();
+            const complement = document.getElementById('registerComplement')?.value.trim();
+            const neighborhood = document.getElementById('registerNeighborhood')?.value.trim();
+            const city = document.getElementById('registerCity')?.value.trim();
+            const stateField = document.getElementById('registerState')?.value.trim();
+            const password = document.getElementById('registerPassword')?.value;
+            const passwordConfirm = document.getElementById('registerPasswordConfirm')?.value;
+            const terms = document.getElementById('registerTerms')?.checked;
+
+            if (!fullName || !email || !phone || !cpf || !zipCode || !street || !number || !neighborhood || !city || !stateField || !password || !passwordConfirm) {
+                showAuthMessage('Preencha todos os campos obrigatórios.', 'error');
+                return;
+            }
+
+            if (password !== passwordConfirm) {
+                showAuthMessage('As senhas não coincidem.', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showAuthMessage('A senha deve ter pelo menos 6 caracteres.', 'error');
+                return;
+            }
+
+            if (!terms) {
+                showAuthMessage('Você precisa aceitar os termos para criar a conta.', 'error');
+                return;
+            }
+
+            const existingUser = state.users.find(u => u.email.toLowerCase() === email.toLowerCase() || u.cpf === cpf);
+            if (existingUser) {
+                showAuthMessage('Já existe uma conta com este e-mail ou CPF.', 'error');
+                return;
+            }
+
+            const newUser = {
+                id: 'user_' + Date.now(),
+                fullName,
+                email,
+                phone,
+                cpf,
+                password,
+                role: 'customer',
+                status: 'active',
+                createdAt: new Date().toISOString(),
+                lastAccess: new Date().toISOString(),
+                address: {
+                    zipCode,
+                    street,
+                    number,
+                    complement: complement || '',
+                    neighborhood,
+                    city,
+                    state: stateField
+                }
+            };
+
+            state.users.push(newUser);
+            state.currentUser = { ...newUser, password: undefined };
+            saveStateToStorage();
+            updateAuthUI();
+            closeAuthModal();
+            showAuthMessage('Conta criada com sucesso!', 'success');
+        }
+
+        function handleAffiliateLogin(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('affiliateLoginEmail')?.value.trim();
+            const password = document.getElementById('affiliateLoginPassword')?.value;
+
+            if (!email || !password) {
+                showAuthMessage('Preencha e-mail e senha.', 'error');
+                return;
+            }
+
+            const user = state.users.find(u =>
+                u.email.toLowerCase() === email.toLowerCase() &&
+                u.password === password &&
+                u.role === 'affiliate'
+            );
+
+            if (!user) {
+                showAuthMessage('E-mail ou senha inválidos.', 'error');
+                return;
+            }
+
+            if (user.status === 'blocked') {
+                showAuthMessage('Seu perfil de afiliado está bloqueado. Contate o suporte.', 'error');
+                return;
+            }
+
+            state.currentUser = { ...user, password: undefined };
+            saveStateToStorage();
+            updateAuthUI();
+            closeAuthModal();
+
+            if (user.affiliateStatus === 'pending') {
+                alert('Sua solicitação de afiliado está em análise. Você será notificado quando for aprovada.');
+            } else if (user.affiliateStatus === 'active') {
+                openAffiliateDashboard();
+            }
+
+            showAuthMessage('Login realizado com sucesso!', 'success');
+        }
+
+        function handleAffiliateRegister(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('affiliateRegisterName')?.value.trim();
+            const email = document.getElementById('affiliateRegisterEmail')?.value.trim();
+            const phone = document.getElementById('affiliateRegisterPhone')?.value.trim();
+            const cpf = document.getElementById('affiliateRegisterCpf')?.value.trim();
+            const pixType = document.getElementById('affiliatePixType')?.value;
+            const pixKey = document.getElementById('affiliatePixKey')?.value.trim();
+            const instagram = document.getElementById('affiliateInstagram')?.value.trim();
+            const website = document.getElementById('affiliateWebsite')?.value.trim();
+            const password = document.getElementById('affiliateRegisterPassword')?.value;
+            const terms = document.getElementById('affiliateRegisterTerms')?.checked;
+
+            if (!name || !email || !phone || !cpf || !pixType || !pixKey || !password) {
+                showAuthMessage('Preencha todos os campos obrigatórios.', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showAuthMessage('A senha deve ter pelo menos 6 caracteres.', 'error');
+                return;
+            }
+
+            if (!terms) {
+                showAuthMessage('Você precisa aceitar os termos para solicitar afiliação.', 'error');
+                return;
+            }
+
+            const existingUser = state.users.find(u => u.email.toLowerCase() === email.toLowerCase() || u.cpf === cpf);
+            if (existingUser) {
+                showAuthMessage('Já existe uma conta com este e-mail ou CPF.', 'error');
+                return;
+            }
+
+            const existingAffiliate = state.affiliates.find(a => a.email.toLowerCase() === email.toLowerCase());
+            if (existingAffiliate) {
+                showAuthMessage('Já existe uma solicitação de afiliado com este e-mail.', 'error');
+                return;
+            }
+
+            const newAffiliate = {
+                id: 'aff_' + Date.now(),
+                userId: null,
+                name,
+                email,
+                phone,
+                cpf,
+                pixType,
+                pixKey,
+                instagram: instagram || '',
+                website: website || '',
+                status: 'pending',
+                code: 'AFF' + Math.random().toString(36).substring(2, 8).toUpperCase(),
+                createdAt: new Date().toISOString(),
+                approvedAt: null
+            };
+
+            const newUser = {
+                id: 'user_' + Date.now(),
+                fullName: name,
+                email,
+                phone,
+                cpf,
+                password,
+                role: 'affiliate',
+                status: 'active',
+                affiliateStatus: 'pending',
+                createdAt: new Date().toISOString(),
+                lastAccess: new Date().toISOString(),
+                address: {
+                    zipCode: '',
+                    street: '',
+                    number: '',
+                    complement: '',
+                    neighborhood: '',
+                    city: '',
+                    state: ''
+                }
+            };
+
+            newAffiliate.userId = newUser.id;
+            state.affiliates.push(newAffiliate);
+            state.users.push(newUser);
+
+            saveStateToStorage();
+
+            closeAuthModal();
+            alert('Solicitação enviada! Após análise, você receberá acesso ao painel de afiliado.');
+            switchAuthScreen('affiliate-login');
+        }
+
+        function handleAdminLogin(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('adminLoginEmail')?.value.trim();
+            const password = document.getElementById('adminLoginPassword')?.value;
+
+            if (!email || !password) {
+                showAuthMessage('Preencha e-mail e senha.', 'error');
+                return;
+            }
+
+            const user = state.users.find(u =>
+                u.email.toLowerCase() === email.toLowerCase() &&
+                u.password === password &&
+                u.role === 'admin' &&
+                u.status === 'active'
+            );
+
+            if (user) {
+    state.currentUser = { ...user, password: undefined };
+    state.currentUser.lastAccess = new Date().toISOString();
+
+    const savedUserIndex = state.users.findIndex(savedUser => savedUser.id === user.id);
+
+    if (savedUserIndex !== -1) {
+        state.users[savedUserIndex].lastAccess = state.currentUser.lastAccess;
+    }
+
+    saveStateToStorage();
+    updateAuthUI();
+    closeAuthModal();
+    openAdminDashboard();
+
+    alert('Login administrativo realizado com sucesso.');
+}
+            else {
+                showAuthMessage('Credenciais administrativas inválidas.', 'error');
+            }
+        }
+
+        function sendPasswordReset() {
+            alert('Funcionalidade de recuperação de senha será implementada com backend.');
+        }
+
+        function signInWithGoogle() {
+            alert('Login com Google será implementado com backend e OAuth.');
+        }
+
+        function showAppleLoginInfo() {
+            alert('Login com Apple será implementado com backend e OAuth.');
+        }
+
+        function togglePasswordVisibility(inputId, button) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+
+            const icon = button.querySelector('i');
+            if (!icon) return;
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.setAttribute('data-lucide', 'eye-off');
+            } else {
+                input.type = 'password';
+                icon.setAttribute('data-lucide', 'eye');
+            }
+
+            lucide.createIcons();
+        }
+
+        function logoutUser() {
+            state.currentUser = null;
+            saveStateToStorage();
+            updateAuthUI();
+            closeUserMenu();
+            closeAdminDashboard();
+            closeAffiliateDashboard();
+            closeCustomerProfile();
+            closeCustomerOrders();
+            alert('Você saiu da sua conta.');
+        }
+
+        function updateAuthUI() {
+            const user = state.currentUser;
+
+            const loginBtn = document.getElementById('loginBtn');
+            const userBtn = document.getElementById('userBtn');
+            const userInitial = document.getElementById('userInitial');
+
+            if (user) {
+                if (loginBtn) loginBtn.classList.add('hidden');
+                if (userBtn) userBtn.classList.remove('hidden');
+
+                const initial = user.fullName?.charAt(0).toUpperCase() || 'U';
+                if (userInitial) userInitial.textContent = initial;
+
+                updateUserMenu();
+            } else {
+                if (loginBtn) loginBtn.classList.remove('hidden');
+                if (userBtn) userBtn.classList.add('hidden');
+            }
+        }
+
+        function updateUserMenu() {
+            const user = state.currentUser;
+            if (!user) return;
+
+            const nameEl = document.getElementById('userMenuName');
+            const emailEl = document.getElementById('userMenuEmail');
+            const initialEl = document.getElementById('userMenuInitial');
+            const affiliateBtn = document.getElementById('affiliateUserMenuButton');
+            const adminBtn = document.getElementById('adminUserMenuButton');
+
+            if (nameEl) nameEl.textContent = user.fullName;
+            if (emailEl) emailEl.textContent = user.email;
+            if (initialEl) initialEl.textContent = user.fullName?.charAt(0).toUpperCase() || 'U';
+
+            if (affiliateBtn) {
+                if (user.role === 'affiliate') {
+                    affiliateBtn.classList.remove('hidden');
+                } else {
+                    affiliateBtn.classList.add('hidden');
+                }
+            }
+
+            if (adminBtn) {
+                if (user.role === 'admin') {
+                    adminBtn.classList.remove('hidden');
+                } else {
+                    adminBtn.classList.add('hidden');
+                }
+            }
+        }
+
+        function openUserMenu() {
+            const modal = document.getElementById('userMenuModal');
+            if (!modal) return;
+
+            updateUserMenu();
+            modal.classList.remove('hidden');
+        }
+
+        function closeUserMenu() {
+            const modal = document.getElementById('userMenuModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        // =====================================================
+        // NAVEGAÇÃO E MODAIS
+        // =====================================================
+        function openNavigationModal() {
+            const modal = document.getElementById('navModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+                lucide.createIcons();
+            }
+        }
+
+        function closeNavigationModal() {
+            const modal = document.getElementById('navModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function openConsultingBooking(type = 'Consultoria', value = 0) {
+            const modal = document.getElementById('consultingModal');
+            const typeDisplay = document.getElementById('consultingTypeDisplay');
+            const priceDisplay = document.getElementById('consultingPriceDisplay');
+            const typeInput = document.getElementById('consultingType');
+            const valueInput = document.getElementById('consultingValue');
+
+            if (!modal) return;
+
+            if (typeDisplay) typeDisplay.textContent = type;
+            if (priceDisplay) priceDisplay.textContent = formatCurrency(value);
+            if (typeInput) typeInput.value = type;
+            if (valueInput) valueInput.value = value;
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closeConsultingBooking() {
+            const modal = document.getElementById('consultingModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+
+            const form = document.getElementById('consultingForm');
+            if (form) form.reset();
+        }
+
+        function submitConsultingBooking(event) {
+            event.preventDefault();
+
+            const company = document.getElementById('consultingCompany')?.value.trim();
+            const phone = document.getElementById('consultingPhone')?.value.trim();
+            const email = document.getElementById('consultingEmail')?.value.trim();
+            const date = document.getElementById('consultingDate')?.value;
+            const time = document.getElementById('consultingTime')?.value;
+            const obs = document.getElementById('consultingObs')?.value.trim();
+            const type = document.getElementById('consultingType')?.value;
+            const value = parseFloat(document.getElementById('consultingValue')?.value || '0');
+            const terms = document.getElementById('consultingTerms')?.checked;
+
+            if (!company || !phone || !email || !date || !time || !terms) {
+                alert('Preencha todos os campos obrigatórios e aceite os termos.');
+                return;
+            }
+
+            const booking = {
+                id: 'book_' + Date.now(),
+                company,
+                phone,
+                email,
+                date,
+                time,
+                obs,
+                type,
+                value,
+                status: 'pending',
+                createdAt: new Date().toISOString()
+            };
+
+            if (!state.consultingBookings) state.consultingBookings = [];
+            state.consultingBookings.push(booking);
+            saveStateToStorage();
+
+            closeConsultingBooking();
+            alert('Solicitação de agendamento enviada! Entraremos em contato em breve.');
+        }
+
+        function openCartModal() {
+            const modal = document.getElementById('cartModal');
+            const itemsContainer = document.getElementById('cartItems');
+            const totalEl = document.getElementById('cartTotal');
+
+            if (!modal || !itemsContainer) return;
+
+            renderCartItems();
+
+            const total = state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            if (totalEl) totalEl.textContent = formatCurrency(total);
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closeCartModal() {
+            const modal = document.getElementById('cartModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function openCheckoutModal() {
+            const modal = document.getElementById('checkoutModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+                lucide.createIcons();
+            }
+        }
+
+        function closeCheckoutModal() {
+            const modal = document.getElementById('checkoutModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function startCheckout() {
+            if (state.cart.length === 0) {
+                alert('Seu carrinho está vazio.');
+                return;
+            }
+
+            closeCartModal();
+
+            if (!state.currentUser) {
+                openAuthModal('customer-login');
+                alert('Faça login ou crie uma conta para continuar.');
+                return;
+            }
+
+            populateCheckoutForm();
+            openCheckoutModal();
+        }
+
+        function populateCheckoutForm() {
+            const user = state.currentUser;
+            if (!user) return;
+
+            const fullName = document.getElementById('checkoutFullName');
+            const cpf = document.getElementById('checkoutCpf');
+            const phone = document.getElementById('checkoutPhone');
+            const email = document.getElementById('checkoutEmail');
+            const address = document.getElementById('checkoutAddress');
+
+            if (fullName) fullName.value = user.fullName;
+            if (cpf) cpf.value = user.cpf;
+            if (phone) phone.value = user.phone;
+            if (email) email.value = user.email;
+
+            if (address && user.address) {
+                const addr = user.address;
+                address.value = `${addr.street}, ${addr.number}${addr.complement ? ' - ' + addr.complement : ''} - ${addr.neighborhood}, ${addr.city} - ${addr.state}, ${addr.zipCode}`;
+            }
+
+            renderCheckoutItems();
+        }
+
+        function renderCheckoutItems() {
+            const container = document.getElementById('checkoutItemsList');
+            const countEl = document.getElementById('checkoutItemsCount');
+            const totalEl = document.getElementById('checkoutTotal');
+
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            state.cart.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'flex justify-between text-sm';
+                div.innerHTML = `
+                    <span>${item.quantity}x ${item.name}</span>
+                    <span class="font-bold">${formatCurrency(item.price * item.quantity)}</span>
+                `;
+                container.appendChild(div);
+            });
+
+            if (countEl) countEl.textContent = `${state.cart.length} item(s)`;
+
+            const total = state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            if (totalEl) totalEl.textContent = formatCurrency(total);
+        }
+
+        function createCheckoutOrder(event) {
+            event.preventDefault();
+
+            const fullName = document.getElementById('checkoutFullName')?.value.trim();
+            const cpf = document.getElementById('checkoutCpf')?.value.trim();
+            const phone = document.getElementById('checkoutPhone')?.value.trim();
+            const email = document.getElementById('checkoutEmail')?.value.trim();
+            const addressText = document.getElementById('checkoutAddress')?.value.trim();
+
+            if (!fullName || !cpf || !phone || !email || !addressText) {
+                alert('Preencha todos os campos obrigatórios.');
+                return;
+            }
+
+            const order = {
+                id: 'order_' + Date.now(),
+                code: 'ORD' + Math.random().toString(36).substring(2, 8).toUpperCase(),
+                userId: state.currentUser?.id,
+                customerName: fullName,
+                customerCpf: cpf,
+                customerPhone: phone,
+                customerEmail: email,
+                address: addressText,
+                items: [...state.cart],
+                total: state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                status: 'pending',
+                paymentMethod: null,
+                trackingCode: '',
+                carrier: '',
+                observations: '',
+                createdAt: new Date().toISOString()
+            };
+
+            state.orders.push(order);
+            state.cart = [];
+            saveStateToStorage();
+
+            closeCheckoutModal();
+            updateCartIcon();
+            alert('Pedido criado com sucesso! Status: Pendente de pagamento.');
+        }
+
+        function openStockAlertModal(productId, productName) {
+            const modal = document.getElementById('stockAlertModal');
+            const nameEl = document.getElementById('stockAlertProductName');
+            const productIdInput = document.getElementById('stockAlertProductId');
+
+            if (!modal) return;
+
+            if (nameEl) nameEl.textContent = productName;
+            if (productIdInput) productIdInput.value = productId;
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closeStockAlertModal() {
+            const modal = document.getElementById('stockAlertModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+
+            const form = document.getElementById('stockAlertForm');
+            if (form) form.reset();
+        }
+
+        function submitStockAlert(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('stockAlertName')?.value.trim();
+            const email = document.getElementById('stockAlertEmail')?.value.trim();
+            const reason = document.getElementById('stockAlertReason')?.value;
+            const productId = document.getElementById('stockAlertProductId')?.value;
+
+            if (!name || !email || !reason || !productId) {
+                alert('Preencha todos os campos.');
+                return;
+            }
+
+            if (!state.stockAlerts) state.stockAlerts = [];
+
+            state.stockAlerts.push({
+                id: 'alert_' + Date.now(),
+                productId,
+                name,
+                email,
+                reason,
+                createdAt: new Date().toISOString(),
+                notified: false
+            });
+
+            saveStateToStorage();
+            closeStockAlertModal();
+            alert('Alerta registrado! Você será avisado quando houver atualização.');
+        }
+
+        // =====================================================
+        // CARRINHO
+        // =====================================================
+        function addToCart(productId) {
+            const product = state.products.find(p => p.id === productId);
+            if (!product) return;
+
+            if (product.stock <= 0) {
+                alert('Produto sem estoque disponível.');
+                return;
+            }
+
+            const existingItem = state.cart.find(item => item.id === productId);
+            if (existingItem) {
+                if (existingItem.quantity >= product.stock) {
+                    alert('Quantidade máxima em estoque atingida.');
+                    return;
+                }
+                existingItem.quantity++;
+            } else {
+                state.cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: calculateFinalPrice(product),
+                    quantity: 1,
+                    image: product.image
+                });
+            }
+
+            saveStateToStorage();
+            updateCartIcon();
+            alert('Produto adicionado ao carrinho!');
+        }
+
+        function removeFromCart(productId) {
+            state.cart = state.cart.filter(item => item.id !== productId);
+            saveStateToStorage();
+            updateCartIcon();
+            renderCartItems();
+        }
+
+        function updateCartItemQuantity(productId, newQuantity) {
+            const item = state.cart.find(i => i.id === productId);
+            const product = state.products.find(p => p.id === productId);
+
+            if (!item || !product) return;
+
+            if (newQuantity <= 0) {
+                removeFromCart(productId);
+                return;
+            }
+
+            if (newQuantity > product.stock) {
+                alert('Quantidade máxima em estoque: ' + product.stock);
+                return;
+            }
+
+            item.quantity = newQuantity;
+            saveStateToStorage();
+            renderCartItems();
+        }
+
+        function renderCartItems() {
+            const container = document.getElementById('cartItems');
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            if (state.cart.length === 0) {
+                container.innerHTML = '<p class="text-sm text-slate-500 text-center py-4">Seu carrinho está vazio.</p>';
+                return;
+            }
+
+            state.cart.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200';
+                div.innerHTML = `
+    <img
+        src="${escapeAttribute(item.image)}"
+        alt="${escapeAttribute(item.name)}"
+        class="w-16 h-16 object-cover rounded-lg"
+    >
+
+    <div class="flex-1 min-w-0">
+        <p class="font-bold text-sm text-slate-900 truncate">
+            ${escapeHtml(item.name)}
+        </p>
+
+        <p class="text-xs text-slate-500">
+            ${formatCurrency(item.price)} un.
+        </p>
+    </div>
+`;
+
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="updateCartItemQuantity('${item.id}', ${item.quantity - 1})" class="w-7 h-7 rounded-lg bg-slate-200 hover:bg-slate-300 flex items-center justify-center">
+                            <i data-lucide="minus" class="w-3 h-3"></i>
+                        </button>
+
+                        <span class="w-6 text-center text-sm font-bold">${item.quantity}</span>
+
+                        <button type="button" onclick="updateCartItemQuantity('${item.id}', ${item.quantity + 1})" class="w-7 h-7 rounded-lg bg-slate-200 hover:bg-slate-300 flex items-center justify-center">
+                            <i data-lucide="plus" class="w-3 h-3"></i>
+                        </button>
+
+                        <button type="button" onclick="removeFromCart('${item.id}')" class="ml-2 text-slate-400 hover:text-red-500">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            lucide.createIcons();
+        }
+
+        function updateCartIcon() {
+            const countEl = document.getElementById('cartCount');
+            const totalQuantity = state.cart.reduce((sum, item) => {
+    return sum + Number(item.quantity || 0);
+}, 0);
+
+if (countEl) {
+    countEl.textContent = `${totalQuantity} ${totalQuantity === 1 ? 'item' : 'itens'}`;
+}
+
+                if (totalItems > 0) {
+                    countEl.classList.remove('hidden');
+                } else {
+                    countEl.classList.add('hidden');
+                }
+            }
+        }
+
+        // =====================================================
+        // PERFIL DO CLIENTE
+        // =====================================================
+        function openCustomerProfile() {
+            const user = state.currentUser;
+            if (!user) {
+                openAuthModal('customer-login');
+                return;
+            }
+
+            closeUserMenu();
+
+            const modal = document.getElementById('customerProfileModal');
+            if (!modal) return;
+
+            document.getElementById('profileHeaderName').textContent = user.fullName;
+            document.getElementById('profileHeaderEmail').textContent = user.email;
+            document.getElementById('profileAvatar').textContent = user.fullName.charAt(0).toUpperCase();
+            document.getElementById('profileRole').textContent = user.role === 'affiliate' ? 'Afiliado' : 'Cliente';
+            document.getElementById('profileCreatedAt').textContent = formatDate(user.createdAt);
+            document.getElementById('profileLastAccess').textContent = formatDate(user.lastAccess);
+
+            document.getElementById('profileFullName').value = user.fullName;
+            document.getElementById('profileEmail').value = user.email;
+            document.getElementById('profilePhone').value = user.phone;
+            document.getElementById('profileCpf').value = user.cpf;
+
+            if (user.address) {
+                document.getElementById('profileZipCode').value = user.address.zipCode || '';
+                document.getElementById('profileStreet').value = user.address.street || '';
+                document.getElementById('profileNumber').value = user.address.number || '';
+                document.getElementById('profileComplement').value = user.address.complement || '';
+                document.getElementById('profileNeighborhood').value = user.address.neighborhood || '';
+                document.getElementById('profileCity').value = user.address.city || '';
+                document.getElementById('profileState').value = user.address.state || '';
+            }
+
+            hideProfileMessage();
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closeCustomerProfile() {
+            const modal = document.getElementById('customerProfileModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function saveCustomerProfile(event) {
+            event.preventDefault();
+
+            const user = state.currentUser;
+            if (!user) return;
+
+            const fullName = document.getElementById('profileFullName')?.value.trim();
+            const phone = document.getElementById('profilePhone')?.value.trim();
+            const cpf = document.getElementById('profileCpf')?.value.trim();
+            const zipCode = document.getElementById('profileZipCode')?.value.trim();
+            const street = document.getElementById('profileStreet')?.value.trim();
+            const number = document.getElementById('profileNumber')?.value.trim();
+            const complement = document.getElementById('profileComplement')?.value.trim();
+            const neighborhood = document.getElementById('profileNeighborhood')?.value.trim();
+            const city = document.getElementById('profileCity')?.value.trim();
+            const stateField = document.getElementById('profileState')?.value.trim();
+
+            if (!fullName || !phone || !cpf || !zipCode || !street || !number || !neighborhood || !city || !stateField) {
+                showProfileMessage('Preencha todos os campos obrigatórios.', 'error');
+                return;
+            }
+
+            user.fullName = fullName;
+            user.phone = phone;
+            user.cpf = cpf;
+            user.address = {
+                zipCode,
+                street,
+                number,
+                complement,
+                neighborhood,
+                city,
+                state: stateField
+            };
+            user.lastAccess = new Date().toISOString();
+
+            const userIndex = state.users.findIndex(u => u.id === user.id);
+            if (userIndex !== -1) {
+                state.users[userIndex] = user;
+            }
+
+            state.currentUser = user;
+            saveStateToStorage();
+
+            showProfileMessage('Perfil atualizado com sucesso!', 'success');
+            updateUserMenu();
+        }
+
+        function showProfileMessage(message, type) {
+            const msgEl = document.getElementById('profileSaveMessage');
+            if (!msgEl) return;
+
+            msgEl.textContent = message;
+            msgEl.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'text-emerald-800', 'bg-red-50', 'border-red-200', 'text-red-800');
+
+            if (type === 'success') {
+                msgEl.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-800');
+            } else {
+                msgEl.classList.add('bg-red-50', 'border-red-200', 'text-red-800');
+            }
+        }
+
+        function hideProfileMessage() {
+            const msgEl = document.getElementById('profileSaveMessage');
+            if (msgEl) msgEl.classList.add('hidden');
+        }
+
+        function lookupProfileZipCode() {
+            const zipCode = document.getElementById('profileZipCode')?.value.replace(/\D/g, '');
+            if (!zipCode || zipCode.length !== 8) return;
+
+            fetch(`https://viacep.com.br/ws/${zipCode}/json/`)
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.erro) {
+                        document.getElementById('profileStreet').value = data.logradouro;
+                        document.getElementById('profileNeighborhood').value = data.bairro;
+                        document.getElementById('profileCity').value = data.localidade;
+                        document.getElementById('profileState').value = data.uf;
+                    }
+                })
+                .catch(() => {});
+        }
+
+        // =====================================================
+        // PEDIDOS DO CLIENTE
+        // =====================================================
+        function openCustomerOrders() {
+            const user = state.currentUser;
+            if (!user) {
+                openAuthModal('customer-login');
+                return;
+            }
+
+            closeUserMenu();
+
+            const modal = document.getElementById('customerOrdersModal');
+            if (!modal) return;
+
+            renderCustomerOrders();
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closeCustomerOrders() {
+            const modal = document.getElementById('customerOrdersModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function renderCustomerOrders() {
+            const container = document.getElementById('customerOrdersList');
+            const user = state.currentUser;
+            if (!container || !user) return;
+
+            container.innerHTML = '';
+
+            const userOrders = state.orders.filter(o => o.userId === user.id);
+
+            if (userOrders.length === 0) {
+                container.innerHTML = `
+                    <div class="p-8 bg-slate-50 border border-slate-200 rounded-xl text-center">
+                        <i data-lucide="package-open" class="w-12 h-12 text-slate-400 mx-auto mb-3"></i>
+                        <p class="text-slate-600 font-bold">Você ainda não possui pedidos.</p>
+                        <p class="text-sm text-slate-500 mt-1">Explore nossa loja e faça sua primeira compra!</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            userOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            userOrders.forEach(order => {
+                const div = document.createElement('div');
+                div.className = 'p-5 bg-slate-50 border border-slate-200 rounded-xl';
+                div.innerHTML = `
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                        <div>
+                            <p class="text-xs text-slate-500">Pedido</p>
+                            <p class="font-bold text-slate-900">${order.code}</p>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold ${getStatusBadgeClass(order.status)}">
+                                ${translateOrderStatus(order.status)}
+                            </span>
+
+                            <p class="font-bold text-amber-600">${formatCurrency(order.total)}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" onclick="viewOrderDetails('${order.id}')" class="px-3 py-2 rounded-lg bg-slate-900 text-amber-400 text-xs font-bold hover:bg-slate-800 transition">
+                            Ver detalhes
+                        </button>
+
+                        ${order.trackingCode ? `
+                            <button type="button" onclick="openTrackingModal('${order.id}')" class="px-3 py-2 rounded-lg border border-slate-300 text-slate-700 text-xs font-bold hover:border-amber-500 transition">
+                                Rastrear
+                            </button>
+                        ` : ''}
+
+                        ${order.status === 'delivered' ? `
+                            <button type="button" onclick="openReturnRequest('${order.id}')" class="px-3 py-2 rounded-lg border border-slate-300 text-slate-700 text-xs font-bold hover:border-amber-500 transition">
+                                Troca/Devolução
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            lucide.createIcons();
+        }
+
+        function getStatusBadgeClass(status) {
+            const classes = {
+                pending: 'bg-amber-100 text-amber-800',
+                paid: 'bg-blue-100 text-blue-800',
+                shipped: 'bg-purple-100 text-purple-800',
+                delivered: 'bg-emerald-100 text-emerald-800',
+                canceled: 'bg-red-100 text-red-800'
+            };
+            return classes[status] || 'bg-slate-100 text-slate-800';
+        }
+
+        function translateOrderStatus(status) {
+            const statuses = {
+                pending: 'Pendente',
+                paid: 'Pago',
+                shipped: 'Enviado',
+                delivered: 'Entregue',
+                canceled: 'Cancelado'
+            };
+            return statuses[status] || status;
+        }
+
+        function viewOrderDetails(orderId) {
+            const order = state.orders.find(o => o.id === orderId);
+            if (!order) return;
+
+            const modal = document.getElementById('orderDetailsModal');
+            const container = document.getElementById('orderDetailsContent');
+            if (!modal || !container) return;
+
+            container.innerHTML = `
+                <div class="flex items-start gap-4 mb-6">
+                    <div class="w-14 h-14 gradient-gold rounded-xl flex items-center justify-center shadow-gold">
+                        <i data-lucide="package-check" class="w-7 h-7 text-slate-900"></i>
+                    </div>
+
+                    <div>
+                        <h3 class="font-serif text-3xl font-bold">Detalhes do Pedido</h3>
+                        <p class="text-sm text-amber-700 font-bold mt-1">${order.code}</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                        <p class="text-xs text-slate-500">Data</p>
+                        <p class="font-bold text-slate-900 mt-1">${formatDate(order.createdAt)}</p>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                        <p class="text-xs text-slate-500">Status</p>
+                        <p class="font-bold text-slate-900 mt-1">${translateOrderStatus(order.status)}</p>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl sm:col-span-2">
+                        <p class="text-xs text-slate-500">Endereço de entrega</p>
+                        <p class="font-bold text-slate-900 mt-1 text-sm">${order.address}</p>
+                    </div>
+                </div>
+
+                <h4 class="font-bold text-slate-900 mb-3">Itens</h4>
+
+                <div class="space-y-3 mb-6">
+                    ${order.items.map(item => `
+                        <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                            <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg">
+
+                            <div class="flex-1">
+                                <p class="font-bold text-sm text-slate-900">${item.name}</p>
+                                <p class="text-xs text-slate-500">${item.quantity}x ${formatCurrency(item.price)}</p>
+                            </div>
+
+                            <p class="font-bold text-slate-900">${formatCurrency(item.price * item.quantity)}</p>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="p-4 bg-slate-900 text-white rounded-xl flex justify-between items-center">
+                    <span class="font-bold">Total</span>
+                    <span class="font-bold text-amber-400 text-xl">${formatCurrency(order.total)}</span>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    ${order.trackingCode ? `
+                        <button type="button" onclick="openTrackingModal('${order.id}')" class="flex-1 py-3 gradient-gold text-slate-900 rounded-xl font-bold hover:shadow-gold transition">
+                            <i data-lucide="map-pinned" class="w-4 h-4 inline mr-1"></i> Rastrear pedido
+                        </button>
+                    ` : ''}
+
+                    <button type="button" onclick="closeOrderDetailsModal()" class="flex-1 py-3 border border-slate-300 text-slate-700 rounded-xl font-bold hover:bg-slate-50 transition">
+                        Fechar
+                    </button>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closeOrderDetailsModal() {
+            const modal = document.getElementById('orderDetailsModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function openTrackingModal(orderId) {
+            const order = state.orders.find(o => o.id === orderId);
+            if (!order) return;
+
+            const modal = document.getElementById('trackingModal');
+            const content = document.getElementById('trackingContent');
+            const orderIdEl = document.getElementById('trackingOrderId');
+
+            if (!modal || !content) return;
+
+            if (orderIdEl) orderIdEl.textContent = order.code;
+
+            content.innerHTML = `
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                    <p class="text-xs text-slate-500">Status atual</p>
+                    <p class="font-bold text-slate-900 mt-1 text-lg">${translateOrderStatus(order.status)}</p>
+                </div>
+
+                ${order.trackingCode ? `
+                    <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+                        <p class="text-xs text-emerald-700 font-bold mb-1">Código de rastreio</p>
+                        <p class="font-mono text-emerald-900">${order.trackingCode}</p>
+                        ${order.carrier ? `<p class="text-xs text-emerald-700 mt-1">Transportadora: ${order.carrier}</p>` : ''}
+                    </div>
+                ` : `
+                    <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                        <p class="text-xs text-amber-800">
+                            <i data-lucide="info" class="w-4 h-4 inline mr-1"></i>
+                            Código de rastreio será disponibilizado quando o pedido for enviado.
+                        </p>
+                    </div>
+                `}
+
+                <button type="button" onclick="closeTrackingModal()" class="w-full py-3 border border-slate-300 text-slate-700 rounded-xl font-bold hover:bg-slate-50 transition">
+                    Fechar
+                </button>
+            `;
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closeTrackingModal() {
+            const modal = document.getElementById('trackingModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function openReturnRequest(orderId) {
+            closeOrderDetailsModal();
+
+            const order = state.orders.find(o => o.id === orderId);
+            if (!order) return;
+
+            const modal = document.getElementById('returnRequestModal');
+            const productSelect = document.getElementById('returnProduct');
+            const orderIdInput = document.getElementById('returnOrderId');
+
+            if (!modal || !productSelect) return;
+
+            productSelect.innerHTML = '<option value="">Selecione o produto</option>';
+            order.items.forEach((item, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${item.name} (${item.quantity}x)`;
+                productSelect.appendChild(option);
+            });
+
+            if (orderIdInput) orderIdInput.value = orderId;
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closeReturnRequestModal() {
+            const modal = document.getElementById('returnRequestModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+
+            const form = document.getElementById('returnRequestForm');
+            if (form) form.reset();
+        }
+
+        function submitReturnRequest(event) {
+            event.preventDefault();
+
+            const orderId = document.getElementById('returnOrderId')?.value;
+            const productIndex = document.getElementById('returnProduct')?.value;
+            const reason = document.getElementById('returnReason')?.value;
+            const description = document.getElementById('returnDescription')?.value.trim();
+
+            if (!orderId || productIndex === '' || !reason || !description) {
+                alert('Preencha todos os campos obrigatórios.');
+                return;
+            }
+
+            const order = state.orders.find(o => o.id === orderId);
+            if (!order) return;
+
+            const product = order.items[parseInt(productIndex)];
+
+            if (!state.returnRequests) state.returnRequests = [];
+
+            state.returnRequests.push({
+                id: 'return_' + Date.now(),
+                orderId,
+                orderCode: order.code,
+                product: product.name,
+                reason,
+                description,
+                status: 'pending',
+                createdAt: new Date().toISOString()
+            });
+
+            saveStateToStorage();
+            closeReturnRequestModal();
+            alert('Solicitação enviada! Ela será analisada pela equipe L&A.');
+        }
+
+        // =====================================================
+        // AFILIADOS
+        // =====================================================
+        function openAffiliateDashboard() {
+            const user = state.currentUser;
+            if (!user || user.role !== 'affiliate') {
+                alert('Acesso restrito a afiliados.');
+                return;
+            }
+
+            closeUserMenu();
+
+            const modal = document.getElementById('affiliateDashboardModal');
+            if (!modal) return;
+
+            const affiliate = state.affiliates.find(a => a.userId === user.id);
+
+            document.getElementById('affiliateHeaderName').textContent = user.fullName;
+            document.getElementById('affiliateHeaderEmail').textContent = user.email;
+
+            const statusSection = document.getElementById('affiliateStatusSection');
+            const statusIcon = document.getElementById('affiliateStatusIcon');
+            const statusTitle = document.getElementById('affiliateStatusTitle');
+            const statusDesc = document.getElementById('affiliateStatusDescription');
+            const statusDetails = document.getElementById('affiliateStatusDetails');
+
+            const summarySection = document.getElementById('affiliateSummarySection');
+            const linksSection = document.getElementById('affiliateLinksSection');
+            const pixSection = document.getElementById('affiliatePixSection');
+            const salesSection = document.getElementById('affiliateSalesSection');
+
+            if (!affiliate || affiliate.status === 'pending') {
+                if (statusIcon) {
+                    statusIcon.className = 'w-12 h-12 rounded-xl flex items-center justify-center bg-amber-100';
+                    statusIcon.innerHTML = '<i data-lucide="clock" class="w-6 h-6 text-amber-700"></i>';
+                }
+                if (statusTitle) statusTitle.textContent = 'Solicitação em análise';
+                if (statusDesc) statusDesc.textContent = 'Seu cadastro está sendo revisado pela equipe.';
+                if (statusDetails) statusDetails.textContent = 'Você será notificado por e-mail quando aprovado.';
+
+                if (summarySection) summarySection.classList.add('hidden');
+                if (linksSection) linksSection.classList.add('hidden');
+                if (pixSection) pixSection.classList.add('hidden');
+                if (salesSection) salesSection.classList.add('hidden');
+
+            } else if (affiliate.status === 'active') {
+                if (statusIcon) {
+                    statusIcon.className = 'w-12 h-12 rounded-xl flex items-center justify-center bg-emerald-100';
+                    statusIcon.innerHTML = '<i data-lucide="circle-check" class="w-6 h-6 text-emerald-700"></i>';
+                }
+                if (statusTitle) statusTitle.textContent = 'Afiliado ativo';
+                if (statusDesc) statusDesc.textContent = 'Seu código de afiliado está liberado.';
+                if (statusDetails) statusDetails.textContent = `Código: ${affiliate.code}`;
+
+                if (summarySection) summarySection.classList.remove('hidden');
+                if (linksSection) linksSection.classList.remove('hidden');
+                if (pixSection) {
+                    pixSection.classList.remove('hidden');
+                    document.getElementById('affiliatePixType').textContent = translatePixType(affiliate.pixType);
+                    document.getElementById('affiliatePixKey').textContent = affiliate.pixKey;
+                }
+                if (salesSection) {
+                    salesSection.classList.remove('hidden');
+                    renderAffiliateSales(affiliate);
+                }
+
+                const mainLinkInput = document.getElementById('affiliateMainLink');
+                const codeInput = document.getElementById('affiliateCode');
+
+                if (mainLinkInput) mainLinkInput.value = window.location.origin + '?ref=' + affiliate.code;
+                if (codeInput) codeInput.value = affiliate.code;
+
+                updateAffiliateSummary(affiliate);
+
+            } else if (affiliate.status === 'blocked') {
+                if (statusIcon) {
+                    statusIcon.className = 'w-12 h-12 rounded-xl flex items-center justify-center bg-red-100';
+                    statusIcon.innerHTML = '<i data-lucide="circle-x" class="w-6 h-6 text-red-700"></i>';
+                }
+                if (statusTitle) statusTitle.textContent = 'Afiliado bloqueado';
+                if (statusDesc) statusDesc.textContent = 'Entre em contato com o suporte para mais informações.';
+                if (statusDetails) statusDetails.textContent = '';
+
+                if (summarySection) summarySection.classList.add('hidden');
+                if (linksSection) linksSection.classList.add('hidden');
+                if (pixSection) pixSection.classList.add('hidden');
+                if (salesSection) salesSection.classList.add('hidden');
+            }
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closeAffiliateDashboard() {
+            const modal = document.getElementById('affiliateDashboardModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function translatePixType(type) {
+            const types = {
+                cpf: 'CPF',
+                email: 'E-mail',
+                telefone: 'Telefone',
+                aleatoria: 'Aleatória'
+            };
+            return types[type] || type;
+        }
+
+        function updateAffiliateSummary(affiliate) {
+            const sales = state.orders.filter(o => o.affiliateCode === affiliate.code && o.status !== 'canceled');
+            const totalSales = sales.length;
+
+            const pendingCommission = sales
+                .filter(o => o.status === 'paid' || o.status === 'shipped')
+                .reduce((sum, o) => sum + calculateAffiliateCommission(o), 0);
+
+            const paidCommission = sales
+                .filter(o => o.status === 'delivered')
+                .reduce((sum, o) => sum + calculateAffiliateCommission(o), 0);
+
+            const totalCommission = pendingCommission + paidCommission;
+
+            document.getElementById('affiliateTotalSales').textContent = totalSales;
+            document.getElementById('affiliatePendingCommission').textContent = formatCurrency(pendingCommission);
+            document.getElementById('affiliatePaidCommission').textContent = formatCurrency(paidCommission);
+            document.getElementById('affiliateTotalCommission').textContent = formatCurrency(totalCommission);
+        }
+
+        function calculateAffiliateCommission(order) {
+            return order.items.reduce((sum, item) => {
+                const product = state.products.find(p => p.id === item.id);
+                if (!product) return sum;
+                return sum + (item.price * item.quantity * (product.commission / 100));
+            }, 0);
+        }
+
+        function renderAffiliateSales(affiliate) {
+            const container = document.getElementById('affiliateSalesList');
+            if (!container) return;
+
+            const sales = state.orders.filter(o => o.affiliateCode === affiliate.code);
+            sales.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            if (sales.length === 0) {
+                container.innerHTML = '<p class="text-sm text-slate-500">Nenhuma venda registrada ainda.</p>';
+                return;
+            }
+
+            container.innerHTML = sales.map(order => `
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                    <div class="flex justify-between items-center mb-2">
+                        <p class="font-bold text-sm">${order.code}</p>
+                        <span class="px-2 py-1 rounded text-xs font-bold ${getStatusBadgeClass(order.status)}">${translateOrderStatus(order.status)}</span>
+                    </div>
+
+                    <p class="text-xs text-slate-500">${formatDate(order.createdAt)}</p>
+
+                    <div class="flex justify-between items-center mt-3">
+                        <p class="text-xs text-slate-500">Comissão</p>
+                        <p class="font-bold text-amber-600">${formatCurrency(calculateAffiliateCommission(order))}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function copyAffiliateLink(inputId) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+
+            input.select();
+            document.execCommand('copy');
+            alert('Link copiado!');
+        }
+
+        function openAffiliateCatalog() {
+            const modal = document.getElementById('affiliateCatalogModal');
+            const container = modal?.querySelector('.grid');
+            if (!container) return;
+
+            container.innerHTML = state.products.map(product => {
+                const finalPrice = calculateFinalPrice(product);
+                const commission = (finalPrice * (product.commission / 100)).toFixed(2);
+                const affiliate = state.affiliates.find(a => a.userId === state.currentUser?.id);
+                const productLink = affiliate ? window.location.origin + '?ref=' + affiliate.code + '&prod=' + product.id : '';
+
+                return `
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-40 object-cover rounded-xl mb-3">
+
+                        <h4 class="font-bold text-slate-900 text-sm mb-1">${product.name}</h4>
+
+                        <p class="text-xs text-slate-500 mb-2">${formatCurrency(finalPrice)}</p>
+
+                        <div class="p-2 bg-emerald-50 border border-emerald-200 rounded-lg mb-3">
+                            <p class="text-[10px] text-emerald-700">Comissão por venda</p>
+                            <p class="font-bold text-emerald-900 text-sm">${formatCurrency(parseFloat(commission))}</p>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <button type="button" onclick="copyProductLink('${product.id}')" class="flex-1 px-3 py-2 rounded-lg bg-slate-900 text-amber-400 text-xs font-bold hover:bg-slate-800 transition">
+                                <i data-lucide="link" class="w-3 h-3 inline mr-1"></i> Copiar link
+                            </button>
+
+                            <button type="button" onclick="shareProduct('${product.id}')" class="px-3 py-2 rounded-lg border border-slate-300 text-slate-700 text-xs font-bold hover:border-amber-500 transition">
+                                <i data-lucide="share-2" class="w-3 h-3"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closeAffiliateCatalog() {
+            const modal = document.getElementById('affiliateCatalogModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function copyProductLink(productId) {
+            const affiliate = state.affiliates.find(a => a.userId === state.currentUser?.id);
+            if (!affiliate) {
+                alert('Você precisa ser um afiliado ativo para gerar links.');
+                return;
+            }
+
+            const link = window.location.origin + '?ref=' + affiliate.code + '&prod=' + productId;
+            navigator.clipboard.writeText(link).then(() => {
+                alert('Link do produto copiado!');
+            }).catch(() => {
+                alert('Link: ' + link);
+            });
+        }
+
+        function shareProduct(productId) {
+            const product = state.products.find(p => p.id === productId);
+            if (!product) return;
+
+            const affiliate = state.affiliates.find(a => a.userId === state.currentUser?.id);
+            const link = affiliate ? window.location.origin + '?ref=' + affiliate.code + '&prod=' + productId : window.location.origin;
+
+            const shareData = {
+                title: product.name,
+                text: `Confira: ${product.name} na L&A Royal Advisory`,
+                url: link
+            };
+
+            if (navigator.share) {
+                navigator.share(shareData).catch(() => {});
+            } else {
+                navigator.clipboard.writeText(link).then(() => {
+                    alert('Link copiado! Cole onde quiser compartilhar.');
+                }).catch(() => {
+                    alert('Link: ' + link);
+                });
+            }
+        }
+
+        function openAffiliateProfile() {
+            const user = state.currentUser;
+            const affiliate = state.affiliates.find(a => a.userId === user?.id);
+
+            if (!user || !affiliate) {
+                alert('Perfil de afiliado não encontrado.');
+                return;
+            }
+
+            closeAffiliateDashboard();
+
+            const modal = document.getElementById('affiliateProfileModal');
+            if (!modal) return;
+
+            document.getElementById('affiliateProfileName').value = affiliate.name;
+            document.getElementById('affiliateProfileEmail').value = affiliate.email;
+            document.getElementById('affiliateProfilePhone').value = affiliate.phone;
+            document.getElementById('affiliateProfileCpf').value = affiliate.cpf;
+            document.getElementById('affiliateProfilePixType').value = affiliate.pixType;
+            document.getElementById('affiliateProfilePixKey').value = affiliate.pixKey;
+            document.getElementById('affiliateProfileInstagram').value = affiliate.instagram;
+            document.getElementById('affiliateProfileWebsite').value = affiliate.website;
+
+            hideAffiliateProfileMessage();
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closeAffiliateProfile() {
+            const modal = document.getElementById('affiliateProfileModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function saveAffiliateProfile(event) {
+            event.preventDefault();
+
+            const user = state.currentUser;
+            const affiliate = state.affiliates.find(a => a.userId === user?.id);
+            if (!affiliate) return;
+
+            const name = document.getElementById('affiliateProfileName')?.value.trim();
+            const phone = document.getElementById('affiliateProfilePhone')?.value.trim();
+            const cpf = document.getElementById('affiliateProfileCpf')?.value.trim();
+            const pixType = document.getElementById('affiliateProfilePixType')?.value;
+            const pixKey = document.getElementById('affiliateProfilePixKey')?.value.trim();
+            const instagram = document.getElementById('affiliateProfileInstagram')?.value.trim();
+            const website = document.getElementById('affiliateProfileWebsite')?.value.trim();
+
+            if (!name || !phone || !cpf || !pixType || !pixKey) {
+                showAffiliateProfileMessage('Preencha todos os campos obrigatórios.', 'error');
+                return;
+            }
+
+            affiliate.name = name;
+            affiliate.phone = phone;
+            affiliate.cpf = cpf;
+            affiliate.pixType = pixType;
+            affiliate.pixKey = pixKey;
+            affiliate.instagram = instagram;
+            affiliate.website = website;
+
+            const affIndex = state.affiliates.findIndex(a => a.id === affiliate.id);
+            if (affIndex !== -1) {
+                state.affiliates[affIndex] = affiliate;
+            }
+
+            const userIndex = state.users.findIndex(u => u.id === user.id);
+            if (userIndex !== -1) {
+                state.users[userIndex].fullName = name;
+                state.users[userIndex].phone = phone;
+                state.users[userIndex].cpf = cpf;
+            }
+
+            saveStateToStorage();
+            showAffiliateProfileMessage('Dados atualizados com sucesso!', 'success');
+        }
+
+        function showAffiliateProfileMessage(message, type) {
+            const msgEl = document.getElementById('affiliateProfileMessage');
+            if (!msgEl) return;
+
+            msgEl.textContent = message;
+            msgEl.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'text-emerald-800', 'bg-red-50', 'border-red-200', 'text-red-800');
+
+            if (type === 'success') {
+                msgEl.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-800');
+            } else {
+                msgEl.classList.add('bg-red-50', 'border-red-200', 'text-red-800');
+            }
+        }
+
+        function hideAffiliateProfileMessage() {
+            const msgEl = document.getElementById('affiliateProfileMessage');
+            if (msgEl) msgEl.classList.add('hidden');
+        }
+
+        // =====================================================
+        // ADMIN DASHBOARD
+        // =====================================================
+        function openAdminDashboard() {
+            const user = state.currentUser;
+            if (!user || user.role !== 'admin') {
+                alert('Acesso administrativo restrito.');
+                return;
+            }
+
+            document.getElementById('adminHeaderName').textContent = user.fullName;
+            document.getElementById('adminHeaderEmail').textContent = user.email;
+
+            const modal = document.getElementById('adminDashboardModal');
+            if (!modal) return;
+
+            loadAdminDashboard();
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closeAdminDashboard() {
+            const modal = document.getElementById('adminDashboardModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        }
+
+  function switchAdminTab(tabId, button) {
+    document.querySelectorAll('.admin-section').forEach(section => {
+        section.classList.add('hidden');
+    });
+
+    document.getElementById(tabId)?.classList.remove('hidden');
+
+    document.querySelectorAll('.admin-tab').forEach(tab => {
+        tab.classList.remove('bg-slate-900', 'text-amber-400');
+        tab.classList.add('text-slate-600');
+    });
+
+    if (button) {
+        button.classList.remove('text-slate-600');
+        button.classList.add('bg-slate-900', 'text-amber-400');
+    }
+
+    if (tabId === 'admin-dashboard') loadAdminDashboard();
+    if (tabId === 'admin-users') loadAdminUsers();
+    if (tabId === 'admin-products') loadAdminProducts();
+    if (tabId === 'admin-orders') loadAdminOrders();
+    if (tabId === 'admin-affiliates') loadAdminAffiliates();
+}
+
+        function loadAdminDashboard() {
+            document.getElementById('adminDashUsers').textContent = state.users.length;
+            document.getElementById('adminDashProducts').textContent = state.products.length;
+            document.getElementById('adminDashOrders').textContent = state.orders.length;
+
+            const activeAffiliates = state.affiliates.filter(a => a.status === 'active').length;
+            document.getElementById('adminDashAffiliates').textContent = activeAffiliates;
+
+            const recentOrders = [...state.orders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+            const recentOrdersEl = document.getElementById('adminDashRecentOrders');
+            if (recentOrdersEl) {
+                recentOrdersEl.innerHTML = recentOrders.map(o => `
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="font-bold">${o.code}</span>
+                        <span class="text-slate-500">${formatCurrency(o.total)}</span>
+                    </div>
+                `).join('') || '<p class="text-sm text-slate-500">Nenhum pedido.</p>';
+            }
+
+            const recentAffiliates = [...state.affiliates].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+            const recentAffiliatesEl = document.getElementById('adminDashRecentAffiliates');
+            if (recentAffiliatesEl) {
+                recentAffiliatesEl.innerHTML = recentAffiliates.map(a => `
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="font-bold">${a.name}</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold ${a.status === 'active' ? 'bg-emerald-100 text-emerald-800' : a.status === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'}">${a.status}</span>
+                    </div>
+                `).join('') || '<p class="text-sm text-slate-500">Nenhum afiliado.</p>';
+            }
+        }
+
+        function loadAdminUsers() {
+            const tbody = document.getElementById('adminUsersTableBody');
+            if (!tbody) return;
+
+            tbody.innerHTML = state.users.map(u => `
+                <tr class="hover:bg-slate-50">
+                    <td class="p-3">${u.fullName}</td>
+                    <td class="p-3">${u.email}</td>
+                    <td class="p-3">${u.cpf}</td>
+                    <td class="p-3"><span class="px-2 py-1 rounded text-[10px] font-bold bg-slate-100">${u.role}</span></td>
+                    <td class="p-3"><span class="px-2 py-1 rounded text-[10px] font-bold ${u.status === 'active' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">${u.status}</span></td>
+                    <td class="p-3">
+                        <button type="button" onclick="openAdminUserForm('${u.id}')" class="px-2 py-1 rounded bg-slate-900 text-amber-400 text-[10px] font-bold">Editar</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function refreshAdminUsers() {
+            loadAdminUsers();
+        }
+
+        function loadAdminProducts() {
+            const container = document.querySelector('#admin-products .grid');
+            if (!container) return;
+
+            container.innerHTML = state.products.map(p => `
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                    <img src="${p.image}" alt="${p.name}" class="w-full h-32 object-cover rounded-xl mb-3">
+                    <h4 class="font-bold text-sm mb-1">${p.name}</h4>
+                    <p class="text-xs text-slate-500 mb-2">${formatCurrency(calculateFinalPrice(p))}</p>
+                    <p class="text-xs text-slate-500 mb-3">Estoque: ${p.stock}</p>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="openAdminProductForm('${p.id}')" class="flex-1 px-2 py-1 rounded bg-slate-900 text-amber-400 text-[10px] font-bold">Editar</button>
+                        <button type="button" onclick="deleteProduct('${p.id}')" class="px-2 py-1 rounded border border-red-300 text-red-700 text-[10px] font-bold">Excluir</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadAdminOrders() {
+            const tbody = document.getElementById('adminOrdersTableBody');
+            if (!tbody) return;
+
+            const filter = document.getElementById('adminOrdersFilter')?.value || 'all';
+            let orders = [...state.orders];
+
+            if (filter !== 'all') {
+                orders = orders.filter(o => o.status === filter);
+            }
+
+            orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            tbody.innerHTML = orders.map(o => `
+                <tr class="hover:bg-slate-50">
+                    <td class="p-3 font-bold">${o.code}</td>
+                    <td class="p-3">${o.customerName}</td>
+                    <td class="p-3">${formatCurrency(o.total)}</td>
+                    <td class="p-3"><span class="px-2 py-1 rounded text-[10px] font-bold ${getStatusBadgeClass(o.status)}">${translateOrderStatus(o.status)}</span></td>
+                    <td class="p-3 text-sm">${formatDate(o.createdAt)}</td>
+                    <td class="p-3">
+                        <button type="button" onclick="openAdminOrderForm('${o.id}')" class="px-2 py-1 rounded bg-slate-900 text-amber-400 text-[10px] font-bold">Editar</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function refreshAdminOrders() {
+            loadAdminOrders();
+        }
+
+        function loadAdminAffiliates() {
+            const tbody = document.getElementById('adminAffiliatesTableBody');
+            if (!tbody) return;
+
+            const filter = document.getElementById('adminAffiliatesFilter')?.value || 'all';
+            let affiliates = [...state.affiliates];
+
+            if (filter !== 'all') {
+                affiliates = affiliates.filter(a => a.status === filter);
+            }
+
+            affiliates.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            tbody.innerHTML = affiliates.map(a => {
+                const salesCount = state.orders.filter(o => o.affiliateCode === a.code).length;
+                return `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-3">${a.name}</td>
+                        <td class="p-3">${a.email}</td>
+                        <td class="p-3 font-mono text-xs">${a.code}</td>
+                        <td class="p-3"><span class="px-2 py-1 rounded text-[10px] font-bold ${a.status === 'active' ? 'bg-emerald-100 text-emerald-800' : a.status === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'}">${a.status}</span></td>
+                        <td class="p-3">${salesCount}</td>
+                        <td class="p-3">
+                            <button type="button" onclick="openAdminAffiliateForm('${a.id}')" class="px-2 py-1 rounded bg-slate-900 text-amber-400 text-[10px] font-bold">Editar</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function refreshAdminAffiliates() {
+            loadAdminAffiliates();
+        }
+
+        function openAdminProductForm(productId = null) {
+            const modal = document.getElementById('adminProductFormModal');
+            if (!modal) return;
+
+            const form = document.getElementById('adminProductForm');
+            form.reset();
+
+            if (productId) {
+                const product = state.products.find(p => p.id === productId);
+                if (product) {
+                    document.getElementById('adminProductId').value = product.id;
+                    document.getElementById('adminProductName').value = product.name;
+                    document.getElementById('adminProductDescription').value = product.description;
+                    document.getElementById('adminProductPrice').value = product.price;
+                    document.getElementById('adminProductDiscount').value = product.discount;
+                    document.getElementById('adminProductStock').value = product.stock;
+                    document.getElementById('adminProductCommission').value = product.commission;
+                    document.getElementById('adminProductImage').value = product.image;
+                    document.getElementById('adminProductCategory').value = product.category;
+                }
+            } else {
+                document.getElementById('adminProductId').value = '';
+            }
+
+            hideAdminProductMessage();
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closeAdminProductForm() {
+            const modal = document.getElementById('adminProductFormModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function saveAdminProduct(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('adminProductId')?.value;
+            const name = document.getElementById('adminProductName')?.value.trim();
+            const description = document.getElementById('adminProductDescription')?.value.trim();
+            const price = parseFloat(document.getElementById('adminProductPrice')?.value || '0');
+            const discount = parseFloat(document.getElementById('adminProductDiscount')?.value || '0');
+            const stock = parseInt(document.getElementById('adminProductStock')?.value || '0');
+            const commission = parseFloat(document.getElementById('adminProductCommission')?.value || '0');
+            const image = document.getElementById('adminProductImage')?.value.trim();
+            const category = document.getElementById('adminProductCategory')?.value.trim();
+
+            if (
+    !name ||
+    !description ||
+    !image ||
+    !category ||
+    !Number.isFinite(price) ||
+    price < 0 ||
+    !Number.isFinite(discount) ||
+    discount < 0 ||
+    discount > 100 ||
+    !Number.isInteger(stock) ||
+    stock < 0 ||
+    !Number.isFinite(commission) ||
+    commission < 0 ||
+    commission > 100
+) {
+    showAdminProductMessage(
+        'Revise os dados do produto. Preço, desconto, estoque e comissão devem ser valores válidos.',
+        'error'
+    );
+    return;
+}
+            }
+
+            if (id) {
+                const index = state.products.findIndex(p => p.id === id);
+                if (index !== -1) {
+                    state.products[index] = {
+                        ...state.products[index],
+                        name,
+                        description,
+                        price,
+                        discount,
+                        stock,
+                        commission,
+                        image,
+                        category
+                    };
+                }
+            } else {
+                state.products.push({
+                    id: 'prod_' + Date.now(),
+                    name,
+                    description,
+                    price,
+                    discount,
+                    stock,
+                    commission,
+                    image,
+                    category
+                });
+            }
+
+saveStateToStorage();
+renderCatalog();
+loadAdminProducts();
+showAdminProductMessage('Produto salvo com sucesso!', 'success');
+        }
+
+        function showAdminProductMessage(message, type) {
+            const msgEl = document.getElementById('adminProductMessage');
+            if (!msgEl) return;
+
+            msgEl.textContent = message;
+            msgEl.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'text-emerald-800', 'bg-red-50', 'border-red-200', 'text-red-800');
+
+            if (type === 'success') {
+                msgEl.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-800');
+            } else {
+                msgEl.classList.add('bg-red-50', 'border-red-200', 'text-red-800');
+            }
+        }
+
+        function hideAdminProductMessage() {
+            const msgEl = document.getElementById('adminProductMessage');
+            if (msgEl) msgEl.classList.add('hidden');
+        }
+
+        function deleteProduct(productId) {
+            if (!confirm('Tem certeza que deseja excluir este produto?')) return;
+
+           state.products = state.products.filter(p => p.id !== productId);
+
+state.cart = state.cart.filter(item => item.id !== productId);
+
+saveStateToStorage();
+renderCatalog();
+updateCartIcon();
+loadAdminProducts();
+        }
+
+        function openAdminOrderForm(orderId) {
+            const modal = document.getElementById('adminOrderFormModal');
+            if (!modal) return;
+
+            const order = state.orders.find(o => o.id === orderId);
+            if (!order) return;
+
+            document.getElementById('adminOrderId').value = order.id;
+            document.getElementById('adminOrderCodeDisplay').textContent = order.code;
+            document.getElementById('adminOrderStatus').value = order.status;
+            document.getElementById('adminOrderTrackingCode').value = order.trackingCode || '';
+            document.getElementById('adminOrderCarrier').value = order.carrier || '';
+            document.getElementById('adminOrderObservations').value = order.observations || '';
+
+            hideAdminOrderMessage();
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closeAdminOrderForm() {
+            const modal = document.getElementById('adminOrderFormModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function saveAdminOrder(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('adminOrderId')?.value;
+            const order = state.orders.find(o => o.id === id);
+            if (!order) return;
+
+            order.status = document.getElementById('adminOrderStatus')?.value;
+            order.trackingCode = document.getElementById('adminOrderTrackingCode')?.value.trim();
+            order.carrier = document.getElementById('adminOrderCarrier')?.value.trim();
+            order.observations = document.getElementById('adminOrderObservations')?.value.trim();
+
+            saveStateToStorage();
+            showAdminOrderMessage('Pedido atualizado com sucesso!', 'success');
+            loadAdminOrders();
+        }
+
+        function showAdminOrderMessage(message, type) {
+            const msgEl = document.getElementById('adminOrderMessage');
+            if (!msgEl) return;
+
+            msgEl.textContent = message;
+            msgEl.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'text-emerald-800', 'bg-red-50', 'border-red-200', 'text-red-800');
+
+            if (type === 'success') {
+                msgEl.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-800');
+            } else {
+                msgEl.classList.add('bg-red-50', 'border-red-200', 'text-red-800');
+            }
+        }
+
+        function hideAdminOrderMessage() {
+            const msgEl = document.getElementById('adminOrderMessage');
+            if (msgEl) msgEl.classList.add('hidden');
+        }
+
+        function openAdminAffiliateForm(affiliateId) {
+            const modal = document.getElementById('adminAffiliateFormModal');
+            if (!modal) return;
+
+            const affiliate = state.affiliates.find(a => a.id === affiliateId);
+            if (!affiliate) return;
+
+            document.getElementById('adminAffiliateId').value = affiliate.id;
+            document.getElementById('adminAffiliateName').value = affiliate.name;
+            document.getElementById('adminAffiliateEmail').value = affiliate.email;
+            document.getElementById('adminAffiliatePhone').value = affiliate.phone;
+            document.getElementById('adminAffiliateCpf').value = affiliate.cpf;
+            document.getElementById('adminAffiliateStatus').value = affiliate.status;
+            document.getElementById('adminAffiliatePixType').value = affiliate.pixType;
+            document.getElementById('adminAffiliatePixKey').value = affiliate.pixKey;
+            document.getElementById('adminAffiliateInstagram').value = affiliate.instagram;
+            document.getElementById('adminAffiliateWebsite').value = affiliate.website;
+
+            hideAdminAffiliateMessage();
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closeAdminAffiliateForm() {
+            const modal = document.getElementById('adminAffiliateFormModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function saveAdminAffiliate(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('adminAffiliateId')?.value;
+            const affiliate = state.affiliates.find(a => a.id === id);
+            if (!affiliate) return;
+
+            affiliate.name = document.getElementById('adminAffiliateName')?.value.trim();
+            affiliate.email = document.getElementById('adminAffiliateEmail')?.value.trim();
+            affiliate.phone = document.getElementById('adminAffiliatePhone')?.value.trim();
+            affiliate.cpf = document.getElementById('adminAffiliateCpf')?.value.trim();
+            affiliate.status = document.getElementById('adminAffiliateStatus')?.value;
+            affiliate.pixType = document.getElementById('adminAffiliatePixType')?.value;
+            affiliate.pixKey = document.getElementById('adminAffiliatePixKey')?.value.trim();
+            affiliate.instagram = document.getElementById('adminAffiliateInstagram')?.value.trim();
+            affiliate.website = document.getElementById('adminAffiliateWebsite')?.value.trim();
+
+            if (affiliate.status === 'active' && !affiliate.approvedAt) {
+                affiliate.approvedAt = new Date().toISOString();
+            }
+
+            const user = state.users.find(u => u.id === affiliate.userId);
+            if (user) {
+                user.fullName = affiliate.name;
+                user.phone = affiliate.phone;
+                user.cpf = affiliate.cpf;
+                user.affiliateStatus = affiliate.status;
+            }
+
+            saveStateToStorage();
+            showAdminAffiliateMessage('Afiliado atualizado com sucesso!', 'success');
+            loadAdminAffiliates();
+        }
+
+        function showAdminAffiliateMessage(message, type) {
+            const msgEl = document.getElementById('adminAffiliateMessage');
+            if (!msgEl) return;
+
+            msgEl.textContent = message;
+            msgEl.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'text-emerald-800', 'bg-red-50', 'border-red-200', 'text-red-800');
+
+            if (type === 'success') {
+                msgEl.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-800');
+            } else {
+                msgEl.classList.add('bg-red-50', 'border-red-200', 'text-red-800');
+            }
+        }
+
+        function hideAdminAffiliateMessage() {
+            const msgEl = document.getElementById('adminAffiliateMessage');
+            if (msgEl) msgEl.classList.add('hidden');
+        }
+
+        function openAdminUserForm(userId) {
+            const modal = document.getElementById('adminUserFormModal');
+            if (!modal) return;
+
+            const user = state.users.find(u => u.id === userId);
+            if (!user) return;
+
+            document.getElementById('adminUserId').value = user.id;
+            document.getElementById('adminUserName').value = user.fullName;
+            document.getElementById('adminUserEmail').value = user.email;
+            document.getElementById('adminUserCpf').value = user.cpf;
+            document.getElementById('adminUserRole').value = user.role;
+            document.getElementById('adminUserStatus').value = user.status;
+
+            hideAdminUserMessage();
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closeAdminUserForm() {
+            const modal = document.getElementById('adminUserFormModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function saveAdminUser(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('adminUserId')?.value;
+            const user = state.users.find(u => u.id === id);
+            if (!user) return;
+
+            user.fullName = document.getElementById('adminUserName')?.value.trim();
+            user.email = document.getElementById('adminUserEmail')?.value.trim();
+            user.cpf = document.getElementById('adminUserCpf')?.value.trim();
+            user.role = document.getElementById('adminUserRole')?.value;
+            user.status = document.getElementById('adminUserStatus')?.value;
+
+            saveStateToStorage();
+            showAdminUserMessage('Usuário atualizado com sucesso!', 'success');
+            loadAdminUsers();
+        }
+
+        function showAdminUserMessage(message, type) {
+            const msgEl = document.getElementById('adminUserMessage');
+            if (!msgEl) return;
+
+            msgEl.textContent = message;
+            msgEl.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'text-emerald-800', 'bg-red-50', 'border-red-200', 'text-red-800');
+
+            if (type === 'success') {
+                msgEl.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-800');
+            } else {
+                msgEl.classList.add('bg-red-50', 'border-red-200', 'text-red-800');
+            }
+        }
+
+        function hideAdminUserMessage() {
+            const msgEl = document.getElementById('adminUserMessage');
+            if (msgEl) msgEl.classList.add('hidden');
+        }
+
+        function generateSalesReport() {
+            const startDate = document.getElementById('reportStartDate')?.value;
+            const endDate = document.getElementById('reportEndDate')?.value;
+            const resultEl = document.getElementById('salesReportResult');
+
+            if (!startDate || !endDate) {
+                alert('Selecione data inicial e final.');
+                return;
+            }
+
+            const start = new Date(`${startDate}T00:00:00`);
+            const end = new Date(`${endDate}T23:59:59.999`);
+
+            const filteredOrders = state.orders.filter(o => {
+                const orderDate = new Date(o.createdAt);
+                return orderDate >= start && orderDate <= end && o.status !== 'canceled';
+            });
+
+            const totalSales = filteredOrders.length;
+            const totalRevenue = filteredOrders.reduce((sum, o) => sum + o.total, 0);
+
+            if (resultEl) {
+                resultEl.innerHTML = `
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                        <p class="text-xs text-slate-500">Total de vendas</p>
+                        <p class="text-2xl font-bold text-slate-900 mt-1">${totalSales}</p>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                        <p class="text-xs text-slate-500">Receita total</p>
+                        <p class="text-2xl font-bold text-amber-600 mt-1">${formatCurrency(totalRevenue)}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function generateCommissionReport() {
+            const startDate = document.getElementById('commissionStartDate')?.value;
+            const endDate = document.getElementById('commissionEndDate')?.value;
+            const resultEl = document.getElementById('commissionReportResult');
+
+            if (!startDate || !endDate) {
+                alert('Selecione data inicial e final.');
+                return;
+            }
+
+             const start = new Date(`${startDate}T00:00:00`);
+             const end = new Date(`${endDate}T23:59:59.999`);
+
+            const filteredOrders = state.orders.filter(o => {
+                const orderDate = new Date(o.createdAt);
+                return orderDate >= start && orderDate <= end && o.affiliateCode && o.status !== 'canceled';
+            });
+
+            const totalCommission = filteredOrders.reduce((sum, o) => sum + calculateAffiliateCommission(o), 0);
+
+            if (resultEl) {
+                resultEl.innerHTML = `
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                        <p class="text-xs text-slate-500">Vendas com afiliados</p>
+                        <p class="text-2xl font-bold text-slate-900 mt-1">${filteredOrders.length}</p>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                        <p class="text-xs text-slate-500">Comissões totais</p>
+                        <p class="text-2xl font-bold text-emerald-600 mt-1">${formatCurrency(totalCommission)}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function saveAdminCompanySettings(event) {
+            event.preventDefault();
+            alert('Configurações salvas (simulação).');
+        }
+
+        function saveAdminCommissionSettings(event) {
+            event.preventDefault();
+            alert('Regras de comissão salvas (simulação).');
+        }
+
+        // =====================================================
+        // UTILITÁRIOS
+        // =====================================================
+        function calculateFinalPrice(product) {
+    const price = Number(product?.price) || 0;
+    const discount = Math.min(Math.max(Number(product?.discount) || 0, 0), 100);
+
+    return price * (1 - discount / 100);
+}
+
+function renderCatalog() {
+    const container =
+        document.getElementById('catalogContainer') ||
+        document.getElementById('productsGrid');
+
+    if (!container) {
+        console.warn(
+            'Nenhum container de produtos foi encontrado. ' +
+            'Use id="catalogContainer" ou id="productsGrid".'
+        );
+        return;
+    }
+
+    const availableProducts = state.products.filter(product => {
+        return Number(product.stock) > 0;
+    });
+
+    if (availableProducts.length === 0) {
+        container.innerHTML = `
+            <div class="col-span-full p-8 bg-slate-50 border border-slate-200 rounded-2xl text-center">
+                <i
+                    data-lucide="package-open"
+                    class="w-12 h-12 text-slate-400 mx-auto mb-3"
+                ></i>
+
+                <p class="font-bold text-slate-700">
+                    Nenhum produto disponível no momento.
+                </p>
+
+                <p class="text-sm text-slate-500 mt-1">
+                    Em breve teremos novas soluções para você.
+                </p>
+            </div>
+        `;
+
+        lucide.createIcons();
+        return;
+    }
+
+    container.innerHTML = availableProducts.map(product => {
+        const originalPrice = Number(product.price) || 0;
+        const discount = Number(product.discount) || 0;
+        const finalPrice = calculateFinalPrice(product);
+
+        return `
+            <article class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col">
+                <div class="relative h-56 bg-slate-100 overflow-hidden">
+                    <img
+                        src="${escapeAttribute(product.image)}"
+                        alt="${escapeAttribute(product.name)}"
+                        class="w-full h-full object-cover hover:scale-105 transition duration-500"
+                        loading="lazy"
+                    >
+
+                    <span class="absolute top-3 left-3 px-3 py-1 rounded-full bg-slate-900/90 text-amber-400 text-xs font-bold">
+                        ${escapeHtml(product.category || 'Produto')}
+                    </span>
+
+                    ${discount > 0 ? `
+                        <span class="absolute top-3 right-3 px-3 py-1 rounded-full bg-amber-400 text-slate-900 text-xs font-extrabold">
+                            ${formatPercentage(discount)}% OFF
+                        </span>
+                    ` : ''}
+                </div>
+
+                <div class="p-5 flex flex-col flex-1">
+                    <h3 class="font-serif text-xl font-bold text-slate-900">
+                        ${escapeHtml(product.name)}
+                    </h3>
+
+                    <p class="text-sm text-slate-600 leading-relaxed mt-2 flex-1">
+                        ${escapeHtml(product.description)}
+                    </p>
+
+                    <div class="mt-5">
+                        ${discount > 0 ? `
+                            <p class="text-sm text-slate-400 line-through">
+                                ${formatCurrency(originalPrice)}
+                            </p>
+                        ` : ''}
+
+                        <p class="text-2xl font-bold text-slate-900">
+                            ${formatCurrency(finalPrice)}
+                        </p>
+
+                        <p class="text-xs text-slate-500 mt-1">
+                            ${Number(product.stock)} ${
+                                Number(product.stock) === 1
+                                    ? 'unidade disponível'
+                                    : 'unidades disponíveis'
+                            }
+                        </p>
+                    </div>
+
+                    <button
+                        type="button"
+                        onclick="addToCart('${escapeAttribute(product.id)}')"
+                        class="w-full mt-5 gradient-gold text-slate-900 py-3 rounded-xl font-bold hover:shadow-gold transition"
+                    >
+                        <i
+                            data-lucide="shopping-cart"
+                            class="w-4 h-4 inline mr-1"
+                        ></i>
+
+                        Adicionar ao carrinho
+                    </button>
+                </div>
+            </article>
+        `;
+    }).join('');
+
+    lucide.createIcons();
+}
+
+function formatPercentage(value) {
+    return new Intl.NumberFormat(APP_CONFIG.locale, {
+        maximumFractionDigits: 2
+    }).format(Number(value) || 0);
+}
+
+function escapeHtml(value) {
+    const element = document.createElement('div');
+    element.textContent = String(value ?? '');
+    return element.innerHTML;
+}
+
+function escapeAttribute(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+        
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value);
+        }
+
+        function formatDate(isoString) {
+            if (!isoString) return '-';
+            const date = new Date(isoString);
+            return date.toLocaleDateString('pt-BR');
+        }
+
+        function handleCookieConsent() {
+            const banner = document.getElementById('cookieBanner');
+            const hasConsent = localStorage.getItem('laCookieConsentGiven');
+
+            if (!hasConsent && banner) {
+                banner.classList.remove('hidden');
+            }
+        }
+
+        function acceptAllCookies() {
+            state.cookiePreferences = {
+                necessary: true,
+                preferences: true,
+                analytics: true
+            };
+
+            localStorage.setItem('laCookieConsentGiven', 'true');
+            saveStateToStorage();
+
+            const banner = document.getElementById('cookieBanner');
+            if (banner) banner.classList.add('hidden');
+
+            alert('Todos os cookies foram aceitos.');
+        }
+
+        function rejectOptionalCookies() {
+            state.cookiePreferences = {
+                necessary: true,
+                preferences: false,
+                analytics: false
+            };
+
+            localStorage.setItem('laCookieConsentGiven', 'true');
+            saveStateToStorage();
+
+            const banner = document.getElementById('cookieBanner');
+            if (banner) banner.classList.add('hidden');
+
+            alert('Cookies não essenciais foram recusados.');
+        }
+
+        function openCookieSettings() {
+            const modal = document.getElementById('cookieSettingsModal');
+            const prefsCheckbox = document.getElementById('cookiePreferences');
+            const analyticsCheckbox = document.getElementById('cookieAnalytics');
+
+            if (!modal) return;
+
+            if (prefsCheckbox) prefsCheckbox.checked = state.cookiePreferences.preferences;
+            if (analyticsCheckbox) analyticsCheckbox.checked = state.cookiePreferences.analytics;
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closeCookieSettings() {
+            const modal = document.getElementById('cookieSettingsModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function saveCookiePreferences() {
+            const prefsCheckbox = document.getElementById('cookiePreferences');
+            const analyticsCheckbox = document.getElementById('cookieAnalytics');
+
+            state.cookiePreferences.preferences = prefsCheckbox?.checked || false;
+            state.cookiePreferences.analytics = analyticsCheckbox?.checked || false;
+
+            localStorage.setItem('laCookieConsentGiven', 'true');
+            saveStateToStorage();
+
+            closeCookieSettings();
+            alert('Preferências salvas!');
+        }
+
+        function lookupZipCode() {
+            const zipCode = document.getElementById('registerZipCode')?.value.replace(/\D/g, '');
+            if (!zipCode || zipCode.length !== 8) return;
+
+            fetch(`https://viacep.com.br/ws/${zipCode}/json/`)
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.erro) {
+                        document.getElementById('registerStreet').value = data.logradouro;
+                        document.getElementById('registerNeighborhood').value = data.bairro;
+                        document.getElementById('registerCity').value = data.localidade;
+                        document.getElementById('registerState').value = data.uf;
+                    }
+                })
+                .catch(() => {});
+        }
+        
+    // =====================================================
+    // FUNÇÕES ADICIONAIS: FILTROS, CARROSSEL E ACESSIBILIDADE
+    // =====================================================
+
+    let accessibilityFontSize = 100;
+    let highContrastEnabled = false;
+
+    function openCatalogFilters() {
+        const filters = document.getElementById('catalogFilters');
+        const modal = document.getElementById('catalogFiltersModal');
+
+        // Caso você tenha criado um modal específico de filtros
+        if (modal) {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+            return;
+        }
+
+        // Caso a área de filtros esteja na própria página
+        if (filters) {
+            filters.classList.toggle('hidden');
+
+            if (!filters.classList.contains('hidden')) {
+                filters.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }
+
+            return;
+        }
+
+        // Alternativa segura: informa que não há filtro cadastrado
+        alert('Os filtros do catálogo ainda não foram configurados nesta versão.');
+    }
+
+    function closeCatalogFilters() {
+        const modal = document.getElementById('catalogFiltersModal');
+
+        if (modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+    }
+
+    function scrollCarousel(direction = 1) {
+        const carousel =
+            document.getElementById('productCarousel') ||
+            document.getElementById('carousel') ||
+            document.querySelector('.product-carousel') ||
+            document.querySelector('[data-carousel]');
+
+        if (!carousel) {
+            console.warn('Carrossel não encontrado no HTML.');
+            return;
+        }
+
+        const scrollAmount = carousel.clientWidth * 0.8;
+
+        carousel.scrollBy({
+            left: direction * scrollAmount,
+            behavior: 'smooth'
+        });
+    }
+
+    function requireAuthForAction(action = 'continuar') {
+        if (state.currentUser) {
+            return true;
+        }
+
+        openAuthModal('customer-login');
+
+        setTimeout(() => {
+            alert('Faça login ou crie uma conta para ' + action + '.');
+        }, 200);
+
+        return false;
+    }
+
+    function increaseFontSize() {
+        if (accessibilityFontSize >= 130) {
+            alert('O tamanho máximo da fonte já foi atingido.');
+            return;
+        }
+
+        accessibilityFontSize += 10;
+
+        document.documentElement.style.fontSize =
+            accessibilityFontSize + '%';
+
+        localStorage.setItem(
+            'laAccessibilityFontSize',
+            accessibilityFontSize
+        );
+
+        showAccessibilityFeedback(
+            'Fonte aumentada para ' + accessibilityFontSize + '%.'
+        );
+    }
+
+    function decreaseFontSize() {
+        if (accessibilityFontSize <= 80) {
+            alert('O tamanho mínimo da fonte já foi atingido.');
+            return;
+        }
+
+        accessibilityFontSize -= 10;
+
+        document.documentElement.style.fontSize =
+            accessibilityFontSize + '%';
+
+        localStorage.setItem(
+            'laAccessibilityFontSize',
+            accessibilityFontSize
+        );
+
+        showAccessibilityFeedback(
+            'Fonte reduzida para ' + accessibilityFontSize + '%.'
+        );
+    }
+
+    function toggleHighContrast() {
+        highContrastEnabled = !highContrastEnabled;
+
+        document.documentElement.classList.toggle(
+            'high-contrast-mode',
+            highContrastEnabled
+        );
+
+        localStorage.setItem(
+            'laHighContrast',
+            highContrastEnabled ? 'true' : 'false'
+        );
+
+        showAccessibilityFeedback(
+            highContrastEnabled
+                ? 'Alto contraste ativado.'
+                : 'Alto contraste desativado.'
+        );
+    }
+
+    function resetAccessibility() {
+        accessibilityFontSize = 100;
+        highContrastEnabled = false;
+
+        document.documentElement.style.fontSize = '100%';
+
+        document.documentElement.classList.remove(
+            'high-contrast-mode'
+        );
+
+        localStorage.removeItem('laAccessibilityFontSize');
+        localStorage.removeItem('laHighContrast');
+
+        showAccessibilityFeedback(
+            'Configurações de acessibilidade restauradas.'
+        );
+    }
+
+    function loadAccessibilitySettings() {
+        const savedFontSize = parseInt(
+            localStorage.getItem('laAccessibilityFontSize') || '100',
+            10
+        );
+
+        const savedContrast =
+            localStorage.getItem('laHighContrast') === 'true';
+
+        accessibilityFontSize = savedFontSize;
+        highContrastEnabled = savedContrast;
+
+        document.documentElement.style.fontSize =
+            accessibilityFontSize + '%';
+
+        if (highContrastEnabled) {
+            document.documentElement.classList.add(
+                'high-contrast-mode'
+            );
+        }
+    }
+
+    function showAccessibilityFeedback(message) {
+        let feedback = document.getElementById(
+            'accessibilityFeedback'
+        );
+
+        if (!feedback) {
+            feedback = document.createElement('div');
+            feedback.id = 'accessibilityFeedback';
+            feedback.className =
+                'fixed bottom-6 left-1/2 -translate-x-1/2 z-[999] ' +
+                'bg-slate-950 text-white border border-amber-400/40 ' +
+                'px-5 py-3 rounded-xl shadow-2xl text-sm font-bold ' +
+                'transition opacity-0 pointer-events-none';
+
+            document.body.appendChild(feedback);
+        }
+
+        feedback.textContent = message;
+        feedback.classList.remove('opacity-0');
+
+        clearTimeout(window.accessibilityFeedbackTimeout);
+
+        window.accessibilityFeedbackTimeout = setTimeout(() => {
+            feedback.classList.add('opacity-0');
+        }, 2500);
+    }
+
+    // Carrega as preferências de acessibilidade salvas.
+    document.addEventListener('DOMContentLoaded', () => {
+        loadAccessibilitySettings();
+    });
+       
+        // Expor funções globalmente
+        window.openAuthModal = openAuthModal;
+        window.closeAuthModal = closeAuthModal;
+        window.switchAuthScreen = switchAuthScreen;
+        window.handleCustomerLogin = handleCustomerLogin;
+        window.handleCustomerRegister = handleCustomerRegister;
+        window.handleAffiliateLogin = handleAffiliateLogin;
+        window.handleAffiliateRegister = handleAffiliateRegister;
+        window.handleAdminLogin = handleAdminLogin;
+        window.sendPasswordReset = sendPasswordReset;
+        window.signInWithGoogle = signInWithGoogle;
+        window.showAppleLoginInfo = showAppleLoginInfo;
+        window.togglePasswordVisibility = togglePasswordVisibility;
+        window.logoutUser = logoutUser;
+        window.openUserMenu = openUserMenu;
+        window.closeUserMenu = closeUserMenu;
+        window.openNavigationModal = openNavigationModal;
+        window.closeNavigationModal = closeNavigationModal;
+        window.openConsultingBooking = openConsultingBooking;
+        window.closeConsultingBooking = closeConsultingBooking;
+        window.submitConsultingBooking = submitConsultingBooking;
+        window.openCartModal = openCartModal;
+        window.closeCartModal = closeCartModal;
+        window.startCheckout = startCheckout;
+        window.openCheckoutModal = openCheckoutModal;
+        window.closeCheckoutModal = closeCheckoutModal;
+        window.createCheckoutOrder = createCheckoutOrder;
+        window.addToCart = addToCart;
+        window.removeFromCart = removeFromCart;
+        window.updateCartItemQuantity = updateCartItemQuantity;
+        window.openStockAlertModal = openStockAlertModal;
+        window.closeStockAlertModal = closeStockAlertModal;
+        window.submitStockAlert = submitStockAlert;
+        window.openCustomerProfile = openCustomerProfile;
+        window.closeCustomerProfile = closeCustomerProfile;
+        window.saveCustomerProfile = saveCustomerProfile;
+        window.openCustomerOrders = openCustomerOrders;
+        window.closeCustomerOrders = closeCustomerOrders;
+        window.viewOrderDetails = viewOrderDetails;
+        window.closeOrderDetailsModal = closeOrderDetailsModal;
+        window.openTrackingModal = openTrackingModal;
+        window.closeTrackingModal = closeTrackingModal;
+        window.openReturnRequest = openReturnRequest;
+        window.closeReturnRequestModal = closeReturnRequestModal;
+         window.submitReturnRequest = submitReturnRequest;
+        window.openAffiliateDashboard = openAffiliateDashboard;
+        window.closeAffiliateDashboard = closeAffiliateDashboard;
+        window.openAffiliateCatalog = openAffiliateCatalog;
+        window.closeAffiliateCatalog = closeAffiliateCatalog;
+        window.copyAffiliateLink = copyAffiliateLink;
+        window.copyProductLink = copyProductLink;
+        window.shareProduct = shareProduct;
+        window.openAffiliateProfile = openAffiliateProfile;
+        window.closeAffiliateProfile = closeAffiliateProfile;
+        window.saveAffiliateProfile = saveAffiliateProfile;
+        window.openAdminDashboard = openAdminDashboard;
+        window.closeAdminDashboard = closeAdminDashboard;
+        window.switchAdminTab = switchAdminTab;
+        window.openAdminProductForm = openAdminProductForm;
+        window.closeAdminProductForm = closeAdminProductForm;
+        window.saveAdminProduct = saveAdminProduct;
+        window.deleteProduct = deleteProduct;
+        window.openAdminOrderForm = openAdminOrderForm;
+        window.closeAdminOrderForm = closeAdminOrderForm;
+        window.saveAdminOrder = saveAdminOrder;
+        window.openAdminAffiliateForm = openAdminAffiliateForm;
+        window.closeAdminAffiliateForm = closeAdminAffiliateForm;
+        window.saveAdminAffiliate = saveAdminAffiliate;
+        window.openAdminUserForm = openAdminUserForm;
+        window.closeAdminUserForm = closeAdminUserForm;
+        window.saveAdminUser = saveAdminUser;
+        window.generateSalesReport = generateSalesReport;
+        window.generateCommissionReport = generateCommissionReport;
+        window.saveAdminCompanySettings = saveAdminCompanySettings;
+        window.saveAdminCommissionSettings = saveAdminCommissionSettings;
+        window.acceptAllCookies = acceptAllCookies;
+        window.rejectOptionalCookies = rejectOptionalCookies;
+        window.openCookieSettings = openCookieSettings;
+        window.closeCookieSettings = closeCookieSettings;
+        window.saveCookiePreferences = saveCookiePreferences;
+        window.lookupZipCode = lookupZipCode;
+        window.lookupProfileZipCode = lookupProfileZipCode;
+        window.scrollToTop = scrollToTop;
+        window.renderProducts = renderProducts;
     
+    window.openCatalogFilters = openCatalogFilters;
+window.closeCatalogFilters = closeCatalogFilters;
+window.scrollCarousel = scrollCarousel;
+window.requireAuthForAction = requireAuthForAction;
+window.increaseFontSize = increaseFontSize;
+window.decreaseFontSize = decreaseFontSize;
+window.toggleHighContrast = toggleHighContrast;
+window.resetAccessibility = resetAccessibility;
+    </script>
+
    <!-- INICIALIZAÇÃO FINAL E PWA -->
 <script>
     document.addEventListener('DOMContentLoaded', () => {
