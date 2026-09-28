@@ -6751,12 +6751,19 @@
         }
 
         async function savePrivateCustomerData(uid, data) {
-            // No primeiro cadastro, o Firebase Auth pode autenticar o usuário
-            // antes de loadStateFromFirebase() terminar. O acesso ao documento
-            // privado do próprio usuário não deve depender de firebaseReady.
             const authUser = firebaseAuth.currentUser || firebaseAuthUser;
-            if (!authUser || authUser.uid !== uid) throw new Error('Usuário não autenticado.');
-            await privateCustomerRef(uid).set({ ...data, uid, updatedAt: new Date().toISOString() }, { merge: true });
+            if (!authUser || authUser.uid !== uid) {
+                throw new Error('Usuário não autenticado.');
+            }
+
+            // Não dependemos de firebaseReady aqui. No primeiro cadastro,
+            // o Firebase Auth já autenticou o cliente mesmo que o carregamento
+            // de app_state/main ainda esteja terminando.
+            await privateCustomerRef(uid).set({
+                ...data,
+                uid,
+                updatedAt: new Date().toISOString()
+            }, { merge: true });
         }
 
         async function loadPrivateCustomerData(uid) {
@@ -6768,15 +6775,14 @@
 
         function waitForFirebaseStateReady(timeoutMs = 10000) {
             if (firebaseReady) return Promise.resolve(true);
+
             return new Promise(resolve => {
                 const startedAt = Date.now();
                 const timer = setInterval(() => {
                     if (firebaseReady) {
                         clearInterval(timer);
                         resolve(true);
-                        return;
-                    }
-                    if (Date.now() - startedAt >= timeoutMs) {
+                    } else if (Date.now() - startedAt >= timeoutMs) {
                         clearInterval(timer);
                         resolve(false);
                     }
@@ -7319,20 +7325,46 @@ function initializeApp() {
                 return;
             }
 
-            // Aguarda o estado inicial do Firestore para não sobrescrever
-            // app_state/main com um estado vazio durante o primeiro cadastro.
+            // O Auth já criou a conta e os dados privados já foram gravados.
+            // Agora aguardamos o estado público do site antes de adicioná-lo,
+            // evitando sobrescrever app_state/main com um estado incompleto.
             const stateReady = await waitForFirebaseStateReady();
             if (!stateReady) {
-                showAuthMessage('A conta foi criada, mas o perfil não pôde ser finalizado. Atualize a página e tente novamente.', 'error');
-                return;
+                // Tenta uma última sincronização diretamente após o login.
+                // Isso cobre o caso em que o primeiro carregamento do Firestore
+                // ainda estava em andamento.
+                try {
+                    await loadStateFromFirebase();
+                } catch (syncError) {
+                    console.error('Erro ao sincronizar perfil público:', syncError);
+                }
             }
 
-            const newUser = { id: uid, fullName, email: email.toLowerCase(), role: 'customer', status: 'active', createdAt, lastAccess: createdAt };
+            const newUser = {
+                id: uid,
+                fullName,
+                email: email.toLowerCase(),
+                role: 'customer',
+                status: 'active',
+                createdAt,
+                lastAccess: createdAt
+            };
+
             const existingIndex = state.users.findIndex(u => u.id === uid);
-            if (existingIndex === -1) state.users.push(newUser);
-            else state.users[existingIndex] = { ...state.users[existingIndex], ...newUser };
+            if (existingIndex === -1) {
+                state.users.push(newUser);
+            } else {
+                state.users[existingIndex] = { ...state.users[existingIndex], ...newUser };
+            }
+
             state.currentUser = { ...newUser, ...privateCustomerData };
-            await saveStateToFirebase();
+
+            // Se o estado do Firebase estiver pronto, persiste o perfil público.
+            if (firebaseReady) {
+                await saveStateToFirebase();
+            }
+
+            saveStateToStorage();
             updateAuthUI();
             closeAuthModal();
             showAuthMessage('Conta criada com sucesso!', 'success');
