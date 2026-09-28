@@ -6659,19 +6659,21 @@
             updateYear();
             lucide.createIcons();
 
-            // O Firestore só será acessado depois que o Firebase Auth
-            // terminar de determinar o usuário atual.
+            // ÚNICO observador do Firebase Auth. O Firestore só é acessado
+            // depois que o Auth terminou de determinar o usuário atual.
             firebaseAuth.onAuthStateChanged(async (user) => {
                 firebaseAuthUser = user || null;
                 firebaseAuthReady = true;
+                firebaseReady = false;
 
                 if (user) {
                     await loadStateFromFirebase();
+                    await syncCurrentUserFromAuth(user);
                 } else {
-                    // Visitante não autenticado: não tenta ler app_state/main,
-                    // pois as regras do Firestore exigem autenticação.
-                    firebaseReady = false;
-                    console.log('Visitante não autenticado: Firestore privado não foi acessado.');
+                    // Visitante: não acessa app_state/main porque as regras
+                    // do Firestore exigem autenticação. O site continua usando
+                    // os dados locais/padrão sem disparar permission-denied.
+                    console.log('Visitante não autenticado: Firestore aguardando login.');
                 }
 
                 initializeApp();
@@ -6713,7 +6715,12 @@
             } catch (e) {
                 firebaseReady = false;
                 console.error('Erro ao carregar estado do Firebase:', e);
-                alert('Não foi possível carregar os dados do Firebase. Verifique sua autenticação e as regras do Firestore.');
+                // Não bloqueia a interface com alert. Se as regras recusarem
+                // o acesso, o usuário verá o erro no console e o site continua
+                // com os dados locais/padrão até a autenticação ser corrigida.
+                if (e?.code === 'permission-denied') {
+                    console.warn('Firestore recusou app_state/main. Confirme se o usuário Firebase está autenticado e se as regras permitem este UID.');
+                }
             }
         }
 
@@ -6896,10 +6903,19 @@ function getAffiliateReferralCode() {
     return affiliate ? affiliate.code : null;
 }
         
-firebaseAuth.onAuthStateChanged(async (user) => {
-    if (!user) return;
+async function syncCurrentUserFromAuth(user) {
+    if (!user) {
+        state.currentUser = null;
+        updateAuthUI();
+        return;
+    }
+
     const saved = state.users.find(u => u.id === user.uid || u.email?.toLowerCase() === user.email?.toLowerCase());
-    if (!saved) return;
+    if (!saved) {
+        console.warn('Usuário autenticado no Firebase, mas ainda não existe perfil público em state.users:', user.uid);
+        return;
+    }
+
     if (saved.role === 'customer') {
         try {
             const privateData = await loadPrivateCustomerData(user.uid);
@@ -6911,12 +6927,18 @@ firebaseAuth.onAuthStateChanged(async (user) => {
     } else {
         state.currentUser = { ...saved, id: user.uid };
     }
+
     updateAuthUI();
     if (state.currentUser.role === 'affiliate' && state.currentUser.affiliateStatus === 'active') enterAffiliateMode();
-});
+}
 
 function setupOrderRealtimeSync() {
-    FIREBASE_STATE_REF.onSnapshot(snapshot => {
+    // Nunca cria um listener Firestore enquanto não houver autenticação
+    // confirmada e estado Firebase carregado. Isso elimina o permission-denied
+    // causado pelo listener durante a inicialização de visitante.
+    if (!firebaseAuthUser || !firebaseReady || firebaseStateUnsubscribe) return;
+
+    firebaseStateUnsubscribe = FIREBASE_STATE_REF.onSnapshot(snapshot => {
         if (!snapshot.exists()) return;
         const remote = snapshot.data();
         if (Array.isArray(remote.orders)) state.orders = remote.orders;
@@ -6924,6 +6946,15 @@ function setupOrderRealtimeSync() {
         if (Array.isArray(remote.affiliateLinks)) state.affiliateLinks = remote.affiliateLinks;
         if (state.currentUser?.role === 'affiliate') { const a = state.affiliates.find(x => x.userId === state.currentUser.id); if (a) { updateAffiliateSummary(a); renderAffiliateSales(a); renderAffiliateGeneratedLinks(a); } }
         checkPendingPaymentConfirmation();
+    }, error => {
+        console.error('Erro no listener em tempo real do Firestore:', error);
+        if (error?.code === 'permission-denied') {
+            console.warn('Listener do Firestore encerrado por falta de permissão. O site não exibirá alerta bloqueante.');
+            if (firebaseStateUnsubscribe) {
+                firebaseStateUnsubscribe();
+                firebaseStateUnsubscribe = null;
+            }
+        }
     });
 }
 
@@ -6973,7 +7004,9 @@ function initializeApp() {
     updateAuthUI();
     handleCookieConsent();
     setupScrollListener();
-    setupOrderRealtimeSync();
+    if (firebaseReady && firebaseAuthUser) {
+        setupOrderRealtimeSync();
+    }
     handlePaymentReturn();
 }
         function initializeDefaultProducts() {
