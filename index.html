@@ -2959,6 +2959,7 @@
                     ================================================== -->
                     <form
                         id="customerRegisterForm"
+                        novalidate
                         onsubmit="handleCustomerRegister(event)"
                         class="auth-form hidden space-y-4"
                     >
@@ -7252,6 +7253,11 @@ function initializeApp() {
 
         async function handleCustomerRegister(event) {
             event.preventDefault();
+            event.stopPropagation();
+
+            const form = document.getElementById('customerRegisterForm');
+            const submitButton = form?.querySelector('button[type="submit"]');
+            if (submitButton?.disabled) return;
 
             const fullName = document.getElementById('registerFullName')?.value.trim();
             const email = document.getElementById('registerEmail')?.value.trim();
@@ -7268,6 +7274,14 @@ function initializeApp() {
             const password = document.getElementById('registerPassword')?.value;
             const passwordConfirm = document.getElementById('registerPasswordConfirm')?.value;
             const terms = document.getElementById('registerTerms')?.checked;
+
+            const setRegisterBusy = (busy) => {
+                if (!submitButton) return;
+                submitButton.disabled = busy;
+                submitButton.classList.toggle('opacity-60', busy);
+                submitButton.classList.toggle('cursor-not-allowed', busy);
+                submitButton.textContent = busy ? 'Criando conta...' : 'Criar conta de cliente';
+            };
 
             if (!fullName || !email || !phone || !cpf || !zipCode || !street || !number || !neighborhood || !city || !stateField || !password || !passwordConfirm) {
                 showAuthMessage('Preencha todos os campos obrigatórios.', 'error');
@@ -7300,11 +7314,26 @@ function initializeApp() {
                 return;
             }
 
+            setRegisterBusy(true);
+
             let firebaseCredential;
             try {
+                if (!firebaseAuth) throw new Error('Firebase Authentication não foi inicializado.');
                 firebaseCredential = await firebaseAuth.createUserWithEmailAndPassword(email.toLowerCase(), password);
             } catch (error) {
-                showAuthMessage(error.code === 'auth/email-already-in-use' ? 'Este e-mail já está cadastrado no Firebase.' : 'Não foi possível criar a conta no Firebase.', 'error');
+                console.error('Erro ao criar cliente no Firebase Auth:', error);
+                const code = error?.code || '';
+                const message = code === 'auth/email-already-in-use'
+                    ? 'Este e-mail já está cadastrado no Firebase.'
+                    : code === 'auth/invalid-email'
+                        ? 'Informe um e-mail válido.'
+                        : code === 'auth/weak-password'
+                            ? 'A senha informada é muito fraca.'
+                            : code === 'auth/operation-not-allowed'
+                                ? 'O cadastro por e-mail e senha está desativado no Firebase Authentication.'
+                                : 'Não foi possível criar a conta. Abra o console do navegador (F12) para ver o erro.';
+                showAuthMessage(message, 'error');
+                setRegisterBusy(false);
                 return;
             }
 
@@ -7320,19 +7349,20 @@ function initializeApp() {
                 await savePrivateCustomerData(uid, privateCustomerData);
             } catch (error) {
                 console.error('Erro ao salvar dados privados do cliente:', error);
-                try { await firebaseAuth.currentUser?.delete(); } catch (_) {}
-                showAuthMessage('Não foi possível proteger e salvar seus dados. A conta não foi concluída.', 'error');
+                const code = error?.code || '';
+                const message = code === 'permission-denied'
+                    ? 'O Firebase bloqueou o salvamento dos dados do cliente. Verifique as regras da coleção customer_private.'
+                    : 'A conta foi criada, mas os dados do cliente não puderam ser salvos. Verifique o Firebase.';
+                showAuthMessage(message, 'error');
+                setRegisterBusy(false);
                 return;
             }
 
             // O Auth já criou a conta e os dados privados já foram gravados.
             // Agora aguardamos o estado público do site antes de adicioná-lo,
             // evitando sobrescrever app_state/main com um estado incompleto.
-            const stateReady = await waitForFirebaseStateReady();
-            if (!stateReady) {
-                // Tenta uma última sincronização diretamente após o login.
-                // Isso cobre o caso em que o primeiro carregamento do Firestore
-                // ainda estava em andamento.
+            const stateReady = await waitForFirebaseStateReady(5000);
+            if (!stateReady && firebaseAuth.currentUser) {
                 try {
                     await loadStateFromFirebase();
                 } catch (syncError) {
@@ -7362,10 +7392,13 @@ function initializeApp() {
             // Se o estado do Firebase estiver pronto, persiste o perfil público.
             if (firebaseReady) {
                 await saveStateToFirebase();
+            } else {
+                console.warn('Perfil público criado localmente, mas o app_state/main ainda não está disponível.');
             }
 
             saveStateToStorage();
             updateAuthUI();
+            setRegisterBusy(false);
             closeAuthModal();
             showAuthMessage('Conta criada com sucesso!', 'success');
         }
