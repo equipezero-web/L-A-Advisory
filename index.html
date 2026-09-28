@@ -6520,33 +6520,63 @@
         let firebaseSaveTimer = null;
 
         // =====================================================
-        // INICIALIZAÇÃO
+        // INICIALIZAÇÃO SEGURA
         // =====================================================
-        document.addEventListener('DOMContentLoaded', async () => {
-            await loadStateFromFirebase();
-            initializeApp();
+        let firebaseAuthReady = false;
+        let firebaseAuthUser = null;
+        let firebaseStateUnsubscribe = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
             updateYear();
             lucide.createIcons();
+
+            // O Firestore só será acessado depois que o Firebase Auth
+            // terminar de determinar o usuário atual.
+            firebaseAuth.onAuthStateChanged(async (user) => {
+                firebaseAuthUser = user || null;
+                firebaseAuthReady = true;
+
+                if (user) {
+                    await loadStateFromFirebase();
+                } else {
+                    // Visitante não autenticado: não tenta ler app_state/main,
+                    // pois as regras do Firestore exigem autenticação.
+                    firebaseReady = false;
+                    console.log('Visitante não autenticado: Firestore privado não foi acessado.');
+                }
+
+                initializeApp();
+                lucide.createIcons();
+            });
         });
 
         async function loadStateFromFirebase() {
+            if (!firebaseAuthReady || !firebaseAuthUser) {
+                firebaseReady = false;
+                return;
+            }
+
             try {
                 const snapshot = await FIREBASE_STATE_REF.get();
+
                 if (snapshot.exists) {
                     const remoteState = snapshot.data();
                     state = { ...state, ...remoteState };
                 }
+
                 if (!Array.isArray(state.cart)) state.cart = [];
                 if (!Array.isArray(state.products)) state.products = [];
                 if (!Array.isArray(state.orders)) state.orders = [];
                 if (!Array.isArray(state.users)) state.users = [];
                 if (!Array.isArray(state.affiliates)) state.affiliates = [];
                 if (!Array.isArray(state.affiliateLinks)) state.affiliateLinks = [];
+
                 firebaseReady = true;
                 console.log('L&A Royal Advisory conectado ao Firebase/Firestore.');
             } catch (e) {
+                firebaseReady = false;
                 console.error('Erro ao carregar estado do Firebase:', e);
-                alert('Não foi possível carregar os dados do Firebase. Verifique as regras do Firestore e a conexão.');
+                alert('Não foi possível carregar os dados do Firebase. Verifique sua autenticação e as regras do Firestore.');
             }
         }
 
