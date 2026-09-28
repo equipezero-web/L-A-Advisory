@@ -6760,18 +6760,44 @@
 
         async function savePrivateCustomerData(uid, data) {
             const authUser = firebaseAuth.currentUser || firebaseAuthUser;
-            if (!authUser || authUser.uid !== uid) {
-                throw new Error('Usuário não autenticado.');
+
+            if (!authUser) {
+                const error = new Error('Usuário não autenticado.');
+                error.code = 'auth/not-authenticated';
+                throw error;
             }
 
-            // Não dependemos de firebaseReady aqui. No primeiro cadastro,
-            // o Firebase Auth já autenticou o cliente mesmo que o carregamento
-            // de app_state/main ainda esteja terminando.
-            await privateCustomerRef(uid).set({
-                ...data,
-                uid,
-                updatedAt: new Date().toISOString()
-            }, { merge: true });
+            if (authUser.uid !== uid) {
+                const error = new Error('O UID autenticado não corresponde ao cliente.');
+                error.code = 'auth/uid-mismatch';
+                throw error;
+            }
+
+            // Atualiza o token antes da avaliação das regras do Firestore.
+            await authUser.getIdToken(true);
+
+            const ref = privateCustomerRef(uid);
+            if (!ref) {
+                const error = new Error('Referência customer_private inválida.');
+                error.code = 'firestore/invalid-reference';
+                throw error;
+            }
+
+            try {
+                await ref.set({
+                    ...data,
+                    uid,
+                    updatedAt: new Date().toISOString()
+                }, { merge: true });
+            } catch (error) {
+                console.error('Erro detalhado ao salvar customer_private:', {
+                    code: error?.code,
+                    message: error?.message,
+                    uid,
+                    authUid: authUser.uid
+                });
+                throw error;
+            }
         }
 
         async function loadPrivateCustomerData(uid) {
