@@ -10,16 +10,23 @@ function getCorsOrigin(request) {
     return origin;
   }
 
-  return ALLOWED_ORIGINS[0];
+  return "";
 }
 
 function corsHeaders(request) {
-  return {
-    "Access-Control-Allow-Origin": getCorsOrigin(request),
+  const origin = getCorsOrigin(request);
+
+  const headers = {
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
     "Access-Control-Max-Age": "86400"
   };
+
+  if (origin) {
+    headers["Access-Control-Allow-Origin"] = origin;
+  }
+
+  return headers;
 }
 
 function json(request, data, status = 200) {
@@ -36,9 +43,10 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    /*
-     * CORS
-     */
+    // ==============================
+    // CORS / OPTIONS
+    // ==============================
+
     if (request.method === "OPTIONS") {
       return new Response(null, {
         status: 204,
@@ -46,9 +54,10 @@ export default {
       });
     }
 
-    /*
-     * TESTE PRINCIPAL
-     */
+    // ==============================
+    // STATUS DA API
+    // ==============================
+
     if (url.pathname === "/" && request.method === "GET") {
       return json(request, {
         ok: true,
@@ -57,22 +66,22 @@ export default {
       });
     }
 
-    /*
-     * TESTE DO SECRET DO MERCADO PAGO
-     */
+    // ==============================
+    // HEALTH CHECK
+    // ==============================
+
     if (url.pathname === "/api/health" && request.method === "GET") {
       return json(request, {
         ok: true,
-        mercadoPagoConfigured: Boolean(env.MP_ACCESS_TOKEN),
-        service: "L&A Royal Advisory API"
+        service: "L&A Royal Advisory API",
+        mercadoPagoConfigured: Boolean(env.MP_ACCESS_TOKEN)
       });
     }
 
-    /*
-     * CRIAR PAGAMENTO
-     *
-     * POST /api/create-payment
-     */
+    // ==============================
+    // CRIAR PAGAMENTO MERCADO PAGO
+    // ==============================
+
     if (
       url.pathname === "/api/create-payment" &&
       request.method === "POST"
@@ -135,6 +144,10 @@ export default {
           body.external_reference || `LA-${Date.now()}`
         );
 
+        const frontendUrl =
+          body.frontend_url ||
+          "https://equipezero-web.github.io";
+
         const preference = {
           items,
 
@@ -147,18 +160,13 @@ export default {
             : undefined,
 
           back_urls: {
-            success:
-              body.back_urls?.success ||
-              `${url.origin}/?payment=success`,
-
-            failure:
-              body.back_urls?.failure ||
-              `${url.origin}/?payment=failure`,
-
-            pending:
-              body.back_urls?.pending ||
-              `${url.origin}/?payment=pending`
+            success: `${frontendUrl}/?payment=success`,
+            failure: `${frontendUrl}/?payment=failure`,
+            pending: `${frontendUrl}/?payment=pending`
           },
+
+          notification_url:
+            `${url.origin}/api/webhook`,
 
           auto_return: "approved"
         };
@@ -170,7 +178,8 @@ export default {
 
             headers: {
               "Content-Type": "application/json",
-              "Authorization": `Bearer ${env.MP_ACCESS_TOKEN}`
+              "Authorization":
+                `Bearer ${env.MP_ACCESS_TOKEN}`
             },
 
             body: JSON.stringify(preference)
@@ -207,18 +216,18 @@ export default {
           request,
           {
             ok: false,
-            error: error.message || "Erro interno."
+            error:
+              error.message || "Erro interno."
           },
           500
         );
       }
     }
 
-    /*
-     * WEBHOOK DO MERCADO PAGO
-     *
-     * POST /api/webhook
-     */
+    // ==============================
+    // WEBHOOK MERCADO PAGO
+    // ==============================
+
     if (
       url.pathname === "/api/webhook" &&
       request.method === "POST"
@@ -245,9 +254,6 @@ export default {
           });
         }
 
-        /*
-         * Consulta o pagamento diretamente no Mercado Pago.
-         */
         const paymentResponse = await fetch(
           `https://api.mercadopago.com/v1/payments/${encodeURIComponent(
             paymentId
@@ -256,12 +262,14 @@ export default {
             method: "GET",
 
             headers: {
-              "Authorization": `Bearer ${env.MP_ACCESS_TOKEN}`
+              "Authorization":
+                `Bearer ${env.MP_ACCESS_TOKEN}`
             }
           }
         );
 
-        const payment = await paymentResponse.json();
+        const payment =
+          await paymentResponse.json();
 
         if (!paymentResponse.ok) {
           return json(
@@ -276,19 +284,13 @@ export default {
           );
         }
 
-        /*
-         * Por enquanto registramos o pagamento
-         * nos logs do Worker.
-         *
-         * Na próxima etapa vamos conectar
-         * esta parte diretamente ao Firebase.
-         */
         console.log(
           JSON.stringify({
             event: "mercado_pago_payment",
             paymentId: payment.id,
             status: payment.status,
-            statusDetail: payment.status_detail,
+            statusDetail:
+              payment.status_detail,
             externalReference:
               payment.external_reference,
             transactionAmount:
@@ -311,16 +313,18 @@ export default {
           {
             ok: false,
             error:
-              error.message || "Erro no webhook."
+              error.message ||
+              "Erro no webhook."
           },
           500
         );
       }
     }
 
-    /*
-     * ROTAS /api NÃO ENCONTRADAS
-     */
+    // ==============================
+    // API NÃO ENCONTRADA
+    // ==============================
+
     if (url.pathname.startsWith("/api/")) {
       return json(
         request,
@@ -332,9 +336,10 @@ export default {
       );
     }
 
-    /*
-     * TODO O RESTANTE É O SEU SITE
-     */
+    // ==============================
+    // ARQUIVOS DO SITE
+    // ==============================
+
     return env.ASSETS.fetch(request);
   }
 };
