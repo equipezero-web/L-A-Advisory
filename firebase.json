@@ -1,0 +1,13 @@
+{
+  "functions": {
+    "source": "functions"
+  },
+  "hosting": {
+    "public": ".",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**", "functions/**"],
+    "rewrites": [
+      { "source": "/api/create-payment", "function": { "functionId": "createPayment", "region": "us-central1" } },
+      { "source": "/api/mercadopago-webhook", "function": { "functionId": "mercadopagoWebhook", "region": "us-central1" } }
+    ]
+  }
+}
