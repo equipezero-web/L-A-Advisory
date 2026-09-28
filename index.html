@@ -2503,6 +2503,124 @@
         </div>
     </div>
 
+
+    <!-- TERMO DE SEGURANÇA E PROTEÇÃO DE DADOS -->
+    <div
+        id="dataSecurityTermsModal"
+        class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[110] hidden overflow-y-auto p-4"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="dataSecurityTermsTitle"
+    >
+        <div class="min-h-full flex items-center justify-center py-8">
+            <div class="bg-white text-slate-900 rounded-2xl max-w-3xl w-full shadow-2xl border border-amber-400/30 overflow-hidden">
+                <div class="p-6 sm:p-8 border-b border-slate-200 flex items-start justify-between gap-5">
+                    <div>
+                        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
+                            <i data-lucide="shield-check" class="w-4 h-4"></i>
+                            Proteção de dados
+                        </span>
+                        <h2 id="dataSecurityTermsTitle" class="font-serif text-2xl sm:text-3xl font-bold mt-4">
+                            Termo de Segurança e Proteção de Dados
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-2">Versão 1.0 • L&A Royal Advisory</p>
+                    </div>
+
+                    <button
+                        type="button"
+                        onclick="closeDataSecurityTerms()"
+                        class="text-slate-400 hover:text-slate-700"
+                        aria-label="Fechar termo"
+                    >
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+
+                <div class="p-6 sm:p-8 space-y-6 text-sm leading-relaxed text-slate-600 max-h-[70vh] overflow-y-auto">
+                    <section>
+                        <h3 class="font-bold text-slate-900 text-base mb-2">1. Finalidade</h3>
+                        <p>
+                            Este termo explica, de forma clara, como os dados pessoais informados no cadastro
+                            podem ser tratados para criação e manutenção da conta, atendimento, processamento
+                            de pedidos, entrega, segurança da plataforma e cumprimento de obrigações legais.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h3 class="font-bold text-slate-900 text-base mb-2">2. CPF e demais dados pessoais</h3>
+                        <p>
+                            O CPF é dado pessoal. O site deve coletá-lo somente quando houver necessidade para
+                            a finalidade informada, evitar exposição pública e limitar o acesso às pessoas e
+                            sistemas autorizados. Nome, e-mail, telefone, endereço e informações de pedidos
+                            também são tratados como dados pessoais quando identificarem o titular.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h3 class="font-bold text-slate-900 text-base mb-2">3. Segurança</h3>
+                        <p>
+                            A plataforma utiliza autenticação do Firebase para as contas e não armazena a senha
+                            do cliente no cadastro do Firestore. O acesso aos dados deve ser protegido por
+                            autenticação, regras de autorização, princípio do menor privilégio, conexões seguras
+                            e controle de acesso administrativo. Nenhuma medida tecnológica elimina totalmente
+                            o risco, mas o objetivo é reduzir acesso, alteração, perda ou divulgação indevida.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h3 class="font-bold text-slate-900 text-base mb-2">4. Compartilhamento</h3>
+                        <p>
+                            Dados somente devem ser compartilhados quando necessários para executar o serviço,
+                            processar pagamentos, realizar entregas, cumprir obrigação legal ou outra hipótese
+                            permitida pela legislação. O site não deve comercializar o CPF do cliente.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h3 class="font-bold text-slate-900 text-base mb-2">5. Direitos do titular</h3>
+                        <p>
+                            O titular pode solicitar informações sobre o tratamento, acesso, correção e, quando
+                            aplicável, anonimização, bloqueio ou eliminação de dados, além de informações sobre
+                            compartilhamento e revogação do consentimento quando essa for a base legal utilizada.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h3 class="font-bold text-slate-900 text-base mb-2">6. Responsabilidade do titular</h3>
+                        <p>
+                            O cliente deve fornecer informações verdadeiras, manter sua senha em sigilo e evitar
+                            compartilhar códigos, credenciais ou documentos pessoais com terceiros.
+                        </p>
+                    </section>
+
+                    <section class="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                        <h3 class="font-bold text-slate-900 text-base mb-2">7. Transparência importante</h3>
+                        <p>
+                            Este termo é uma camada de transparência e não substitui a Política de Privacidade,
+                            os contratos aplicáveis nem a análise jurídica específica do negócio. As medidas
+                            técnicas de proteção devem ser mantidas e revisadas continuamente.
+                        </p>
+                    </section>
+
+                    <p class="text-xs text-slate-500">
+                        Base informativa: Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018) e
+                        orientações públicas da Autoridade Nacional de Proteção de Dados (ANPD).
+                    </p>
+                </div>
+
+                <div class="p-6 sm:p-8 border-t border-slate-200 bg-slate-50 flex justify-end">
+                    <button
+                        type="button"
+                        onclick="closeDataSecurityTerms()"
+                        class="gradient-gold text-slate-900 px-6 py-3 rounded-xl font-bold hover:shadow-gold transition"
+                    >
+                        Entendi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL DE AUTENTICAÇÃO EM TELA CHEIA -->
     <div
         id="authModal"
@@ -3092,16 +3210,26 @@
                                 type="checkbox"
                                 id="registerTerms"
                                 required
-                                class="mt-1 w-4 h-4 accent-amber-500"
+                                class="mt-1 w-4 h-4 accent-amber-500 flex-none"
+                                aria-describedby="registerTermsText"
                             >
 
                             <label
                                 for="registerTerms"
+                                id="registerTermsText"
                                 class="text-xs text-slate-600 leading-relaxed cursor-pointer"
                             >
-                                Confirmo que os dados são verdadeiros e aceito o
-                                tratamento de dados para criação de conta, compras,
-                                entregas e atendimento da L&A Royal Advisory.
+                                Li e estou ciente do
+                                <button
+                                    type="button"
+                                    onclick="openDataSecurityTerms(event)"
+                                    class="font-bold text-amber-700 hover:text-amber-600 underline underline-offset-2"
+                                >
+                                    Termo de Segurança e Proteção de Dados
+                                </button>
+                                e do Aviso de Privacidade. Declaro que os dados
+                                fornecidos são verdadeiros e estou ciente de como
+                                meus dados pessoais, inclusive CPF, serão tratados.
                             </label>
                         </div>
 
@@ -7026,13 +7154,54 @@ function initializeApp() {
             }
         }
 
+
+        const DATA_SECURITY_TERMS_VERSION = '1.0';
+
+        function openDataSecurityTerms(event) {
+            if (event) event.preventDefault();
+            const modal = document.getElementById('dataSecurityTermsModal');
+            if (!modal) return;
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closeDataSecurityTerms() {
+            const modal = document.getElementById('dataSecurityTermsModal');
+            if (!modal) return;
+            modal.classList.add('hidden');
+            if (document.getElementById('authModal')?.classList.contains('hidden')) {
+                document.body.style.overflow = '';
+            }
+        }
+
+        function normalizeCpf(value) {
+            return String(value || '').replace(/\D/g, '');
+        }
+
+        function isValidCpf(value) {
+            const cpf = normalizeCpf(value);
+            if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+            let sum = 0;
+            for (let i = 0; i < 9; i++) sum += Number(cpf[i]) * (10 - i);
+            let digit = (sum * 10) % 11;
+            if (digit === 10) digit = 0;
+            if (digit !== Number(cpf[9])) return false;
+            sum = 0;
+            for (let i = 0; i < 10; i++) sum += Number(cpf[i]) * (11 - i);
+            digit = (sum * 10) % 11;
+            if (digit === 10) digit = 0;
+            return digit === Number(cpf[10]);
+        }
+
         async function handleCustomerRegister(event) {
             event.preventDefault();
 
             const fullName = document.getElementById('registerFullName')?.value.trim();
             const email = document.getElementById('registerEmail')?.value.trim();
             const phone = document.getElementById('registerPhone')?.value.trim();
-            const cpf = document.getElementById('registerCpf')?.value.trim();
+            const cpfInput = document.getElementById('registerCpf')?.value.trim();
+            const cpf = normalizeCpf(cpfInput);
             const zipCode = document.getElementById('registerZipCode')?.value.trim();
             const street = document.getElementById('registerStreet')?.value.trim();
             const number = document.getElementById('registerNumber')?.value.trim();
@@ -7056,6 +7225,11 @@ function initializeApp() {
 
             if (password.length < 6) {
                 showAuthMessage('A senha deve ter pelo menos 6 caracteres.', 'error');
+                return;
+            }
+
+            if (!isValidCpf(cpf)) {
+                showAuthMessage('Informe um CPF válido.', 'error');
                 return;
             }
 
@@ -7096,6 +7270,12 @@ function initializeApp() {
                     neighborhood,
                     city,
                     state: stateField
+                },
+                privacyConsent: {
+                    accepted: true,
+                    version: DATA_SECURITY_TERMS_VERSION,
+                    acceptedAt: new Date().toISOString(),
+                    document: 'Termo de Segurança e Proteção de Dados'
                 }
             };
 
@@ -9860,6 +10040,8 @@ function escapeAttribute(value) {
         window.rejectOptionalCookies = rejectOptionalCookies;
         window.openCookieSettings = openCookieSettings;
         window.closeCookieSettings = closeCookieSettings;
+        window.openDataSecurityTerms = openDataSecurityTerms;
+        window.closeDataSecurityTerms = closeDataSecurityTerms;
         window.saveCookiePreferences = saveCookiePreferences;
         window.lookupZipCode = lookupZipCode;
         window.lookupProfileZipCode = lookupProfileZipCode;
