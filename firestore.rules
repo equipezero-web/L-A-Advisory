@@ -1,14 +1,14 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    function signedIn() { return request.auth != null; }
 
-    // ATENÇÃO: esta regra é compatível com a arquitetura atual (um único documento
-    // app_state/main), mas NÃO é adequada para produção porque qualquer usuário
-    // autenticado poderia alterar o estado inteiro. Para produção, migre usuários,
-    // pedidos, produtos e afiliados para coleções separadas e use regras por documento.
+    function signedIn() {
+      return request.auth != null;
+    }
+
     match /app_state/main {
-      allow read: if signedIn();
+      allow read: if true;
       allow write: if signedIn();
     }
   }
