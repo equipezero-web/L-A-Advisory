@@ -79,10 +79,14 @@ export default {
     ) {
       try {
         if (!env.MP_ACCESS_TOKEN) {
-          return json(request, {
-            ok: false,
-            error: "MP_ACCESS_TOKEN não configurado."
-          }, 500);
+          return json(
+            request,
+            {
+              ok: false,
+              error: "MP_ACCESS_TOKEN não configurado."
+            },
+            500
+          );
         }
 
         const body = await request.json();
@@ -92,10 +96,14 @@ export default {
           !Array.isArray(body.items) ||
           body.items.length === 0
         ) {
-          return json(request, {
-            ok: false,
-            error: "Nenhum produto foi enviado."
-          }, 400);
+          return json(
+            request,
+            {
+              ok: false,
+              error: "Nenhum produto foi enviado."
+            },
+            400
+          );
         }
 
         const items = body.items.map((item) => {
@@ -108,7 +116,9 @@ export default {
             !Number.isFinite(unitPrice) ||
             unitPrice <= 0
           ) {
-            throw new Error("Produto com quantidade ou preço inválido.");
+            throw new Error(
+              "Produto com quantidade ou preço inválido."
+            );
           }
 
           return {
@@ -121,11 +131,9 @@ export default {
           };
         });
 
-        const externalReference =
-          String(
-            body.external_reference ||
-            `LA-${Date.now()}`
-          );
+        const externalReference = String(
+          body.external_reference || `LA-${Date.now()}`
+        );
 
         const preference = {
           items,
@@ -173,33 +181,36 @@ export default {
           await mercadoPagoResponse.json();
 
         if (!mercadoPagoResponse.ok) {
-          return json(request, {
-            ok: false,
-            error: "Mercado Pago recusou a preferência.",
-            details: mercadoPagoData
-          }, mercadoPagoResponse.status);
+          return json(
+            request,
+            {
+              ok: false,
+              error:
+                "Mercado Pago recusou a preferência.",
+              details: mercadoPagoData
+            },
+            mercadoPagoResponse.status
+          );
         }
 
         return json(request, {
           ok: true,
-
-          preferenceId:
-            mercadoPagoData.id,
-
-          initPoint:
-            mercadoPagoData.init_point,
-
+          preferenceId: mercadoPagoData.id,
+          initPoint: mercadoPagoData.init_point,
           sandboxInitPoint:
             mercadoPagoData.sandbox_init_point || null,
-
           externalReference
         });
 
       } catch (error) {
-        return json(request, {
-          ok: false,
-          error: error.message || "Erro interno."
-        }, 500);
+        return json(
+          request,
+          {
+            ok: false,
+            error: error.message || "Erro interno."
+          },
+          500
+        );
       }
     }
 
@@ -221,19 +232,11 @@ export default {
           payload = {};
         }
 
-        /*
-         * O Mercado Pago pode enviar o ID do pagamento
-         * dentro de data.id.
-         */
         const paymentId =
           payload?.data?.id ||
           payload?.id ||
           null;
 
-        /*
-         * Se ainda não houver ID, respondemos 200
-         * para não provocar reenvios desnecessários.
-         */
         if (!paymentId) {
           return json(request, {
             ok: true,
@@ -246,7 +249,9 @@ export default {
          * Consulta o pagamento diretamente no Mercado Pago.
          */
         const paymentResponse = await fetch(
-          `https://api.mercadopago.com/v1/payments/${encodeURIComponent(paymentId)}`,
+          `https://api.mercadopago.com/v1/payments/${encodeURIComponent(
+            paymentId
+          )}`,
           {
             method: "GET",
 
@@ -259,18 +264,24 @@ export default {
         const payment = await paymentResponse.json();
 
         if (!paymentResponse.ok) {
-          return json(request, {
-            ok: false,
-            error: "Não foi possível consultar o pagamento.",
-            details: payment
-          }, 502);
+          return json(
+            request,
+            {
+              ok: false,
+              error:
+                "Não foi possível consultar o pagamento.",
+              details: payment
+            },
+            502
+          );
         }
 
         /*
-         * Por enquanto registramos o resultado nos logs.
+         * Por enquanto registramos o pagamento
+         * nos logs do Worker.
          *
-         * Na próxima etapa vamos ligar essa parte
-         * diretamente ao Firestore.
+         * Na próxima etapa vamos conectar
+         * esta parte diretamente ao Firebase.
          */
         console.log(
           JSON.stringify({
@@ -278,8 +289,10 @@ export default {
             paymentId: payment.id,
             status: payment.status,
             statusDetail: payment.status_detail,
-            externalReference: payment.external_reference,
-            transactionAmount: payment.transaction_amount
+            externalReference:
+              payment.external_reference,
+            transactionAmount:
+              payment.transaction_amount
           })
         );
 
@@ -293,21 +306,30 @@ export default {
       } catch (error) {
         console.error(error);
 
-        return json(request, {
-          ok: false,
-          error: error.message || "Erro no webhook."
-        }, 500);
+        return json(
+          request,
+          {
+            ok: false,
+            error:
+              error.message || "Erro no webhook."
+          },
+          500
+        );
       }
     }
 
     /*
-     * ROTA NÃO ENCONTRADA
+     * ROTAS /api NÃO ENCONTRADAS
      */
     if (url.pathname.startsWith("/api/")) {
-      return json(request, {
-        ok: false,
-        error: "Endpoint não encontrado."
-      }, 404);
+      return json(
+        request,
+        {
+          ok: false,
+          error: "Endpoint não encontrado."
+        },
+        404
+      );
     }
 
     /*
