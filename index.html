@@ -7278,6 +7278,7 @@ function initializeApp() {
 
             const container = document.getElementById('authTurnstile');
             if (!container) return;
+            if (container.querySelector('iframe') || container.dataset.turnstileRendered === '1') return;
 
             turnstileInitializing = true;
             try {
@@ -7295,6 +7296,7 @@ function initializeApp() {
                         console.warn('Turnstile não conseguiu validar este navegador.');
                     }
                 });
+                container.dataset.turnstileRendered = '1';
             } catch (error) {
                 console.error('Erro ao inicializar Turnstile:', error);
                 turnstileWidgetId = null;
@@ -7586,8 +7588,7 @@ async function handleAffiliateLogin(event) {
                 const { data, error } = await supabaseClient.auth.signUp({
                     email,
                     password,
-                    options: { data: { full_name: name } },
-                    captchaToken
+                    options: { data: { full_name: name }, captchaToken }
                 });
                 resetAuthTurnstile();
                 if (error) throw error;
