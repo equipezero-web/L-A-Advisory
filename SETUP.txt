@@ -1,0 +1,23 @@
+L&A Royal Advisory — Supabase Edge Functions
+
+1. No Supabase Dashboard, abra Edge Functions e crie/deploy:
+   - create-checkout
+   - register-affiliate
+   - mercado-pago-webhook
+
+2. Secrets necessários nas Edge Functions:
+   MP_ACCESS_TOKEN = seu Access Token de PRODUÇÃO do Mercado Pago
+   SUPABASE_SERVICE_ROLE_KEY = chave secreta/service role do projeto (somente servidor)
+   SITE_URL = https://equipezero-web.github.io/L-A-Advisory
+
+   SUPABASE_URL e SUPABASE_ANON_KEY são fornecidos pelo ambiente do Supabase.
+
+3. Webhook do Mercado Pago:
+   https://fqisewatypluagngmgka.supabase.co/functions/v1/mercado-pago-webhook
+
+4. Não coloque MP_ACCESS_TOKEN nem SUPABASE_SERVICE_ROLE_KEY no index.html, GitHub Pages ou JavaScript do navegador.
+
+5. O frontend atual já chama:
+   /functions/v1/create-checkout
+
+6. Antes de produção, aplicar uma operação SQL atômica para baixa de estoque e comissão, evitando dupla baixa em webhooks simultâneos.
