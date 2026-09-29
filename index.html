@@ -7351,7 +7351,7 @@ function initializeApp() {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email,
                     password,
-                    options: { captchaToken }
+                    captchaToken
                 });
                 if (error) throw error;
                 if (!data?.user || !data?.session) throw new Error('Sessão não foi criada.');
@@ -7534,7 +7534,7 @@ async function handleAffiliateLogin(event) {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email,
                     password,
-                    options: { captchaToken }
+                    captchaToken
                 });
                 if (error) throw error;
                 const { data: affiliate, error: affiliateError } = await supabaseClient.from('affiliates').select('*').eq('user_id', data.user.id).maybeSingle();
@@ -7610,7 +7610,7 @@ async function handleAffiliateLogin(event) {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email,
                     password,
-                    options: { captchaToken }
+                    captchaToken
                 });
                 if (error) throw error;
                 const { data: profile, error: profileError } = await supabaseClient.from('profiles').select('*').eq('id', data.user.id).single();
