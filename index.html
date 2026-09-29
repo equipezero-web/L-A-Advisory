@@ -30,6 +30,9 @@
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+    <!-- Cloudflare Turnstile -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -2812,6 +2815,12 @@
                         class="hidden mb-5 p-4 rounded-xl text-sm"
                     ></div>
 
+                    <div
+                        id="authTurnstile"
+                        class="mb-5 flex justify-center min-h-[65px]"
+                        aria-label="Verificação de segurança"
+                    ></div>
+
                     <!-- =================================================
                          LOGIN CLIENTE
                     ================================================== -->
@@ -3185,7 +3194,7 @@
 
                                 <button
                                     type="button"
-                                    onclick="togglePasswordVisibility(registerPassword, this)"
+                                    onclick="togglePasswordVisibility('registerPassword', this)"
                                     class="absolute right-4 top-[3.25rem] text-slate-400 hover:text-slate-700"
                                     aria-label="Mostrar senha"
                                 >
@@ -3212,7 +3221,7 @@
 
                                 <button
                                     type="button"
-                                    onclick="togglePasswordVisibility(registerPasswordConfirm, this)"
+                                    onclick="togglePasswordVisibility('registerPasswordConfirm', this)"
                                     class="absolute right-4 top-[3.25rem] text-slate-400 hover:text-slate-700"
                                     aria-label="Mostrar senha"
                                 >
@@ -3329,7 +3338,7 @@
 
                                 <button
                                     type="button"
-                                    onclick="togglePasswordVisibility(affiliateLoginPassword, this)"
+                                    onclick="togglePasswordVisibility('affiliateLoginPassword', this)"
                                     class="absolute right-4 top-[3.25rem] text-slate-400 hover:text-slate-700"
                                     aria-label="Mostrar senha"
                                 >
@@ -3561,7 +3570,7 @@
 
                                 <button
                                     type="button"
-                                    onclick="togglePasswordVisibility(affiliateRegisterPassword, this)"
+                                    onclick="togglePasswordVisibility('affiliateRegisterPassword', this)"
                                     class="absolute right-4 top-[3.25rem] text-slate-400 hover:text-slate-700"
                                     aria-label="Mostrar senha"
                                 >
@@ -3671,7 +3680,7 @@
 
                                 <button
                                     type="button"
-                                    onclick="togglePasswordVisibility(adminLoginPassword, this)"
+                                    onclick="togglePasswordVisibility('adminLoginPassword', this)"
                                     class="absolute right-4 top-[3.25rem] text-slate-400 hover:text-slate-700"
                                     aria-label="Mostrar senha"
                                 >
@@ -7071,6 +7080,7 @@ function initializeApp() {
             document.body.style.overflow = 'hidden';
 
             switchAuthScreen(screen);
+            setTimeout(initializeTurnstile, 100);
         }
 
         function closeAuthModal() {
@@ -7228,29 +7238,137 @@ function initializeApp() {
             }
         }
 
+        function normalizeCpf(value) {
+            return String(value || '').replace(/\D/g, '');
+        }
+
+        function isValidCpf(value) {
+            const cpf = normalizeCpf(value);
+            if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+
+            let sum = 0;
+            for (let i = 0; i < 9; i++) sum += Number(cpf[i]) * (10 - i);
+            let digit = (sum * 10) % 11;
+            if (digit === 10) digit = 0;
+            if (digit !== Number(cpf[9])) return false;
+
+            sum = 0;
+            for (let i = 0; i < 10; i++) sum += Number(cpf[i]) * (11 - i);
+            digit = (sum * 10) % 11;
+            if (digit === 10) digit = 0;
+
+            return digit === Number(cpf[10]);
+        }
+
+        // =====================================================
+        // CLOUDFLARE TURNSTILE — PROTEÇÃO DO SUPABASE AUTH
+        // =====================================================
+        const TURNSTILE_SITE_KEY = '0x4AAAAAAFJBWj-hgl8mnsl7';
+        let turnstileWidgetId = null;
+        let turnstileToken = null;
+        let turnstileInitializing = false;
+
+        function initializeTurnstile() {
+            if (turnstileWidgetId !== null) return;
+            if (turnstileInitializing) return;
+            if (!window.turnstile) {
+                setTimeout(initializeTurnstile, 300);
+                return;
+            }
+
+            const container = document.getElementById('authTurnstile');
+            if (!container) return;
+
+            turnstileInitializing = true;
+            try {
+                turnstileWidgetId = window.turnstile.render(container, {
+                    sitekey: TURNSTILE_SITE_KEY,
+                    theme: 'light',
+                    callback: (token) => {
+                        turnstileToken = token;
+                    },
+                    'expired-callback': () => {
+                        turnstileToken = null;
+                    },
+                    'error-callback': () => {
+                        turnstileToken = null;
+                        console.warn('Turnstile não conseguiu validar este navegador.');
+                    }
+                });
+            } catch (error) {
+                console.error('Erro ao inicializar Turnstile:', error);
+                turnstileWidgetId = null;
+            } finally {
+                turnstileInitializing = false;
+            }
+        }
+
+        function getAuthCaptchaToken() {
+            initializeTurnstile();
+            if (!turnstileToken) {
+                showAuthMessage('Conclua a verificação de segurança antes de continuar.', 'error');
+                return null;
+            }
+
+            const token = turnstileToken;
+            turnstileToken = null;
+
+            if (turnstileWidgetId !== null && window.turnstile) {
+                try {
+                    window.turnstile.reset(turnstileWidgetId);
+                } catch (error) {
+                    console.warn('Não foi possível renovar o Turnstile:', error);
+                }
+            }
+
+            return token;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initializeTurnstile, 500);
+        });
+
         async function handleCustomerLogin(event) {
             event.preventDefault();
             const email = document.getElementById('customerLoginEmail')?.value.trim().toLowerCase();
-            const password = document.getElementById('customerLoginPassword')?.value;
+            const password = document.getElementById('customerLoginPassword')?.value || '';
+
             if (!email || !password) {
-                showAuthMessage('Informe seu e-mail e senha.', 'error');
+                showAuthMessage('Informe seu e-mail e sua senha.', 'error');
                 return;
             }
-            try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-                if (error) throw error;
-                if (!data?.user || !data?.session) throw new Error('Não foi possível iniciar a sessão.');
 
+            const button = event.submitter;
+            if (button) {
+                button.disabled = true;
+                button.classList.add('opacity-60', 'cursor-not-allowed');
+            }
+
+            try {
+                const captchaToken = getAuthCaptchaToken();
+                if (!captchaToken) return;
+
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password,
+                    options: { captchaToken }
+                });
+                if (error) throw error;
+                if (!data?.user || !data?.session) throw new Error('Sessão não foi criada.');
+
+                // O Auth é a fonte principal da autenticação.
+                // O perfil pode ser carregado pelo trigger do Supabase; se ainda não
+                // existir, não bloqueamos o login.
                 const { data: profile, error: profileError } = await supabaseClient
                     .from('profiles')
                     .select('id, full_name, email, role, is_active')
                     .eq('id', data.user.id)
                     .maybeSingle();
-                if (profileError) throw profileError;
-                if (!profile) throw new Error('Perfil da conta não encontrado.');
-                if (!profile.is_active) throw new Error('Conta inativa.');
-                if (profile.role !== 'customer' && profile.role !== 'affiliate' && profile.role !== 'admin') {
-                    throw new Error('Perfil de usuário inválido.');
+
+                if (profileError) console.warn('Perfil:', profileError.message);
+                if (profile && profile.is_active === false) {
+                    await supabaseClient.auth.signOut();
+                    throw new Error('Sua conta está inativa.');
                 }
 
                 await applySupabaseSession(data.session);
@@ -7258,18 +7376,29 @@ function initializeApp() {
                 closeAuthModal();
                 updateAuthUI();
             } catch (error) {
-                console.error(error);
-                const message = error?.message || '';
-                if (/email not confirmed|email.*confirm/i.test(message)) {
+                console.error('Erro no login:', error);
+                const message = String(error?.message || '').toLowerCase();
+
+                if (message.includes('email not confirmed') || message.includes('email_not_confirmed')) {
                     showAuthMessage('Confirme seu e-mail antes de entrar. Verifique também a caixa de spam.', 'error');
+                } else if (message.includes('invalid login credentials')) {
+                    showAuthMessage('E-mail ou senha incorretos.', 'error');
+                } else if (message.includes('inactive')) {
+                    showAuthMessage(error.message, 'error');
                 } else {
-                    showAuthMessage('E-mail ou senha inválidos. Verifique seus dados.', 'error');
+                    showAuthMessage(error?.message || 'Não foi possível entrar. Tente novamente.', 'error');
+                }
+            } finally {
+                if (button) {
+                    button.disabled = false;
+                    button.classList.remove('opacity-60', 'cursor-not-allowed');
                 }
             }
         }
 
         async function handleCustomerRegister(event) {
             event.preventDefault();
+
             const fullName = document.getElementById('registerFullName')?.value.trim();
             const email = document.getElementById('registerEmail')?.value.trim().toLowerCase();
             const phone = document.getElementById('registerPhone')?.value.trim();
@@ -7281,12 +7410,16 @@ function initializeApp() {
             const neighborhood = document.getElementById('registerNeighborhood')?.value.trim();
             const city = document.getElementById('registerCity')?.value.trim();
             const stateField = document.getElementById('registerState')?.value.trim();
-            const password = document.getElementById('registerPassword')?.value;
-            const passwordConfirm = document.getElementById('registerPasswordConfirm')?.value;
+            const password = document.getElementById('registerPassword')?.value || '';
+            const passwordConfirm = document.getElementById('registerPasswordConfirm')?.value || '';
             const terms = document.getElementById('registerTerms')?.checked;
 
             if (!fullName || !email || !phone || !cpf || !zipCode || !street || !number || !neighborhood || !city || !stateField || !password || !passwordConfirm) {
                 showAuthMessage('Preencha todos os campos obrigatórios.', 'error');
+                return;
+            }
+            if (!/^\S+@\S+\.\S+$/.test(email)) {
+                showAuthMessage('Informe um e-mail válido.', 'error');
                 return;
             }
             if (password !== passwordConfirm) {
@@ -7306,47 +7439,88 @@ function initializeApp() {
                 return;
             }
 
+            const button = event.submitter;
+            if (button) {
+                button.disabled = true;
+                button.classList.add('opacity-60', 'cursor-not-allowed');
+                button.dataset.originalText = button.textContent;
+                button.textContent = 'Criando conta...';
+            }
+
             try {
+                const captchaToken = getAuthCaptchaToken();
+                if (!captchaToken) return;
+
                 const { data, error } = await supabaseClient.auth.signUp({
                     email,
                     password,
-                    options: { data: { full_name: fullName } }
+                    options: {
+                        data: { full_name: fullName },
+                        emailRedirectTo: window.location.origin + window.location.pathname,
+                        captchaToken
+                    }
                 });
+
                 if (error) throw error;
-                if (!data?.user) throw new Error('Não foi possível criar o usuário.');
+                if (!data?.user) throw new Error('O Supabase não retornou o usuário criado.');
 
                 const createdAt = new Date().toISOString();
                 const privateCustomerData = {
                     fullName,
                     phone,
                     cpf,
-                    address: { zipCode, street, number, complement: complement || '', neighborhood, city, state: stateField },
-                    privacyConsent: { accepted: true, version: DATA_SECURITY_TERMS_VERSION, acceptedAt: createdAt, document: 'Termo de Segurança e Proteção de Dados' }
+                    address: {
+                        zipCode,
+                        street,
+                        number,
+                        complement: complement || '',
+                        neighborhood,
+                        city,
+                        state: stateField
+                    },
+                    privacyConsent: {
+                        accepted: true,
+                        version: DATA_SECURITY_TERMS_VERSION,
+                        acceptedAt: createdAt,
+                        document: 'Termo de Segurança e Proteção de Dados'
+                    }
                 };
 
-                if (data.session) {
-                    await applySupabaseSession(data.session);
-                    await savePrivateCustomerData(data.user.id, privateCustomerData);
-                    await applySupabaseSession(data.session);
-                    sessionStorage.removeItem('laPendingCustomerPrivateData');
-                    closeAuthModal();
-                    updateAuthUI();
-                    alert('Conta criada com sucesso!');
-                } else {
+                // Se a confirmação de e-mail estiver habilitada, o Supabase cria
+                // o usuário mas não entrega uma sessão ainda. Guardamos apenas os
+                // dados complementares temporariamente até o primeiro login.
+                if (!data.session) {
                     sessionStorage.setItem('laPendingCustomerPrivateData', JSON.stringify(privateCustomerData));
-                    showAuthMessage('Conta criada! Confirme seu e-mail. Depois volte e entre com sua senha para concluir o cadastro.', 'success');
+                    showAuthMessage('Conta criada com sucesso! Confirme o e-mail enviado pelo Supabase e depois entre com sua senha.', 'success');
+                    return;
                 }
+
+                await applySupabaseSession(data.session);
+                await savePrivateCustomerData(data.user.id, privateCustomerData);
+                sessionStorage.removeItem('laPendingCustomerPrivateData');
+                await applySupabaseSession(data.session);
+                closeAuthModal();
+                updateAuthUI();
+                alert('Conta criada com sucesso!');
             } catch (error) {
-                console.error(error);
-                const message = error?.message || '';
-                if (/already registered|already exists|user already/i.test(message)) {
+                console.error('Erro no cadastro:', error);
+                const message = String(error?.message || '').toLowerCase();
+
+                if (message.includes('already registered') || message.includes('already exists') || message.includes('user already')) {
                     showAuthMessage('Este e-mail já possui uma conta. Use Entrar ou Recuperar senha.', 'error');
+                } else if (message.includes('password')) {
+                    showAuthMessage(error.message || 'A senha não atende aos requisitos.', 'error');
                 } else {
-                    showAuthMessage(message || 'Não foi possível criar a conta.', 'error');
+                    showAuthMessage(error?.message || 'Não foi possível criar a conta.', 'error');
+                }
+            } finally {
+                if (button) {
+                    button.disabled = false;
+                    button.classList.remove('opacity-60', 'cursor-not-allowed');
+                    if (button.dataset.originalText) button.textContent = button.dataset.originalText;
                 }
             }
         }
-
         
 async function handleAffiliateLogin(event) {
             event.preventDefault();
@@ -7354,7 +7528,14 @@ async function handleAffiliateLogin(event) {
             const password = document.getElementById('affiliateLoginPassword')?.value;
             if (!email || !password) { showAuthMessage('Preencha e-mail e senha.', 'error'); return; }
             try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                const captchaToken = getAuthCaptchaToken();
+                if (!captchaToken) return;
+
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password,
+                    options: { captchaToken }
+                });
                 if (error) throw error;
                 const { data: affiliate, error: affiliateError } = await supabaseClient.from('affiliates').select('*').eq('user_id', data.user.id).maybeSingle();
                 if (affiliateError) throw affiliateError;
@@ -7388,7 +7569,14 @@ async function handleAffiliateLogin(event) {
             if (!isValidCpf(cpf)) { showAuthMessage('Informe um CPF válido.', 'error'); return; }
             if (!terms) { showAuthMessage('Você precisa aceitar os termos para solicitar afiliação.', 'error'); return; }
             try {
-                const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { data: { full_name: name } } });
+                const captchaToken = getAuthCaptchaToken();
+                if (!captchaToken) return;
+
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email,
+                    password,
+                    options: { data: { full_name: name }, captchaToken }
+                });
                 if (error) throw error;
                 if (!data.user) throw new Error('Não foi possível criar o usuário.');
                 const session = data.session;
@@ -7416,7 +7604,14 @@ async function handleAffiliateLogin(event) {
             const password = document.getElementById('adminLoginPassword')?.value;
             if (!email || !password) { showAuthMessage('Preencha e-mail e senha.', 'error'); return; }
             try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                const captchaToken = getAuthCaptchaToken();
+                if (!captchaToken) return;
+
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password,
+                    options: { captchaToken }
+                });
                 if (error) throw error;
                 const { data: profile, error: profileError } = await supabaseClient.from('profiles').select('*').eq('id', data.user.id).single();
                 if (profileError) throw profileError;
@@ -7448,8 +7643,12 @@ async function handleAffiliateLogin(event) {
             }
 
             try {
+                const captchaToken = getAuthCaptchaToken();
+                if (!captchaToken) return;
+
                 const { error } = await supabaseClient.auth.resetPasswordForEmail(raw, {
-                    redirectTo: window.location.origin + window.location.pathname
+                    redirectTo: window.location.origin + window.location.pathname,
+                    captchaToken
                 });
                 if (error) throw error;
                 showAuthMessage('Link de recuperação enviado. Verifique seu e-mail e a caixa de spam.', 'success');
