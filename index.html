@@ -7359,7 +7359,7 @@ function initializeApp() {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email,
                     password,
-                    options: { captchaToken }
+                    captchaToken
                 });
                 resetAuthTurnstile();
                 if (error) throw error;
@@ -7544,7 +7544,7 @@ async function handleAffiliateLogin(event) {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email,
                     password,
-                    options: { captchaToken }
+                    captchaToken
                 });
                 resetAuthTurnstile();
                 if (error) throw error;
@@ -7586,7 +7586,8 @@ async function handleAffiliateLogin(event) {
                 const { data, error } = await supabaseClient.auth.signUp({
                     email,
                     password,
-                    options: { data: { full_name: name }, captchaToken }
+                    options: { data: { full_name: name } },
+                    captchaToken
                 });
                 resetAuthTurnstile();
                 if (error) throw error;
@@ -7622,7 +7623,7 @@ async function handleAffiliateLogin(event) {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email,
                     password,
-                    options: { captchaToken }
+                    captchaToken
                 });
                 resetAuthTurnstile();
                 if (error) throw error;
