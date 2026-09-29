@@ -29,11 +29,7 @@
 
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <!-- Cloudflare Turnstile -->
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-
-    <!-- Tailwind CSS -->
+<!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Fontes -->
@@ -2814,14 +2810,7 @@
                         id="authMessage"
                         class="hidden mb-5 p-4 rounded-xl text-sm"
                     ></div>
-
-                    <div
-                        id="authTurnstile"
-                        class="mb-5 flex justify-center min-h-[65px]"
-                        aria-label="Verificação de segurança"
-                    ></div>
-
-                    <!-- =================================================
+<!-- =================================================
                          LOGIN CLIENTE
                     ================================================== -->
                     <form
@@ -7080,7 +7069,6 @@ function initializeApp() {
             document.body.style.overflow = 'hidden';
 
             switchAuthScreen(screen);
-            setTimeout(initializeTurnstile, 100);
         }
 
         function closeAuthModal() {
@@ -7259,85 +7247,6 @@ function initializeApp() {
 
             return digit === Number(cpf[10]);
         }
-
-        // =====================================================
-        // CLOUDFLARE TURNSTILE — PROTEÇÃO DO SUPABASE AUTH
-        // =====================================================
-        const TURNSTILE_SITE_KEY = '0x4AAAAAAFJBWj-hgl8mnsl7';
-        let turnstileWidgetId = null;
-        let turnstileToken = null;
-        let turnstileInitializing = false;
-
-        function initializeTurnstile() {
-            if (turnstileWidgetId !== null) return;
-            if (turnstileInitializing) return;
-            if (!window.turnstile) {
-                setTimeout(initializeTurnstile, 300);
-                return;
-            }
-
-            const container = document.getElementById('authTurnstile');
-            if (!container) return;
-            if (container.querySelector('iframe') || container.dataset.turnstileRendered === '1') return;
-
-            turnstileInitializing = true;
-            try {
-                turnstileWidgetId = window.turnstile.render(container, {
-                    sitekey: TURNSTILE_SITE_KEY,
-                    theme: 'light',
-                    callback: (token) => {
-                        turnstileToken = token;
-                    },
-                    'expired-callback': () => {
-                        turnstileToken = null;
-                    },
-                    'error-callback': () => {
-                        turnstileToken = null;
-                        console.warn('Turnstile não conseguiu validar este navegador.');
-                    }
-                });
-                container.dataset.turnstileRendered = '1';
-            } catch (error) {
-                console.error('Erro ao inicializar Turnstile:', error);
-                turnstileWidgetId = null;
-            } finally {
-                turnstileInitializing = false;
-            }
-        }
-
-        function getAuthCaptchaToken() {
-            initializeTurnstile();
-            if (turnstileWidgetId === null || !window.turnstile) {
-                showAuthMessage('A verificação de segurança ainda está carregando. Tente novamente.', 'error');
-                return null;
-            }
-
-            // Não resetamos o widget aqui. O token precisa chegar ao Supabase
-            // antes de ser invalidado pelo reset do Turnstile.
-            const token = window.turnstile.getResponse(turnstileWidgetId) || turnstileToken;
-            if (!token) {
-                showAuthMessage('Conclua a verificação de segurança antes de continuar.', 'error');
-                return null;
-            }
-
-            return token;
-        }
-
-        function resetAuthTurnstile() {
-            turnstileToken = null;
-            if (turnstileWidgetId !== null && window.turnstile) {
-                try {
-                    window.turnstile.reset(turnstileWidgetId);
-                } catch (error) {
-                    console.warn('Não foi possível renovar o Turnstile:', error);
-                }
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(initializeTurnstile, 500);
-        });
-
         async function handleCustomerLogin(event) {
             event.preventDefault();
             const email = document.getElementById('customerLoginEmail')?.value.trim().toLowerCase();
@@ -7355,16 +7264,11 @@ function initializeApp() {
             }
 
             try {
-                const captchaToken = getAuthCaptchaToken();
-                if (!captchaToken) return;
-
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email,
-                    password,
-                    options: { captchaToken }
+                    password
                 });
-                resetAuthTurnstile();
-                if (error) throw error;
+if (error) throw error;
                 if (!data?.user || !data?.session) throw new Error('Sessão não foi criada.');
 
                 // O Auth é a fonte principal da autenticação.
@@ -7459,21 +7363,15 @@ function initializeApp() {
             }
 
             try {
-                const captchaToken = getAuthCaptchaToken();
-                if (!captchaToken) return;
-
                 const { data, error } = await supabaseClient.auth.signUp({
                     email,
                     password,
                     options: {
                         data: { full_name: fullName },
-                        emailRedirectTo: window.location.origin + window.location.pathname,
-                        captchaToken
+                        emailRedirectTo: window.location.origin + window.location.pathname
                     }
                 });
-                resetAuthTurnstile();
-
-                if (error) throw error;
+if (error) throw error;
                 if (!data?.user) throw new Error('O Supabase não retornou o usuário criado.');
 
                 const createdAt = new Date().toISOString();
@@ -7540,16 +7438,11 @@ async function handleAffiliateLogin(event) {
             const password = document.getElementById('affiliateLoginPassword')?.value;
             if (!email || !password) { showAuthMessage('Preencha e-mail e senha.', 'error'); return; }
             try {
-                const captchaToken = getAuthCaptchaToken();
-                if (!captchaToken) return;
-
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email,
-                    password,
-                    options: { captchaToken }
+                    password
                 });
-                resetAuthTurnstile();
-                if (error) throw error;
+if (error) throw error;
                 const { data: affiliate, error: affiliateError } = await supabaseClient.from('affiliates').select('*').eq('user_id', data.user.id).maybeSingle();
                 if (affiliateError) throw affiliateError;
                 if (!affiliate) throw new Error('Perfil de afiliado não encontrado.');
@@ -7582,16 +7475,12 @@ async function handleAffiliateLogin(event) {
             if (!isValidCpf(cpf)) { showAuthMessage('Informe um CPF válido.', 'error'); return; }
             if (!terms) { showAuthMessage('Você precisa aceitar os termos para solicitar afiliação.', 'error'); return; }
             try {
-                const captchaToken = getAuthCaptchaToken();
-                if (!captchaToken) return;
-
                 const { data, error } = await supabaseClient.auth.signUp({
                     email,
                     password,
-                    options: { data: { full_name: name }, captchaToken }
+                    options: { data: { full_name: name } }
                 });
-                resetAuthTurnstile();
-                if (error) throw error;
+if (error) throw error;
                 if (!data.user) throw new Error('Não foi possível criar o usuário.');
                 const session = data.session;
                 if (!session?.access_token) throw new Error('Confirme o e-mail da conta antes de solicitar a afiliação.');
@@ -7618,16 +7507,11 @@ async function handleAffiliateLogin(event) {
             const password = document.getElementById('adminLoginPassword')?.value;
             if (!email || !password) { showAuthMessage('Preencha e-mail e senha.', 'error'); return; }
             try {
-                const captchaToken = getAuthCaptchaToken();
-                if (!captchaToken) return;
-
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email,
-                    password,
-                    options: { captchaToken }
+                    password
                 });
-                resetAuthTurnstile();
-                if (error) throw error;
+if (error) throw error;
                 const { data: profile, error: profileError } = await supabaseClient.from('profiles').select('*').eq('id', data.user.id).single();
                 if (profileError) throw profileError;
                 if (profile.role !== 'admin' || !profile.is_active) throw new Error('Usuário sem permissão administrativa.');
@@ -7658,15 +7542,10 @@ async function handleAffiliateLogin(event) {
             }
 
             try {
-                const captchaToken = getAuthCaptchaToken();
-                if (!captchaToken) return;
-
                 const { error } = await supabaseClient.auth.resetPasswordForEmail(raw, {
-                    redirectTo: window.location.origin + window.location.pathname,
-                    captchaToken
+                    redirectTo: window.location.origin + window.location.pathname
                 });
-                resetAuthTurnstile();
-                if (error) throw error;
+if (error) throw error;
                 showAuthMessage('Link de recuperação enviado. Verifique seu e-mail e a caixa de spam.', 'success');
             } catch (error) {
                 console.error(error);
