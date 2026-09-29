@@ -7305,14 +7305,24 @@ function initializeApp() {
 
         function getAuthCaptchaToken() {
             initializeTurnstile();
-            if (!turnstileToken) {
+            if (turnstileWidgetId === null || !window.turnstile) {
+                showAuthMessage('A verificação de segurança ainda está carregando. Tente novamente.', 'error');
+                return null;
+            }
+
+            // Não resetamos o widget aqui. O token precisa chegar ao Supabase
+            // antes de ser invalidado pelo reset do Turnstile.
+            const token = window.turnstile.getResponse(turnstileWidgetId) || turnstileToken;
+            if (!token) {
                 showAuthMessage('Conclua a verificação de segurança antes de continuar.', 'error');
                 return null;
             }
 
-            const token = turnstileToken;
-            turnstileToken = null;
+            return token;
+        }
 
+        function resetAuthTurnstile() {
+            turnstileToken = null;
             if (turnstileWidgetId !== null && window.turnstile) {
                 try {
                     window.turnstile.reset(turnstileWidgetId);
@@ -7320,8 +7330,6 @@ function initializeApp() {
                     console.warn('Não foi possível renovar o Turnstile:', error);
                 }
             }
-
-            return token;
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -7353,6 +7361,7 @@ function initializeApp() {
                     password,
                     captchaToken
                 });
+                resetAuthTurnstile();
                 if (error) throw error;
                 if (!data?.user || !data?.session) throw new Error('Sessão não foi criada.');
 
@@ -7460,6 +7469,7 @@ function initializeApp() {
                         captchaToken
                     }
                 });
+                resetAuthTurnstile();
 
                 if (error) throw error;
                 if (!data?.user) throw new Error('O Supabase não retornou o usuário criado.');
@@ -7536,6 +7546,7 @@ async function handleAffiliateLogin(event) {
                     password,
                     captchaToken
                 });
+                resetAuthTurnstile();
                 if (error) throw error;
                 const { data: affiliate, error: affiliateError } = await supabaseClient.from('affiliates').select('*').eq('user_id', data.user.id).maybeSingle();
                 if (affiliateError) throw affiliateError;
@@ -7577,6 +7588,7 @@ async function handleAffiliateLogin(event) {
                     password,
                     options: { data: { full_name: name }, captchaToken }
                 });
+                resetAuthTurnstile();
                 if (error) throw error;
                 if (!data.user) throw new Error('Não foi possível criar o usuário.');
                 const session = data.session;
@@ -7612,6 +7624,7 @@ async function handleAffiliateLogin(event) {
                     password,
                     captchaToken
                 });
+                resetAuthTurnstile();
                 if (error) throw error;
                 const { data: profile, error: profileError } = await supabaseClient.from('profiles').select('*').eq('id', data.user.id).single();
                 if (profileError) throw profileError;
@@ -7650,6 +7663,7 @@ async function handleAffiliateLogin(event) {
                     redirectTo: window.location.origin + window.location.pathname,
                     captchaToken
                 });
+                resetAuthTurnstile();
                 if (error) throw error;
                 showAuthMessage('Link de recuperação enviado. Verifique seu e-mail e a caixa de spam.', 'success');
             } catch (error) {
