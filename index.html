@@ -3165,7 +3165,7 @@
                                 >
                             </div>
 
-                            <div>
+                            <div class="relative">
                                 <label
                                     for="registerPassword"
                                     class="block text-xs font-bold text-slate-700 uppercase mb-2"
@@ -3177,11 +3177,20 @@
                                     type="password"
                                     id="registerPassword"
                                     required
-                                    minlength="6"
+                                    minlength="12"
                                     autocomplete="new-password"
-                                    placeholder="Mínimo de 6 caracteres"
-                                    class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500"
+                                    placeholder="Mínimo de 12 caracteres"
+                                    class="w-full pr-12 px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500"
                                 >
+
+                                <button
+                                    type="button"
+                                    onclick="togglePasswordVisibility(registerPassword, this)"
+                                    class="absolute right-4 top-[3.25rem] text-slate-400 hover:text-slate-700"
+                                    aria-label="Mostrar senha"
+                                >
+                                    <i data-lucide="eye" class="w-5 h-5"></i>
+                                </button>
                             </div>
 
                             <div class="sm:col-span-2">
@@ -3196,10 +3205,19 @@
                                     type="password"
                                     id="registerPasswordConfirm"
                                     required
-                                    minlength="6"
+                                    minlength="12"
                                     autocomplete="new-password"
-                                    class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500"
+                                    class="w-full pr-12 px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500"
                                 >
+
+                                <button
+                                    type="button"
+                                    onclick="togglePasswordVisibility(registerPasswordConfirm, this)"
+                                    class="absolute right-4 top-[3.25rem] text-slate-400 hover:text-slate-700"
+                                    aria-label="Mostrar senha"
+                                >
+                                    <i data-lucide="eye" class="w-5 h-5"></i>
+                                </button>
                             </div>
                         </div>
 
@@ -3293,7 +3311,7 @@
                             <button type="button" onclick="sendPasswordReset()" class="text-xs font-bold text-amber-700 hover:text-amber-600">Esqueci minha senha</button>
                         </div>
 
-                        <div>
+                        <div class="relative">
                             <label
                                 for="affiliateLoginPassword"
                                 class="block text-xs font-bold text-slate-700 uppercase mb-2"
@@ -3306,8 +3324,17 @@
                                 id="affiliateLoginPassword"
                                 required
                                 autocomplete="current-password"
-                                class="w-full px-4 py-3.5 border-2 border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-amber-500"
+                                class="w-full pr-12 px-4 py-3.5 border-2 border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-amber-500"
                             >
+
+                                <button
+                                    type="button"
+                                    onclick="togglePasswordVisibility(affiliateLoginPassword, this)"
+                                    class="absolute right-4 top-[3.25rem] text-slate-400 hover:text-slate-700"
+                                    aria-label="Mostrar senha"
+                                >
+                                    <i data-lucide="eye" class="w-5 h-5"></i>
+                                </button>
                         </div>
 
                         <button
@@ -3527,10 +3554,19 @@
                                     type="password"
                                     id="affiliateRegisterPassword"
                                     required
-                                    minlength="6"
+                                    minlength="12"
                                     autocomplete="new-password"
-                                    class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500"
+                                    class="w-full pr-12 px-4 py-3 border-2 border-slate-300 rounded-xl outline-none focus:border-amber-500"
                                 >
+
+                                <button
+                                    type="button"
+                                    onclick="togglePasswordVisibility(affiliateRegisterPassword, this)"
+                                    class="absolute right-4 top-[3.25rem] text-slate-400 hover:text-slate-700"
+                                    aria-label="Mostrar senha"
+                                >
+                                    <i data-lucide="eye" class="w-5 h-5"></i>
+                                </button>
                             </div>
                         </div>
 
@@ -3617,7 +3653,7 @@
                             >
                         </div>
 
-                        <div>
+                        <div class="relative">
                             <label
                                 for="adminLoginPassword"
                                 class="block text-xs font-bold text-slate-700 uppercase mb-2"
@@ -3630,8 +3666,17 @@
                                 id="adminLoginPassword"
                                 required
                                 autocomplete="current-password"
-                                class="w-full px-4 py-3.5 border-2 border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-amber-500"
+                                class="w-full pr-12 px-4 py-3.5 border-2 border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-amber-500"
                             >
+
+                                <button
+                                    type="button"
+                                    onclick="togglePasswordVisibility(adminLoginPassword, this)"
+                                    class="absolute right-4 top-[3.25rem] text-slate-400 hover:text-slate-700"
+                                    aria-label="Mostrar senha"
+                                >
+                                    <i data-lucide="eye" class="w-5 h-5"></i>
+                                </button>
                         </div>
 
                         <button
@@ -6775,13 +6820,12 @@
         }
 
         async function saveProfile(uid, data) {
-            if (!uid) throw new Error('Usuário não autenticado.');
+            if (!uid || !supabaseAuthUser || supabaseAuthUser.id !== uid) throw new Error('Usuário não autenticado.');
             const payload = {
-                id: uid,
                 full_name: data.fullName || '',
-                email: data.email || supabaseAuthUser?.email || ''
+                email: data.email || supabaseAuthUser.email || ''
             };
-            const { error } = await supabaseClient.from('profiles').upsert(payload, { onConflict: 'id' });
+            const { error } = await supabaseClient.from('profiles').update(payload).eq('id', uid);
             if (error) throw error;
         }
 
@@ -6870,36 +6914,6 @@ function getAffiliateReferralCode() {
     return affiliate ? affiliate.code : null;
 }
         
-supabaseClient.auth.onAuthStateChanged(async (user) => {
-    if (!user) return;
-    const saved = state.users.find(u => u.id === user.uid || u.email?.toLowerCase() === user.email?.toLowerCase());
-    if (!saved) return;
-    if (saved.role === 'customer') {
-        try {
-            const privateData = await loadPrivateCustomerData(user.uid);
-            state.currentUser = { ...saved, ...(privateData || {}), id: user.uid, email: user.email || saved.email };
-        } catch (error) {
-            console.error('Erro ao carregar dados privados do cliente:', error);
-            state.currentUser = { ...saved, id: user.uid, email: user.email || saved.email };
-        }
-    } else {
-        state.currentUser = { ...saved, id: user.uid };
-    }
-    updateAuthUI();
-    if (state.currentUser.role === 'affiliate' && state.currentUser.affiliateStatus === 'active') enterAffiliateMode();
-});
-
-function setupOrderRealtimeSync() {
-    null.onSnapshot(snapshot => {
-        if (!snapshot.exists()) return;
-        const remote = snapshot.data();
-        if (Array.isArray(remote.orders)) state.orders = remote.orders;
-        if (Array.isArray(remote.affiliates)) state.affiliates = remote.affiliates;
-        if (Array.isArray(remote.affiliateLinks)) state.affiliateLinks = remote.affiliateLinks;
-        if (state.currentUser?.role === 'affiliate') { const a = state.affiliates.find(x => x.userId === state.currentUser.id); if (a) { updateAffiliateSummary(a); renderAffiliateSales(a); renderAffiliateGeneratedLinks(a); } }
-        checkPendingPaymentConfirmation();
-    });
-}
 
 function handlePaymentReturn() {
     const params = new URLSearchParams(window.location.search);
@@ -7200,23 +7214,57 @@ function initializeApp() {
             if (msgEl) msgEl.classList.add('hidden');
         }
 
+        async function persistPendingCustomerData() {
+            if (!supabaseAuthUser) return;
+            const raw = sessionStorage.getItem('laPendingCustomerPrivateData');
+            if (!raw) return;
+            try {
+                const data = JSON.parse(raw);
+                await savePrivateCustomerData(supabaseAuthUser.id, data);
+                sessionStorage.removeItem('laPendingCustomerPrivateData');
+                await applySupabaseSession(await supabaseClient.auth.getSession().then(r => r.data.session));
+            } catch (error) {
+                console.warn('Não foi possível salvar os dados complementares do cadastro:', error);
+            }
+        }
+
         async function handleCustomerLogin(event) {
             event.preventDefault();
             const email = document.getElementById('customerLoginEmail')?.value.trim().toLowerCase();
             const password = document.getElementById('customerLoginPassword')?.value;
-            if (!email || !password) { showAuthMessage('Informe seu e-mail e senha.', 'error'); return; }
+            if (!email || !password) {
+                showAuthMessage('Informe seu e-mail e senha.', 'error');
+                return;
+            }
             try {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
                 if (error) throw error;
-                const { data: profile, error: profileError } = await supabaseClient.from('profiles').select('*').eq('id', data.user.id).single();
+                if (!data?.user || !data?.session) throw new Error('Não foi possível iniciar a sessão.');
+
+                const { data: profile, error: profileError } = await supabaseClient
+                    .from('profiles')
+                    .select('id, full_name, email, role, is_active')
+                    .eq('id', data.user.id)
+                    .maybeSingle();
                 if (profileError) throw profileError;
+                if (!profile) throw new Error('Perfil da conta não encontrado.');
                 if (!profile.is_active) throw new Error('Conta inativa.');
+                if (profile.role !== 'customer' && profile.role !== 'affiliate' && profile.role !== 'admin') {
+                    throw new Error('Perfil de usuário inválido.');
+                }
+
                 await applySupabaseSession(data.session);
+                await persistPendingCustomerData();
                 closeAuthModal();
-                showAuthMessage('Login realizado com sucesso!', 'success');
+                updateAuthUI();
             } catch (error) {
                 console.error(error);
-                showAuthMessage('E-mail ou senha inválidos. Verifique seus dados.', 'error');
+                const message = error?.message || '';
+                if (/email not confirmed|email.*confirm/i.test(message)) {
+                    showAuthMessage('Confirme seu e-mail antes de entrar. Verifique também a caixa de spam.', 'error');
+                } else {
+                    showAuthMessage('E-mail ou senha inválidos. Verifique seus dados.', 'error');
+                }
             }
         }
 
@@ -7238,44 +7286,69 @@ function initializeApp() {
             const terms = document.getElementById('registerTerms')?.checked;
 
             if (!fullName || !email || !phone || !cpf || !zipCode || !street || !number || !neighborhood || !city || !stateField || !password || !passwordConfirm) {
-                showAuthMessage('Preencha todos os campos obrigatórios.', 'error'); return;
+                showAuthMessage('Preencha todos os campos obrigatórios.', 'error');
+                return;
             }
-            if (password !== passwordConfirm) { showAuthMessage('As senhas não coincidem.', 'error'); return; }
-            if (password.length < 12) { showAuthMessage('A senha deve ter pelo menos 12 caracteres.', 'error'); return; }
-            if (!isValidCpf(cpf)) { showAuthMessage('Informe um CPF válido.', 'error'); return; }
-            if (!terms) { showAuthMessage('Você precisa aceitar os termos para criar a conta.', 'error'); return; }
+            if (password !== passwordConfirm) {
+                showAuthMessage('As senhas não coincidem.', 'error');
+                return;
+            }
+            if (password.length < 12) {
+                showAuthMessage('A senha deve ter pelo menos 12 caracteres.', 'error');
+                return;
+            }
+            if (!isValidCpf(cpf)) {
+                showAuthMessage('Informe um CPF válido.', 'error');
+                return;
+            }
+            if (!terms) {
+                showAuthMessage('Você precisa aceitar os termos para criar a conta.', 'error');
+                return;
+            }
 
             try {
                 const { data, error } = await supabaseClient.auth.signUp({
-                    email, password,
+                    email,
+                    password,
                     options: { data: { full_name: fullName } }
                 });
                 if (error) throw error;
-                if (!data.user) throw new Error('Não foi possível criar o usuário.');
+                if (!data?.user) throw new Error('Não foi possível criar o usuário.');
 
                 const createdAt = new Date().toISOString();
                 const privateCustomerData = {
-                    fullName, phone, cpf,
+                    fullName,
+                    phone,
+                    cpf,
                     address: { zipCode, street, number, complement: complement || '', neighborhood, city, state: stateField },
                     privacyConsent: { accepted: true, version: DATA_SECURITY_TERMS_VERSION, acceptedAt: createdAt, document: 'Termo de Segurança e Proteção de Dados' }
                 };
-                await savePrivateCustomerData(data.user.id, privateCustomerData);
-                await saveProfile(data.user.id, { fullName, email });
 
-                await applySupabaseSession(data.session);
                 if (data.session) {
+                    await applySupabaseSession(data.session);
+                    await savePrivateCustomerData(data.user.id, privateCustomerData);
+                    await applySupabaseSession(data.session);
+                    sessionStorage.removeItem('laPendingCustomerPrivateData');
                     closeAuthModal();
-                    showAuthMessage('Conta criada com sucesso!', 'success');
+                    updateAuthUI();
+                    alert('Conta criada com sucesso!');
                 } else {
-                    showAuthMessage('Conta criada. Verifique seu e-mail para confirmar o cadastro.', 'success');
+                    sessionStorage.setItem('laPendingCustomerPrivateData', JSON.stringify(privateCustomerData));
+                    showAuthMessage('Conta criada! Confirme seu e-mail. Depois volte e entre com sua senha para concluir o cadastro.', 'success');
                 }
             } catch (error) {
                 console.error(error);
-                showAuthMessage(error.message || 'Não foi possível criar a conta.', 'error');
+                const message = error?.message || '';
+                if (/already registered|already exists|user already/i.test(message)) {
+                    showAuthMessage('Este e-mail já possui uma conta. Use Entrar ou Recuperar senha.', 'error');
+                } else {
+                    showAuthMessage(message || 'Não foi possível criar a conta.', 'error');
+                }
             }
         }
 
-        async function handleAffiliateLogin(event) {
+        
+async function handleAffiliateLogin(event) {
             event.preventDefault();
             const email = document.getElementById('affiliateLoginEmail')?.value.trim().toLowerCase();
             const password = document.getElementById('affiliateLoginPassword')?.value;
@@ -7361,23 +7434,28 @@ function initializeApp() {
         async function sendPasswordReset() {
             const customerInput = document.getElementById('customerLoginEmail');
             const affiliateInput = document.getElementById('affiliateLoginEmail');
-            const raw = (affiliateInput && !affiliateInput.closest('.hidden') ? affiliateInput.value : customerInput?.value || '').trim();
+            const customerVisible = customerInput && !customerInput.closest('form')?.classList.contains('hidden');
+            const affiliateVisible = affiliateInput && !affiliateInput.closest('form')?.classList.contains('hidden');
+            const raw = (affiliateVisible ? affiliateInput.value : customerVisible ? customerInput.value : customerInput?.value || '').trim().toLowerCase();
+
             if (!raw) {
                 showAuthMessage('Informe seu e-mail para receber o link de recuperação.', 'error');
                 return;
             }
-            const email = raw;
-            if (!email || !email.includes('@')) {
-                showAuthMessage('Para recuperar a senha, informe o e-mail cadastrado. O CPF não é usado para recuperação.', 'error');
+            if (!/^\S+@\S+\.\S+$/.test(raw)) {
+                showAuthMessage('Informe um e-mail válido para recuperar a senha.', 'error');
                 return;
             }
+
             try {
-                await supabaseClient.auth.resetPasswordForEmail(email.toLowerCase(), { redirectTo: window.location.origin + window.location.pathname });
+                const { error } = await supabaseClient.auth.resetPasswordForEmail(raw, {
+                    redirectTo: window.location.origin + window.location.pathname
+                });
+                if (error) throw error;
                 showAuthMessage('Link de recuperação enviado. Verifique seu e-mail e a caixa de spam.', 'success');
             } catch (error) {
                 console.error(error);
-                const msg = error.code === 'auth/user-not-found' ? 'Não encontramos uma conta com esse e-mail.' : 'Não foi possível enviar o link de recuperação.';
-                showAuthMessage(msg, 'error');
+                showAuthMessage('Não foi possível enviar o link de recuperação. Tente novamente.', 'error');
             }
         }
 
@@ -7391,32 +7469,35 @@ function initializeApp() {
 
         function togglePasswordVisibility(inputId, button) {
             const input = document.getElementById(inputId);
-            if (!input) return;
+            if (!input || !button) return;
 
-            const icon = button.querySelector('i');
-            if (!icon) return;
+            const visible = input.type === 'text';
+            input.type = visible ? 'password' : 'text';
+            button.setAttribute('aria-label', visible ? 'Mostrar senha' : 'Ocultar senha');
 
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.setAttribute('data-lucide', 'eye-off');
-            } else {
-                input.type = 'password';
-                icon.setAttribute('data-lucide', 'eye');
+            const icon = button.querySelector('[data-lucide], svg');
+            if (icon && icon.tagName.toLowerCase() === 'i') {
+                icon.setAttribute('data-lucide', visible ? 'eye' : 'eye-off');
+            } else if (icon) {
+                button.innerHTML = '<i data-lucide="' + (visible ? 'eye' : 'eye-off') + '" class="w-5 h-5"></i>';
             }
-
             lucide.createIcons();
         }
 
-        function logoutUser() {
+        async function logoutUser() {
+            try {
+                await supabaseClient.auth.signOut();
+            } catch (error) {
+                console.error('Erro ao sair:', error);
+            }
             state.currentUser = null;
-            saveStateToStorage();
+            supabaseAuthUser = null;
             updateAuthUI();
             closeUserMenu();
             closeAdminDashboard();
             closeAffiliateDashboard();
             closeCustomerProfile();
             closeCustomerOrders();
-            alert('Você saiu da sua conta.');
         }
 
         function updateAuthUI() {
