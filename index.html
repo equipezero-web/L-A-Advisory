@@ -6755,6 +6755,15 @@
             updateAuthUI();
         }
 
+        function isActiveAffiliate() {
+            const affiliate = state.affiliates?.[0];
+            return !!(
+                state.currentUser &&
+                affiliate &&
+                ['active', 'approved'].includes(affiliate.status)
+            );
+        }
+
         async function loadAuthenticatedState(user) {
             const uid = user.id;
             const [profileRes, privateRes, productsRes, ordersRes, affiliatesRes] = await Promise.all([
@@ -6818,7 +6827,7 @@
                 };
             }
 
-            if (state.currentUser?.role === 'affiliate' && affiliate) {
+            if (isActiveAffiliate() && affiliate) {
                 const links = await supabaseClient.from('affiliate_links').select('*').eq('affiliate_code', affiliate.code).eq('active', true);
                 state.affiliateLinks = links.data || [];
             } else {
@@ -6827,7 +6836,7 @@
 
             state.users = profile ? [state.currentUser] : [];
             updateAuthUI();
-            if (state.currentUser?.role === 'affiliate' && state.currentUser.affiliateStatus === 'active') enterAffiliateMode();
+            if (isActiveAffiliate()) enterAffiliateMode();
         }
 
         function mapProductFromSupabase(product) {
@@ -6936,7 +6945,7 @@
                         const { data } = await supabaseClient.from('orders').select('*').eq('user_id', supabaseAuthUser.id).order('created_at', { ascending: false });
                         if (data) state.orders = data;
                         checkPendingPaymentConfirmation();
-                        if (state.currentUser?.role === 'affiliate') renderAffiliateSales(state.affiliates[0]);
+                        if (isActiveAffiliate()) renderAffiliateSales(state.affiliates[0]);
                     }
                 }).subscribe();
             realtimeChannels.push(orderChannel);
@@ -6950,14 +6959,9 @@ function captureAffiliateReferral() {
         return;
     }
 
-    const affiliate = state.affiliates.find(item =>
-        item.code === referralCode &&
-        item.status === 'active'
-    );
-
-    if (affiliate) {
-        sessionStorage.setItem('laAffiliateReferralCode', affiliate.code);
-    }
+    // O navegador apenas guarda o código recebido no link.
+    // A validade do código é conferida novamente pelo Edge Function no checkout.
+    sessionStorage.setItem('laAffiliateReferralCode', referralCode);
 }
 
 function getAffiliateReferralCode() {
@@ -7691,7 +7695,7 @@ if (error) throw error;
 
             if (user) {
                 const isAdmin = user.role === 'admin';
-                const isAffiliate = user.role === 'affiliate';
+                const isAffiliate = isActiveAffiliate();
                 document.body.classList.add(isAdmin ? 'admin-mode' : 'customer-mode');
                 if (isAffiliate) document.body.classList.add('affiliate-user-mode');
 
@@ -7737,7 +7741,7 @@ if (error) throw error;
             if (initialEl) initialEl.textContent = user.fullName?.charAt(0).toUpperCase() || 'U';
 
             if (affiliateBtn) {
-                if (user.role === 'affiliate') {
+                if (isActiveAffiliate()) {
                     affiliateBtn.classList.remove('hidden');
                 } else {
                     affiliateBtn.classList.add('hidden');
@@ -7766,8 +7770,14 @@ if (error) throw error;
                 openAuthModal('customer-login');
                 return;
             }
-            if (state.currentUser.role === 'affiliate') {
+            if (isActiveAffiliate()) {
                 openAffiliateDashboard();
+                return;
+            }
+            const existing = state.affiliates?.[0];
+            if (existing?.status === 'pending') {
+                closeUserMenu();
+                alert('Sua solicitação de afiliação já está em análise.');
                 return;
             }
             closeUserMenu();
@@ -8362,7 +8372,7 @@ if (error) throw error;
             document.getElementById('profileHeaderName').textContent = user.fullName;
             document.getElementById('profileHeaderEmail').textContent = user.email;
             document.getElementById('profileAvatar').textContent = user.fullName.charAt(0).toUpperCase();
-            document.getElementById('profileRole').textContent = user.role === 'affiliate' ? 'Afiliado' : 'Cliente';
+            document.getElementById('profileRole').textContent = isActiveAffiliate() ? 'Afiliado' : 'Cliente';
             document.getElementById('profileCreatedAt').textContent = formatDate(user.createdAt);
             document.getElementById('profileLastAccess').textContent = formatDate(user.lastAccess);
 
@@ -8829,7 +8839,7 @@ if (error) throw error;
 
         function openAffiliateDashboard() {
             const user = state.currentUser;
-            if (!user || user.role !== 'affiliate') {
+            if (!user || !isActiveAffiliate()) {
                 alert('Acesso restrito a afiliados.');
                 return;
             }
