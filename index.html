@@ -3700,6 +3700,70 @@
                             Entrar no portal administrativo
                         </button>
                     </form>
+
+                    <!-- =================================================
+                         REDEFINIÇÃO DE SENHA
+                    ================================================== -->
+                    <form
+                        id="passwordRecoveryForm"
+                        onsubmit="handlePasswordRecovery(event)"
+                        class="auth-form hidden space-y-5"
+                    >
+                        <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                            <div class="flex items-start gap-3">
+                                <i data-lucide="key-round" class="w-5 h-5 text-amber-700 flex-none mt-0.5"></i>
+                                <p class="text-sm text-amber-900 leading-relaxed">
+                                    Você entrou pelo link de recuperação. Defina uma nova senha para sua conta.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="recoveryNewPassword" class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">
+                                Nova senha
+                            </label>
+                            <div class="relative">
+                                <input
+                                    type="password"
+                                    id="recoveryNewPassword"
+                                    required
+                                    minlength="12"
+                                    autocomplete="new-password"
+                                    placeholder="Digite sua nova senha"
+                                    class="w-full pr-12 px-4 py-3.5 border-2 border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-amber-500"
+                                >
+                                <button type="button" onclick="togglePasswordVisibility('recoveryNewPassword', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700" aria-label="Mostrar senha">
+                                    <i data-lucide="eye" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-2">Mínimo de 12 caracteres.</p>
+                        </div>
+
+                        <div>
+                            <label for="recoveryConfirmPassword" class="block text-xs font-bold text-slate-700 uppercase mb-2 tracking-wide">
+                                Confirmar nova senha
+                            </label>
+                            <div class="relative">
+                                <input
+                                    type="password"
+                                    id="recoveryConfirmPassword"
+                                    required
+                                    minlength="12"
+                                    autocomplete="new-password"
+                                    placeholder="Digite a senha novamente"
+                                    class="w-full pr-12 px-4 py-3.5 border-2 border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-amber-500"
+                                >
+                                <button type="button" onclick="togglePasswordVisibility('recoveryConfirmPassword', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700" aria-label="Mostrar senha">
+                                    <i data-lucide="eye" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full gradient-gold text-slate-900 py-4 rounded-xl font-bold hover:shadow-gold transition btn-premium">
+                            <i data-lucide="lock-keyhole" class="w-5 h-5 inline mr-2"></i>
+                            Salvar nova senha
+                        </button>
+                    </form>
                 </div>
             </section>
         </div>
@@ -6724,10 +6788,16 @@
             try {
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 await applySupabaseSession(session);
+                openPasswordRecoveryIfPresent(session);
 
-                supabaseClient.auth.onAuthStateChange((_event, session) => {
+                supabaseClient.auth.onAuthStateChange((event, session) => {
                     // Não faça consultas complexas dentro do callback síncrono do Supabase Auth.
-                    setTimeout(() => applySupabaseSession(session), 0);
+                    setTimeout(() => {
+                        applySupabaseSession(session);
+                        if (event === 'PASSWORD_RECOVERY') {
+                            openAuthModal('password-recovery');
+                        }
+                    }, 0);
                 });
 
                 supabaseReady = true;
@@ -6737,6 +6807,16 @@
                 console.error('Erro ao inicializar Supabase:', error);
                 supabaseReady = false;
                 initializeApp();
+            }
+        }
+
+        function openPasswordRecoveryIfPresent(session) {
+            const hash = window.location.hash || '';
+            const query = window.location.search || '';
+            const isRecoveryUrl = /(?:^|[&#?])type=recovery(?:&|$)/i.test(hash + '&' + query) || /type=recovery/i.test(hash);
+
+            if (isRecoveryUrl && session?.user) {
+                setTimeout(() => openAuthModal('password-recovery'), 0);
             }
         }
 
@@ -6751,11 +6831,6 @@
                 state.orders = [];
                 state.affiliates = [];
                 state.affiliateLinks = [];
-                state.favorites = [];
-                state.addresses = [];
-                state.reviews = [];
-                state.notifications = [];
-                state.supportConversations = [];
             }
             updateAuthUI();
         }
@@ -6831,140 +6906,8 @@
             }
 
             state.users = profile ? [state.currentUser] : [];
-            await loadCustomerExtras();
             updateAuthUI();
             if (state.currentUser?.role === 'affiliate' && state.currentUser.affiliateStatus === 'active') enterAffiliateMode();
-        }
-
-        async function loadFavorites() {
-            if (!state.currentUser) { state.favorites = []; return; }
-            const { data, error } = await supabaseClient
-                .from('favorites').select('id, product_id, created_at')
-                .eq('user_id', state.currentUser.id).order('created_at', { ascending: false });
-            if (error) { console.error('Erro ao carregar favoritos:', error); state.favorites = []; return; }
-            state.favorites = data || [];
-        }
-
-        function isFavorite(productId) {
-            return state.favorites.some(item => item.product_id === productId);
-        }
-
-        async function toggleFavorite(productId) {
-            if (!state.currentUser) { requireAuthForAction('customer-login'); return; }
-            try {
-                if (isFavorite(productId)) {
-                    const item = state.favorites.find(f => f.product_id === productId);
-                    const { error } = await supabaseClient.from('favorites').delete().eq('id', item.id).eq('user_id', state.currentUser.id);
-                    if (error) throw error;
-                    state.favorites = state.favorites.filter(f => f.id !== item.id);
-                } else {
-                    const { data, error } = await supabaseClient.from('favorites').insert({ user_id: state.currentUser.id, product_id: productId }).select('id, product_id, created_at').single();
-                    if (error) throw error;
-                    state.favorites.push(data);
-                }
-                renderCatalog();
-            } catch (error) {
-                console.error('Erro ao atualizar favorito:', error);
-                alert('Não foi possível atualizar os favoritos. Tente novamente.');
-            }
-        }
-
-        async function loadCustomerExtras() {
-            if (!state.currentUser) {
-                state.favorites = []; state.addresses = []; state.reviews = []; state.notifications = []; state.supportConversations = []; return;
-            }
-            const uid = state.currentUser.id;
-            const [fav, addr, rev, notif, support] = await Promise.all([
-                supabaseClient.from('favorites').select('*').eq('user_id', uid).order('created_at', { ascending: false }),
-                supabaseClient.from('addresses').select('*').eq('user_id', uid).order('is_default', { ascending: false }).order('created_at', { ascending: false }),
-                supabaseClient.from('reviews').select('*').eq('user_id', uid).order('created_at', { ascending: false }),
-                supabaseClient.from('notifications').select('*').eq('user_id', uid).order('created_at', { ascending: false }),
-                supabaseClient.from('support_conversations').select('*').eq('user_id', uid).order('created_at', { ascending: false })
-            ]);
-            state.favorites = fav.data || [];
-            state.addresses = addr.data || [];
-            state.reviews = rev.data || [];
-            state.notifications = notif.data || [];
-            state.supportConversations = support.data || [];
-            [fav, addr, rev, notif, support].forEach(r => { if (r.error) console.warn('Supabase dados da conta:', r.error.message); });
-        }
-
-        async function saveCustomerAddress(address) {
-            if (!state.currentUser) return { ok: false, error: 'Não autenticado' };
-            const payload = { ...address, user_id: state.currentUser.id };
-            const { data, error } = await supabaseClient.from('addresses').insert(payload).select('*').single();
-            if (error) { console.error(error); return { ok: false, error }; }
-            state.addresses = [data, ...state.addresses];
-            return { ok: true, data };
-        }
-
-        async function updateCustomerAddress(id, address) {
-            if (!state.currentUser) return { ok: false, error: 'Não autenticado' };
-            const { data, error } = await supabaseClient.from('addresses').update(address).eq('id', id).eq('user_id', state.currentUser.id).select('*').single();
-            if (error) { console.error(error); return { ok: false, error }; }
-            state.addresses = state.addresses.map(a => a.id === id ? data : a);
-            return { ok: true, data };
-        }
-
-        async function deleteCustomerAddress(id) {
-            if (!state.currentUser) return { ok: false, error: 'Não autenticado' };
-            const { error } = await supabaseClient.from('addresses').delete().eq('id', id).eq('user_id', state.currentUser.id);
-            if (error) { console.error(error); return { ok: false, error }; }
-            state.addresses = state.addresses.filter(a => a.id !== id);
-            return { ok: true };
-        }
-
-        async function loadProductReviews(productId) {
-            const { data, error } = await supabaseClient.from('reviews').select('*').eq('product_id', productId).eq('status', 'approved').order('created_at', { ascending: false });
-            if (error) { console.warn('Erro ao carregar avaliações:', error.message); return []; }
-            return data || [];
-        }
-
-        async function createProductReview(productId, rating, comment = '', orderId = null) {
-            if (!state.currentUser) return { ok: false, error: 'Faça login para avaliar.' };
-            const payload = { user_id: state.currentUser.id, product_id: productId, order_id: orderId, rating: Math.max(1, Math.min(5, Number(rating))), comment: String(comment || '').trim(), status: 'pending' };
-            const { data, error } = await supabaseClient.from('reviews').insert(payload).select('*').single();
-            if (error) { console.error('Erro ao enviar avaliação:', error); return { ok: false, error }; }
-            state.reviews.unshift(data);
-            return { ok: true, data };
-        }
-
-        async function loadNotifications() {
-            if (!state.currentUser) { state.notifications = []; return []; }
-            const { data, error } = await supabaseClient.from('notifications').select('*').eq('user_id', state.currentUser.id).order('created_at', { ascending: false });
-            if (error) { console.warn('Erro ao carregar notificações:', error.message); state.notifications = []; return []; }
-            state.notifications = data || []; return state.notifications;
-        }
-
-        async function markNotificationAsRead(id) {
-            if (!state.currentUser) return false;
-            const { error } = await supabaseClient.from('notifications').update({ is_read: true }).eq('id', id).eq('user_id', state.currentUser.id);
-            if (error) { console.warn(error); return false; }
-            state.notifications = state.notifications.map(n => n.id === id ? { ...n, is_read: true } : n);
-            return true;
-        }
-
-        async function createSupportConversation(subject, category = 'question', orderId = null) {
-            if (!state.currentUser) return { ok: false, error: 'Faça login para abrir atendimento.' };
-            const { data, error } = await supabaseClient.from('support_conversations').insert({ user_id: state.currentUser.id, subject: String(subject || 'Atendimento').trim(), category, order_id: orderId, status: 'open' }).select('*').single();
-            if (error) { console.error(error); return { ok: false, error }; }
-            state.supportConversations.unshift(data); return { ok: true, data };
-        }
-
-        async function loadSupportMessages(conversationId) {
-            if (!state.currentUser) return [];
-            const { data, error } = await supabaseClient.from('support_messages').select('*').eq('conversation_id', conversationId).order('created_at', { ascending: true });
-            if (error) { console.warn('Erro ao carregar mensagens:', error.message); return []; }
-            return data || [];
-        }
-
-        async function sendSupportMessage(conversationId, message) {
-            if (!state.currentUser) return { ok: false, error: 'Faça login para enviar mensagens.' };
-            const text = String(message || '').trim();
-            if (!text) return { ok: false, error: 'Mensagem vazia.' };
-            const { data, error } = await supabaseClient.from('support_messages').insert({ conversation_id: conversationId, sender_id: state.currentUser.id, message: text }).select('*').single();
-            if (error) { console.error(error); return { ok: false, error }; }
-            return { ok: true, data };
         }
 
         function mapProductFromSupabase(product) {
@@ -7391,19 +7334,33 @@ function initializeApp() {
                         lucide.createIcons();
                     }
                     break;
+
+                case 'password-recovery':
+                    document.getElementById('passwordRecoveryForm')?.classList.remove('hidden');
+                    loginTab?.classList.add('hidden');
+                    registerTab?.classList.add('hidden');
+                    if (visualTitle) visualTitle.textContent = 'Recupere o acesso à sua conta.';
+                    if (visualDesc) visualDesc.textContent = 'Escolha uma nova senha segura para continuar usando sua conta.';
+                    if (formTitle) formTitle.textContent = 'Redefinir senha';
+                    if (formDesc) formDesc.textContent = 'Digite e confirme sua nova senha. A alteração será salva com segurança no Supabase.';
+                    if (formBadge) {
+                        formBadge.innerHTML = '<i data-lucide="key-round" class="w-4 h-4"></i> Recuperação de conta';
+                        lucide.createIcons();
+                    }
+                    break;
             }
 
             lucide.createIcons();
         }
 
         function hideAllAuthForms() {
-            ['customerLoginForm', 'customerRegisterForm', 'affiliateLoginForm', 'affiliateRegisterForm', 'adminLoginForm'].forEach(id => {
+            ['customerLoginForm', 'customerRegisterForm', 'affiliateLoginForm', 'affiliateRegisterForm', 'adminLoginForm', 'passwordRecoveryForm'].forEach(id => {
                 document.getElementById(id)?.classList.add('hidden');
             });
         }
 
         function clearAuthForms() {
-            ['customerLoginForm', 'customerRegisterForm', 'affiliateLoginForm', 'affiliateRegisterForm', 'adminLoginForm'].forEach(id => {
+            ['customerLoginForm', 'customerRegisterForm', 'affiliateLoginForm', 'affiliateRegisterForm', 'adminLoginForm', 'passwordRecoveryForm'].forEach(id => {
                 const form = document.getElementById(id);
                 if (form) form.reset();
             });
@@ -7742,6 +7699,60 @@ if (error) throw error;
             } catch (error) {
                 console.error(error);
                 showAuthMessage('Credenciais administrativas inválidas.', 'error');
+            }
+        }
+
+        async function handlePasswordRecovery(event) {
+            event.preventDefault();
+
+            const newPassword = document.getElementById('recoveryNewPassword')?.value || '';
+            const confirmPassword = document.getElementById('recoveryConfirmPassword')?.value || '';
+
+            if (newPassword.length < 12) {
+                showAuthMessage('A nova senha deve ter pelo menos 12 caracteres.', 'error');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showAuthMessage('As senhas não coincidem.', 'error');
+                return;
+            }
+
+            const button = event.submitter;
+            if (button) {
+                button.disabled = true;
+                button.dataset.originalText = button.innerHTML;
+                button.innerHTML = 'Salvando...';
+            }
+
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session?.user) {
+                    throw new Error('A sessão de recuperação expirou. Solicite um novo link.');
+                }
+
+                const { error } = await supabaseClient.auth.updateUser({
+                    password: newPassword
+                });
+
+                if (error) throw error;
+
+                showAuthMessage('Senha redefinida com sucesso! Você já pode entrar com a nova senha.', 'success');
+                document.getElementById('recoveryNewPassword').value = '';
+                document.getElementById('recoveryConfirmPassword').value = '';
+
+                setTimeout(() => {
+                    switchAuthScreen('customer-login');
+                    showAuthMessage('Senha redefinida com sucesso. Entre com sua nova senha.', 'success');
+                }, 1200);
+            } catch (error) {
+                console.error('Erro ao redefinir senha:', error);
+                showAuthMessage(error?.message || 'Não foi possível redefinir a senha. Solicite um novo link.', 'error');
+            } finally {
+                if (button) {
+                    button.disabled = false;
+                    button.innerHTML = button.dataset.originalText || 'Salvar nova senha';
+                }
             }
         }
 
@@ -10064,9 +10075,6 @@ function renderCatalog() {
         return `
             <article class="w-[320px] flex-shrink-0 bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col">
                 <div class="relative h-56 bg-slate-100 overflow-hidden">
-                    <button type="button" onclick="toggleFavorite('${escapeAttribute(product.id)}')" class="absolute top-3 right-3 z-10 w-10 h-10 rounded-full bg-white/95 shadow flex items-center justify-center ${isFavorite(product.id) ? 'text-red-500' : 'text-slate-500'} hover:text-red-500 transition" aria-label="${isFavorite(product.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}">
-                        <i data-lucide="heart" class="w-5 h-5 ${isFavorite(product.id) ? 'fill-current' : ''}"></i>
-                    </button>
                     <img
                         src="${escapeAttribute(product.image)}"
                         alt="${escapeAttribute(product.name)}"
@@ -10133,6 +10141,13 @@ function renderCatalog() {
                             Comprar agora
                         </button>
                     </div>
+                        <i
+                            data-lucide="shopping-cart"
+                            class="w-4 h-4 inline mr-1"
+                        ></i>
+
+                        Adicionar ao carrinho
+                    </button>
                 </div>
             </article>
         `;
@@ -10494,6 +10509,7 @@ function escapeAttribute(value) {
         window.handleAffiliateRegister = handleAffiliateRegister;
         window.handleAdminLogin = handleAdminLogin;
         window.sendPasswordReset = sendPasswordReset;
+        window.handlePasswordRecovery = handlePasswordRecovery;
         window.signInWithGoogle = signInWithGoogle;
         window.showAppleLoginInfo = showAppleLoginInfo;
         window.togglePasswordVisibility = togglePasswordVisibility;
