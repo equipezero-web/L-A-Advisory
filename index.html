@@ -2089,6 +2089,10 @@
                         </label>
                         <input type="email" id="checkoutEmail" required maxlength="254" autocomplete="email" class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-amber-500">
                     </div>
+                    <div>
+                        <label for="checkoutCpf" class="block text-xs font-bold text-slate-700 uppercase mb-2">CPF</label>
+                        <input type="text" id="checkoutCpf" required minlength="11" maxlength="14" inputmode="numeric" autocomplete="off" placeholder="000.000.000-00" class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
                 </div>
 
                 <div class="p-5 bg-slate-50 border border-slate-200 rounded-xl space-y-4">
@@ -8117,6 +8121,8 @@ if (error) throw error;
             if (fullName) fullName.value = user.fullName || '';
             if (phone) phone.value = user.phone || '';
             if (email) email.value = user.email || '';
+            const cpf = document.getElementById('checkoutCpf');
+            if (cpf) cpf.value = user.cpf || '';
             document.getElementById('checkoutZipCode').value = address.zipCode || '';
             document.getElementById('checkoutStreet').value = address.street || '';
             document.getElementById('checkoutNumber').value = address.number || '';
@@ -8216,6 +8222,7 @@ if (error) throw error;
             const fullName = document.getElementById('checkoutFullName')?.value.trim();
             const phone = document.getElementById('checkoutPhone')?.value.trim();
             const email = document.getElementById('checkoutEmail')?.value.trim().toLowerCase();
+            const cpf = document.getElementById('checkoutCpf')?.value.trim();
             const zipCode = document.getElementById('checkoutZipCode')?.value.trim();
             const street = document.getElementById('checkoutStreet')?.value.trim();
             const number = document.getElementById('checkoutNumber')?.value.trim();
@@ -8229,6 +8236,7 @@ const requiredFields = {
     'Nome completo': fullName,
     'WhatsApp / Telefone': phone,
     'E-mail': email,
+    'CPF': cpf,
     'CEP': zipCode,
     'Rua / Logradouro': street,
     'Número': number,
@@ -8257,6 +8265,12 @@ if (emptyFields.length > 0) {
                 return;
             }
 
+            const cpfDigits = cpf.replace(/\D/g, '');
+            if (cpfDigits.length !== 11 || /^(\d)\1{10}$/.test(cpfDigits)) {
+                alert('Informe um CPF válido com 11 números.');
+                return;
+            }
+
             if (!state.cart.length) {
                 alert('Seu carrinho está vazio.');
                 return;
@@ -8282,6 +8296,8 @@ if (emptyFields.length > 0) {
             );
             if (!addressValid) return;
 
+            const addressText = `${street}, ${number}${complement ? ' - ' + complement : ''} - ${neighborhood}, ${city} - ${checkoutState} - CEP ${address.zipCode.replace(/(\d{5})(\d{3})/, '$1-$2')}`;
+
             const submitButton = event.submitter;
             if (submitButton) {
                 submitButton.disabled = true;
@@ -8305,7 +8321,7 @@ if (emptyFields.length > 0) {
                         'apikey': SUPABASE_ANON_KEY
                     },
                     body: JSON.stringify({
-                        customer: { fullName, phone, email, address },
+                        customer: { fullName, cpf: cpfDigits, phone, email, address: addressText },
                         items: state.cart.map(item => ({ productId: item.id, quantity: Number(item.quantity) })),
                         affiliateCode: getAffiliateReferralCode()
                     })
@@ -8324,7 +8340,6 @@ if (emptyFields.length > 0) {
 
                 if (data.orderId) sessionStorage.setItem('laPendingPaymentOrder', data.orderId);
 
-                const addressText = `${street}, ${number}${complement ? ' - ' + complement : ''} - ${neighborhood}, ${city} - ${state} - CEP ${address.zipCode.replace(/(\d{5})(\d{3})/, '$1-$2')}`;
                 const itemsText = state.cart.map(item => `• ${item.quantity}x ${item.name} — ${formatCurrency(Number(item.price) * Number(item.quantity))}`).join('\n');
                 const whatsappText = [
                     '🛍️ *NOVO PEDIDO — L&A ROYAL ADVISORY*',
