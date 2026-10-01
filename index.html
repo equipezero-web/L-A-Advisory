@@ -8222,14 +8222,14 @@ if (error) throw error;
             const complement = document.getElementById('checkoutComplement')?.value.trim();
             const neighborhood = document.getElementById('checkoutNeighborhood')?.value.trim();
             const city = document.getElementById('checkoutCity')?.value.trim();
-            const state = document.getElementById('checkoutState')?.value.trim().toUpperCase();
+            const checkoutState = document.getElementById('checkoutState')?.value.trim().toUpperCase();
 
-            if (!fullName || !phone || !email || !zipCode || !street || !number || !neighborhood || !city || !state) {
+            if (!fullName || !phone || !email || !zipCode || !street || !number || !neighborhood || !city || !checkoutState) {
                 alert('Preencha todas as informações obrigatórias do pedido e do endereço.');
                 return;
             }
 
-            if (!/^[A-Z]{2}$/.test(state)) {
+            if (!/^[A-Z]{2}$/.test(checkoutState)) {
                 alert('Informe o estado com 2 letras, por exemplo: PE.');
                 return;
             }
@@ -8257,7 +8257,7 @@ if (error) throw error;
                 complement,
                 neighborhood,
                 city,
-                state,
+               state: checkoutState,
             };
 
             const addressValid = await validateCheckoutAddressWithViaCep(
