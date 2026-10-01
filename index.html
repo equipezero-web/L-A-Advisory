@@ -9642,7 +9642,7 @@ if (emptyFields.length > 0) {
             }
         }
 
-        function saveAdminProduct(event) {
+        async function saveAdminProduct(event) {
             event.preventDefault();
 
             const id = document.getElementById('adminProductId')?.value;
@@ -9656,61 +9656,84 @@ if (emptyFields.length > 0) {
             const category = document.getElementById('adminProductCategory')?.value.trim();
 
             if (
-    !name ||
-    !description ||
-    !image ||
-    !category ||
-    !Number.isFinite(price) ||
-    price < 0 ||
-    !Number.isFinite(discount) ||
-    discount < 0 ||
-    discount > 100 ||
-    !Number.isInteger(stock) ||
-    stock < 0 ||
-    !Number.isFinite(commission) ||
-    commission < 0 ||
-    commission > 100
-) {
-    showAdminProductMessage(
-        'Revise os dados do produto. Preço, desconto, estoque e comissão devem ser valores válidos.',
-        'error'
-    );
-    return;
-}
+                !name ||
+                !description ||
+                !image ||
+                !category ||
+                !Number.isFinite(price) ||
+                price < 0 ||
+                !Number.isFinite(discount) ||
+                discount < 0 ||
+                discount > 100 ||
+                !Number.isInteger(stock) ||
+                stock < 0 ||
+                !Number.isFinite(commission) ||
+                commission < 0 ||
+                commission > 100
+            ) {
+                showAdminProductMessage(
+                    'Revise os dados do produto. Preço, desconto, estoque e comissão devem ser valores válidos.',
+                    'error'
+                );
+                return;
+            }
 
-            if (id) {
-                const index = state.products.findIndex(p => p.id === id);
+            const productId = id || 'prod_' + Date.now();
+            const product = {
+                id: productId,
+                name,
+                description,
+                price,
+                discount,
+                stock,
+                commission,
+                image,
+                category
+            };
+
+            try {
+                if (!supabaseAuthUser) {
+                    throw new Error('Sua sessão expirou. Faça login novamente como administrador.');
+                }
+
+                const { error } = await supabaseClient
+                    .from('products')
+                    .upsert({
+                        id: product.id,
+                        name: product.name,
+                        description: product.description,
+                        price: product.price,
+                        discount: product.discount,
+                        stock: product.stock,
+                        commission: product.commission,
+                        image: product.image,
+                        category: product.category,
+                        active: true
+                    }, { onConflict: 'id' });
+
+                if (error) throw error;
+
+                const index = state.products.findIndex(p => p.id === product.id);
                 if (index !== -1) {
                     state.products[index] = {
                         ...state.products[index],
-                        name,
-                        description,
-                        price,
-                        discount,
-                        stock,
-                        commission,
-                        image,
-                        category
+                        ...product
                     };
+                } else {
+                    state.products.push(product);
                 }
-            } else {
-                state.products.push({
-                    id: 'prod_' + Date.now(),
-                    name,
-                    description,
-                    price,
-                    discount,
-                    stock,
-                    commission,
-                    image,
-                    category
-                });
-            }
 
-saveStateToStorage();
-renderCatalog();
-loadAdminProducts();
-showAdminProductMessage('Produto salvo com sucesso!', 'success');
+                saveStateToStorage();
+                renderCatalog();
+                loadAdminProducts();
+                showAdminProductMessage('Produto salvo no Supabase com sucesso!', 'success');
+            } catch (error) {
+                console.error('Erro ao salvar produto no Supabase:', error);
+                showAdminProductMessage(
+                    'Não foi possível salvar o produto no banco de dados: ' + (error?.message || 'erro desconhecido'),
+                    'error'
+                );
+            }
         }
 
         function showAdminProductMessage(message, type) {
