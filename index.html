@@ -8331,9 +8331,21 @@ if (emptyFields.length > 0) {
                 let data = {};
                 try { data = raw ? JSON.parse(raw) : {}; } catch (_) {}
 
-                if (!response.ok) {
-                    throw new Error(data.error || `Erro no checkout (${response.status}).`);
-                }
+               if (!response.ok) {
+    const debug = data.debug || {};
+
+    const detalhes = [
+        debug.code ? `Código: ${debug.code}` : '',
+        debug.message ? `Mensagem: ${debug.message}` : '',
+        debug.details ? `Detalhes: ${debug.details}` : '',
+        debug.hint ? `Dica: ${debug.hint}` : ''
+    ].filter(Boolean).join('\n');
+
+    throw new Error(
+        (data.error || `Erro no checkout (${response.status}).`) +
+        (detalhes ? `\n\n${detalhes}` : '')
+    );
+}
                 if (!data.init_point) {
                     throw new Error('O Mercado Pago não retornou o endereço de pagamento.');
                 }
