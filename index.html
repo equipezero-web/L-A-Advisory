@@ -8224,11 +8224,28 @@ if (error) throw error;
             const city = document.getElementById('checkoutCity')?.value.trim();
             const checkoutState = document.getElementById('checkoutState')?.value.trim().toUpperCase();
 
-            if (!fullName || !phone || !email || !zipCode || !street || !number || !neighborhood || !city || !checkoutState) {
-                alert('Preencha todas as informações obrigatórias do pedido e do endereço.');
-                return;
-            }
+            
+const requiredFields = {
+    'Nome completo': fullName,
+    'WhatsApp / Telefone': phone,
+    'E-mail': email,
+    'CEP': zipCode,
+    'Rua / Logradouro': street,
+    'Número': number,
+    'Bairro': neighborhood,
+    'Cidade': city,
+    'Estado': checkoutState
+};
 
+const emptyFields = Object.entries(requiredFields)
+    .filter(([_, value]) => !value)
+    .map(([name]) => name);
+
+if (emptyFields.length > 0) {
+    alert('Confira estes campos obrigatórios: ' + emptyFields.join(', '));
+    console.table(requiredFields);
+    return;
+}
             if (!/^[A-Z]{2}$/.test(checkoutState)) {
                 alert('Informe o estado com 2 letras, por exemplo: PE.');
                 return;
