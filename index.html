@@ -6753,6 +6753,10 @@
         // =====================================================
         const SUPABASE_URL = 'https://fqisewatypluagngmgka.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_Etts25r3XRBdDHuUYuUajg_YjXTn_wb';
+        // Captura a URL antes que o Supabase processe/remova os parâmetros do link.
+        const PASSWORD_RECOVERY_URL = /(?:^|[&#?])type=recovery(?:&|$)/i.test(
+            (window.location.hash || '') + '&' + (window.location.search || '')
+        ) || /[?&]code=/i.test(window.location.search || '');
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
             auth: {
                 persistSession: true,
@@ -6785,39 +6789,56 @@
         });
 
         async function initializeSupabase() {
-            try {
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                await applySupabaseSession(session);
-                openPasswordRecoveryIfPresent(session);
-
-                supabaseClient.auth.onAuthStateChange((event, session) => {
-                    // Não faça consultas complexas dentro do callback síncrono do Supabase Auth.
-                    setTimeout(() => {
-                        applySupabaseSession(session);
+            // Registra o listener ANTES de getSession(), pois a validação do link
+            // pode disparar PASSWORD_RECOVERY durante a inicialização do cliente.
+            supabaseClient.auth.onAuthStateChange((event, session) => {
+                setTimeout(async () => {
+                    try {
+                        await applySupabaseSession(session);
                         if (event === 'PASSWORD_RECOVERY') {
                             openAuthModal('password-recovery');
                         }
-                    }, 0);
-                });
+                    } catch (error) {
+                        console.error('Erro ao processar sessão de autenticação:', error);
+                    }
+                }, 0);
+            });
+
+            try {
+                const { data: { session }, error } = await supabaseClient.auth.getSession();
+                if (error) throw error;
+                await applySupabaseSession(session);
 
                 supabaseReady = true;
                 initializeApp();
                 lucide.createIcons();
+
+                // Também cobre links que já chegaram com a sessão restaurada.
+                openPasswordRecoveryIfPresent(session);
             } catch (error) {
                 console.error('Erro ao inicializar Supabase:', error);
                 supabaseReady = false;
                 initializeApp();
+                lucide.createIcons();
+
+                if (PASSWORD_RECOVERY_URL) {
+                    setTimeout(() => {
+                        openAuthModal('password-recovery');
+                        showAuthMessage('Não foi possível validar este link de recuperação. Ele pode ter expirado ou já ter sido usado. Solicite um novo link quando o limite de envio permitir.', 'error');
+                    }, 0);
+                }
             }
         }
 
         function openPasswordRecoveryIfPresent(session) {
-            const hash = window.location.hash || '';
-            const query = window.location.search || '';
-            const isRecoveryUrl = /(?:^|[&#?])type=recovery(?:&|$)/i.test(hash + '&' + query) || /type=recovery/i.test(hash);
+            if (!PASSWORD_RECOVERY_URL) return;
 
-            if (isRecoveryUrl && session?.user) {
-                setTimeout(() => openAuthModal('password-recovery'), 0);
-            }
+            setTimeout(() => {
+                openAuthModal('password-recovery');
+                if (!session?.user) {
+                    showAuthMessage('O formulário abriu, mas o link ainda não foi validado. Se ao salvar aparecer que a sessão expirou, o link pode estar vencido ou já ter sido usado.', 'error');
+                }
+            }, 100);
         }
 
         async function applySupabaseSession(session) {
