@@ -2213,28 +2213,24 @@
                     </p>
                 </div>
 
-                <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl">
-                    <div class="flex items-start gap-3">
-                        <i
-                            data-lucide="credit-card"
-                            class="w-5 h-5 text-amber-700 flex-none mt-0.5"
-                        ></i>
+                </form>
 
-                        <p class="text-xs text-amber-900 leading-relaxed">
-                            Na próxima etapa, você escolherá Pix, cartão ou boleto.
-                            O pagamento será confirmado de forma segura antes de
-                            gerar qualquer comissão de afiliado.
-                        </p>
+                <div class="p-5 bg-amber-50 border border-amber-200 rounded-xl">
+                    <div class="flex items-start gap-3">
+                        <i data-lucide="shield-check" class="w-5 h-5 text-amber-700 flex-none mt-0.5"></i>
+                        <div>
+                            <p class="text-sm font-bold text-amber-900">Pagamento seguro</p>
+                            <p class="text-xs text-amber-900/80 leading-relaxed mt-1">
+                                Escolha Pix ou cartão de crédito no formulário seguro do Mercado Pago.
+                                Os dados do cartão são tratados pelo próprio Mercado Pago.
+                            </p>
+                        </div>
                     </div>
                 </div>
 
-                <button
-                    type="submit"
-                    class="w-full gradient-gold text-slate-900 py-4 rounded-xl font-bold hover:shadow-gold transition btn-premium"
-                >
-                    Prosseguir para pagamento
-                </button>
-            </form>
+                <div id="paymentBrick_container" class="mt-4"></div>
+
+                <div id="checkoutPaymentMessage" class="hidden mt-4 p-3 rounded-xl text-sm"></div>
         </div>
     </div>
 
@@ -8080,10 +8076,21 @@ if (error) throw error;
                 modal.classList.remove('hidden');
                 document.body.style.overflow = 'hidden';
                 lucide.createIcons();
+
+                setTimeout(() => {
+                    renderMercadoPagoPaymentBrick();
+                }, 100);
             }
         }
 
         function closeCheckoutModal() {
+            if (window.paymentBrickController?.unmount) {
+                try {
+                    window.paymentBrickController.unmount();
+                } catch (_) {}
+                window.paymentBrickController = null;
+            }
+
             const modal = document.getElementById('checkoutModal');
             if (modal) {
                 modal.classList.add('hidden');
@@ -8216,9 +8223,7 @@ if (error) throw error;
             }
         }
 
-        async function createCheckoutOrder(event) {
-            event.preventDefault();
-
+        async function collectCheckoutCustomer() {
             const fullName = document.getElementById('checkoutFullName')?.value.trim();
             const phone = document.getElementById('checkoutPhone')?.value.trim();
             const email = document.getElementById('checkoutEmail')?.value.trim().toLowerCase();
@@ -8231,54 +8236,47 @@ if (error) throw error;
             const city = document.getElementById('checkoutCity')?.value.trim();
             const checkoutState = document.getElementById('checkoutState')?.value.trim().toUpperCase();
 
-            
-const requiredFields = {
-    'Nome completo': fullName,
-    'WhatsApp / Telefone': phone,
-    'E-mail': email,
-    'CPF': cpf,
-    'CEP': zipCode,
-    'Rua / Logradouro': street,
-    'Número': number,
-    'Bairro': neighborhood,
-    'Cidade': city,
-    'Estado': checkoutState
-};
+            const requiredFields = {
+                'Nome completo': fullName,
+                'WhatsApp / Telefone': phone,
+                'E-mail': email,
+                'CPF': cpf,
+                'CEP': zipCode,
+                'Rua / Logradouro': street,
+                'Número': number,
+                'Bairro': neighborhood,
+                'Cidade': city,
+                'Estado': checkoutState
+            };
 
-const emptyFields = Object.entries(requiredFields)
-    .filter(([_, value]) => !value)
-    .map(([name]) => name);
+            const emptyFields = Object.entries(requiredFields)
+                .filter(([_, value]) => !value)
+                .map(([name]) => name);
 
-if (emptyFields.length > 0) {
-    alert('Confira estes campos obrigatórios: ' + emptyFields.join(', '));
-    console.table(requiredFields);
-    return;
-}
+            if (emptyFields.length > 0) {
+                throw new Error('Confira estes campos obrigatórios: ' + emptyFields.join(', '));
+            }
+
             if (!/^[A-Z]{2}$/.test(checkoutState)) {
-                alert('Informe o estado com 2 letras, por exemplo: PE.');
-                return;
+                throw new Error('Informe o estado com 2 letras, por exemplo: PE.');
             }
 
             const phoneDigits = phone.replace(/\D/g, '');
             if (phoneDigits.length < 10 || phoneDigits.length > 13) {
-                alert('Informe um WhatsApp/telefone válido.');
-                return;
+                throw new Error('Informe um WhatsApp/telefone válido.');
             }
 
             const cpfDigits = cpf.replace(/\D/g, '');
             if (cpfDigits.length !== 11 || /^(\d)\1{10}$/.test(cpfDigits)) {
-                alert('Informe um CPF válido com 11 números.');
-                return;
+                throw new Error('Informe um CPF válido com 11 números.');
             }
 
             if (!state.cart.length) {
-                alert('Seu carrinho está vazio.');
-                return;
+                throw new Error('Seu carrinho está vazio.');
             }
 
             if (!supabaseAuthUser) {
-                alert('Entre na sua conta antes de finalizar a compra.');
-                return;
+                throw new Error('Entre na sua conta antes de finalizar a compra.');
             }
 
             const address = {
@@ -8288,109 +8286,435 @@ if (emptyFields.length > 0) {
                 complement,
                 neighborhood,
                 city,
-               state: checkoutState,
+                state: checkoutState
             };
 
             const addressValid = await validateCheckoutAddressWithViaCep(
-                address.zipCode, address.street, address.neighborhood, address.city, address.state
+                address.zipCode,
+                address.street,
+                address.neighborhood,
+                address.city,
+                address.state
             );
-            if (!addressValid) return;
 
-            const addressText = `${street}, ${number}${complement ? ' - ' + complement : ''} - ${neighborhood}, ${city} - ${checkoutState} - CEP ${address.zipCode.replace(/(\d{5})(\d{3})/, '$1-$2')}`;
-
-            const submitButton = event.submitter;
-            if (submitButton) {
-                submitButton.disabled = true;
-                submitButton.classList.add('opacity-60', 'cursor-not-allowed');
+            if (!addressValid) {
+                throw new Error('Confira o endereço informado.');
             }
 
+            const addressText =
+                `${street}, ${number}${complement ? ' - ' + complement : ''} - ${neighborhood}, ${city} - ${checkoutState} - CEP ${address.zipCode.replace(/(\d{5})(\d{3})/, '$1-$2')}`;
+
+            return {
+                fullName,
+                phone,
+                email,
+                cpfDigits,
+                addressText
+            };
+        }
+
+        async function submitCheckoutPayment(formData, selectedPaymentMethod) {
             let whatsappWindow = null;
-            try {
-                whatsappWindow = window.open('about:blank', '_blank');
-            } catch (_) {}
 
             try {
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                if (!session?.access_token) throw new Error('Sessão expirada. Entre novamente.');
+                const customer = await collectCheckoutCustomer();
 
-                const response = await fetch(SUPABASE_FUNCTIONS_BASE + '/create-checkout', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + session.access_token,
-                        'apikey': SUPABASE_ANON_KEY
-                    },
-                    body: JSON.stringify({
-                        customer: { fullName, cpf: cpfDigits, phone, email, address: addressText },
-                        items: state.cart.map(item => ({ productId: item.id, quantity: Number(item.quantity) })),
-                        affiliateCode: getAffiliateReferralCode()
-                    })
-                });
+                const paymentMethodId =
+                    formData?.payment_method_id ||
+                    formData?.paymentMethodId ||
+                    (selectedPaymentMethod === 'pix' ? 'pix' : '');
+
+                const paymentMethod =
+                    paymentMethodId === 'pix' ||
+                    selectedPaymentMethod === 'pix' ||
+                    selectedPaymentMethod === 'bank_transfer'
+                        ? 'pix'
+                        : 'credit_card';
+
+                const cardToken =
+                    formData?.token ||
+                    formData?.cardToken ||
+                    '';
+
+                const installments =
+                    Number(formData?.installments) || 1;
+
+                if (paymentMethod === 'credit_card' && !cardToken) {
+                    throw new Error('Não foi possível gerar o token seguro do cartão. Confira os dados do cartão.');
+                }
+
+                if (paymentMethod === 'credit_card' && !paymentMethodId) {
+                    throw new Error('Não foi possível identificar a bandeira do cartão.');
+                }
+
+                try {
+                    whatsappWindow = window.open('about:blank', '_blank');
+                } catch (_) {}
+
+                const { data: { session } } =
+                    await supabaseClient.auth.getSession();
+
+                if (!session?.access_token) {
+                    throw new Error('Sessão expirada. Entre novamente.');
+                }
+
+                const response = await fetch(
+                    SUPABASE_FUNCTIONS_BASE + '/create-checkout',
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + session.access_token,
+                            'apikey': SUPABASE_ANON_KEY
+                        },
+                        body: JSON.stringify({
+                            customer: {
+                                fullName: customer.fullName,
+                                cpf: customer.cpfDigits,
+                                phone: customer.phone,
+                                email: customer.email,
+                                address: customer.addressText
+                            },
+                            items: state.cart.map(item => ({
+                                productId: item.id,
+                                quantity: Number(item.quantity)
+                            })),
+                            affiliateCode: getAffiliateReferralCode(),
+                            paymentMethod,
+                            cardToken,
+                            paymentMethodId,
+                            installments
+                        })
+                    }
+                );
 
                 const raw = await response.text();
                 let data = {};
-                try { data = raw ? JSON.parse(raw) : {}; } catch (_) {}
 
-               if (!response.ok) {
-    const debug = data.debug || {};
+                try {
+                    data = raw ? JSON.parse(raw) : {};
+                } catch (_) {}
 
-    const detalhes = [
-        debug.code ? `Código: ${debug.code}` : '',
-        debug.message ? `Mensagem: ${debug.message}` : '',
-        debug.details ? `Detalhes: ${debug.details}` : '',
-        debug.hint ? `Dica: ${debug.hint}` : ''
-    ].filter(Boolean).join('\n');
+                if (!response.ok) {
+                    const debug = data.debug || {};
+                    const detalhes = [
+                        debug.code ? `Código: ${debug.code}` : '',
+                        debug.message ? `Mensagem: ${debug.message}` : '',
+                        debug.details ? `Detalhes: ${debug.details}` : '',
+                        debug.hint ? `Dica: ${debug.hint}` : ''
+                    ].filter(Boolean).join('\n');
 
-    throw new Error(
-        (data.error || `Erro no checkout (${response.status}).`) +
-        (detalhes ? `\n\n${detalhes}` : '')
-    );
-}
-                if (!data.init_point) {
-                    throw new Error('O Mercado Pago não retornou o endereço de pagamento.');
+                    throw new Error(
+                        (data.error || `Erro no checkout (${response.status}).`) +
+                        (detalhes ? `\n\n${detalhes}` : '')
+                    );
                 }
 
-                if (data.orderId) sessionStorage.setItem('laPendingPaymentOrder', data.orderId);
+                if (!data.ok) {
+                    throw new Error(data.error || 'O Mercado Pago não retornou um resultado válido.');
+                }
 
-                const itemsText = state.cart.map(item => `• ${item.quantity}x ${item.name} — ${formatCurrency(Number(item.price) * Number(item.quantity))}`).join('\n');
+                if (data.orderId) {
+                    sessionStorage.setItem('laPendingPaymentOrder', data.orderId);
+                }
+
+                const itemsText = state.cart
+                    .map(item =>
+                        `• ${item.quantity}x ${item.name} — ${formatCurrency(Number(item.price) * Number(item.quantity))}`
+                    )
+                    .join('\n');
+
                 const whatsappText = [
                     '🛍️ *NOVO PEDIDO — L&A ROYAL ADVISORY*',
                     '',
                     `Pedido: ${data.orderCode || data.orderId || '-'}`,
-                    `Cliente: ${fullName}`,
-                    `WhatsApp: ${phone}`,
-                    `E-mail: ${email}`,
-                    `Endereço: ${addressText}`,
+                    `Cliente: ${customer.fullName}`,
+                    `WhatsApp: ${customer.phone}`,
+                    `E-mail: ${customer.email}`,
+                    `Endereço: ${customer.addressText}`,
                     '',
                     '*Itens:*',
                     itemsText,
                     '',
                     `Total: ${formatCurrency(Number(data.total || state.cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0)))}`,
-                    'Pagamento: Mercado Pago',
-                    'Status do pagamento: aguardando confirmação'
+                    `Pagamento: ${paymentMethod === 'pix' ? 'Pix' : 'Cartão de crédito'}`,
+                    `Status do pagamento: ${data.status || 'aguardando confirmação'}`
                 ].join('\n');
-                const whatsappUrl = 'https://wa.me/5581989492224?text=' + encodeURIComponent(whatsappText);
+
+                const whatsappUrl =
+                    'https://wa.me/5581989492224?text=' +
+                    encodeURIComponent(whatsappText);
 
                 if (whatsappWindow && !whatsappWindow.closed) {
                     whatsappWindow.location.href = whatsappUrl;
                 }
 
-                state.cart = [];
-                updateCartIcon();
-                closeCheckoutModal();
-                window.location.href = data.init_point;
+                if (paymentMethod === 'pix') {
+                    state.cart = [];
+                    updateCartIcon();
+                    showPixPaymentResult(data);
+                } else {
+                    const status = String(data.status || '').toLowerCase();
+
+                    if (status === 'approved') {
+                        state.cart = [];
+                        updateCartIcon();
+                        closeCheckoutModal();
+                        alert('Pagamento aprovado! Seu pedido foi registrado com sucesso.');
+                    } else if (
+                        status === 'in_process' ||
+                        status === 'pending' ||
+                        status === 'action_required'
+                    ) {
+                        state.cart = [];
+                        updateCartIcon();
+                        closeCheckoutModal();
+                        alert('Pagamento recebido e está em análise. A confirmação será atualizada automaticamente.');
+                    } else {
+                        if (whatsappWindow && !whatsappWindow.closed) {
+                            whatsappWindow.close();
+                        }
+
+                        throw new Error(
+                            data.statusDetail
+                                ? `O cartão não foi aprovado: ${data.statusDetail}`
+                                : 'O cartão não foi aprovado. Confira os dados e tente novamente.'
+                        );
+                    }
+                }
+
+                return data;
             } catch (error) {
                 console.error('Erro no checkout:', error);
-                if (whatsappWindow && !whatsappWindow.closed) whatsappWindow.close();
-                alert(error.message || 'Não foi possível iniciar o checkout.');
-            } finally {
-                if (submitButton) {
-                    submitButton.disabled = false;
-                    submitButton.classList.remove('opacity-60', 'cursor-not-allowed');
+
+                if (whatsappWindow && !whatsappWindow.closed) {
+                    whatsappWindow.close();
                 }
+
+                const message = error?.message || 'Não foi possível iniciar o pagamento.';
+                const paymentMessage = document.getElementById('checkoutPaymentMessage');
+
+                if (paymentMessage) {
+                    paymentMessage.textContent = message;
+                    paymentMessage.className =
+                        'mt-4 p-3 rounded-xl text-sm bg-red-50 border border-red-200 text-red-800';
+                }
+
+                throw error;
             }
         }
 
+        async function createCheckoutOrder(event) {
+            if (event?.preventDefault) event.preventDefault();
+
+            try {
+                const customer = await collectCheckoutCustomer();
+                alert('Confira os dados e finalize o pagamento pelo formulário seguro do Mercado Pago abaixo.');
+                return customer;
+            } catch (error) {
+                alert(error?.message || 'Confira os dados do checkout.');
+                throw error;
+            }
+        }
+
+        async function renderMercadoPagoPaymentBrick() {
+            const container = document.getElementById('paymentBrick_container');
+
+            if (!container || typeof MercadoPago === 'undefined') return;
+
+            if (window.paymentBrickController?.unmount) {
+                try {
+                    window.paymentBrickController.unmount();
+                } catch (_) {}
+                window.paymentBrickController = null;
+            }
+
+            container.innerHTML = '';
+
+            const total = state.cart.reduce(
+                (sum, item) => sum + (Number(item.price) * Number(item.quantity)),
+                0
+            );
+
+            if (!total || total <= 0) {
+                container.innerHTML = '<p class="text-sm text-red-700">O valor do pedido é inválido.</p>';
+                return;
+            }
+
+            const email =
+                document.getElementById('checkoutEmail')?.value.trim().toLowerCase() || '';
+
+            const cpf =
+                document.getElementById('checkoutCpf')?.value.replace(/\D/g, '') || '';
+
+            try {
+                const mp = new MercadoPago(
+                    'APP_USR-a73c883b-109b-4132-be28-42eac193d54e',
+                    { locale: 'pt-BR' }
+                );
+
+                const bricksBuilder = mp.bricks();
+
+                window.paymentBrickController =
+                    await bricksBuilder.create(
+                        'payment',
+                        'paymentBrick_container',
+                        {
+                            initialization: {
+                                amount: Number(total.toFixed(2)),
+                                payer: {
+                                    email,
+                                    identification: {
+                                        type: 'CPF',
+                                        number: cpf
+                                    }
+                                }
+                            },
+                            customization: {
+                                paymentMethods: {
+                                    creditCard: 'all',
+                                    bankTransfer: 'pix'
+                                }
+                            },
+                            callbacks: {
+                                onReady: () => {
+                                    const message =
+                                        document.getElementById('checkoutPaymentMessage');
+
+                                    if (message) {
+                                        message.className = 'hidden mt-4 p-3 rounded-xl text-sm';
+                                        message.textContent = '';
+                                    }
+                                },
+                                onSubmit: async ({ selectedPaymentMethod, formData }) => {
+                                    return submitCheckoutPayment(
+                                        formData,
+                                        selectedPaymentMethod
+                                    );
+                                },
+                                onError: (error) => {
+                                    console.error('Erro no Mercado Pago Payment Brick:', error);
+
+                                    const message =
+                                        document.getElementById('checkoutPaymentMessage');
+
+                                    if (message) {
+                                        message.textContent =
+                                            'Não foi possível carregar ou validar o pagamento. Confira os dados e tente novamente.';
+                                        message.className =
+                                            'mt-4 p-3 rounded-xl text-sm bg-red-50 border border-red-200 text-red-800';
+                                    }
+                                }
+                            }
+                        }
+                    );
+            } catch (error) {
+                console.error('Erro ao iniciar Mercado Pago:', error);
+
+                container.innerHTML =
+                    '<p class="text-sm text-red-700">Não foi possível carregar o formulário de pagamento do Mercado Pago. Atualize a página e tente novamente.</p>';
+            }
+        }
+
+        function showPixPaymentResult(data) {
+            let modal = document.getElementById('pixPaymentResultModal');
+
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'pixPaymentResultModal';
+                modal.className =
+                    'fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[95] flex items-center justify-center p-4';
+
+                modal.innerHTML = `
+                    <div class="bg-white text-slate-900 rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative border-2 border-amber-400/30 max-h-[92vh] overflow-y-auto">
+                        <button type="button" id="closePixResultButton" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700" aria-label="Fechar">
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                        <div class="text-center">
+                            <div class="w-14 h-14 gradient-gold rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i data-lucide="qr-code" class="w-7 h-7 text-slate-900"></i>
+                            </div>
+                            <h3 class="font-serif text-2xl font-bold">Pague com Pix</h3>
+                            <p class="text-sm text-slate-500 mt-1">Escaneie o QR Code ou copie o código abaixo.</p>
+                            <div id="pixQrCodeContainer" class="mt-5 flex justify-center"></div>
+                            <textarea id="pixCopyCode" readonly rows="5" class="w-full mt-5 p-3 text-xs bg-slate-50 border border-slate-300 rounded-xl resize-none"></textarea>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                                <button type="button" id="copyPixCodeButton" class="gradient-gold text-slate-900 py-3 rounded-xl font-bold">Copiar Pix</button>
+                                <button type="button" id="openPixTicketButton" class="bg-slate-900 text-amber-400 py-3 rounded-xl font-bold border border-slate-700">Abrir Pix</button>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-4">
+                                Pedido <span id="pixOrderCode" class="font-bold text-slate-700"></span>.
+                                O pagamento será confirmado após a compensação.
+                            </p>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(modal);
+
+                document.getElementById('closePixResultButton')?.addEventListener(
+                    'click',
+                    () => modal.remove()
+                );
+
+                document.getElementById('copyPixCodeButton')?.addEventListener(
+                    'click',
+                    async () => {
+                        const code = document.getElementById('pixCopyCode')?.value || '';
+
+                        try {
+                            await navigator.clipboard.writeText(code);
+                            alert('Código Pix copiado.');
+                        } catch (_) {
+                            const textarea = document.getElementById('pixCopyCode');
+                            textarea?.select();
+                            document.execCommand('copy');
+                            alert('Código Pix copiado.');
+                        }
+                    }
+                );
+
+                document.getElementById('openPixTicketButton')?.addEventListener(
+                    'click',
+                    () => {
+                        const url =
+                            document.getElementById('openPixTicketButton')?.dataset.url;
+
+                        if (url) {
+                            window.open(url, '_blank', 'noopener,noreferrer');
+                        }
+                    }
+                );
+            }
+
+            const pix = data.pix || {};
+            const qrContainer = document.getElementById('pixQrCodeContainer');
+            const qrCode = document.getElementById('pixCopyCode');
+            const orderCode = document.getElementById('pixOrderCode');
+            const openButton = document.getElementById('openPixTicketButton');
+
+            if (qrContainer) {
+                qrContainer.innerHTML = pix.qrCodeBase64
+                    ? `<img src="data:image/png;base64,${pix.qrCodeBase64}" alt="QR Code Pix" class="w-64 h-64 object-contain border border-slate-200 rounded-xl p-2">`
+                    : '<p class="text-sm text-slate-500">QR Code não disponível. Use o botão Abrir Pix.</p>';
+            }
+
+            if (qrCode) qrCode.value = pix.qrCode || '';
+            if (orderCode) orderCode.textContent = data.orderCode || data.orderId || '-';
+
+            if (openButton) {
+                openButton.dataset.url = pix.ticketUrl || '';
+                openButton.disabled = !pix.ticketUrl;
+                openButton.classList.toggle('opacity-50', !pix.ticketUrl);
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+
+            closeCheckoutModal();
+        }
         function openStockAlertModal(productId, productName) {
             const modal = document.getElementById('stockAlertModal');
             const nameEl = document.getElementById('stockAlertProductName');
