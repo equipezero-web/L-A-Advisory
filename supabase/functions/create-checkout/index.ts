@@ -756,15 +756,41 @@ Deno.serve(async (req) => {
     );
   }
 
+  /*
+   * Dados do pagador enviados ao Checkout Pro.
+   * O Mercado Pago aceita nome/sobrenome e telefone estruturados;
+   * enviar esses dados completos evita depender de campos inferidos
+   * no checkout, especialmente em meios como Pix.
+   */
+  const nameParts = fullName.split(/\\s+/).filter(Boolean);
+  const payerName = nameParts.shift() || fullName;
+  const payerSurname = nameParts.join(' ').trim();
+  const phoneDigits = phone.replace(/\\D/g, '');
+  const payerAreaCode = phoneDigits.length >= 10 ? phoneDigits.slice(0, 2) : '';
+  const payerPhoneNumber = phoneDigits.length >= 10 ? phoneDigits.slice(2) : phoneDigits;
+
+  const payer: Record<string, unknown> = {
+    name: payerName,
+    email,
+    identification: { type: 'CPF', number: cpf },
+  };
+
+  if (payerSurname) {
+    payer.surname = payerSurname;
+  }
+
+  if (payerAreaCode && payerPhoneNumber) {
+    payer.phone = {
+      area_code: payerAreaCode,
+      number: payerPhoneNumber,
+    };
+  }
+
   /* Mercado Pago Checkout Pro: pagamento concluído no ambiente seguro do Mercado Pago */
   const preference = {
     items: mercadoPagoItems,
     external_reference: orderId,
-    payer: {
-      name: fullName,
-      email,
-      identification: { type: 'CPF', number: cpf },
-    },
+    payer,
     notification_url: `${SUPABASE_URL}/functions/v1/mercado-pago-webhook`,
     back_urls: {
       success: `${SITE_URL}/?payment=success&order=${encodeURIComponent(orderId)}`,
@@ -773,8 +799,6 @@ Deno.serve(async (req) => {
     },
     auto_return: 'approved',
     payment_methods: {
-      excluded_payment_methods: [],
-      excluded_payment_types: [],
       installments: 18,
     },
     metadata: {
