@@ -18,18 +18,18 @@ a{color:#009ee3;font-weight:bold}
 <div class="card">
 <h1>🧪 Teste Mercado Pago</h1>
 <p>Esta página cria uma Order de teste usando a Edge Function <b>create-test-checkout</b>.</p>
-<label for="email">E-mail do comprador de teste</label>
-<input id="email" type="email" placeholder="comprador_de_teste@exemplo.com" autocomplete="email">
+<label for="buyer">Usuário de teste do Mercado Pago</label>
+<input id="buyer" type="text" placeholder="TESTUSER5071385824503173649" autocomplete="off">
 <button id="btn">Criar pagamento de teste</button>
 <div id="status" class="status">Aguardando...</div>
-<p class="small">Use somente o e-mail da conta de comprador de teste do Mercado Pago. Nenhum Access Token é colocado nesta página.</p>
+<p class="small">Informe o usuário de teste exatamente como aparece no Mercado Pago. A página usará o formato de e-mail de teste necessário pela API. Nenhum Access Token é colocado nesta página.</p>
 </div>
 <script>
 const FUNCTION_URL="https://fqisewatypluagngmgka.supabase.co/functions/v1/create-test-checkout";
-const btn=document.getElementById("btn"),email=document.getElementById("email"),status=document.getElementById("status");
+const btn=document.getElementById("btn"),buyer=document.getElementById("buyer"),status=document.getElementById("status");
 btn.addEventListener("click",async()=>{
- const payer_email=email.value.trim();
- if(!payer_email){status.textContent="Informe o e-mail do comprador de teste.";return;}\n if(!/@testuser\\.com$/i.test(payer_email)){status.textContent="O Mercado Pago exige que o e-mail do comprador de teste termine com @testuser.com. Exemplo: test_user_123@testuser.com";return;}
+ const test_user=buyer.value.trim();
+ if(!test_user){status.textContent="Informe o usuário do comprador de teste.";return;}\n const payer_email=test_user.replace(/^test_user_/i,"test_user_")+"@testuser.com";
  btn.disabled=true; status.textContent="Criando Order de teste...";
  try{
   const res=await fetch(FUNCTION_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({payer_email})});
