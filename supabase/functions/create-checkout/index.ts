@@ -373,7 +373,7 @@ Deno.serve(async (req) => {
   } = await admin
     .from('products')
     .select(
-      'id,name,description,price,discount,stock,commission,image,active'
+      'id,name,description,price,sale_price,discount,stock,commission,image,active'
     )
     .in('id', productIds)
     .eq('active', true);
@@ -455,25 +455,21 @@ Deno.serve(async (req) => {
       );
     }
 
-    const discount =
-      Math.min(
-        Math.max(
-          Number(product.discount || 0),
-          0
-        ),
-        100
-      );
+    const salePriceRaw = Number(product.sale_price);
 
-    const unitPrice =
-      money(
-        price *
-          (1 - discount / 100)
-      );
+    const unitPrice = Number.isFinite(salePriceRaw) && salePriceRaw >= 0
+      ? money(salePriceRaw)
+      : money(price * (1 - discount / 100));
 
     const itemSubtotal =
       money(
         unitPrice * quantity
       );
+
+    const grossPrice = money(price);
+    const affiliateCommission = validAffiliateCode
+      ? money(grossPrice * quantity * 0.20)
+      : 0;
 
     subtotal =
       money(
@@ -486,6 +482,9 @@ Deno.serve(async (req) => {
       product_name: product.name,
       quantity,
       unit_price: unitPrice,
+      gross_price: grossPrice,
+      sale_price: unitPrice,
+      affiliate_commission: affiliateCommission,
       discount,
       subtotal: itemSubtotal,
     });
