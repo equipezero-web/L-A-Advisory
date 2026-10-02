@@ -19,29 +19,45 @@ a{color:#009ee3;font-weight:bold}.small{font-size:13px;color:#667085}
 <p>Esta página cria uma Order de teste usando a Edge Function <b>create-test-checkout</b>.</p>
 <label for="buyer">Usuário de teste do Mercado Pago</label>
 <input id="buyer" type="text" value="TESTUSER5071385824503173649" autocomplete="off">
-<button id="btn">Criar pagamento de teste</button>
+<button id="btn" type="button" onclick="criarPagamento()">Criar pagamento de teste</button>
 <div id="status" class="status">Aguardando...</div>
 <p class="small">O usuário acima serve apenas para identificar a conta de teste. A API de testes do Mercado Pago utiliza o e-mail de teste permitido pela documentação. Nenhum Access Token é colocado nesta página.</p>
 </div>
 <script>
 const FUNCTION_URL="https://fqisewatypluagngmgka.supabase.co/functions/v1/create-test-checkout";
-const btn=document.getElementById("btn"),buyer=document.getElementById("buyer"),status=document.getElementById("status");
-btn.addEventListener("click",async()=>{
+async function criarPagamento(){
+ const btn=document.getElementById("btn");
+ const buyer=document.getElementById("buyer");
+ const status=document.getElementById("status");
  const test_user=buyer.value.trim();
  if(!test_user){status.textContent="Informe o usuário do comprador de teste.";return;}
- const payer_email="test@testuser.com";
- btn.disabled=true; status.textContent="Criando Order de teste...";
+ btn.disabled=true;
+ btn.textContent="Criando...";
+ status.textContent="Conectando ao Mercado Pago...";
  try{
-  const res=await fetch(FUNCTION_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({payer_email})});
-  const data=await res.json().catch(()=>({}));
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),30000);
+  const res=await fetch(FUNCTION_URL,{
+   method:"POST",
+   headers:{"Content-Type":"application/json"},
+   body:JSON.stringify({payer_email:"test@testuser.com"}),
+   signal:controller.signal
+  });
+  clearTimeout(timer);
+  const raw=await res.text();
+  let data={};
+  try{data=JSON.parse(raw);}catch(e){}
   if(!res.ok||!data.success){
-   const detalhe=JSON.stringify(data,null,2);
-   throw new Error((data.error||"Não foi possível criar a Order.")+"\nHTTP: "+(data.status||res.status)+"\n\nResposta completa:\n"+detalhe);
+   throw new Error((data.error||"Não foi possível criar a Order.")+"\\nHTTP: "+res.status+"\\n\\nResposta completa:\\n"+(raw||"(vazia)"));
   }
   status.innerHTML="Order criada com sucesso!<br><br><b>Order ID:</b> "+data.orderId+"<br><br><a href='"+data.checkoutUrl+"' target='_blank' rel='noopener'>Abrir Checkout Pro de teste</a>";
- }catch(e){status.textContent="Erro: "+e.message;}
- finally{btn.disabled=false;}
-});
+ }catch(e){
+  status.textContent=e.name==="AbortError"?"Tempo esgotado: a Edge Function não respondeu em 30 segundos.": "Erro: "+e.message;
+ }finally{
+  btn.disabled=false;
+  btn.textContent="Criar pagamento de teste";
+ }
+}
 </script>
 </body>
 </html>
