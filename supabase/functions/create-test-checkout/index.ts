@@ -23,12 +23,12 @@ serve(async (req) => {
     );
   }
 
-  const MP_ACCESS_TOKEN = (Deno.env.get("MP_ACCESS_TOKEN") || "").trim();
+  const MP_TEST_ACCESS_TOKEN = (Deno.env.get("MP_TEST_ACCESS_TOKEN") || "").trim();
 
-  if (!MP_ACCESS_TOKEN) {
+  if (!MP_TEST_ACCESS_TOKEN) {
     return new Response(
       JSON.stringify({
-        error: "MP_ACCESS_TOKEN não configurado no Supabase.",
+        error: "MP_TEST_ACCESS_TOKEN não configurado no Supabase.",
       }),
       { status: 500, headers: corsHeaders },
     );
@@ -38,7 +38,7 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const payerEmail = String(body?.payer_email || "").trim();
 
-    if (!payerEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payerEmail)) {
+    if (!payerEmail || !/^([^\s@]+)@([^\s@]+)\.[^\s@]+$/.test(payerEmail)) {
       return new Response(
         JSON.stringify({
           error: "Informe o e-mail da conta de comprador de teste do Mercado Pago.",
@@ -80,14 +80,10 @@ serve(async (req) => {
       },
     };
 
-    const tokenLoaded = MP_ACCESS_TOKEN.length > 0;
-    const tokenLooksLikeMercadoPago = /^(APP_USR|TEST)-/.test(MP_ACCESS_TOKEN);
-    console.log("MP test token diagnostics:", { tokenLoaded, tokenLength: MP_ACCESS_TOKEN.length, tokenLooksLikeMercadoPago });
-
     const requestHeaders = new Headers();
     requestHeaders.set("Accept", "application/json");
     requestHeaders.set("Content-Type", "application/json");
-    requestHeaders.set("Authorization", "Bearer " + MP_ACCESS_TOKEN);
+    requestHeaders.set("Authorization", "Bearer " + MP_TEST_ACCESS_TOKEN);
     requestHeaders.set("X-Idempotency-Key", idempotencyKey);
 
     const response = await fetch("https://api.mercadopago.com/v1/orders", {
@@ -105,11 +101,6 @@ serve(async (req) => {
           error: "Mercado Pago recusou a criação da order de teste.",
           status: response.status,
           details: data,
-          diagnostics: {
-            tokenLoaded,
-            tokenLength: MP_ACCESS_TOKEN.length,
-            tokenLooksLikeMercadoPago,
-          },
         }),
         { status: response.status, headers: corsHeaders },
       );
