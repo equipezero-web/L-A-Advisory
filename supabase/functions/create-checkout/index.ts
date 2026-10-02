@@ -722,152 +722,55 @@ Deno.serve(async (req) => {
     );
   }
 
-  /*
-   * Cria a preferência do Mercado Pago.
-   */
-  const preference = {
-    items: mercadoPagoItems,
+  /* Mercado Pago: Pix e cartão via Orders API */
+  const paymentMethod = String(body.paymentMethod || 'pix').toLowerCase() === 'pix' ? 'pix' : 'credit_card';
+  const cardToken = String(body.cardToken || '').trim();
+  const paymentMethodId = String(body.paymentMethodId || '').trim();
+  const installments = Number(body.installments) || 1;
 
-    external_reference:
-      orderId,
+  if (paymentMethod === 'credit_card' && (!cardToken || !paymentMethodId)) {
+    return json({ error: 'Dados do cartão incompletos.' }, 400);
+  }
+  if (paymentMethod === 'credit_card' && (!Number.isInteger(installments) || installments < 1 || installments > 24)) {
+    return json({ error: 'Número de parcelas inválido.' }, 400);
+  }
 
-    notification_url:
-      `${SUPABASE_URL}/functions/v1/mercado-pago-webhook`,
+  const mercadoPagoPayment = paymentMethod === 'pix'
+    ? { amount: subtotal.toFixed(2), payment_method: { id: 'pix', type: 'bank_transfer' } }
+    : { amount: subtotal.toFixed(2), payment_method: { id: paymentMethodId, type: 'credit_card', token: cardToken, installments } };
 
-    payer: {
-      email,
-    },
-
-    back_urls: {
-      success:
-        `${SITE_URL}?payment=success&order=${encodeURIComponent(orderId)}`,
-
-      failure:
-        `${SITE_URL}?payment=failure&order=${encodeURIComponent(orderId)}`,
-
-      pending:
-        `${SITE_URL}?payment=pending&order=${encodeURIComponent(orderId)}`,
-    },
-
-    auto_return:
-      'approved',
+  const mercadoPagoOrder = {
+    type: 'online', processing_mode: 'automatic', total_amount: subtotal.toFixed(2),
+    external_reference: orderId,
+    payer: { email, first_name: fullName.split(/\\s+/)[0] || fullName, identification: { type: 'CPF', number: cpf } },
+    transactions: { payments: [mercadoPagoPayment] },
   };
 
-  /*
-   * Envia a preferência para o Mercado Pago.
-   */
-  const mercadoPagoResponse =
-    await fetch(
-      'https://api.mercadopago.com/checkout/preferences',
-      {
-        method: 'POST',
-
-        headers: {
-          Authorization:
-            `Bearer ${MP_ACCESS_TOKEN}`,
-
-          'Content-Type':
-            'application/json',
-        },
-
-        body:
-          JSON.stringify(preference),
-      }
-    );
-
-  const mercadoPagoData =
-    await mercadoPagoResponse
-      .json()
-      .catch(() => ({}));
-
-  /*
-   * Se o Mercado Pago rejeitar,
-   * cancela o pedido.
-   */
-  if (
-    !mercadoPagoResponse.ok ||
-    !mercadoPagoData.id ||
-    !mercadoPagoData.init_point
-  ) {
-    console.error(
-      'Erro ao criar preferência Mercado Pago:',
-      mercadoPagoData
-    );
-
-    await admin
-      .from('orders')
-      .update({
-        status: 'cancelled',
-        payment_status: 'cancelled',
-      })
-      .eq('id', orderId);
-
-    return json(
-      {
-        error:
-          'Não foi possível iniciar o pagamento.',
-      },
-      502
-    );
-  }
-
-  /*
-   * Registra o pagamento como pendente.
-   */
-  const {
-    error: paymentError,
-  } = await admin
-    .from('payments')
-    .insert({
-      id: generateCode('PAY'),
-      order_id: orderId,
-
-      provider:
-        'mercado_pago',
-
-      provider_payment_id:
-        null,
-
-      status:
-        'pending',
-
-      amount:
-        subtotal,
-
-      currency:
-        'BRL',
-
-      payment_method:
-        'mercado_pago',
-
-      provider_status:
-        'created',
-    });
-
-  if (paymentError) {
-    console.error(
-      'Erro ao registrar pagamento:',
-      paymentError
-    );
-
-    /*
-     * O pedido continua existente porque a
-     * preferência do Mercado Pago já foi criada.
-     * O webhook poderá localizar o pedido
-     * pelo external_reference.
-     */
-  }
-
-  /*
-   * Retorna somente dados necessários
-   * ao navegador.
-   *
-   * Nenhum segredo é enviado.
-   */
-  return json({
-    ok: true,
-    orderId,
-    init_point:
-      mercadoPagoData.init_point,
+  const mercadoPagoResponse = await fetch('https://api.mercadopago.com/v1/orders', {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + MP_ACCESS_TOKEN, 'Content-Type': 'application/json', Accept: 'application/json', 'X-Idempotency-Key': orderId },
+    body: JSON.stringify(mercadoPagoOrder),
   });
+  const mercadoPagoData = await mercadoPagoResponse.json().catch(() => ({}));
+
+  if (!mercadoPagoResponse.ok) {
+    console.error('Erro Mercado Pago Orders API:', mercadoPagoData);
+    await admin.from('orders').update({ status: 'cancelled', payment_status: 'cancelled' }).eq('id', orderId);
+    return json({ error: 'Não foi possível iniciar o pagamento.', debug: { status: mercadoPagoResponse.status, message: mercadoPagoData?.message || mercadoPagoData?.error || null, details: mercadoPagoData?.cause || mercadoPagoData?.details || null } }, 502);
+  }
+
+  const payment = mercadoPagoData?.transactions?.payments?.[0] || mercadoPagoData?.payments?.[0] || mercadoPagoData?.payment || {};
+  const paymentId = payment?.id ? String(payment.id) : null;
+  const paymentStatus = String(payment?.status || 'pending');
+  const paymentStatusDetail = payment?.status_detail || null;
+  const qrCode = payment?.point_of_interaction?.transaction_data?.qr_code || payment?.qr_code || null;
+  const qrCodeBase64 = payment?.point_of_interaction?.transaction_data?.qr_code_base64 || payment?.qr_code_base64 || null;
+  const ticketUrl = payment?.point_of_interaction?.transaction_data?.ticket_url || payment?.ticket_url || null;
+
+  if (paymentId) await admin.from('orders').update({ payment_id: paymentId, payment_status: paymentStatus }).eq('id', orderId);
+
+  const { error: paymentError } = await admin.from('payments').insert({ id: generateCode('PAY'), order_id: orderId, provider: 'mercado_pago', provider_payment_id: paymentId, status: paymentStatus, amount: subtotal, currency: 'BRL', payment_method: paymentMethod, provider_status: paymentStatusDetail || 'created' });
+  if (paymentError) console.error('Erro ao registrar pagamento:', paymentError);
+
+  return json({ ok: true, orderId, orderCode, total: subtotal, status: paymentStatus, statusDetail: paymentStatusDetail, paymentId, paymentMethod, qrCode, qrCodeBase64, ticketUrl });
 });
