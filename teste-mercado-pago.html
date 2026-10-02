@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Teste Mercado Pago - L&A Royal Advisory</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f4f6f8;margin:0;padding:30px;color:#17202a}
+.card{max-width:520px;margin:40px auto;background:#fff;padding:28px;border-radius:16px;box-shadow:0 8px 30px #0001}
+h1{margin-top:0}input,button{width:100%;box-sizing:border-box;padding:14px;border-radius:10px;font-size:16px}
+input{border:1px solid #ccd3da;margin:12px 0}button{border:0;background:#009ee3;color:white;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.6;cursor:wait}.status{margin-top:18px;padding:12px;border-radius:10px;background:#eef2f5;white-space:pre-wrap;word-break:break-word}
+a{color:#009ee3;font-weight:bold}
+.small{font-size:13px;color:#667085}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>🧪 Teste Mercado Pago</h1>
+<p>Esta página cria uma Order de teste usando a Edge Function <b>create-test-checkout</b>.</p>
+<label for="email">E-mail do comprador de teste</label>
+<input id="email" type="email" placeholder="comprador_de_teste@exemplo.com" autocomplete="email">
+<button id="btn">Criar pagamento de teste</button>
+<div id="status" class="status">Aguardando...</div>
+<p class="small">Use somente o e-mail da conta de comprador de teste do Mercado Pago. Nenhum Access Token é colocado nesta página.</p>
+</div>
+<script>
+const FUNCTION_URL="https://fqisewatypluagngmgka.supabase.co/functions/v1/create-test-checkout";
+const btn=document.getElementById("btn"),email=document.getElementById("email"),status=document.getElementById("status");
+btn.addEventListener("click",async()=>{
+ const payer_email=email.value.trim();
+ if(!payer_email){status.textContent="Informe o e-mail do comprador de teste.";return;}
+ btn.disabled=true; status.textContent="Criando Order de teste...";
+ try{
+  const res=await fetch(FUNCTION_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({payer_email})});
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok||!data.success) throw new Error(data.error||"Não foi possível criar a Order.");
+  status.innerHTML="Order criada com sucesso!<br><br><b>Order ID:</b> "+data.orderId+"<br><br><a href='"+data.checkoutUrl+"' target='_blank' rel='noopener'>Abrir Checkout Pro de teste</a>";
+ }catch(e){status.textContent="Erro: "+e.message;}
+ finally{btn.disabled=false;}
+});
+</script>
+</body>
+</html>
