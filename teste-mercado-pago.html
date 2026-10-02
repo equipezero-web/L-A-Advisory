@@ -34,7 +34,7 @@ btn.addEventListener("click",async()=>{
  try{
   const res=await fetch(FUNCTION_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({payer_email})});
   const data=await res.json().catch(()=>({}));
-  if(!res.ok||!data.success) throw new Error(data.error||"Não foi possível criar a Order.");
+  if(!res.ok||!data.success){ const detalhe=data.details? "\n\nDetalhes do Mercado Pago:\n"+JSON.stringify(data.details,null,2):""; throw new Error((data.error||"Não foi possível criar a Order.")+"\nHTTP: "+(data.status||res.status)+detalhe); }
   status.innerHTML="Order criada com sucesso!<br><br><b>Order ID:</b> "+data.orderId+"<br><br><a href='"+data.checkoutUrl+"' target='_blank' rel='noopener'>Abrir Checkout Pro de teste</a>";
  }catch(e){status.textContent="Erro: "+e.message;}
  finally{btn.disabled=false;}
