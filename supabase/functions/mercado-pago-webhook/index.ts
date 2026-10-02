@@ -1,5 +1,18 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { corsHeaders, json } from '../_shared/cors.ts';
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "https://equipezero-web.github.io",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+  "Content-Type": "application/json",
+};
+
+function json(data: unknown, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: corsHeaders,
+  });
+}
 
 const URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
