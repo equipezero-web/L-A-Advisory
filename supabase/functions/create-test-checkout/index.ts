@@ -23,12 +23,12 @@ serve(async (req) => {
     );
   }
 
-  const MP_TEST_ACCESS_TOKEN = (Deno.env.get("MP_TEST_ACCESS_TOKEN") || "").trim();
+  const MP_ACCESS_TOKEN = (Deno.env.get("MP_ACCESS_TOKEN") || "").trim();
 
-  if (!MP_TEST_ACCESS_TOKEN) {
+  if (!MP_ACCESS_TOKEN) {
     return new Response(
       JSON.stringify({
-        error: "MP_TEST_ACCESS_TOKEN não configurado no Supabase.",
+        error: "MP_ACCESS_TOKEN não configurado no Supabase.",
       }),
       { status: 500, headers: corsHeaders },
     );
@@ -80,14 +80,14 @@ serve(async (req) => {
       },
     };
 
-    const tokenLoaded = MP_TEST_ACCESS_TOKEN.length > 0;
-    const tokenLooksLikeMercadoPago = /^(APP_USR|TEST)-/.test(MP_TEST_ACCESS_TOKEN);
-    console.log("MP test token diagnostics:", { tokenLoaded, tokenLength: MP_TEST_ACCESS_TOKEN.length, tokenLooksLikeMercadoPago });
+    const tokenLoaded = MP_ACCESS_TOKEN.length > 0;
+    const tokenLooksLikeMercadoPago = /^(APP_USR|TEST)-/.test(MP_ACCESS_TOKEN);
+    console.log("MP test token diagnostics:", { tokenLoaded, tokenLength: MP_ACCESS_TOKEN.length, tokenLooksLikeMercadoPago });
 
     const requestHeaders = new Headers();
     requestHeaders.set("Accept", "application/json");
     requestHeaders.set("Content-Type", "application/json");
-    requestHeaders.set("Authorization", "Bearer " + MP_TEST_ACCESS_TOKEN);
+    requestHeaders.set("Authorization", "Bearer " + MP_ACCESS_TOKEN);
     requestHeaders.set("X-Idempotency-Key", idempotencyKey);
 
     const response = await fetch("https://api.mercadopago.com/v1/orders", {
@@ -107,7 +107,7 @@ serve(async (req) => {
           details: data,
           diagnostics: {
             tokenLoaded,
-            tokenLength: MP_TEST_ACCESS_TOKEN.length,
+            tokenLength: MP_ACCESS_TOKEN.length,
             tokenLooksLikeMercadoPago,
           },
         }),
