@@ -455,6 +455,11 @@ Deno.serve(async (req) => {
       );
     }
 
+    const discount = Math.min(
+      Math.max(Number(product.discount || 0), 0),
+      100
+    );
+
     const salePriceRaw = Number(product.sale_price);
 
     const unitPrice = Number.isFinite(salePriceRaw) && salePriceRaw >= 0
