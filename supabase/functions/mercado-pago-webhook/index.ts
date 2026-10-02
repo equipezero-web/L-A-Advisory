@@ -60,11 +60,13 @@ Deno.serve(async (req) => {
     if (order.affiliate_code) {
       const { data: affiliate } = await admin.from('affiliates').select('id,total_sales,total_commission').eq('code', order.affiliate_code).maybeSingle();
       if (affiliate) {
-        const { data: items } = await admin.from('order_items').select('product_id,quantity,unit_price').eq('order_id', orderId);
+        const { data: items } = await admin.from('order_items').select('gross_price,quantity,affiliate_commission').eq('order_id', orderId);
         let commission = 0;
         for (const item of items || []) {
-          const { data: product } = await admin.from('products').select('commission').eq('id', item.product_id).single();
-          commission += Number(item.unit_price) * Number(item.quantity) * (Number(product?.commission || 0) / 100);
+          const savedCommission = Number(item.affiliate_commission || 0);
+          commission += savedCommission > 0
+            ? savedCommission
+            : Number(item.gross_price || 0) * Number(item.quantity || 0) * 0.20;
         }
         await admin.from('affiliates').update({
           total_sales: Number(affiliate.total_sales || 0) + Number(order.total || 0),
