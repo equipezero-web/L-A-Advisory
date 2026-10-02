@@ -467,9 +467,7 @@ Deno.serve(async (req) => {
       );
 
     const grossPrice = money(price);
-    const affiliateCommission = validAffiliateCode
-      ? money(grossPrice * quantity * 0.20)
-      : 0;
+    const affiliateCommission = 0;
 
     subtotal =
       money(
@@ -535,6 +533,20 @@ Deno.serve(async (req) => {
     if (affiliate) {
       validAffiliateCode =
         affiliate.code;
+    }
+  }
+
+  /*
+   * Calcula a comissão somente depois de validar o afiliado.
+   * A comissão é sempre 20% do valor bruto/base, nunca do preço de venda.
+   */
+  if (validAffiliateCode) {
+    for (const item of orderItems) {
+      item.affiliate_commission = money(
+        Number(item.gross_price || 0) *
+          Number(item.quantity || 0) *
+          0.20
+      );
     }
   }
 
