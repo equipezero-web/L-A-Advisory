@@ -772,6 +772,11 @@ Deno.serve(async (req) => {
       failure: `${SITE_URL}/?payment=failure&order=${encodeURIComponent(orderId)}`,
     },
     auto_return: 'approved',
+    payment_methods: {
+      excluded_payment_methods: [],
+      excluded_payment_types: [],
+      installments: 18,
+    },
     metadata: {
       order_id: orderId,
       order_code: orderCode,
