@@ -2231,7 +2231,17 @@
                     </div>
                 </div>
 
-                <div id="paymentBrick_container" class="mt-4"></div>
+                <button
+                    id="goToMercadoPagoButton"
+                    type="button"
+                    onclick="startMercadoPagoCheckout()"
+                    class="mt-5 w-full gradient-gold text-slate-950 py-4 rounded-xl font-bold text-lg shadow-lg hover:opacity-90 transition"
+                >
+                    Pagar diretamente no Mercado Pago
+                </button>
+                <p class="text-xs text-slate-500 text-center mt-3">
+                    Você será direcionado ao ambiente seguro do Mercado Pago para escolher Pix ou cartão.
+                </p>
 
                 <div id="checkoutPaymentMessage" class="hidden mt-4 p-3 rounded-xl text-sm"></div>
         </div>
@@ -8085,12 +8095,13 @@ if (error) throw error;
                 document.body.style.overflow = 'hidden';
                 lucide.createIcons();
 
-                setTimeout(() => {
-                    renderMercadoPagoPaymentBrick();
-                }, 100);
+                const button = document.getElementById('goToMercadoPagoButton');
+                if (button) {
+                    button.disabled = false;
+                    button.textContent = 'Pagar diretamente no Mercado Pago';
+                }
             }
         }
-
         function closeCheckoutModal() {
             if (window.paymentBrickController?.unmount) {
                 try {
@@ -8321,43 +8332,22 @@ if (error) throw error;
             };
         }
 
-        async function submitCheckoutPayment(formData, selectedPaymentMethod) {
-            let whatsappWindow = null;
+        async function startMercadoPagoCheckout() {
+            const button = document.getElementById('goToMercadoPagoButton');
+            const paymentMessage = document.getElementById('checkoutPaymentMessage');
 
             try {
+                if (button) {
+                    button.disabled = true;
+                    button.textContent = 'Abrindo Mercado Pago...';
+                }
+
+                if (paymentMessage) {
+                    paymentMessage.className = 'hidden mt-4 p-3 rounded-xl text-sm';
+                    paymentMessage.textContent = '';
+                }
+
                 const customer = await collectCheckoutCustomer();
-
-                const paymentMethodId =
-                    formData?.payment_method_id ||
-                    formData?.paymentMethodId ||
-                    (selectedPaymentMethod === 'pix' ? 'pix' : '');
-
-                const paymentMethod =
-                    paymentMethodId === 'pix' ||
-                    selectedPaymentMethod === 'pix' ||
-                    selectedPaymentMethod === 'bank_transfer'
-                        ? 'pix'
-                        : 'credit_card';
-
-                const cardToken =
-                    formData?.token ||
-                    formData?.cardToken ||
-                    '';
-
-                const installments =
-                    Number(formData?.installments) || 1;
-
-                if (paymentMethod === 'credit_card' && !cardToken) {
-                    throw new Error('Não foi possível gerar o token seguro do cartão. Confira os dados do cartão.');
-                }
-
-                if (paymentMethod === 'credit_card' && !paymentMethodId) {
-                    throw new Error('Não foi possível identificar a bandeira do cartão.');
-                }
-
-                try {
-                    whatsappWindow = window.open('about:blank', '_blank');
-                } catch (_) {}
 
                 const { data: { session } } =
                     await supabaseClient.auth.getSession();
@@ -8387,130 +8377,53 @@ if (error) throw error;
                                 productId: item.id,
                                 quantity: Number(item.quantity)
                             })),
-                            affiliateCode: getAffiliateReferralCode(),
-                            paymentMethod,
-                            cardToken,
-                            paymentMethodId,
-                            installments
+                            affiliateCode: getAffiliateReferralCode()
                         })
                     }
                 );
 
                 const raw = await response.text();
                 let data = {};
-
                 try {
                     data = raw ? JSON.parse(raw) : {};
                 } catch (_) {}
 
-                if (!response.ok) {
+                if (!response.ok || !data.ok || !data.initPoint) {
                     const debug = data.debug || {};
                     const detalhes = [
-                        debug.code ? `Código: ${debug.code}` : '',
-                        debug.message ? `Mensagem: ${debug.message}` : '',
-                        debug.details ? `Detalhes: ${debug.details}` : '',
-                        debug.hint ? `Dica: ${debug.hint}` : ''
+                        debug.code ? 'Código: ' + debug.code : '',
+                        debug.message ? 'Mensagem: ' + debug.message : '',
+                        debug.cause ? 'Detalhes: ' + JSON.stringify(debug.cause) : ''
                     ].filter(Boolean).join('\n');
 
                     throw new Error(
-                        (data.error || `Erro no checkout (${response.status}).`) +
-                        (detalhes ? `\n\n${detalhes}` : '')
+                        (data.error || 'Não foi possível abrir o Mercado Pago.') +
+                        (detalhes ? '\n\n' + detalhes : '')
                     );
-                }
-
-                if (!data.ok) {
-                    throw new Error(data.error || 'O Mercado Pago não retornou um resultado válido.');
                 }
 
                 if (data.orderId) {
                     sessionStorage.setItem('laPendingPaymentOrder', data.orderId);
                 }
 
-                const itemsText = state.cart
-                    .map(item =>
-                        `• ${item.quantity}x ${item.name} — ${formatCurrency(Number(item.price) * Number(item.quantity))}`
-                    )
-                    .join('\n');
-
-                const whatsappText = [
-                    '🛍️ *NOVO PEDIDO — L&A ROYAL ADVISORY*',
-                    '',
-                    `Pedido: ${data.orderCode || data.orderId || '-'}`,
-                    `Cliente: ${customer.fullName}`,
-                    `WhatsApp: ${customer.phone}`,
-                    `E-mail: ${customer.email}`,
-                    `Endereço: ${customer.addressText}`,
-                    '',
-                    '*Itens:*',
-                    itemsText,
-                    '',
-                    `Total: ${formatCurrency(Number(data.total || state.cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0)))}`,
-                    `Pagamento: ${paymentMethod === 'pix' ? 'Pix' : 'Cartão de crédito'}`,
-                    `Status do pagamento: ${data.status || 'aguardando confirmação'}`
-                ].join('\n');
-
-                const whatsappUrl =
-                    'https://wa.me/5581989492224?text=' +
-                    encodeURIComponent(whatsappText);
-
-                if (whatsappWindow && !whatsappWindow.closed) {
-                    whatsappWindow.location.href = whatsappUrl;
-                }
-
-                if (paymentMethod === 'pix') {
-                    state.cart = [];
-                    updateCartIcon();
-                    showPixPaymentResult(data);
-                } else {
-                    const status = String(data.status || '').toLowerCase();
-
-                    if (status === 'approved') {
-                        state.cart = [];
-                        updateCartIcon();
-                        closeCheckoutModal();
-                        alert('Pagamento aprovado! Seu pedido foi registrado com sucesso.');
-                    } else if (
-                        status === 'in_process' ||
-                        status === 'pending' ||
-                        status === 'action_required'
-                    ) {
-                        state.cart = [];
-                        updateCartIcon();
-                        closeCheckoutModal();
-                        alert('Pagamento recebido e está em análise. A confirmação será atualizada automaticamente.');
-                    } else {
-                        if (whatsappWindow && !whatsappWindow.closed) {
-                            whatsappWindow.close();
-                        }
-
-                        throw new Error(
-                            data.statusDetail
-                                ? `O cartão não foi aprovado: ${data.statusDetail}`
-                                : 'O cartão não foi aprovado. Confira os dados e tente novamente.'
-                        );
-                    }
-                }
-
-                return data;
+                window.location.assign(data.initPoint);
             } catch (error) {
-                console.error('Erro no checkout:', error);
-
-                if (whatsappWindow && !whatsappWindow.closed) {
-                    whatsappWindow.close();
-                }
-
-                const message = error?.message || 'Não foi possível iniciar o pagamento.';
-                const paymentMessage = document.getElementById('checkoutPaymentMessage');
+                console.error('Erro ao abrir Mercado Pago:', error);
 
                 if (paymentMessage) {
-                    paymentMessage.textContent = message;
+                    paymentMessage.textContent =
+                        error?.message || 'Não foi possível iniciar o pagamento.';
                     paymentMessage.className =
                         'mt-4 p-3 rounded-xl text-sm bg-red-50 border border-red-200 text-red-800';
                 }
 
-                throw error;
+                if (button) {
+                    button.disabled = false;
+                    button.textContent = 'Pagar diretamente no Mercado Pago';
+                }
             }
         }
+
 
         async function createCheckoutOrder(event) {
             if (event?.preventDefault) event.preventDefault();
