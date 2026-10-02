@@ -756,80 +756,81 @@ Deno.serve(async (req) => {
     );
   }
 
-  /* Mercado Pago: Pix e cartão via Orders API */
-  const paymentMethod = String(body.paymentMethod || 'pix').toLowerCase() === 'pix' ? 'pix' : 'credit_card';
-  const cardToken = String(body.cardToken || '').trim();
-  const paymentMethodId = String(body.paymentMethodId || '').trim();
-  const installments = Number(body.installments) || 1;
-
-  if (paymentMethod === 'credit_card' && (!cardToken || !paymentMethodId)) {
-    return json({ error: 'Dados do cartão incompletos.' }, 400);
-  }
-  if (paymentMethod === 'credit_card' && (!Number.isInteger(installments) || installments < 1 || installments > 24)) {
-    return json({ error: 'Número de parcelas inválido.' }, 400);
-  }
-
-  const mercadoPagoPayment = paymentMethod === 'pix'
-    ? { amount: subtotal.toFixed(2), payment_method: { id: 'pix', type: 'bank_transfer' } }
-    : { amount: subtotal.toFixed(2), payment_method: { id: paymentMethodId, type: 'credit_card', token: cardToken, installments } };
-
-  const mercadoPagoOrder = {
-    type: 'online', processing_mode: 'automatic', total_amount: subtotal.toFixed(2),
+  /* Mercado Pago Checkout Pro: pagamento concluído no ambiente seguro do Mercado Pago */
+  const preference = {
+    items: mercadoPagoItems,
     external_reference: orderId,
-    payer: { email, first_name: fullName.split(/\\s+/)[0] || fullName, identification: { type: 'CPF', number: cpf } },
-    transactions: { payments: [mercadoPagoPayment] },
+    payer: {
+      name: fullName,
+      email,
+      identification: { type: 'CPF', number: cpf },
+    },
+    notification_url: `${SUPABASE_URL}/functions/v1/mercado-pago-webhook`,
+    back_urls: {
+      success: `${SITE_URL}/?payment=success&order=${encodeURIComponent(orderId)}`,
+      pending: `${SITE_URL}/?payment=pending&order=${encodeURIComponent(orderId)}`,
+      failure: `${SITE_URL}/?payment=failure&order=${encodeURIComponent(orderId)}`,
+    },
+    auto_return: 'approved',
+    metadata: {
+      order_id: orderId,
+      order_code: orderCode,
+      user_id: user.id,
+      affiliate_code: validAffiliateCode || '',
+    },
   };
 
-  const mercadoPagoResponse = await fetch('https://api.mercadopago.com/v1/orders', {
-    method: 'POST',
-    headers: { Authorization: 'Bearer ' + MP_ACCESS_TOKEN, 'Content-Type': 'application/json', Accept: 'application/json', 'X-Idempotency-Key': orderId },
-    body: JSON.stringify(mercadoPagoOrder),
-  });
+  const mercadoPagoResponse = await fetch(
+    'https://api.mercadopago.com/checkout/preferences',
+    {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + MP_ACCESS_TOKEN,
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        'X-Idempotency-Key': orderId,
+      },
+      body: JSON.stringify(preference),
+    }
+  );
+
   const mercadoPagoData = await mercadoPagoResponse.json().catch(() => ({}));
 
-  if (!mercadoPagoResponse.ok) {
+  if (!mercadoPagoResponse.ok || !mercadoPagoData?.init_point) {
     const mercadoPagoDebug = {
       status: mercadoPagoResponse.status,
-      statusText: mercadoPagoResponse.statusText || null,
       message: mercadoPagoData?.message || null,
       error: mercadoPagoData?.error || null,
       cause: mercadoPagoData?.cause || null,
-      details: mercadoPagoData?.details || null,
-      code: mercadoPagoData?.code || null,
-      type: mercadoPagoData?.type || null,
     };
 
-    console.error('========== MERCADO PAGO ERROR ==========');
-    console.error(JSON.stringify(mercadoPagoDebug, null, 2));
-    console.error('Mercado Pago response:', JSON.stringify(mercadoPagoData, null, 2));
-    console.error('=========================================');
+    console.error(
+      'Erro ao criar preferência do Mercado Pago:',
+      JSON.stringify(mercadoPagoDebug)
+    );
 
     await admin
       .from('orders')
-      .update({ status: 'cancelled', payment_status: 'cancelled' })
+      .update({
+        status: 'cancelled',
+        payment_status: 'cancelled',
+      })
       .eq('id', orderId);
 
     return json(
       {
-        error: 'Não foi possível iniciar o pagamento.',
+        error: 'Não foi possível abrir o checkout do Mercado Pago.',
         debug: mercadoPagoDebug,
       },
       502
     );
   }
 
-  const payment = mercadoPagoData?.transactions?.payments?.[0] || mercadoPagoData?.payments?.[0] || mercadoPagoData?.payment || {};
-  const paymentId = payment?.id ? String(payment.id) : null;
-  const paymentStatus = String(payment?.status || 'pending');
-  const paymentStatusDetail = payment?.status_detail || null;
-  const qrCode = payment?.point_of_interaction?.transaction_data?.qr_code || payment?.qr_code || null;
-  const qrCodeBase64 = payment?.point_of_interaction?.transaction_data?.qr_code_base64 || payment?.qr_code_base64 || null;
-  const ticketUrl = payment?.point_of_interaction?.transaction_data?.ticket_url || payment?.ticket_url || null;
-
-  if (paymentId) await admin.from('orders').update({ payment_id: paymentId, payment_status: paymentStatus }).eq('id', orderId);
-
-  const { error: paymentError } = await admin.from('payments').insert({ id: generateCode('PAY'), order_id: orderId, provider: 'mercado_pago', provider_payment_id: paymentId, status: paymentStatus, amount: subtotal, currency: 'BRL', payment_method: paymentMethod, provider_status: paymentStatusDetail || 'created' });
-  if (paymentError) console.error('Erro ao registrar pagamento:', paymentError);
-
-  return json({ ok: true, orderId, orderCode, total: subtotal, status: paymentStatus, statusDetail: paymentStatusDetail, paymentId, paymentMethod, qrCode, qrCodeBase64, ticketUrl });
+  return json({
+    ok: true,
+    orderId,
+    orderCode,
+    total: subtotal,
+    initPoint: mercadoPagoData.init_point,
+  });
 });
