@@ -23,7 +23,7 @@ serve(async (req) => {
     );
   }
 
-  const MP_TEST_ACCESS_TOKEN = Deno.env.get("MP_TEST_ACCESS_TOKEN");
+  const MP_TEST_ACCESS_TOKEN = (Deno.env.get("MP_TEST_ACCESS_TOKEN") || "").trim();
 
   if (!MP_TEST_ACCESS_TOKEN) {
     return new Response(
@@ -80,14 +80,15 @@ serve(async (req) => {
       },
     };
 
+    const requestHeaders = new Headers();
+    requestHeaders.set("Accept", "application/json");
+    requestHeaders.set("Content-Type", "application/json");
+    requestHeaders.set("Authorization", "Bearer " + MP_TEST_ACCESS_TOKEN);
+    requestHeaders.set("X-Idempotency-Key", idempotencyKey);
+
     const response = await fetch("https://api.mercadopago.com/v1/orders", {
       method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${MP_TEST_ACCESS_TOKEN}`,
-        "X-Idempotency-Key": idempotencyKey,
-      },
+      headers: requestHeaders,
       body: JSON.stringify(order),
     });
 
