@@ -472,16 +472,50 @@ Deno.serve(async (req) => {
       100
     );
 
-    const salePriceRaw = Number(product.sale_price);
+    const hasSalePrice =
+      product.sale_price !== null &&
+      product.sale_price !== undefined &&
+      String(product.sale_price).trim() !== '';
 
-    const unitPrice = Number.isFinite(salePriceRaw) && salePriceRaw >= 0
-      ? money(salePriceRaw)
-      : money(price * (1 - discount / 100));
+    const salePriceRaw = hasSalePrice
+      ? Number(product.sale_price)
+      : NaN;
+
+    const unitPrice =
+      Number.isFinite(salePriceRaw) && salePriceRaw > 0
+        ? money(salePriceRaw)
+        : money(price * (1 - discount / 100));
 
     const itemSubtotal =
       money(
         unitPrice * quantity
       );
+
+    if (
+      !Number.isFinite(unitPrice) ||
+      unitPrice <= 0 ||
+      itemSubtotal <= 0
+    ) {
+      console.error(
+        'Preço final inválido para o produto:',
+        {
+          productId: product.id,
+          productPrice: product.price,
+          salePrice: product.sale_price,
+          discount,
+          unitPrice,
+          quantity
+        }
+      );
+
+      return json(
+        {
+          error:
+            'O produto possui preço de venda inválido.'
+        },
+        409
+      );
+    }
 
     const grossPrice = money(price);
     const affiliateCommission = 0;
