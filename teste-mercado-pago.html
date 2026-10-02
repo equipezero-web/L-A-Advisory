@@ -29,7 +29,7 @@ const FUNCTION_URL="https://fqisewatypluagngmgka.supabase.co/functions/v1/create
 const btn=document.getElementById("btn"),email=document.getElementById("email"),status=document.getElementById("status");
 btn.addEventListener("click",async()=>{
  const payer_email=email.value.trim();
- if(!payer_email){status.textContent="Informe o e-mail do comprador de teste.";return;}
+ if(!payer_email){status.textContent="Informe o e-mail do comprador de teste.";return;}\n if(!/@testuser\\.com$/i.test(payer_email)){status.textContent="O Mercado Pago exige que o e-mail do comprador de teste termine com @testuser.com. Exemplo: test_user_123@testuser.com";return;}
  btn.disabled=true; status.textContent="Criando Order de teste...";
  try{
   const res=await fetch(FUNCTION_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({payer_email})});
