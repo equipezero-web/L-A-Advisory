@@ -69,6 +69,7 @@ serve(async (req) => {
           total_amount: amount,
         },
       ],
+      capture_mode: "automatic",
       config: {
         online: {
           success_url: `${SITE_URL}/?mp_test=success`,
