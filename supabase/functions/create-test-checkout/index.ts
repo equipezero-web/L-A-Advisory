@@ -80,6 +80,10 @@ serve(async (req) => {
       },
     };
 
+    const tokenLoaded = MP_TEST_ACCESS_TOKEN.length > 0;
+    const tokenLooksLikeMercadoPago = /^(APP_USR|TEST)-/.test(MP_TEST_ACCESS_TOKEN);
+    console.log("MP test token diagnostics:", { tokenLoaded, tokenLength: MP_TEST_ACCESS_TOKEN.length, tokenLooksLikeMercadoPago });
+
     const requestHeaders = new Headers();
     requestHeaders.set("Accept", "application/json");
     requestHeaders.set("Content-Type", "application/json");
@@ -101,6 +105,11 @@ serve(async (req) => {
           error: "Mercado Pago recusou a criação da order de teste.",
           status: response.status,
           details: data,
+          diagnostics: {
+            tokenLoaded,
+            tokenLength: MP_TEST_ACCESS_TOKEN.length,
+            tokenLooksLikeMercadoPago,
+          },
         }),
         { status: response.status, headers: corsHeaders },
       );
