@@ -6,3 +6,6 @@ verify_jwt = true
 
 [functions.mercado-pago-webhook]
 verify_jwt = false
+
+[functions.create-test-checkout]
+verify_jwt = false
