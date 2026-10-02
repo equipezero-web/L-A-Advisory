@@ -754,9 +754,34 @@ Deno.serve(async (req) => {
   const mercadoPagoData = await mercadoPagoResponse.json().catch(() => ({}));
 
   if (!mercadoPagoResponse.ok) {
-    console.error('Erro Mercado Pago Orders API:', mercadoPagoData);
-    await admin.from('orders').update({ status: 'cancelled', payment_status: 'cancelled' }).eq('id', orderId);
-    return json({ error: 'Não foi possível iniciar o pagamento.', debug: { status: mercadoPagoResponse.status, message: mercadoPagoData?.message || mercadoPagoData?.error || null, details: mercadoPagoData?.cause || mercadoPagoData?.details || null } }, 502);
+    const mercadoPagoDebug = {
+      status: mercadoPagoResponse.status,
+      statusText: mercadoPagoResponse.statusText || null,
+      message: mercadoPagoData?.message || null,
+      error: mercadoPagoData?.error || null,
+      cause: mercadoPagoData?.cause || null,
+      details: mercadoPagoData?.details || null,
+      code: mercadoPagoData?.code || null,
+      type: mercadoPagoData?.type || null,
+    };
+
+    console.error('========== MERCADO PAGO ERROR ==========');
+    console.error(JSON.stringify(mercadoPagoDebug, null, 2));
+    console.error('Mercado Pago response:', JSON.stringify(mercadoPagoData, null, 2));
+    console.error('=========================================');
+
+    await admin
+      .from('orders')
+      .update({ status: 'cancelled', payment_status: 'cancelled' })
+      .eq('id', orderId);
+
+    return json(
+      {
+        error: 'Não foi possível iniciar o pagamento.',
+        debug: mercadoPagoDebug,
+      },
+      502
+    );
   }
 
   const payment = mercadoPagoData?.transactions?.payments?.[0] || mercadoPagoData?.payments?.[0] || mercadoPagoData?.payment || {};
