@@ -8689,13 +8689,53 @@ if (error) throw error;
                             document.getElementById('openPixTicketButton')?.dataset.url;
 
                         if (url) {
-                            window.open(url, '_blank', 'noopener,noreferrer');
+                            const paymentWindow = window.open(url, '_blank', 'noopener,noreferrer');
+                            if (!paymentWindow) window.location.href = url;
+                            return;
+                        }
+
+                        const code = document.getElementById('pixCopyCode')?.value || '';
+                        if (code) {
+                            navigator.clipboard?.writeText(code).then(
+                                () => alert('Código Pix copiado. Cole no aplicativo do seu banco para pagar.'),
+                                () => {
+                                    const textarea = document.getElementById('pixCopyCode');
+                                    textarea?.focus();
+                                    textarea?.select();
+                                    alert('Copie o código Pix e cole no aplicativo do seu banco.');
+                                }
+                            );
+                        } else {
+                            alert('O Mercado Pago não retornou o link nem o código Pix. Gere uma nova tentativa de pagamento.');
                         }
                     }
                 );
             }
 
-            const pix = data.pix || {};
+            // A Edge Function retorna os dados do Pix no nível principal;
+            // também aceitamos o formato agrupado em data.pix para compatibilidade.
+            const pixSource = data.pix || data.payment || data;
+            const transactionData =
+                pixSource?.point_of_interaction?.transaction_data ||
+                pixSource?.pointOfInteraction?.transactionData ||
+                {};
+            const pix = {
+                qrCode:
+                    pixSource?.qrCode ||
+                    pixSource?.qr_code ||
+                    transactionData?.qr_code ||
+                    '',
+                qrCodeBase64:
+                    pixSource?.qrCodeBase64 ||
+                    pixSource?.qr_code_base64 ||
+                    transactionData?.qr_code_base64 ||
+                    '',
+                ticketUrl:
+                    pixSource?.ticketUrl ||
+                    pixSource?.ticket_url ||
+                    transactionData?.ticket_url ||
+                    ''
+            };
             const qrContainer = document.getElementById('pixQrCodeContainer');
             const qrCode = document.getElementById('pixCopyCode');
             const orderCode = document.getElementById('pixOrderCode');
@@ -8704,16 +8744,17 @@ if (error) throw error;
             if (qrContainer) {
                 qrContainer.innerHTML = pix.qrCodeBase64
                     ? `<img src="data:image/png;base64,${pix.qrCodeBase64}" alt="QR Code Pix" class="w-64 h-64 object-contain border border-slate-200 rounded-xl p-2">`
-                    : '<p class="text-sm text-slate-500">QR Code não disponível. Use o botão Abrir Pix.</p>';
+                    : '<p class="text-sm text-slate-500">QR Code não disponível. Use o código Pix ou abra o link de pagamento.</p>';
             }
 
-            if (qrCode) qrCode.value = pix.qrCode || '';
+            if (qrCode) qrCode.value = pix.qrCode;
             if (orderCode) orderCode.textContent = data.orderCode || data.orderId || '-';
 
             if (openButton) {
-                openButton.dataset.url = pix.ticketUrl || '';
-                openButton.disabled = !pix.ticketUrl;
-                openButton.classList.toggle('opacity-50', !pix.ticketUrl);
+                openButton.dataset.url = pix.ticketUrl;
+                openButton.disabled = !pix.ticketUrl && !pix.qrCode;
+                openButton.classList.toggle('opacity-50', openButton.disabled);
+                openButton.textContent = pix.ticketUrl ? 'Abrir Pix' : 'Copiar código Pix';
             }
 
             modal.classList.remove('hidden');
