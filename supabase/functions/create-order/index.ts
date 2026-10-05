@@ -64,8 +64,9 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({
       error: 'Mercado Pago recusou a order.',
       status: mp.status,
-      message: data.message || null,
-      cause: data.cause || null
+      message: data.message || data.error || null,
+      cause: data.cause || null,
+      debug: data
     }), { status: 502, headers: cors });
   }
 
