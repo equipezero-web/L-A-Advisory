@@ -128,7 +128,16 @@ Deno.serve(async (req) => {
   const customer =
     body.customer && typeof body.customer === 'object'
       ? body.customer
-      : {};
+      : {
+          fullName: body.fullName || body.first_name || body.firstName || '',
+          phone: body.phone || '',
+          email: body.email || '',
+          cpf: body.cpf || body.identification_number || body.identificationNumber || '',
+          addressText: body.addressText || '',
+          address: body.address && typeof body.address === 'object'
+            ? body.address
+            : {}
+        };
 
   const items =
     Array.isArray(body.items)
@@ -159,13 +168,13 @@ Deno.serve(async (req) => {
   const addressText =
     String(customer.addressText || '').trim().slice(0, 1000) ||
     [
-      String(address.street || '').trim(),
-      String(address.number || '').trim(),
+      String(address.street || address.street_name || '').trim(),
+      String(address.number || address.street_number || '').trim(),
       String(address.complement || '').trim(),
       String(address.neighborhood || '').trim(),
       String(address.city || '').trim(),
       String(address.state || '').trim(),
-      String(address.zipCode || '').replace(/\D/g, '')
+      String(address.zipCode || address.zip_code || '').replace(/\D/g, '')
     ].filter(Boolean).join(', ').slice(0, 1000);
 
   const missingCustomerFields: string[] = [];
