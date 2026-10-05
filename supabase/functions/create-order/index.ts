@@ -39,6 +39,14 @@ Deno.serve(async (req) => {
       total_amount: total.toFixed(2),
       external_reference: 'LA-' + idempotency,
       payer: { email },
+      config: {
+        online: {
+          success_url: 'https://equipezero-web.github.io/L-A-Advisory/',
+          failure_url: 'https://equipezero-web.github.io/L-A-Advisory/',
+          pending_url: 'https://equipezero-web.github.io/L-A-Advisory/',
+          auto_return: 'approved'
+        }
+      },
       items: [{
         title,
         unit_price: total.toFixed(2),
