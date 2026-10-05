@@ -8328,7 +8328,8 @@ if (error) throw error;
                 phone,
                 email,
                 cpfDigits,
-                addressText
+                addressText,
+                address
             };
         }
 
@@ -8380,7 +8381,12 @@ if (error) throw error;
                             title: state.cart.length === 1
                                 ? String(state.cart[0].name || 'Produto')
                                 : 'Compra L&A Royal Advisory',
-                            email: customer.email
+                            email: customer.email,
+                            address: {
+                                zip_code: customer.address.zipCode,
+                                street_name: customer.address.street,
+                                street_number: customer.address.number
+                            }
                         })
                     }
                 );
