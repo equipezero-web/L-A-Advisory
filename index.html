@@ -8377,16 +8377,19 @@ if (error) throw error;
                             'apikey': SUPABASE_ANON_KEY
                         },
                         body: JSON.stringify({
-                            total: Number(total.toFixed(2)),
-                            title: state.cart.length === 1
-                                ? String(state.cart[0].name || 'Produto')
-                                : 'Compra L&A Royal Advisory',
-                            email: customer.email,
-                            address: {
-                                zip_code: customer.address.zipCode,
-                                street_name: customer.address.street,
-                                street_number: customer.address.number
-                            }
+                            customer: {
+                                fullName: customer.fullName,
+                                phone: customer.phone,
+                                email: customer.email,
+                                cpf: customer.cpfDigits,
+                                addressText: customer.addressText,
+                                address: customer.address
+                            },
+                            items: state.cart.map(item => ({
+                                productId: item.id || item.product_id || item.productId,
+                                quantity: Number(item.quantity)
+                            })),
+                            affiliateCode: getAffiliateReferralCode()
                         })
                     }
                 );
