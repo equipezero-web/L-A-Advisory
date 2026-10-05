@@ -18,6 +18,7 @@ Deno.serve(async (req) => {
   const total = Number(body.total);
   const title = String(body.title || 'Produto').slice(0, 256);
   const email = String(body.email || '').trim().toLowerCase();
+  const address = body.address && typeof body.address === 'object' ? body.address : null;
 
   if (!Number.isFinite(total) || total <= 0 || !email) {
     return new Response(JSON.stringify({ error: 'total e email são obrigatórios.' }), { status: 400, headers: cors });
@@ -39,7 +40,16 @@ Deno.serve(async (req) => {
       processing_mode: 'manual',
       total_amount: total.toFixed(2),
       external_reference: externalReference,
-      payer: { email },
+      payer: {
+        email,
+        ...(address ? {
+          address: {
+            zip_code: String(address.zip_code || '').trim(),
+            street_name: String(address.street_name || '').trim(),
+            street_number: String(address.street_number || '').trim()
+          }
+        } : {})
+      },
       config: {
         online: {
           success_url: 'https://equipezero-web.github.io/L-A-Advisory/',
@@ -66,6 +76,8 @@ Deno.serve(async (req) => {
       status: mp.status,
       message: data.message || data.error || null,
       cause: data.cause || null,
+      error_code: data.error_code || data.code || null,
+      details: data.details || data.errors || null,
       debug: data
     }), { status: 502, headers: cors });
   }
