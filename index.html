@@ -8377,6 +8377,8 @@ if (error) throw error;
                             'apikey': SUPABASE_ANON_KEY
                         },
                         body: JSON.stringify({
+                            // Envia os dados nos dois formatos para manter compatibilidade
+                            // com a versão atual e versões anteriores da Edge Function.
                             customer: {
                                 fullName: customer.fullName,
                                 phone: customer.phone,
@@ -8385,6 +8387,12 @@ if (error) throw error;
                                 addressText: customer.addressText,
                                 address: customer.address
                             },
+                            fullName: customer.fullName,
+                            phone: customer.phone,
+                            email: customer.email,
+                            cpf: customer.cpfDigits,
+                            addressText: customer.addressText,
+                            address: customer.address,
                             items: state.cart.map(item => ({
                                 productId: item.id || item.product_id || item.productId,
                                 quantity: Number(item.quantity)
