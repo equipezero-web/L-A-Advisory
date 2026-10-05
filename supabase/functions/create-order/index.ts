@@ -51,9 +51,7 @@ Deno.serve(async (req) => {
       items: [{
         title,
         unit_price: total.toFixed(2),
-        quantity: 1,
-        unit_measure: 'unit',
-        total_amount: total.toFixed(2)
+        quantity: 1
       }]
     })
   });
