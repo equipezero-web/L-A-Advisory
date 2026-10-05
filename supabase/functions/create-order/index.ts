@@ -24,6 +24,7 @@ Deno.serve(async (req) => {
   }
 
   const idempotency = crypto.randomUUID();
+  const externalReference = 'LA' + idempotency.replaceAll('-', '');
 
   const mp = await fetch('https://api.mercadopago.com/v1/orders', {
     method: 'POST',
@@ -37,7 +38,7 @@ Deno.serve(async (req) => {
       type: 'online',
       processing_mode: 'manual',
       total_amount: total.toFixed(2),
-      external_reference: 'LA-' + idempotency,
+      external_reference: externalReference,
       payer: { email },
       config: {
         online: {
