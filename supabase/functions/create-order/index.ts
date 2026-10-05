@@ -188,7 +188,9 @@ Deno.serve(async (req) => {
   if (missingCustomerFields.length) {
     return json(
       {
-        error: 'Dados do cliente incompletos.',
+        error:
+          'Dados do cliente incompletos. Campos faltando: ' +
+          missingCustomerFields.join(', ') + '.',
         missing: missingCustomerFields
       },
       400
