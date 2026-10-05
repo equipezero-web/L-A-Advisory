@@ -63,10 +63,6 @@ Deno.serve(async (req) => {
     body.phone_number || body.phoneNumber || ''
   ).replace(/\D/g, '').slice(0, 15);
 
-  const registrationDate = String(
-    body.registration_date || body.registrationDate || ''
-  ).trim();
-
   if (!Number.isFinite(total) || total <= 0 || !email) {
     return new Response(
       JSON.stringify({
@@ -107,14 +103,6 @@ Deno.serve(async (req) => {
     };
   }
 
-  const additionalPayer: Record<string, unknown> = {
-    is_first_purchase_online: true
-  };
-
-  if (registrationDate) {
-    additionalPayer.registration_date = registrationDate;
-  }
-
   const mp = await fetch(
     'https://api.mercadopago.com/v1/orders',
     {
@@ -128,36 +116,22 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         type: 'online',
         processing_mode: 'manual',
-
         total_amount: total.toFixed(2),
-
         external_reference: externalReference,
-
         description: title,
-
         payer,
-
         config: {
           statement_descriptor: 'LA ROYAL ADVISORY',
-
           online: {
             success_url:
               'https://equipezero-web.github.io/L-A-Advisory/',
-
             failure_url:
               'https://equipezero-web.github.io/L-A-Advisory/',
-
             pending_url:
               'https://equipezero-web.github.io/L-A-Advisory/',
-
             auto_return: 'approved'
           }
         },
-
-        additional_info: {
-          payer: additionalPayer
-        },
-
         items: [
           {
             title,
@@ -195,7 +169,6 @@ Deno.serve(async (req) => {
           data.message ||
           data.error ||
           null,
-
         error_code:
           data.error_code ||
           data.code ||
@@ -206,28 +179,22 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({
         error: 'Mercado Pago recusou a order.',
-
         status: mp.status,
-
         message:
           data.message ||
           data.error ||
           null,
-
         cause:
           data.cause ||
           null,
-
         error_code:
           data.error_code ||
           data.code ||
           null,
-
         details:
           data.details ||
           data.errors ||
           null,
-
         debug: data
       }),
       {
@@ -241,10 +208,8 @@ Deno.serve(async (req) => {
     'Mercado Pago Order criada:',
     {
       order_id: data.id,
-
       external_reference:
         externalReference,
-
       status:
         data.status ||
         null
@@ -254,9 +219,7 @@ Deno.serve(async (req) => {
   return new Response(
     JSON.stringify({
       ok: true,
-
       order_id: data.id,
-
       checkout_url:
         data.checkout_url
     }),
