@@ -29,6 +29,180 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST' && req.method !== 'GET') return json({ error: 'Método não permitido.' }, 405);
 
   const payload = await req.json().catch(() => ({}));
+
+  // Orders API: Mercado Pago envia type=order e data.id com o ID da Order.
+  // A documentação recomenda consultar /v1/orders/{id} para obter os dados completos.
+  const notificationType = String(
+    payload?.type || payload?.topic || ''
+  ).toLowerCase();
+
+  if (notificationType === 'order' || notificationType.includes('order')) {
+    const orderId = String(
+      payload?.data?.id ||
+      payload?.id ||
+      ''
+    ).trim();
+
+    if (!orderId) {
+      return json({ received: true });
+    }
+
+    const orderResponse = await fetch(
+      `https://api.mercadopago.com/v1/orders/${encodeURIComponent(orderId)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
+          Accept: 'application/json',
+        },
+      }
+    );
+
+    const mpOrder = await orderResponse.json().catch(() => ({}));
+
+    if (!orderResponse.ok || !mpOrder?.id) {
+      console.error('Não foi possível consultar a Order do Mercado Pago:', {
+        status: orderResponse.status,
+        order_id: orderId,
+      });
+      return json({ received: true });
+    }
+
+    console.log('Webhook Order recebido:', {
+      order_id: mpOrder.id,
+      status: mpOrder.status || null,
+      status_detail: mpOrder.status_detail || null,
+      external_reference: mpOrder.external_reference || null,
+    });
+
+    // A Order pode conter os pagamentos dentro de transactions.payments.
+    // Mantemos o processamento legado abaixo para notificações payment.
+    const orderExternalReference = String(
+      mpOrder.external_reference || ''
+    ).trim();
+
+    if (orderExternalReference) {
+      const admin = createClient(URL, SERVICE);
+      const { data: order } = await admin
+        .from('orders')
+        .select('*')
+        .eq('id', orderExternalReference)
+        .maybeSingle();
+
+      if (order) {
+        const payments = Array.isArray(mpOrder?.transactions?.payments)
+          ? mpOrder.transactions.payments
+          : [];
+
+        const payment = payments[0];
+
+        const statusMap: Record<string, string> = {
+          processed: 'approved',
+          approved: 'approved',
+          pending: 'pending',
+          in_process: 'pending',
+          action_required: 'pending',
+          rejected: 'rejected',
+          cancelled: 'cancelled',
+          refunded: 'refunded',
+          charged_back: 'chargeback',
+        };
+
+        const orderPaymentStatus =
+          statusMap[String(mpOrder.status || '').toLowerCase()] ||
+          statusMap[String(payment?.status || '').toLowerCase()] ||
+          'pending';
+
+        const approved =
+          orderPaymentStatus === 'approved';
+
+        const paymentId = String(
+          payment?.id || ''
+        ).trim();
+
+        if (paymentId) {
+          const amount = Number(
+            payment?.amount ||
+            payment?.paid_amount ||
+            mpOrder.total_paid_amount ||
+            mpOrder.total_amount ||
+            0
+          );
+
+          const { data: existingPayment } = await admin
+            .from('payments')
+            .select('id,status')
+            .eq('provider_payment_id', paymentId)
+            .maybeSingle();
+
+          const paymentRow = {
+            order_id: orderExternalReference,
+            provider: 'mercado_pago',
+            provider_payment_id: paymentId,
+            status: orderPaymentStatus,
+            amount,
+            currency: mpOrder.currency_id || 'BRL',
+            payment_method:
+              payment?.payment_method?.type ||
+              payment?.payment_method?.id ||
+              'mercado_pago',
+            provider_status:
+              payment?.status ||
+              mpOrder.status ||
+              null,
+            provider_status_detail:
+              payment?.status_detail ||
+              mpOrder.status_detail ||
+              null,
+            paid_at:
+              approved
+                ? new Date().toISOString()
+                : null,
+          };
+
+          if (existingPayment) {
+            await admin
+              .from('payments')
+              .update(paymentRow)
+              .eq('id', existingPayment.id);
+          } else {
+            await admin
+              .from('payments')
+              .insert({
+                id: crypto.randomUUID(),
+                ...paymentRow,
+              });
+          }
+        }
+
+        const newOrderStatus =
+          approved
+            ? 'paid'
+            : orderPaymentStatus === 'refunded'
+              ? 'refunded'
+              : orderPaymentStatus === 'rejected' ||
+                orderPaymentStatus === 'cancelled'
+                ? 'cancelled'
+                : 'pending';
+
+        const orderUpdate: Record<string, unknown> = {
+          payment_status: orderPaymentStatus,
+          status: newOrderStatus,
+        };
+
+        if (approved) {
+          orderUpdate.paid_at =
+            new Date().toISOString();
+        }
+
+        await admin
+          .from('orders')
+          .update(orderUpdate)
+          .eq('id', orderExternalReference);
+      }
+    }
+
+    return json({ received: true });
+  }
   const paymentId = String(payload?.data?.id || payload?.id || '').trim();
   const type = String(payload?.type || payload?.topic || '').toLowerCase();
   if (!paymentId || (type && !type.includes('payment'))) return json({ received: true });
