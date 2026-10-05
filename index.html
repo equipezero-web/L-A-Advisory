@@ -8356,8 +8356,18 @@ if (error) throw error;
                     throw new Error('Sessão expirada. Entre novamente.');
                 }
 
+                const total = state.cart.reduce(
+                    (sum, item) =>
+                        sum + (Number(item.price) * Number(item.quantity)),
+                    0
+                );
+
+                if (!Number.isFinite(total) || total <= 0) {
+                    throw new Error('O valor do pedido é inválido.');
+                }
+
                 const response = await fetch(
-                    SUPABASE_FUNCTIONS_BASE + '/create-checkout',
+                    SUPABASE_FUNCTIONS_BASE + '/create-order',
                     {
                         method: 'POST',
                         headers: {
@@ -8366,18 +8376,11 @@ if (error) throw error;
                             'apikey': SUPABASE_ANON_KEY
                         },
                         body: JSON.stringify({
-                            customer: {
-                                fullName: customer.fullName,
-                                cpf: customer.cpfDigits,
-                                phone: customer.phone,
-                                email: customer.email,
-                                address: customer.addressText
-                            },
-                            items: state.cart.map(item => ({
-                                productId: item.id,
-                                quantity: Number(item.quantity)
-                            })),
-                            affiliateCode: getAffiliateReferralCode()
+                            total: Number(total.toFixed(2)),
+                            title: state.cart.length === 1
+                                ? String(state.cart[0].name || 'Produto')
+                                : 'Compra L&A Royal Advisory',
+                            email: customer.email
                         })
                     }
                 );
@@ -8388,12 +8391,13 @@ if (error) throw error;
                     data = raw ? JSON.parse(raw) : {};
                 } catch (_) {}
 
-                if (!response.ok || !data.ok || !data.initPoint) {
+                if (!response.ok || !data.ok || !data.checkout_url) {
                     const debug = data.debug || {};
                     const detalhes = [
-                        debug.code ? 'Código: ' + debug.code : '',
-                        debug.message ? 'Mensagem: ' + debug.message : '',
-                        debug.cause ? 'Detalhes: ' + JSON.stringify(debug.cause) : ''
+                        data.status ? 'Status: ' + data.status : '',
+                        data.message ? 'Mensagem: ' + data.message : '',
+                        debug.message ? 'Detalhes: ' + debug.message : '',
+                        debug.cause ? 'Causa: ' + JSON.stringify(debug.cause) : ''
                     ].filter(Boolean).join('\n');
 
                     throw new Error(
@@ -8402,13 +8406,16 @@ if (error) throw error;
                     );
                 }
 
-                if (data.orderId) {
-                    sessionStorage.setItem('laPendingPaymentOrder', data.orderId);
+                if (data.order_id) {
+                    sessionStorage.setItem(
+                        'laPendingPaymentOrder',
+                        data.order_id
+                    );
                 }
 
-                window.location.assign(data.initPoint);
+                window.location.assign(data.checkout_url);
             } catch (error) {
-                console.error('Erro ao abrir Mercado Pago:', error);
+                console.error('Erro ao abrir Mercado Pago Orders:', error);
 
                 if (paymentMessage) {
                     paymentMessage.textContent =
@@ -8423,7 +8430,6 @@ if (error) throw error;
                 }
             }
         }
-
 
         async function createCheckoutOrder(event) {
             if (event?.preventDefault) event.preventDefault();
