@@ -8406,6 +8406,7 @@ if (error) throw error;
                         data.status ? 'Status: ' + data.status : '',
                         data.message ? 'Mensagem: ' + data.message : '',
                         data.error_code ? 'Código: ' + data.error_code : '',
+                        data.missing?.length ? 'Campos faltando: ' + data.missing.join(', ') : '',
                         data.details ? 'Detalhes: ' + JSON.stringify(data.details) : '',
                         debug.message ? 'Detalhes: ' + debug.message : '',
                         debug.cause ? 'Causa: ' + JSON.stringify(debug.cause) : '',
