@@ -762,10 +762,10 @@ Deno.serve(async (req) => {
    * enviar esses dados completos evita depender de campos inferidos
    * no checkout, especialmente em meios como Pix.
    */
-  const nameParts = fullName.split(/\\s+/).filter(Boolean);
+  const nameParts = fullName.split(/\s+/).filter(Boolean);
   const payerName = nameParts.shift() || fullName;
   const payerSurname = nameParts.join(' ').trim();
-  const phoneDigits = phone.replace(/\\D/g, '');
+  const phoneDigits = phone.replace(/\D/g, '');
   const payerAreaCode = phoneDigits.length >= 10 ? phoneDigits.slice(0, 2) : '';
   const payerPhoneNumber = phoneDigits.length >= 10 ? phoneDigits.slice(2) : phoneDigits;
 
