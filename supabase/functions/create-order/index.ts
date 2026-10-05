@@ -168,9 +168,20 @@ Deno.serve(async (req) => {
       String(address.zipCode || '').replace(/\D/g, '')
     ].filter(Boolean).join(', ').slice(0, 1000);
 
-  if (!fullName || !phone || !email || !cpf || !addressText) {
+  const missingCustomerFields: string[] = [];
+
+  if (!fullName) missingCustomerFields.push('nome completo');
+  if (!phone) missingCustomerFields.push('telefone');
+  if (!email) missingCustomerFields.push('e-mail');
+  if (!cpf) missingCustomerFields.push('CPF');
+  if (!addressText) missingCustomerFields.push('endereço');
+
+  if (missingCustomerFields.length) {
     return json(
-      { error: 'Dados do cliente incompletos.' },
+      {
+        error: 'Dados do cliente incompletos.',
+        missing: missingCustomerFields
+      },
       400
     );
   }
