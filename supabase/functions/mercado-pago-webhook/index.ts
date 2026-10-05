@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
     payload?.type || payload?.topic || ''
   ).toLowerCase();
 
-  if (notificationType === 'order' || notificationType.includes('order')) {
+  if (notificationType === 'order' || notificationType === 'orders') {
     const orderId = String(
       payload?.data?.id ||
       payload?.id ||
