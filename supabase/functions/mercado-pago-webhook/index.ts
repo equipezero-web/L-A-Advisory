@@ -15,7 +15,13 @@ function json(data: unknown, status = 200) {
 }
 
 const URL = Deno.env.get('SUPABASE_URL')!;
-const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const SUPABASE_SECRET_KEYS = JSON.parse(
+  Deno.env.get('SUPABASE_SECRET_KEYS') || '{}'
+);
+const SERVICE =
+  SUPABASE_SECRET_KEYS['default'] ||
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ||
+  '';
 const MP_ACCESS_TOKEN = Deno.env.get('MP_ACCESS_TOKEN')!;
 
 Deno.serve(async (req) => {
