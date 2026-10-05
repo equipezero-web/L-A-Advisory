@@ -61,6 +61,12 @@ Deno.serve(async (req) => {
   try { data = rawResponse ? JSON.parse(rawResponse) : {}; } catch (_) { data = { raw_response: rawResponse }; }
 
   if (!mp.ok || !data.checkout_url) {
+    console.error('Mercado Pago rejeitou a Order:', {
+      status: mp.status,
+      message: data.message || data.error || null,
+      error_code: data.error_code || data.code || null
+    });
+
     return new Response(JSON.stringify({
       error: 'Mercado Pago recusou a order.',
       status: mp.status,
@@ -71,6 +77,12 @@ Deno.serve(async (req) => {
       debug: data
     }), { status: 502, headers: cors });
   }
+
+  console.log('Mercado Pago Order criada:', {
+    order_id: data.id,
+    external_reference: externalReference,
+    status: data.status || null
+  });
 
   return new Response(JSON.stringify({
     ok: true,
