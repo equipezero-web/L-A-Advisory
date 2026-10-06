@@ -6827,8 +6827,13 @@
                 if (error) throw error;
                 await applySupabaseSession(session);
 
+                // Produtos são públicos e devem ser carregados do Supabase
+                // para visitante, cliente e afiliado.
+                await loadPublicProducts();
+
                 supabaseReady = true;
                 initializeApp();
+                startProductAutoRefresh();
                 lucide.createIcons();
 
                 // Também cobre links que já chegaram com a sessão restaurada.
@@ -6872,6 +6877,50 @@
                 state.affiliateLinks = [];
             }
             updateAuthUI();
+        }
+
+        async function loadPublicProducts() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('products')
+                    .select('*')
+                    .eq('active', true)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                state.products = (data || []).map(mapProductFromSupabase);
+                return true;
+            } catch (error) {
+                console.error('Erro ao carregar produtos públicos do Supabase:', error);
+                return false;
+            }
+        }
+
+        function startProductAutoRefresh() {
+            if (window.laProductRefreshTimer) {
+                clearInterval(window.laProductRefreshTimer);
+            }
+
+            window.laProductRefreshTimer = setInterval(async () => {
+                if (document.visibilityState !== 'hidden' && supabaseReady) {
+                    const loaded = await loadPublicProducts();
+                    if (loaded) {
+                        renderCatalog();
+                        if (typeof renderProducts === 'function') renderProducts();
+                    }
+                }
+            }, 30000);
+
+            document.addEventListener('visibilitychange', async () => {
+                if (document.visibilityState === 'visible' && supabaseReady) {
+                    const loaded = await loadPublicProducts();
+                    if (loaded) {
+                        renderCatalog();
+                        if (typeof renderProducts === 'function') renderProducts();
+                    }
+                }
+            }, { passive: true });
         }
 
         async function loadAuthenticatedState(user) {
@@ -7151,7 +7200,9 @@ function checkPendingPaymentConfirmation() {
 function initializeApp() {
     captureAffiliateReferral();
 
-    if (!state.products || state.products.length === 0) {
+    // O catálogo oficial vem do Supabase. Os produtos locais só são usados
+    // como fallback quando a consulta pública falhou.
+    if (!state.products || state.products.length === 0 && !supabaseReady) {
         initializeDefaultProducts();
     }
 
