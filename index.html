@@ -9078,7 +9078,14 @@ if (error) throw error;
                 await savePrivateCustomerData(user.id, updatedPrivateData);
             } catch (error) {
                 console.error('Erro ao atualizar dados privados:', error);
-                showProfileMessage('Não foi possível proteger e salvar seus dados.', 'error');
+                const detail = error?.message || error?.details || error?.hint || 'Erro desconhecido do Supabase.';
+                console.error('Erro ao atualizar dados privados:', {
+                    message: error?.message,
+                    details: error?.details,
+                    hint: error?.hint,
+                    code: error?.code
+                });
+                showProfileMessage('Não foi possível salvar seus dados: ' + detail, 'error');
                 return;
             }
 
