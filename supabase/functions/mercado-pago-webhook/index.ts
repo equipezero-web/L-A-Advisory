@@ -252,10 +252,71 @@ Deno.serve(async (req) => {
             new Date().toISOString();
         }
 
+        const wasAlreadyApproved = order.payment_status === 'approved';
+
         await admin
           .from('orders')
           .update(orderUpdate)
           .eq('id', orderExternalReference);
+
+        // Orders API: aplicar estoque e comissão somente na primeira transição para aprovado.
+        // Isso torna o processamento idempotente contra notificações duplicadas.
+        if (approved && !wasAlreadyApproved) {
+          const { data: items } = await admin
+            .from('order_items')
+            .select('product_id,quantity')
+            .eq('order_id', orderExternalReference);
+
+          for (const item of items || []) {
+            const { data: product } = await admin
+              .from('products')
+              .select('stock')
+              .eq('id', item.product_id)
+              .single();
+
+            if (product) {
+              await admin
+                .from('products')
+                .update({
+                  stock: Math.max(0, Number(product.stock) - Number(item.quantity)),
+                })
+                .eq('id', item.product_id);
+            }
+          }
+
+          if (order.affiliate_code) {
+            const { data: affiliate } = await admin
+              .from('affiliates')
+              .select('id,total_sales,total_commission')
+              .eq('code', order.affiliate_code)
+              .maybeSingle();
+
+            if (affiliate) {
+              const { data: commissionItems } = await admin
+                .from('order_items')
+                .select('gross_price,quantity,affiliate_commission')
+                .eq('order_id', orderExternalReference);
+
+              let commission = 0;
+              for (const item of commissionItems || []) {
+                const savedCommission = Number(item.affiliate_commission || 0);
+                commission += savedCommission > 0
+                  ? savedCommission
+                  : Number(item.gross_price || 0) * Number(item.quantity || 0) * 0.20;
+              }
+
+              await admin
+                .from('affiliates')
+                .update({
+                  total_sales: Number(affiliate.total_sales || 0) + Number(order.total || 0),
+                  total_commission:
+                    Number(affiliate.total_commission || 0) +
+                    Math.round(commission * 100) / 100,
+                })
+                .eq('id', affiliate.id);
+            }
+          }
+        }
       }
     }
 
