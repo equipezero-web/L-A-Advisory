@@ -336,6 +336,7 @@ Deno.serve(async (req) => {
       id: generateCode('ITEM'),
       product_id: product.id,
       product_name: product.name,
+      image: product.image || '',
       quantity,
       unit_price: unitPrice,
       gross_price: grossPrice,
