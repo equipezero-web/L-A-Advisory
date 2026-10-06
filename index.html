@@ -7003,6 +7003,7 @@
                 shipping: Number(order.shipping ?? 0),
                 discount: Number(order.discount ?? 0),
                 trackingCode: order.trackingCode || order.tracking_code || '',
+                paidAt: order.paidAt || order.paid_at || null,
                 address: order.address?.text || order.address_text || order.address || ''
             };
         }
@@ -7027,6 +7028,22 @@
 
             state.products = (productsRes.data || []).map(mapProductFromSupabase);
             state.orders = (ordersRes.data || []).map(mapOrderFromSupabase);
+
+            // Recupera o horário real de pagamento salvo na tabela de pagamentos.
+            if (state.orders.length) {
+                const orderIds = state.orders.map(order => order.id).filter(Boolean);
+                if (orderIds.length) {
+                    const { data: customerPayments, error: customerPaymentsError } = await supabaseClient
+                        .from('payments').select('order_id,paid_at,status,created_at').in('order_id', orderIds);
+                    if (customerPaymentsError) console.warn('Supabase pagamentos dos pedidos:', customerPaymentsError.message);
+                    const paymentByOrder = {};
+                    for (const payment of (customerPayments || [])) {
+                        const paymentDate = payment.paid_at || (payment.status === 'approved' ? payment.created_at : null);
+                        if (payment.order_id && paymentDate) paymentByOrder[payment.order_id] = paymentDate;
+                    }
+                    state.orders = state.orders.map(order => ({ ...order, paidAt: order.paidAt || paymentByOrder[order.id] || null }));
+                }
+            }
 
             // Carrega os itens dos pedidos do próprio cliente para o botão "Ver detalhes".
             if (state.orders.length) {
@@ -9454,6 +9471,11 @@ if (error) throw error;
                     </div>
 
                     <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                        <p class="text-xs text-slate-500">Horário do pagamento</p>
+                        <p class="font-bold text-slate-900 mt-1">${order.paidAt ? new Date(order.paidAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'Aguardando confirmação'}</p>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
                         <p class="text-xs text-slate-500">Status</p>
                         <p class="font-bold text-slate-900 mt-1">${translateOrderStatus(order.status)}</p>
                     </div>
@@ -9469,11 +9491,14 @@ if (error) throw error;
                 <div class="space-y-3 mb-6">
                     ${order.items.map(item => `
                         <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
-                            <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg">
+                            <img src="${item.image || './icons/icon-192.png'}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg border border-slate-200">
 
-                            <div class="flex-1">
+                            <div class="flex-1 min-w-0">
                                 <p class="font-bold text-sm text-slate-900">${item.name}</p>
                                 <p class="text-xs text-slate-500">${item.quantity}x ${formatCurrency(item.price)}</p>
+                                <a href="${item.productUrl || (window.location.origin + window.location.pathname + '#loja')}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-xs text-amber-700 font-bold mt-1 hover:underline">
+                                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Ver produto no site
+                                </a>
                             </div>
 
                             <p class="font-bold text-slate-900">${formatCurrency(item.price * item.quantity)}</p>
