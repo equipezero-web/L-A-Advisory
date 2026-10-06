@@ -23,10 +23,72 @@ const SERVICE =
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ||
   '';
 const MP_ACCESS_TOKEN = Deno.env.get('MP_ACCESS_TOKEN')!;
+const MP_WEBHOOK_SECRET = Deno.env.get('MP_WEBHOOK_SECRET') || '';
+
+async function validateMercadoPagoSignature(req: Request): Promise<boolean> {
+  if (!MP_WEBHOOK_SECRET) {
+    console.error('MP_WEBHOOK_SECRET não configurado.');
+    return false;
+  }
+
+  const xSignature = req.headers.get('x-signature') || '';
+  const xRequestId = req.headers.get('x-request-id') || '';
+  const url = new URL(req.url);
+  const dataId = (url.searchParams.get('data.id') || '').toLowerCase();
+
+  let ts = '';
+  let v1 = '';
+
+  for (const part of xSignature.split(',')) {
+    const eq = part.indexOf('=');
+    if (eq === -1) continue;
+    const key = part.slice(0, eq).trim();
+    const value = part.slice(eq + 1).trim();
+    if (key === 'ts') ts = value;
+    if (key === 'v1') v1 = value;
+  }
+
+  if (!ts || !v1) {
+    console.error('Assinatura do Webhook Mercado Pago ausente ou incompleta.');
+    return false;
+  }
+
+  const manifestParts: string[] = [];
+  if (dataId) manifestParts.push('id:' + dataId);
+  if (xRequestId) manifestParts.push('request-id:' + xRequestId);
+  manifestParts.push('ts:' + ts);
+  const manifest = manifestParts.join(';') + ';';
+
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(MP_WEBHOOK_SECRET),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
+  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(manifest));
+  const computed = Array.from(new Uint8Array(signature))
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('');
+
+  if (computed.length !== v1.length) return false;
+
+  let diff = 0;
+  for (let i = 0; i < computed.length; i++) {
+    diff |= computed.charCodeAt(i) ^ v1.charCodeAt(i);
+  }
+  return diff === 0;
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST' && req.method !== 'GET') return json({ error: 'Método não permitido.' }, 405);
+
+  const signatureValid = await validateMercadoPagoSignature(req);
+  if (!signatureValid) {
+    return json({ error: 'Assinatura do Webhook inválida.' }, 401);
+  }
 
   const payload = await req.json().catch(() => ({}));
 
