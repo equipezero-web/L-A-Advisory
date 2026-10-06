@@ -352,10 +352,8 @@ Deno.serve(async (req) => {
       ).slice(0, 256),
       external_code: String(product.id).slice(0, 100),
       category_id: 'other',
-      unit_measure: 'unit',
       unit_price: unitPrice.toFixed(2),
-      quantity,
-      total_amount: itemSubtotal.toFixed(2)
+      quantity
     });
   }
 
