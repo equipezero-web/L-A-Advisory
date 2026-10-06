@@ -14,7 +14,7 @@ function json(data: unknown, status = 200) {
   });
 }
 
-const URL = Deno.env.get('SUPABASE_URL')!;
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SECRET_KEYS = JSON.parse(
   Deno.env.get('SUPABASE_SECRET_KEYS') || '{}'
 );
@@ -33,7 +33,7 @@ async function validateMercadoPagoSignature(req: Request): Promise<boolean> {
 
   const xSignature = req.headers.get('x-signature') || '';
   const xRequestId = req.headers.get('x-request-id') || '';
-  const url = new URL(req.url);
+  const url = new globalThis.URL(req.url);
   const dataId = (url.searchParams.get('data.id') || '').toLowerCase();
 
   let ts = '';
@@ -146,7 +146,7 @@ Deno.serve(async (req) => {
     ).trim();
 
     if (orderExternalReference) {
-      const admin = createClient(URL, SERVICE);
+      const admin = createClient(SUPABASE_URL, SERVICE);
       const { data: order } = await admin
         .from('orders')
         .select('*')
