@@ -1,5 +1,4 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { MercadoPagoConfig, Order as MercadoPagoOrder } from 'npm:mercadopago';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://equipezero-web.github.io",
@@ -48,25 +47,17 @@ Deno.serve(async (req) => {
       return json({ received: true });
     }
 
-    const mercadoPagoClient = new MercadoPagoConfig({
-      accessToken: MP_ACCESS_TOKEN,
-      options: { timeout: 10000 }
+    const mpResponse = await fetch(`https://api.mercadopago.com/v1/orders/${encodeURIComponent(orderId)}`, {
+      headers: {
+        Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
+        Accept: 'application/json',
+      },
     });
-    const mercadoPagoOrder = new MercadoPagoOrder(mercadoPagoClient);
+    const mpOrder = await mpResponse.json().catch(() => ({}));
 
-    let mpOrder: any = {};
-    try {
-      mpOrder = await mercadoPagoOrder.get({ id: orderId });
-    } catch (error) {
-      console.error('Não foi possível consultar a Order do Mercado Pago pelo SDK:', {
-        order_id: orderId,
-        message: error instanceof Error ? error.message : String(error),
-      });
-      return json({ received: true });
-    }
-
-    if (!mpOrder?.id) {
-      console.error('Mercado Pago SDK retornou Order sem ID:', {
+    if (!mpResponse.ok || !mpOrder?.id) {
+      console.error('Não foi possível consultar a Order do Mercado Pago:', {
+        status: mpResponse.status,
         order_id: orderId,
       });
       return json({ received: true });
