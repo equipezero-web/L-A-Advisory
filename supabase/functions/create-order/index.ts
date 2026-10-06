@@ -1,5 +1,4 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { MercadoPagoConfig, Order as MercadoPagoOrder } from 'npm:mercadopago';
 
 const cors = {
   'Access-Control-Allow-Origin': 'https://equipezero-web.github.io',
@@ -481,20 +480,17 @@ Deno.serve(async (req) => {
     };
   }
 
-  const mercadoPagoClient = new MercadoPagoConfig({
-    accessToken: token,
-    options: { timeout: 10000 }
-  });
-
-  const mercadoPagoOrder = new MercadoPagoOrder(mercadoPagoClient);
-
-  let data: any = {};
-  let mpOk = true;
-  let mpStatus = 200;
-
-  try {
-    data = await mercadoPagoOrder.create({
-      body: {
+  const mp = await fetch(
+    'https://api.mercadopago.com/v1/orders',
+    {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + token,
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        'X-Idempotency-Key': orderId
+      },
+      body: JSON.stringify({
         type: 'online',
         processing_mode: 'manual',
         capture_mode: 'automatic_async',
@@ -526,26 +522,22 @@ Deno.serve(async (req) => {
           }
         },
         items: mercadoPagoItems
-      },
-      requestOptions: {
-        idempotencyKey: orderId
-      }
-    });
-  } catch (error) {
-    mpOk = false;
-    mpStatus = 502;
-    console.error('Mercado Pago SDK rejeitou a Order:', {
-      message: error instanceof Error ? error.message : String(error)
-    });
-    data = {
-      message: error instanceof Error ? error.message : String(error),
-      sdk_error: true
-    };
+      })
+    }
+  );
+
+  const rawResponse = await mp.text();
+
+  let data: any = {};
+  try {
+    data = rawResponse ? JSON.parse(rawResponse) : {};
+  } catch (_) {
+    data = { raw_response: rawResponse };
   }
 
-  if (!mpOk || !data.checkout_url) {
+  if (!mp.ok || !data.checkout_url) {
     console.error('Mercado Pago rejeitou a Order:', {
-      status: mpStatus,
+      status: mp.status,
       message: data.message || data.error || null,
       error_code: data.error_code || data.code || null
     });
