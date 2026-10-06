@@ -6986,6 +6986,27 @@
             }, { passive: true });
         }
 
+        function mapOrderFromSupabase(order) {
+            if (!order) return order;
+            return {
+                ...order,
+                id: order.id,
+                code: order.code || order.order_code || order.id,
+                userId: order.userId || order.user_id,
+                createdAt: order.createdAt || order.created_at,
+                updatedAt: order.updatedAt || order.updated_at,
+                status: order.status || order.payment_status || 'pending',
+                paymentStatus: order.paymentStatus || order.payment_status || 'pending',
+                paymentId: order.paymentId || order.payment_id || null,
+                total: Number(order.total ?? order.total_amount ?? 0),
+                subtotal: Number(order.subtotal ?? 0),
+                shipping: Number(order.shipping ?? 0),
+                discount: Number(order.discount ?? 0),
+                trackingCode: order.trackingCode || order.tracking_code || '',
+                address: order.address?.text || order.address_text || order.address || ''
+            };
+        }
+
         async function loadAuthenticatedState(user) {
             const uid = user.id;
             const [profileRes, privateRes, productsRes, ordersRes, affiliatesRes] = await Promise.all([
@@ -7005,7 +7026,7 @@
             const affiliate = affiliatesRes.data;
 
             state.products = (productsRes.data || []).map(mapProductFromSupabase);
-            state.orders = ordersRes.data || [];
+            state.orders = (ordersRes.data || []).map(mapOrderFromSupabase);
             state.affiliates = affiliate ? [mapAffiliateFromSupabase(affiliate)] : [];
 
             if (profile?.role === 'admin' && profile.is_active) {
@@ -7015,7 +7036,7 @@
                 ]);
                 if (allOrdersRes.error) console.warn('Supabase pedidos ADM:', allOrdersRes.error.message);
                 if (allAffiliatesRes.error) console.warn('Supabase afiliados ADM:', allAffiliatesRes.error.message);
-                state.orders = allOrdersRes.data || [];
+                state.orders = (allOrdersRes.data || []).map(mapOrderFromSupabase);
                 state.affiliates = (allAffiliatesRes.data || []).map(mapAffiliateFromSupabase);
 
                 if (state.orders.length) {
@@ -7165,7 +7186,7 @@
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, async () => {
                     if (state.currentUser?.role === 'admin') {
                         const { data } = await supabaseClient.from('orders').select('*').order('created_at', { ascending: false });
-                        if (data) state.orders = data;
+                        if (data) state.orders = data.map(mapOrderFromSupabase);
                         loadAdminOrders();
                     } else {
                         const { data } = await supabaseClient.from('orders').select('*').eq('user_id', supabaseAuthUser.id).order('created_at', { ascending: false });
