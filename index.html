@@ -7027,6 +7027,42 @@
 
             state.products = (productsRes.data || []).map(mapProductFromSupabase);
             state.orders = (ordersRes.data || []).map(mapOrderFromSupabase);
+
+            // Carrega os itens dos pedidos do próprio cliente para o botão "Ver detalhes".
+            if (state.orders.length) {
+                const orderIds = state.orders.map(order => order.id).filter(Boolean);
+                if (orderIds.length) {
+                    const { data: customerOrderItems, error: customerOrderItemsError } = await supabaseClient
+                        .from('order_items')
+                        .select('*')
+                        .in('order_id', orderIds);
+
+                    if (customerOrderItemsError) {
+                        console.warn('Supabase itens dos pedidos:', customerOrderItemsError.message);
+                    }
+
+                    const itemsByOrder = {};
+                    for (const item of (customerOrderItems || [])) {
+                        const mappedItem = {
+                            ...item,
+                            id: item.id,
+                            orderId: item.orderId || item.order_id,
+                            productId: item.productId || item.product_id,
+                            name: item.name || item.product_name || 'Produto',
+                            image: item.image || item.product_image || '',
+                            price: Number(item.price ?? item.unit_price ?? item.gross_price ?? 0),
+                            quantity: Number(item.quantity || 1)
+                        };
+                        (itemsByOrder[mappedItem.orderId] ||= []).push(mappedItem);
+                    }
+
+                    state.orders = state.orders.map(order => ({
+                        ...order,
+                        items: itemsByOrder[order.id] || []
+                    }));
+                }
+            }
+
             state.affiliates = affiliate ? [mapAffiliateFromSupabase(affiliate)] : [];
 
             if (profile?.role === 'admin' && profile.is_active) {
