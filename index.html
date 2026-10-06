@@ -7066,6 +7066,7 @@
                             orderId: item.orderId || item.order_id,
                             productId: item.productId || item.product_id,
                             name: item.name || item.product_name || 'Produto',
+                            // Imagem congelada no momento da compra: vem do snapshot salvo em order_items.
                             image: item.image || item.product_image || '',
                             price: Number(item.price ?? item.unit_price ?? item.gross_price ?? 0),
                             quantity: Number(item.quantity || 1)
