@@ -9490,21 +9490,21 @@ if (error) throw error;
                 <h4 class="font-bold text-slate-900 mb-3">Itens</h4>
 
                 <div class="space-y-3 mb-6">
-                    ${order.items.map(item => `
-                        <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
-                            <img src="${item.image || './icons/icon-192.png'}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg border border-slate-200">
+                    ${order.items.map(item => {
+                        const imageUrl = String(item.image || '').trim();
 
-                            <div class="flex-1 min-w-0">
-                                <p class="font-bold text-sm text-slate-900">${item.name}</p>
-                                <p class="text-xs text-slate-500">${item.quantity}x ${formatCurrency(item.price)}</p>
-                                <a href="${item.productUrl || (window.location.origin + window.location.pathname + '#loja')}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-xs text-amber-700 font-bold mt-1 hover:underline">
-                                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Ver produto no site
-                                </a>
+                        return imageUrl ? `
+                            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex justify-center">
+                                <img
+                                    src="${escapeAttribute(imageUrl)}"
+                                    alt=""
+                                    class="w-full max-w-sm max-h-72 object-contain rounded-lg"
+                                    loading="lazy"
+                                    referrerpolicy="no-referrer"
+                                >
                             </div>
-
-                            <p class="font-bold text-slate-900">${formatCurrency(item.price * item.quantity)}</p>
-                        </div>
-                    `).join('')}
+                        ` : '';
+                    }).join('')}
                 </div>
 
                 <div class="p-4 bg-slate-900 text-white rounded-xl flex justify-between items-center">
