@@ -7099,7 +7099,14 @@
                 user_id: uid,
                 cpf: data.cpf || null,
                 phone: data.phone || null,
-                privacy_consent: data.privacyConsent || null,
+                privacy_consent: data.privacyConsent || {
+                    accepted: true,
+                    version: typeof DATA_SECURITY_TERMS_VERSION !== 'undefined'
+                        ? DATA_SECURITY_TERMS_VERSION
+                        : '2026-01',
+                    acceptedAt: new Date().toISOString(),
+                    document: 'Termo de Segurança e Proteção de Dados'
+                },
                 address: data.address || {},
                 updated_at: new Date().toISOString()
             };
