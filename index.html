@@ -9493,17 +9493,28 @@ if (error) throw error;
                     ${order.items.map(item => {
                         const imageUrl = String(item.image || '').trim();
 
-                        return imageUrl ? `
-                            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex justify-center">
-                                <img
-                                    src="${escapeAttribute(imageUrl)}"
-                                    alt=""
-                                    class="w-full max-w-sm max-h-72 object-contain rounded-lg"
-                                    loading="lazy"
-                                    referrerpolicy="no-referrer"
-                                >
+                        return `
+                            <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                                <div class="w-20 h-20 shrink-0 rounded-lg border border-slate-200 bg-white flex items-center justify-center overflow-hidden">
+                                    ${imageUrl ? `
+                                        <img
+                                            src="${escapeAttribute(imageUrl)}"
+                                            alt="${item.name || 'Produto'}"
+                                            class="w-full h-full object-contain"
+                                            loading="lazy"
+                                            referrerpolicy="no-referrer"
+                                        >
+                                    ` : ''}
+                                </div>
+
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-bold text-sm text-slate-900 truncate">${item.name || 'Produto'}</p>
+                                    <p class="text-xs text-slate-500 mt-1">Quantidade: ${item.quantity}</p>
+                                </div>
+
+                                <p class="font-bold text-slate-900 whitespace-nowrap">${formatCurrency(item.price * item.quantity)}</p>
                             </div>
-                        ` : '';
+                        `;
                     }).join('')}
                 </div>
 
