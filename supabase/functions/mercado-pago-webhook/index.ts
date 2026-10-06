@@ -98,6 +98,13 @@ Deno.serve(async (req) => {
     payload?.type || payload?.topic || ''
   ).toLowerCase();
 
+  // Eventos de vinculação (mp-connect) não fazem parte do fluxo de pedidos.
+  // Devem ser reconhecidos sem tentar consultar /payments ou /orders.
+  if (notificationType === 'mp-connect' || notificationType === 'application.authorized') {
+    console.log('Webhook de vinculação recebido e reconhecido.');
+    return json({ received: true });
+  }
+
   if (notificationType === 'order' || notificationType === 'orders') {
     const orderId = String(
       payload?.data?.id ||
