@@ -501,6 +501,11 @@ Deno.serve(async (req) => {
             ? String(products[0].name || 'Produto').slice(0, 256)
             : 'Compra L&A Royal Advisory',
         payer,
+        additional_info: {
+          payer: {
+            registration_date: user.created_at
+          }
+        },
         config: {
           statement_descriptor: 'LA ROYAL ADVISORY',
           online: {
