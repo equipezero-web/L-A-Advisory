@@ -352,8 +352,10 @@ Deno.serve(async (req) => {
       ).slice(0, 256),
       external_code: String(product.id).slice(0, 100),
       category_id: 'other',
+      unit_measure: 'unit',
       unit_price: unitPrice.toFixed(2),
-      quantity
+      quantity,
+      total_amount: itemSubtotal.toFixed(2)
     });
   }
 
@@ -493,6 +495,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         type: 'online',
         processing_mode: 'manual',
+        capture_mode: 'automatic_async',
         total_amount: subtotal.toFixed(2),
         external_reference: orderId,
         description:
@@ -585,7 +588,11 @@ Deno.serve(async (req) => {
     order_id: data.id,
     internal_order_id: orderId,
     external_reference: orderId,
-    status: data.status || null
+    status: data.status || null,
+    status_detail: data.status_detail || null,
+    capture_mode: data.capture_mode || null,
+    total_amount: data.total_amount || null,
+    total_paid_amount: data.total_paid_amount || null
   });
 
   return json({
