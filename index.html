@@ -7059,18 +7059,46 @@
                     }
 
                     const itemsByOrder = {};
+                    const itemProductIds = [...new Set(
+                        (customerOrderItems || [])
+                            .map(item => item.productId || item.product_id)
+                            .filter(Boolean)
+                    )];
+
+                    // Recupera a URL cadastrada no produto somente quando o snapshot
+                    // do pedido estiver vazio. Para novas compras, create-order já
+                    // grava products.image em order_items.image.
+                    let productImageById = {};
+                    if (itemProductIds.length) {
+                        const { data: itemProducts, error: itemProductsError } = await supabaseClient
+                            .from('products')
+                            .select('id,image')
+                            .in('id', itemProductIds);
+
+                        if (itemProductsError) {
+                            console.warn('Supabase imagens dos produtos:', itemProductsError.message);
+                        }
+
+                        for (const product of (itemProducts || [])) {
+                            productImageById[product.id] = String(product.image || '').trim();
+                        }
+                    }
+
                     for (const item of (customerOrderItems || [])) {
+                        const productId = item.productId || item.product_id;
+                        const snapshotImage = String(item.image || item.product_image || '').trim();
+
                         const mappedItem = {
                             ...item,
                             id: item.id,
                             orderId: item.orderId || item.order_id,
-                            productId: item.productId || item.product_id,
+                            productId,
                             name: item.name || item.product_name || 'Produto',
-                            // Imagem congelada no momento da compra: vem do snapshot salvo em order_items.
-                            image: item.image || item.product_image || '',
+                            image: snapshotImage || productImageById[productId] || '',
                             price: Number(item.price ?? item.unit_price ?? item.gross_price ?? 0),
                             quantity: Number(item.quantity || 1)
                         };
+
                         (itemsByOrder[mappedItem.orderId] ||= []).push(mappedItem);
                     }
 
