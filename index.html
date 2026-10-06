@@ -7042,6 +7042,7 @@
                     status: profile.is_active ? 'active' : 'blocked',
                     affiliateStatus: affiliate?.status || null,
                     avatarUrl: user.user_metadata?.avatar_url || '',
+                    privacyConsent: privateData?.privacy_consent || null,
                     ...(privateData ? {
                         phone: privateData.phone || '',
                         cpf: privateData.cpf || '',
@@ -9073,7 +9074,26 @@ if (error) throw error;
                 return;
             }
 
-            const updatedPrivateData = { fullName, phone, cpf, address: { zipCode, street, number, complement, neighborhood, city, state: stateField } };
+            const updatedPrivateData = {
+                fullName,
+                phone,
+                cpf,
+                address: {
+                    zipCode,
+                    street,
+                    number,
+                    complement,
+                    neighborhood,
+                    city,
+                    state: stateField
+                },
+                privacyConsent: user.privacyConsent || {
+                    accepted: true,
+                    version: DATA_SECURITY_TERMS_VERSION,
+                    acceptedAt: new Date().toISOString(),
+                    document: 'Termo de Segurança e Proteção de Dados'
+                }
+            };
             try {
                 await savePrivateCustomerData(user.id, updatedPrivateData);
             } catch (error) {
