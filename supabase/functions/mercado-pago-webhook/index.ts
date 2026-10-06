@@ -259,16 +259,37 @@ Deno.serve(async (req) => {
             new Date().toISOString();
         }
 
-        const wasAlreadyApproved = order.payment_status === 'approved';
+        // Para aprovação, a transição é atômica: somente uma notificação pode
+        // "ganhar" a mudança de pending -> approved. Isso evita baixa dupla
+        // de estoque/comissão quando o Mercado Pago reenviar o mesmo webhook.
+        let shouldApplyFulfillment = false;
 
-        await admin
-          .from('orders')
-          .update(orderUpdate)
-          .eq('id', orderExternalReference);
+        if (approved) {
+          const { data: claimedOrder, error: claimError } = await admin
+            .from('orders')
+            .update(orderUpdate)
+            .eq('id', orderExternalReference)
+            .neq('payment_status', 'approved')
+            .select('id')
+            .maybeSingle();
+
+          if (claimError) {
+            console.error('Erro ao confirmar aprovação da Order:', claimError);
+            return json({ error: 'Não foi possível confirmar a aprovação.' }, 500);
+          }
+
+          shouldApplyFulfillment = !!claimedOrder;
+        } else {
+          await admin
+            .from('orders')
+            .update(orderUpdate)
+            .eq('id', orderExternalReference);
+        }
 
         // Orders API: aplicar estoque e comissão somente na primeira transição para aprovado.
-        // Isso torna o processamento idempotente contra notificações duplicadas.
-        if (approved && !wasAlreadyApproved) {
+        // A atualização condicional acima torna essa operação idempotente também
+        // contra webhooks duplicados concorrentes.
+        if (approved && shouldApplyFulfillment) {
           const { data: items } = await admin
             .from('order_items')
             .select('product_id,quantity')
@@ -369,8 +390,29 @@ Deno.serve(async (req) => {
   if (approved) orderUpdate.paid_at = new Date().toISOString();
   await admin.from('orders').update(orderUpdate).eq('id', orderId);
 
-  // Idempotency: stock/commission are only applied when transitioning into approved.
-  if (approved && order.payment_status !== 'approved') {
+  // Idempotency: claim the approval transition atomically before applying
+  // stock/commission, preventing duplicate concurrent webhooks from double-counting.
+  let shouldApplyFulfillment = false;
+  if (approved) {
+    const { data: claimedOrder, error: claimError } = await admin
+      .from('orders')
+      .update(orderUpdate)
+      .eq('id', orderId)
+      .neq('payment_status', 'approved')
+      .select('id')
+      .maybeSingle();
+
+    if (claimError) {
+      console.error('Erro ao confirmar aprovação do pagamento:', claimError);
+      return json({ error: 'Não foi possível confirmar a aprovação.' }, 500);
+    }
+
+    shouldApplyFulfillment = !!claimedOrder;
+  } else {
+    await admin.from('orders').update(orderUpdate).eq('id', orderId);
+  }
+
+  if (approved && shouldApplyFulfillment) {
     const { data: items } = await admin.from('order_items').select('product_id,quantity').eq('order_id', orderId);
     for (const item of items || []) {
       const { data: product } = await admin.from('products').select('stock').eq('id', item.product_id).single();
