@@ -7180,7 +7180,8 @@
             return {
                 ...a,
                 id: a.id,
-                userId: a.user_id,
+                userId: a.user_id || a.id,
+                email: a.email || a.affiliate_email || '',
                 pixType: a.pix_type,
                 pixKey: a.pix_key,
                 totalSales: Number(a.total_sales || 0),
@@ -11500,29 +11501,20 @@ window.resetAccessibility = resetAccessibility;
             event.preventDefault();
             const email = document.getElementById('affiliateLoginEmail')?.value.trim().toLowerCase();
             const password = document.getElementById('affiliateLoginPassword')?.value;
-
-            if (!email || !password) {
-                showAuthMessage('Preencha e-mail e senha.', 'error');
-                return;
-            }
+            if (!email || !password) { showAuthMessage('Preencha e-mail e senha.', 'error'); return; }
 
             try {
                 const response = await fetch(SUPABASE_FUNCTIONS_BASE + '/affiliate-login', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'apikey': SUPABASE_ANON_KEY
-                    },
+                    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
                     body: JSON.stringify({ email, password })
                 });
-
                 const result = await response.json().catch(() => ({}));
                 if (!response.ok) throw new Error(result.error || 'E-mail ou senha de afiliado incorretos.');
 
                 const affiliate = mapAffiliateFromSupabase(result.affiliate);
                 affiliate.userId = affiliate.userId || affiliate.id;
                 affiliate.email = affiliate.email || email;
-
                 state.affiliates = [affiliate];
                 state.currentUser = {
                     id: affiliate.userId,
