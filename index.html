@@ -7141,7 +7141,7 @@ id="customerProfileForm"
                 setTimeout(() => openAdminDashboard(), 0);
             }
 
-            if (state.currentUser?.role === 'affiliate' && state.currentUser.affiliateStatus === 'active') // Não entra no modo afiliado antes da aprovação.
+            if (state.currentUser?.role === 'affiliate' && state.currentUser.affiliateStatus === 'active') enterAffiliateMode();
         }
 
         function mapProductFromSupabase(product) {
