@@ -7273,6 +7273,26 @@ function captureAffiliateReferral() {
     }
 }
 
+function focusAffiliateProductFromLink() {
+    const productId = sessionStorage.getItem('laAffiliateReferralProductId');
+    if (!productId) return;
+
+    const product = state.products.find(item => item.id === productId);
+    if (!product) return;
+
+    if (!catalogShowingAll && !state.products.slice(0, CATALOG_CAROUSEL_LIMIT).some(item => item.id === productId)) {
+        catalogShowingAll = true;
+        renderCatalog();
+    }
+
+    setTimeout(() => {
+        const card = document.querySelector('[data-product-id="' + CSS.escape(productId) + '"]');
+        if (card) {
+            card.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+        }
+    }, 100);
+}
+
 function getAffiliateReferralCode() {
     const input = document.getElementById('checkoutAffiliateCode');
     const manualCode = input?.value?.trim().toUpperCase();
@@ -7352,6 +7372,7 @@ function initializeApp() {
     }
 
     renderCatalog();
+    focusAffiliateProductFromLink();
     updateCartIcon();
     updateAuthUI();
     handleCookieConsent();
@@ -9932,15 +9953,14 @@ if (error) throw error;
                             <p class="font-bold text-emerald-900 text-sm">${formatCurrency(parseFloat(commission))}</p>
                         </div>
 
-                        <div class="flex gap-2">
-                            <button type="button" onclick="copyProductLink('${product.id}')" class="flex-1 px-3 py-2 rounded-lg bg-slate-900 text-amber-400 text-xs font-bold hover:bg-slate-800 transition">
-                                <i data-lucide="link" class="w-3 h-3 inline mr-1"></i> Copiar link
-                            </button>
-
-                            <button type="button" onclick="shareProduct('${product.id}')" class="px-3 py-2 rounded-lg border border-slate-300 text-slate-700 text-xs font-bold hover:border-amber-500 transition">
-                                <i data-lucide="share-2" class="w-3 h-3"></i>
-                            </button>
-                        </div>
+                        <button
+                            type="button"
+                            onclick="shareProduct('${product.id}')"
+                            class="w-full px-3 py-3 rounded-lg gradient-gold text-slate-900 text-xs font-bold hover:shadow-gold transition"
+                        >
+                            <i data-lucide="share-2" class="w-4 h-4 inline mr-1"></i>
+                            Compartilhar produto
+                        </button>
                     </div>
                 `;
             }).join('');
@@ -10938,14 +10958,14 @@ function renderCatalog() {
         : 'flex gap-6 overflow-x-auto pb-6 scroll-smooth snap-x snap-mandatory no-scrollbar';
 
     container.innerHTML = visibleProducts.map(product => {
-        const cardWidthClass = catalogShowingAll ? 'w-full' : 'w-[320px] flex-shrink-0';
+        const cardWidthClass = catalogShowingAll ? 'w-full' : 'w-[360px] sm:w-[380px] flex-shrink-0';
         const originalPrice = Number(product.price) || 0;
         const discount = Number(product.discount) || 0;
         const finalPrice = calculateFinalPrice(product);
 
         return `
             <article data-product-id="${escapeAttribute(product.id)}" class="${cardWidthClass} bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col">
-                <div class="relative h-56 bg-slate-100 overflow-hidden">
+                <div class="relative h-64 bg-slate-100 overflow-hidden">
                     <img
                         src="${escapeAttribute(product.image)}"
                         alt="${escapeAttribute(product.name)}"
