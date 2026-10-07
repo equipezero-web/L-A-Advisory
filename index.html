@@ -7114,7 +7114,7 @@
             if (profile?.role === 'admin' && profile.is_active) {
                 const [allOrdersRes, allAffiliatesRes] = await Promise.all([
                     supabaseClient.from('orders').select('*').order('created_at', { ascending: false }),
-                    supabaseClient.from('affiliates').select('*').order('created_at', { ascending: false })
+                    supabaseClient.from('affiliates').select('id,user_id,code,status,name,email,affiliate_email,phone,cpf,pix_type,pix_key,instagram,website,total_sales,total_commission,created_at,updated_at').order('created_at', { ascending: false })
                 ]);
                 if (allOrdersRes.error) console.warn('Supabase pedidos ADM:', allOrdersRes.error.message);
                 if (allAffiliatesRes.error) console.warn('Supabase afiliados ADM:', allAffiliatesRes.error.message);
