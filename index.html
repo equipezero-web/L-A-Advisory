@@ -9118,7 +9118,7 @@ if (error) throw error;
              else { title.textContent='Afiliação indisponível'; description.textContent='Sua solicitação não está ativa no momento.'; button.textContent='Solicitar novamente'; button.onclick=()=>openAffiliateRegistrationForCurrentUser(); }
          }
 
-         function openCustomerProfile() {
+         async function openCustomerProfile() {
             const user = state.currentUser;
             if (!user) {
                 openAuthModal('customer-login');
