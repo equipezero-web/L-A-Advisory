@@ -4024,7 +4024,10 @@
             </div>
 
             <form
-                id="customerProfileForm"
+                <div id="customerAffiliateSection" class="mb-7 p-5 bg-gradient-to-br from-slate-50 to-amber-50/40 border border-amber-200 rounded-xl">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4"><div><p class="text-xs font-bold uppercase tracking-wider text-amber-700">Programa de afiliados</p><h4 id="customerAffiliateTitle" class="font-bold text-slate-900 mt-1">Quer se tornar um afiliado?</h4><p id="customerAffiliateDescription" class="text-sm text-slate-600 mt-1">Solicite sua afiliação e aguarde a análise da equipe L&A.</p></div><button type="button" id="customerAffiliateAction" onclick="openAffiliateRegistrationForCurrentUser()" class="shrink-0 gradient-gold text-slate-900 px-5 py-3 rounded-xl font-bold hover:shadow-gold transition">Solicitar afiliação</button></div></div>
+
+id="customerProfileForm"
                 onsubmit="saveCustomerProfile(event)"
                 class="space-y-5"
             >
@@ -7138,7 +7141,7 @@
                 setTimeout(() => openAdminDashboard(), 0);
             }
 
-            if (state.currentUser?.role === 'affiliate' && state.currentUser.affiliateStatus === 'active') enterAffiliateMode();
+            if (state.currentUser?.role === 'affiliate' && state.currentUser.affiliateStatus === 'active') // Não entra no modo afiliado antes da aprovação.
         }
 
         function mapProductFromSupabase(product) {
@@ -7867,11 +7870,11 @@ async function handleAffiliateLogin(event) {
                 if (!response.ok) throw new Error(result.error || 'E-mail ou senha de afiliado incorretos.');
                 const affiliate = mapAffiliateFromSupabase(result.affiliate);
                 state.affiliates = [affiliate];
-                state.currentUser = { id: affiliate.userId, fullName: affiliate.name, email: affiliate.email || email, role: 'affiliate', isActive: true };
+                // Conta de cliente e conta de afiliado permanecem separadas.
                 closeAuthModal();
                 updateAuthUI();
                 if (affiliate.status === 'pending') alert('Sua solicitação de afiliado está em análise.');
-                else if (['active', 'approved'].includes(affiliate.status)) { enterAffiliateMode(); openAffiliateDashboard(); }
+                else if (['active', 'approved'].includes(affiliate.status)) { enterAffiliateMode(); // O acesso ao sistema de afiliado ocorre pelo login separado. }
             } catch (error) {
                 console.error('Erro no login de afiliado:', error);
                 showAuthMessage(error.message || 'E-mail ou senha de afiliado incorretos.', 'error');
@@ -7907,7 +7910,8 @@ async function handleAffiliateLogin(event) {
                 updateAuthUI();
                 enterAffiliateMode();
                 openAffiliateDashboard();
-                alert('Solicitação enviada! Sua conta de afiliado possui senha própria e não altera a conta de cliente.');
+                updateCustomerAffiliateSection(affiliate);
+                 alert('Solicitação enviada! Sua conta de cliente continua a mesma. A solicitação ficará em análise até a aprovação.');
             } catch (error) {
                 console.error('Erro no cadastro de afiliado:', error);
                 showAuthMessage(error.message || 'Não foi possível enviar a solicitação.', 'error');
@@ -9097,7 +9101,21 @@ if (error) throw error;
         // =====================================================
         // PERFIL DO CLIENTE
         // =====================================================
-        function openCustomerProfile() {
+        async function refreshCustomerAffiliateStatus() {
+             const user = state.currentUser; if (!user || user.role !== 'customer') return null;
+             let affiliate = state.affiliates.find(a => a.userId === user.id || String(a.email || '').toLowerCase() === String(user.email || '').toLowerCase());
+             try { const { data, error } = await supabaseClient.from('affiliates').select('id,user_id,code,status,name,affiliate_email,phone,cpf,pix_type,pix_key,instagram,website,total_sales,total_commission,created_at,updated_at').eq('affiliate_email', String(user.email || '').trim().toLowerCase()).order('created_at', { ascending: false }).limit(1).maybeSingle(); if (!error && data) { affiliate = mapAffiliateFromSupabase(data); state.affiliates = [affiliate]; } } catch (error) { console.warn('Status da afiliação:', error); }
+             updateCustomerAffiliateSection(affiliate); return affiliate || null;
+         }
+         function updateCustomerAffiliateSection(affiliate) {
+             const user = state.currentUser, title = document.getElementById('customerAffiliateTitle'), description = document.getElementById('customerAffiliateDescription'), button = document.getElementById('customerAffiliateAction'); if (!title || !description || !button) return;
+             if (!affiliate) { title.textContent='Quer se tornar um afiliado?'; description.textContent='Solicite sua afiliação e aguarde a análise da equipe L&A.'; button.textContent='Solicitar afiliação'; button.onclick=()=>openAffiliateRegistrationForCurrentUser(); }
+             else if (affiliate.status==='pending') { title.textContent='Solicitação de afiliado em análise'; description.textContent='Sua solicitação foi recebida. Aguarde a aprovação da equipe L&A.'; button.textContent='Acompanhar solicitação de afiliado'; button.onclick=()=>alert('Sua solicitação continua em análise. Após a aprovação, esta opção mudará para “Acessar sistema de afiliado”.'); }
+             else if (['active','approved'].includes(affiliate.status)) { title.textContent='Afiliação aprovada'; description.textContent='Sua conta de afiliado foi aprovada. O acesso é separado da sua conta de cliente.'; button.textContent='Acessar sistema de afiliado'; button.onclick=()=>{ closeCustomerProfile(); openAuthModal('affiliate-login'); const input=document.getElementById('affiliateLoginEmail'); if(input) input.value=user?.email || affiliate.email || ''; }; }
+             else { title.textContent='Afiliação indisponível'; description.textContent='Sua solicitação não está ativa no momento.'; button.textContent='Solicitar novamente'; button.onclick=()=>openAffiliateRegistrationForCurrentUser(); }
+         }
+
+         function openCustomerProfile() {
             const user = state.currentUser;
             if (!user) {
                 openAuthModal('customer-login');
@@ -9115,6 +9133,7 @@ if (error) throw error;
             document.getElementById('profileRole').textContent = user.role === 'affiliate' ? 'Afiliado' : 'Cliente';
             document.getElementById('profileCreatedAt').textContent = formatDate(user.createdAt);
             document.getElementById('profileLastAccess').textContent = formatDate(user.lastAccess);
+             await refreshCustomerAffiliateStatus();
 
             document.getElementById('profileFullName').value = user.fullName;
             document.getElementById('profileEmail').value = user.email;
@@ -9745,6 +9764,10 @@ if (error) throw error;
             const linksSection = document.getElementById('affiliateLinksSection');
             const pixSection = document.getElementById('affiliatePixSection');
             const salesSection = document.getElementById('affiliateSalesSection');
+             [summarySection, linksSection, pixSection, salesSection].forEach(section => section?.classList.add('hidden'));
+             document.querySelector('#affiliateDashboardModal [onclick="openAffiliateProfile()"]')?.classList.add('hidden');
+             const catalogButton = document.querySelector('#affiliateDashboardModal [onclick="openAffiliateCatalog()"]');
+             if (catalogButton) { catalogButton.classList.remove('hidden'); catalogButton.innerHTML = '<i data-lucide="share-2" class="w-4 h-4 inline mr-1"></i> Compartilhar produto'; }
 
             if (!affiliate || affiliate.status === 'pending') {
                 if (statusIcon) {
@@ -9769,26 +9792,7 @@ if (error) throw error;
                 if (statusDesc) statusDesc.textContent = 'Seu código de afiliado está liberado.';
                 if (statusDetails) statusDetails.textContent = `Código: ${affiliate.code}`;
 
-                if (summarySection) summarySection.classList.remove('hidden');
-                if (linksSection) linksSection.classList.remove('hidden');
-                if (pixSection) {
-                    pixSection.classList.remove('hidden');
-                    document.getElementById('affiliatePixType').textContent = translatePixType(affiliate.pixType);
-                    document.getElementById('affiliatePixKey').textContent = affiliate.pixKey;
-                }
-                if (salesSection) {
-                    salesSection.classList.remove('hidden');
-                    renderAffiliateSales(affiliate);
-                }
-
-                const mainLinkInput = document.getElementById('affiliateMainLink');
-                const codeInput = document.getElementById('affiliateCode');
-
-                if (mainLinkInput) mainLinkInput.value = window.location.origin + '?ref=' + affiliate.code;
-                if (codeInput) codeInput.value = affiliate.code;
-
-                updateAffiliateSummary(affiliate);
-                renderAffiliateGeneratedLinks(affiliate);
+                [summarySection, linksSection, pixSection, salesSection].forEach(section => section?.classList.add('hidden'));
 
             } else if (affiliate.status === 'blocked') {
                 if (statusIcon) {
@@ -9966,14 +9970,16 @@ if (error) throw error;
             }).join('');
         }
 
-        function copyProductLink(productId) {
+        function buildAffiliateProductLink(productId, affiliateCode) { const url = new URL(window.location.origin + window.location.pathname); url.searchParams.set('prod', productId); url.searchParams.set('ref', affiliateCode); return url.toString(); }
+
+         function copyProductLink(productId) {
             const affiliate = state.affiliates.find(a => a.userId === state.currentUser?.id);
             if (!affiliate) {
                 alert('Você precisa ser um afiliado ativo para gerar links.');
                 return;
             }
 
-            const link = window.location.origin + '?ref=' + affiliate.code + '&prod=' + productId;
+            const link = buildAffiliateProductLink(productId, affiliate.code);
             recordAffiliateLink(link, productId);
             navigator.clipboard.writeText(link).then(() => {
                 alert('Link do produto copiado!');
@@ -9987,7 +9993,7 @@ if (error) throw error;
             if (!product) return;
 
             const affiliate = state.affiliates.find(a => a.userId === state.currentUser?.id);
-            const link = affiliate ? window.location.origin + '?ref=' + affiliate.code + '&prod=' + productId : window.location.origin;
+            const link = affiliate ? buildAffiliateProductLink(productId, affiliate.code) : window.location.origin;
 
             const shareData = {
                 title: product.name,
