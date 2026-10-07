@@ -7914,46 +7914,90 @@ if (error) throw error;
             const website = document.getElementById('affiliateWebsite')?.value.trim();
             const password = document.getElementById('affiliateRegisterPassword')?.value;
             const terms = document.getElementById('affiliateRegisterTerms')?.checked;
-            if (!name || !email || !phone || !cpf || !pixType || !pixKey || !password) { showAuthMessage('Preencha todos os campos obrigatórios.', 'error'); return; }
-            if (password.length < 12) { showAuthMessage('A senha deve ter pelo menos 12 caracteres.', 'error'); return; }
-            if (!isValidCpf(cpf)) { showAuthMessage('Informe um CPF válido.', 'error'); return; }
-            if (!terms) { showAuthMessage('Você precisa aceitar os termos para solicitar afiliação.', 'error'); return; }
-            try {
-                const { data, error } = await supabaseClient.auth.signUp({
-                    email,
-                    password,
-                    options: { data: { full_name: name } }
-                });
-if (error) throw error;
-                if (!data.user) throw new Error('Não foi possível criar o usuário.');
-                let session = data.session;
 
-                // Se o e-mail já pertence a uma conta confirmada, o Supabase
-                // pode retornar o usuário sem criar uma nova sessão no signUp.
-                // Nesse caso, tenta autenticar com a senha informada.
-                if (!session?.access_token && data.user) {
-                    const { data: loginData, error: loginError } = await supabaseClient.auth.signInWithPassword({
+            if (!name || !email || !phone || !cpf || !pixType || !pixKey || !password) {
+                showAuthMessage('Preencha todos os campos obrigatórios.', 'error');
+                return;
+            }
+            if (password.length < 12) {
+                showAuthMessage('A senha deve ter pelo menos 12 caracteres.', 'error');
+                return;
+            }
+            if (!isValidCpf(cpf)) {
+                showAuthMessage('Informe um CPF válido.', 'error');
+                return;
+            }
+            if (!terms) {
+                showAuthMessage('Você precisa aceitar os termos para solicitar a afiliação.', 'error');
+                return;
+            }
+
+            try {
+                let session = null;
+                let user = null;
+
+                // Primeiro tenta autenticar uma conta que já existe.
+                // Isso evita que o signUp() trate uma conta existente como
+                // se ela precisasse ser criada novamente.
+                const { data: loginData, error: loginError } = await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+                if (!loginError && loginData?.session?.access_token) {
+                    session = loginData.session;
+                    user = loginData.user;
+                } else {
+                    const loginMessage = String(loginError?.message || '').toLowerCase();
+
+                    if (loginMessage.includes('email not confirmed') || loginMessage.includes('email_not_confirmed')) {
+                        throw new Error('Confirme o e-mail da conta antes de solicitar a afiliação.');
+                    }
+
+                    // Se não foi possível entrar, tenta criar uma nova conta.
+                    const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({
                         email,
-                        password
+                        password,
+                        options: { data: { full_name: name } }
                     });
 
-                    if (!loginError && loginData?.session?.access_token) {
-                        session = loginData.session;
+                    if (signUpError) throw signUpError;
+                    if (!signUpData?.user) throw new Error('Não foi possível criar o usuário.');
+
+                    user = signUpData.user;
+                    session = signUpData.session;
+
+                    // Se o Supabase ocultou que o e-mail já existe, não tentamos
+                    // criar outra conta nem exibimos uma mensagem falsa.
+                    if (!signUpData.user.identities || signUpData.user.identities.length === 0) {
+                        throw new Error('Este e-mail já possui uma conta. Entre com sua senha ou use Recuperar senha.');
+                    }
+
+                    if (!session?.access_token) {
+                        throw new Error('Conta criada. Confirme o e-mail enviado pelo Supabase e depois solicite a afiliação novamente.');
                     }
                 }
 
-                if (!session?.access_token) {
-                    throw new Error('Confirme o e-mail da conta antes de solicitar a afiliação.');
+                if (!session?.access_token || !user?.id) {
+                    throw new Error('Não foi possível autenticar a conta.');
                 }
 
                 const affiliateResponse = await fetch(SUPABASE_FUNCTIONS_BASE + '/register-affiliate', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token, 'apikey': SUPABASE_ANON_KEY },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + session.access_token,
+                        'apikey': SUPABASE_ANON_KEY
+                    },
                     body: JSON.stringify({ name, phone, cpf, pixType, pixKey, instagram, website })
                 });
+
                 const affiliateResult = await affiliateResponse.json().catch(() => ({}));
-                if (!affiliateResponse.ok) throw new Error(affiliateResult.error || 'Não foi possível enviar a solicitação.');
-                if (data.session) await applySupabaseSession(data.session);
+                if (!affiliateResponse.ok) {
+                    throw new Error(affiliateResult.error || 'Não foi possível enviar a solicitação.');
+                }
+
+                await applySupabaseSession(session);
                 closeAuthModal();
                 alert('Solicitação enviada! Após análise, você receberá acesso ao painel de afiliado.');
                 switchAuthScreen('affiliate-login');
