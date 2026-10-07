@@ -7080,7 +7080,7 @@
             if (profile?.role === 'admin' && profile.is_active) {
                 const [allOrdersRes, allAffiliatesRes] = await Promise.all([
                     supabaseClient.from('orders').select('*').order('created_at', { ascending: false }),
-                    supabaseClient.from('affiliates').select('id,user_id,code,status,name,email,affiliate_email,phone,cpf,pix_type,pix_key,instagram,website,total_sales,total_commission,created_at,updated_at').order('created_at', { ascending: false })
+                    supabaseClient.from('affiliates').select('id,user_id,code,status,name,affiliate_email,phone,cpf,pix_type,pix_key,instagram,website,total_sales,total_commission,created_at,updated_at').order('created_at', { ascending: false })
                 ]);
                 if (allOrdersRes.error) console.warn('Supabase pedidos ADM:', allOrdersRes.error.message);
                 if (allAffiliatesRes.error) console.warn('Supabase afiliados ADM:', allAffiliatesRes.error.message);
@@ -7128,6 +7128,30 @@
             }
 
             state.users = profile ? [state.currentUser] : [];
+
+            if (profile?.role === 'admin' && profile.is_active) {
+                const { data: allProfiles, error: allProfilesError } = await supabaseClient
+                    .from('profiles')
+                    .select('id,full_name,email,role,is_active')
+                    .order('full_name', { ascending: true });
+
+                if (allProfilesError) {
+                    console.warn('Supabase usuários ADM:', allProfilesError.message);
+                } else {
+                    state.users = (allProfiles || []).map(item => ({
+                        id: item.id,
+                        fullName: item.full_name || '',
+                        email: item.email || '',
+                        role: item.role || 'customer',
+                        status: item.is_active ? 'active' : 'blocked'
+                    }));
+                }
+
+                if (localStorage.getItem('laAdminPanelActive') === 'true') {
+                    setTimeout(() => openAdminDashboard(), 0);
+                }
+            }
+
             updateAuthUI();
             if (state.currentUser?.role === 'affiliate' && state.currentUser.affiliateStatus === 'active') enterAffiliateMode();
         }
@@ -7919,6 +7943,7 @@ if (error) throw error;
                 const { data: profile, error: profileError } = await supabaseClient.from('profiles').select('*').eq('id', data.user.id).single();
                 if (profileError) throw profileError;
                 if (profile.role !== 'admin' || !profile.is_active) throw new Error('Usuário sem permissão administrativa.');
+                localStorage.setItem('laAdminPanelActive', 'true');
                 await applySupabaseSession(data.session);
                 closeAuthModal();
                 openAdminDashboard();
@@ -8038,6 +8063,7 @@ if (error) throw error;
 
         async function logoutUser() {
             const wasAffiliate = state.currentUser?.role === 'affiliate';
+            const wasAdmin = state.currentUser?.role === 'admin';
 
             if (!wasAffiliate) {
                 try {
@@ -8058,6 +8084,8 @@ if (error) throw error;
                     await loadAuthenticatedState(supabaseAuthUser);
                 }
             }
+
+            if (wasAdmin) localStorage.removeItem('laAdminPanelActive');
 
             updateAuthUI();
             closeUserMenu();
@@ -10146,6 +10174,14 @@ if (error) throw error;
     if (tabId === 'admin-products') loadAdminProducts();
     if (tabId === 'admin-orders') loadAdminOrders();
     if (tabId === 'admin-affiliates') loadAdminAffiliates();
+            if (tabId === 'admin-settings') {
+                const savedCompany = JSON.parse(localStorage.getItem('laAdminCompanySettings') || '{}');
+                const savedCommission = localStorage.getItem('laAdminCommissionPercent');
+                if (document.getElementById('adminCompanyName')) document.getElementById('adminCompanyName').value = savedCompany.name || '';
+                if (document.getElementById('adminCompanyCnpj')) document.getElementById('adminCompanyCnpj').value = savedCompany.cnpj || '';
+                if (document.getElementById('adminCompanyEmail')) document.getElementById('adminCompanyEmail').value = savedCompany.email || '';
+                if (document.getElementById('adminCommissionPercent')) document.getElementById('adminCommissionPercent').value = savedCommission || '20';
+            }
 
     prepareCheckoutAffiliateField();
 }
@@ -10579,38 +10615,61 @@ loadAdminProducts();
             }
         }
 
-        function saveAdminAffiliate(event) {
+        async function saveAdminAffiliate(event) {
             event.preventDefault();
 
             const id = document.getElementById('adminAffiliateId')?.value;
             const affiliate = state.affiliates.find(a => a.id === id);
             if (!affiliate) return;
 
-            affiliate.name = document.getElementById('adminAffiliateName')?.value.trim();
-            affiliate.email = document.getElementById('adminAffiliateEmail')?.value.trim();
-            affiliate.phone = document.getElementById('adminAffiliatePhone')?.value.trim();
-            affiliate.cpf = document.getElementById('adminAffiliateCpf')?.value.trim();
-            affiliate.status = document.getElementById('adminAffiliateStatus')?.value;
-            affiliate.pixType = document.getElementById('adminAffiliatePixType')?.value;
-            affiliate.pixKey = document.getElementById('adminAffiliatePixKey')?.value.trim();
-            affiliate.instagram = document.getElementById('adminAffiliateInstagram')?.value.trim();
-            affiliate.website = document.getElementById('adminAffiliateWebsite')?.value.trim();
+            const name = document.getElementById('adminAffiliateName')?.value.trim();
+            const affiliateEmail = document.getElementById('adminAffiliateEmail')?.value.trim().toLowerCase();
+            const phone = document.getElementById('adminAffiliatePhone')?.value.trim();
+            const cpf = document.getElementById('adminAffiliateCpf')?.value.trim();
+            const status = document.getElementById('adminAffiliateStatus')?.value;
+            const pixType = document.getElementById('adminAffiliatePixType')?.value;
+            const pixKey = document.getElementById('adminAffiliatePixKey')?.value.trim();
+            const instagram = document.getElementById('adminAffiliateInstagram')?.value.trim();
+            const website = document.getElementById('adminAffiliateWebsite')?.value.trim();
 
-            if (affiliate.status === 'active' && !affiliate.approvedAt) {
-                affiliate.approvedAt = new Date().toISOString();
+            if (!name || !affiliateEmail || !phone || !cpf || !status || !pixType || !pixKey) {
+                showAdminAffiliateMessage('Preencha todos os campos obrigatórios.', 'error');
+                return;
             }
 
-            const user = state.users.find(u => u.id === affiliate.userId);
-            if (user) {
-                user.fullName = affiliate.name;
-                user.phone = affiliate.phone;
-                user.cpf = affiliate.cpf;
-                user.affiliateStatus = affiliate.status;
-            }
+            try {
+                const { error } = await supabaseClient.from('affiliates').update({
+                    name,
+                    affiliate_email: affiliateEmail,
+                    phone,
+                    cpf,
+                    status,
+                    pix_type: pixType,
+                    pix_key: pixKey,
+                    instagram: instagram || null,
+                    website: website || null,
+                    updated_at: new Date().toISOString()
+                }).eq('id', id);
 
-            saveStateToStorage();
-            showAdminAffiliateMessage('Afiliado atualizado com sucesso!', 'success');
-            loadAdminAffiliates();
+                if (error) throw error;
+
+                Object.assign(affiliate, { name, email: affiliateEmail, affiliate_email: affiliateEmail, phone, cpf, status, pixType, pixKey, instagram, website });
+
+                const user = state.users.find(u => u.id === affiliate.userId);
+                if (user) {
+                    user.fullName = name;
+                    user.phone = phone;
+                    user.cpf = cpf;
+                    user.affiliateStatus = status;
+                }
+
+                showAdminAffiliateMessage('Afiliado atualizado no Supabase com sucesso!', 'success');
+                loadAdminAffiliates();
+                loadAdminDashboard();
+            } catch (error) {
+                console.error('Erro ao salvar afiliado no Supabase:', error);
+                showAdminAffiliateMessage('Não foi possível salvar o afiliado: ' + (error?.message || 'erro desconhecido'), 'error');
+            }
         }
 
         function showAdminAffiliateMessage(message, type) {
@@ -10660,22 +10719,41 @@ loadAdminProducts();
             }
         }
 
-        function saveAdminUser(event) {
+        async function saveAdminUser(event) {
             event.preventDefault();
 
             const id = document.getElementById('adminUserId')?.value;
             const user = state.users.find(u => u.id === id);
             if (!user) return;
 
-            user.fullName = document.getElementById('adminUserName')?.value.trim();
-            user.email = document.getElementById('adminUserEmail')?.value.trim();
-            if (user.role !== 'customer') user.cpf = document.getElementById('adminUserCpf')?.value.trim();
-            user.role = document.getElementById('adminUserRole')?.value;
-            user.status = document.getElementById('adminUserStatus')?.value;
+            const fullName = document.getElementById('adminUserName')?.value.trim();
+            const email = document.getElementById('adminUserEmail')?.value.trim().toLowerCase();
+            const role = document.getElementById('adminUserRole')?.value;
+            const status = document.getElementById('adminUserStatus')?.value;
 
-            saveStateToStorage();
-            showAdminUserMessage('Usuário atualizado com sucesso!', 'success');
-            loadAdminUsers();
+            if (!fullName || !email || !role || !status) {
+                showAdminUserMessage('Preencha os campos obrigatórios.', 'error');
+                return;
+            }
+
+            try {
+                const { error } = await supabaseClient.from('profiles').update({
+                    full_name: fullName,
+                    email,
+                    role,
+                    is_active: status === 'active',
+                    updated_at: new Date().toISOString()
+                }).eq('id', id);
+
+                if (error) throw error;
+
+                Object.assign(user, { fullName, email, role, status });
+                showAdminUserMessage('Usuário atualizado no Supabase com sucesso!', 'success');
+                loadAdminUsers();
+            } catch (error) {
+                console.error('Erro ao salvar usuário no Supabase:', error);
+                showAdminUserMessage('Não foi possível salvar o usuário: ' + (error?.message || 'erro desconhecido'), 'error');
+            }
         }
 
         function showAdminUserMessage(message, type) {
@@ -10770,12 +10848,20 @@ loadAdminProducts();
 
         function saveAdminCompanySettings(event) {
             event.preventDefault();
-            alert('Configurações salvas (simulação).');
+            const data = {
+                name: document.getElementById('adminCompanyName')?.value.trim() || '',
+                cnpj: document.getElementById('adminCompanyCnpj')?.value.trim() || '',
+                email: document.getElementById('adminCompanyEmail')?.value.trim().toLowerCase() || ''
+            };
+            localStorage.setItem('laAdminCompanySettings', JSON.stringify(data));
+            alert('Configurações da empresa salvas.');
         }
 
         function saveAdminCommissionSettings(event) {
             event.preventDefault();
-            alert('Regras de comissão salvas (simulação).');
+            const value = document.getElementById('adminCommissionPercent')?.value || '20';
+            localStorage.setItem('laAdminCommissionPercent', value);
+            alert('Regra de comissão salva.');
         }
 
         // =====================================================
@@ -10791,6 +10877,14 @@ loadAdminProducts();
 
 function calculateAffiliateCommission(product, quantity = 1) {
     return (Number(product?.price) || 0) * (Number(quantity) || 0) * 0.20;
+}
+
+let catalogShowingAll = false;
+const CATALOG_CAROUSEL_LIMIT = 4;
+
+function toggleFullCatalog() {
+    catalogShowingAll = !catalogShowingAll;
+    renderCatalog();
 }
 
 function renderCatalog() {
@@ -10832,7 +10926,9 @@ function renderCatalog() {
         return;
     }
 
-    container.innerHTML = availableProducts.map(product => {
+    const visibleProducts = catalogShowingAll ? availableProducts : availableProducts.slice(0, CATALOG_CAROUSEL_LIMIT);
+
+    container.innerHTML = visibleProducts.map(product => {
         const originalPrice = Number(product.price) || 0;
         const discount = Number(product.discount) || 0;
         const finalPrice = calculateFinalPrice(product);
@@ -10917,6 +11013,27 @@ function renderCatalog() {
             </article>
         `;
     }).join('');
+
+    const catalogButton = document.getElementById('btn-ver-catalogo');
+    if (catalogButton) {
+        if (availableProducts.length > CATALOG_CAROUSEL_LIMIT) {
+            catalogButton.classList.remove('hidden');
+            catalogButton.innerHTML = catalogShowingAll
+                ? '<i data-lucide="chevron-up" class="w-4 h-4"></i> Ocultar catálogo'
+                : '<i data-lucide="grid-3x3" class="w-4 h-4"></i> Ver catálogo completo';
+            catalogButton.onclick = toggleFullCatalog;
+        } else {
+            catalogButton.classList.add('hidden');
+            catalogShowingAll = false;
+        }
+    }
+
+    const resultInfo = document.getElementById('catalogResultInfo');
+    if (resultInfo) {
+        resultInfo.textContent = availableProducts.length > CATALOG_CAROUSEL_LIMIT && !catalogShowingAll
+            ? 'Mostrando ' + visibleProducts.length + ' produtos em destaque de ' + availableProducts.length + ' disponíveis.'
+            : availableProducts.length + ' produto(s) disponível(is).';
+    }
 
     lucide.createIcons();
 }
@@ -11353,6 +11470,7 @@ function escapeAttribute(value) {
         window.lookupProfileZipCode = lookupProfileZipCode;
         window.scrollToTop = scrollToTop;
         window.renderProducts = renderProducts;
+        window.toggleFullCatalog = toggleFullCatalog;
     
     window.openCatalogFilters = openCatalogFilters;
 window.closeCatalogFilters = closeCatalogFilters;
