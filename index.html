@@ -4591,15 +4591,28 @@ id="customerProfileForm"
                 <div class="flex flex-wrap gap-3">
                     <button
                         type="button"
-                        onclick="enterAffiliateMode(); closeAffiliateDashboard(); document.getElementById('loja')?.scrollIntoView({behavior:'smooth'});"
-                        class="px-5 py-3 gradient-gold text-slate-900 rounded-xl font-bold hover:shadow-gold transition"
+                        onclick="openAffiliateProfile()"
+                        class="px-4 py-3 rounded-xl border border-slate-300 text-slate-700 font-bold hover:border-amber-500 transition"
                     >
                         <i
-                            data-lucide="share-2"
+                            data-lucide="user-round"
                             class="w-4 h-4 inline mr-1"
                         ></i>
 
-                        Compartilhar produto
+                        Meus dados
+                    </button>
+
+                    <button
+                        type="button"
+                        onclick="openAffiliateCatalog()"
+                        class="px-4 py-3 gradient-gold text-slate-900 rounded-xl font-bold hover:shadow-gold transition"
+                    >
+                        <i
+                            data-lucide="shopping-bag"
+                            class="w-4 h-4 inline mr-1"
+                        ></i>
+
+                        Catálogo
                     </button>
                 </div>
             </div>
@@ -7249,30 +7262,18 @@ id="customerProfileForm"
 function captureAffiliateReferral() {
     const params = new URLSearchParams(window.location.search);
     const referralCode = params.get('ref')?.trim().toUpperCase();
-    const productId = params.get('prod')?.trim();
 
-    if (referralCode) {
-        sessionStorage.setItem('laAffiliateReferralCode', referralCode);
+    if (!referralCode) {
+        return;
     }
 
-    if (productId) {
-        sessionStorage.setItem('laAffiliateReferralProduct', productId);
-    }
-}
+    const affiliate = state.affiliates.find(item =>
+        item.code === referralCode &&
+        item.status === 'active'
+    );
 
-function focusAffiliateProductFromLink() {
-    const productId = sessionStorage.getItem('laAffiliateReferralProduct');
-    if (!productId) return;
-
-    const product = state.products.find(product => product.id === productId);
-    if (!product) return;
-
-    const cards = document.querySelectorAll('[data-product-id]');
-    const card = Array.from(cards).find(element => element.getAttribute('data-product-id') === productId);
-    if (card) {
-        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        card.classList.add('ring-4', 'ring-amber-400', 'ring-offset-4');
-        setTimeout(() => card.classList.remove('ring-4', 'ring-amber-400', 'ring-offset-4'), 3500);
+    if (affiliate) {
+        sessionStorage.setItem('laAffiliateReferralCode', affiliate.code);
     }
 }
 
@@ -7355,7 +7356,6 @@ function initializeApp() {
     }
 
     renderCatalog();
-    focusAffiliateProductFromLink();
     updateCartIcon();
     updateAuthUI();
     handleCookieConsent();
@@ -8094,16 +8094,13 @@ if (error) throw error;
             const affiliateNav = document.getElementById('affiliateNavLink');
             const affiliateSection = document.getElementById('afiliados');
 
-            document.body.classList.remove('guest-mode', 'customer-mode', 'admin-mode', 'affiliate-user-mode', 'affiliate-mode');
+            document.body.classList.remove('guest-mode', 'customer-mode', 'admin-mode', 'affiliate-user-mode');
 
             if (user) {
                 const isAdmin = user.role === 'admin';
                 const isAffiliate = user.role === 'affiliate';
                 document.body.classList.add(isAdmin ? 'admin-mode' : 'customer-mode');
-                if (isAffiliate) {
-                    document.body.classList.add('affiliate-user-mode');
-                    document.body.classList.add('affiliate-mode');
-                }
+                if (isAffiliate) document.body.classList.add('affiliate-user-mode');
 
                 loginBtn?.classList.add('hidden');
                 userBtn?.classList.remove('hidden');
@@ -9973,15 +9970,7 @@ if (error) throw error;
             }).join('');
         }
 
-        function buildAffiliateProductLink(productId, affiliateCode) {
-    const basePath = window.location.pathname.endsWith('/')
-        ? window.location.pathname
-        : window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-    const url = new URL(basePath || '/', window.location.origin);
-    url.searchParams.set('ref', String(affiliateCode || '').trim().toUpperCase());
-    url.searchParams.set('prod', productId);
-    return url.toString();
-}
+        function buildAffiliateProductLink(productId, affiliateCode) { const url = new URL(window.location.origin + window.location.pathname); url.searchParams.set('prod', productId); url.searchParams.set('ref', affiliateCode); return url.toString(); }
 
          function copyProductLink(productId) {
             const affiliate = state.affiliates.find(a => a.userId === state.currentUser?.id);
@@ -10942,14 +10931,14 @@ function renderCatalog() {
         : 'flex gap-6 overflow-x-auto pb-6 scroll-smooth snap-x snap-mandatory no-scrollbar';
 
     container.innerHTML = visibleProducts.map(product => {
-        const cardWidthClass = catalogShowingAll ? 'w-full' : 'w-[360px] sm:w-[380px] flex-shrink-0';
+        const cardWidthClass = catalogShowingAll ? 'w-full' : 'w-[320px] flex-shrink-0';
         const originalPrice = Number(product.price) || 0;
         const discount = Number(product.discount) || 0;
         const finalPrice = calculateFinalPrice(product);
 
         return `
-            <article data-product-id="${escapeAttribute(product.id)}" class="${cardWidthClass} bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col">
-                <div class="relative h-64 bg-slate-100 overflow-hidden">
+            <article class="${cardWidthClass} bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col">
+                <div class="relative h-56 bg-slate-100 overflow-hidden">
                     <img
                         src="${escapeAttribute(product.image)}"
                         alt="${escapeAttribute(product.name)}"
@@ -10997,37 +10986,24 @@ function renderCatalog() {
                         </p>
                     </div>
 
-                    <div class="mt-5">
-                        ${document.body.classList.contains('affiliate-mode') ? `
-                            <button
-                                type="button"
-                                onclick="shareProduct('${escapeAttribute(product.id)}')"
-                                class="w-full gradient-gold text-slate-900 py-3.5 rounded-xl font-bold hover:shadow-gold transition text-sm"
-                            >
-                                <i data-lucide="share-2" class="w-4 h-4 inline mr-1"></i>
-                                Compartilhar produto
-                            </button>
-                        ` : `
-                            <div class="grid grid-cols-2 gap-2">
-                                <button
-                                    type="button"
-                                    onclick="addToCart('${escapeAttribute(product.id)}')"
-                                    class="w-full gradient-gold text-slate-900 py-3 rounded-xl font-bold hover:shadow-gold transition text-sm"
-                                >
-                                    <i data-lucide="shopping-cart" class="w-4 h-4 inline mr-1"></i>
-                                    Adicionar
-                                </button>
+                    <div class="grid grid-cols-2 gap-2 mt-5">
+                        <button
+                            type="button"
+                            onclick="addToCart('${escapeAttribute(product.id)}')"
+                            class="w-full gradient-gold text-slate-900 py-3 rounded-xl font-bold hover:shadow-gold transition text-sm"
+                        >
+                            <i data-lucide="shopping-cart" class="w-4 h-4 inline mr-1"></i>
+                            Adicionar
+                        </button>
 
-                                <button
-                                    type="button"
-                                    onclick="buyNow('${escapeAttribute(product.id)}')"
-                                    class="w-full bg-slate-900 text-amber-400 py-3 rounded-xl font-bold hover:bg-slate-800 transition text-sm border border-slate-700"
-                                >
-                                    <i data-lucide="credit-card" class="w-4 h-4 inline mr-1"></i>
-                                    Comprar agora
-                                </button>
-                            </div>
-                        `}
+                        <button
+                            type="button"
+                            onclick="buyNow('${escapeAttribute(product.id)}')"
+                            class="w-full bg-slate-900 text-amber-400 py-3 rounded-xl font-bold hover:bg-slate-800 transition text-sm border border-slate-700"
+                        >
+                            <i data-lucide="credit-card" class="w-4 h-4 inline mr-1"></i>
+                            Comprar agora
+                        </button>
                     </div>
                 </div>
             </article>
