@@ -7142,12 +7142,14 @@
                     }));
                 }
 
-                if (localStorage.getItem('laAdminPanelActive') === 'true') {
-                    setTimeout(() => openAdminDashboard(), 0);
-                }
             }
 
             updateAuthUI();
+
+            if (state.currentUser?.role === 'admin' && state.currentUser?.status === 'active' && localStorage.getItem('laAdminPanelActive') === 'true') {
+                setTimeout(() => openAdminDashboard(), 0);
+            }
+
             if (state.currentUser?.role === 'affiliate' && state.currentUser.affiliateStatus === 'active') enterAffiliateMode();
         }
 
