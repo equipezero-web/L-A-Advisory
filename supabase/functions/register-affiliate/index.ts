@@ -62,12 +62,15 @@ Deno.serve(async (req) => {
 
   const admin = createClient(SUPABASE_URL, SECRET);
 
-  const { data: existingEmail, error: emailError } = await admin.from('affiliates')
-    .select('id,code,status,name,email,affiliate_email,affiliate_password_hash').ilike('affiliate_email', email).maybeSingle();
+  const { data: existingEmailRows, error: emailError } = await admin.from('affiliates')
+    .select('id,code,status,name,email,affiliate_email,affiliate_password_hash')
+    .eq('affiliate_email', email)
+    .limit(1);
   if (emailError) {
-    console.error(emailError);
+    console.error('Erro ao consultar e-mail do afiliado:', emailError);
     return json({ error: 'Não foi possível verificar o e-mail do afiliado.' }, 500);
   }
+  const existingEmail = existingEmailRows?.[0] || null;
   if (existingEmail?.affiliate_password_hash) {
     return json({ error: 'Este e-mail já possui uma conta de afiliado. Use Entrar como afiliado ou Recuperar senha.' }, 409);
   }
