@@ -4023,11 +4023,19 @@
                 </div>
             </div>
 
-            <form
-                <div id="customerAffiliateSection" class="mb-7 p-5 bg-gradient-to-br from-slate-50 to-amber-50/40 border border-amber-200 rounded-xl">
-<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4"><div><p class="text-xs font-bold uppercase tracking-wider text-amber-700">Programa de afiliados</p><h4 id="customerAffiliateTitle" class="font-bold text-slate-900 mt-1">Quer se tornar um afiliado?</h4><p id="customerAffiliateDescription" class="text-sm text-slate-600 mt-1">Solicite sua afiliação e aguarde a análise da equipe L&A.</p></div><button type="button" id="customerAffiliateAction" onclick="openAffiliateRegistrationForCurrentUser()" class="shrink-0 gradient-gold text-slate-900 px-5 py-3 rounded-xl font-bold hover:shadow-gold transition">Solicitar afiliação</button></div></div>
+            <div id="customerAffiliateSection" class="mb-7 p-5 bg-gradient-to-br from-slate-50 to-amber-50/40 border border-amber-200 rounded-xl">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-wider text-amber-700">Programa de afiliados</p>
+                        <h4 id="customerAffiliateTitle" class="font-bold text-slate-900 mt-1">Quer se tornar um afiliado?</h4>
+                        <p id="customerAffiliateDescription" class="text-sm text-slate-600 mt-1">Solicite sua afiliação e aguarde a análise da equipe L&A.</p>
+                    </div>
+                    <button type="button" id="customerAffiliateAction" onclick="openAffiliateRegistrationForCurrentUser()" class="shrink-0 gradient-gold text-slate-900 px-5 py-3 rounded-xl font-bold hover:shadow-gold transition">Solicitar afiliação</button>
+                </div>
+            </div>
 
-id="customerProfileForm"
+            <form
+                id="customerProfileForm"
                 onsubmit="saveCustomerProfile(event)"
                 class="space-y-5"
             >
@@ -7280,17 +7288,33 @@ function focusAffiliateProductFromLink() {
     const product = state.products.find(item => item.id === productId);
     if (!product) return;
 
+    // Quem recebe um link de afiliado continua no modo cliente normal.
+    document.body.classList.remove('affiliate-mode');
+    document.getElementById('affiliateCatalogStatus')?.classList.add('hidden');
+
+    // Mostra o catálogo completo para garantir que o produto compartilhado apareça.
     if (!catalogShowingAll && !state.products.slice(0, CATALOG_CAROUSEL_LIMIT).some(item => item.id === productId)) {
         catalogShowingAll = true;
         renderCatalog();
     }
 
+    const catalogSection = document.getElementById('loja');
+
     setTimeout(() => {
+        if (catalogSection) {
+            catalogSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
         const card = document.querySelector('[data-product-id="' + CSS.escape(productId) + '"]');
         if (card) {
+            card.classList.add('ring-4', 'ring-amber-400', 'ring-offset-4');
             card.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+
+            setTimeout(() => {
+                card.classList.remove('ring-4', 'ring-amber-400', 'ring-offset-4');
+            }, 4000);
         }
-    }, 100);
+    }, 250);
 }
 
 function getAffiliateReferralCode() {
@@ -8341,6 +8365,7 @@ if (error) throw error;
                 modal.classList.remove('hidden');
                 document.body.style.overflow = 'hidden';
                 lucide.createIcons();
+                prepareCheckoutAffiliateField();
 
                 const button = document.getElementById('goToMercadoPagoButton');
                 if (button) {
@@ -8405,6 +8430,7 @@ if (error) throw error;
             document.getElementById('checkoutState').value = address.state || '';
 
             renderCheckoutItems();
+            prepareCheckoutAffiliateField();
         }
 
         function renderCheckoutItems() {
