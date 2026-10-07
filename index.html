@@ -7874,7 +7874,10 @@ async function handleAffiliateLogin(event) {
                 closeAuthModal();
                 updateAuthUI();
                 if (affiliate.status === 'pending') alert('Sua solicitação de afiliado está em análise.');
-                else if (['active', 'approved'].includes(affiliate.status)) { enterAffiliateMode(); // O acesso ao sistema de afiliado ocorre pelo login separado. }
+                else if (['active', 'approved'].includes(affiliate.status)) {
+                    enterAffiliateMode();
+                    openAffiliateDashboard();
+                }
             } catch (error) {
                 console.error('Erro no login de afiliado:', error);
                 showAuthMessage(error.message || 'E-mail ou senha de afiliado incorretos.', 'error');
