@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
   const admin = createClient(SUPABASE_URL, SECRET);
 
   const { data: existingEmailRows, error: emailError } = await admin.from('affiliates')
-    .select('id,code,status,name,email,affiliate_email,affiliate_password_hash')
+    .select('id,code,status,name,affiliate_email,affiliate_password_hash')
     .eq('affiliate_email', email)
     .limit(1);
   if (emailError) {
@@ -93,7 +93,6 @@ Deno.serve(async (req) => {
       code: code(),
       status: 'pending',
       name,
-      email,
       affiliate_email: email,
       affiliate_password_hash: passwordHash,
       affiliate_password_salt: b64(salt),
@@ -105,7 +104,7 @@ Deno.serve(async (req) => {
       website: website || null,
       total_sales: 0,
       total_commission: 0
-    }).select('id,code,status,name,email,affiliate_email,phone,cpf,pix_type,pix_key,instagram,website,user_id,total_sales,total_commission').single();
+    }).select('id,code,status,name,affiliate_email,phone,cpf,pix_type,pix_key,instagram,website,user_id,total_sales,total_commission').single();
 
     if (!error && affiliate) {
       return json({ ok: true, affiliate: { ...affiliate, user_id: affiliate.user_id || affiliate.id, email: affiliate.affiliate_email || affiliate.email || email } }, 201);
