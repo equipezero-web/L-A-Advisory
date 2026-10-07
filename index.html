@@ -5543,8 +5543,6 @@
                 </div>
             </section>
 
-            </section>
-
             <!-- PEDIDOS -->
             <section
                 id="admin-orders"
@@ -10142,6 +10140,7 @@ if (error) throw error;
   function switchAdminTab(tabId, button) {
     document.querySelectorAll('.admin-section').forEach(section => {
         section.classList.add('hidden');
+        section.style.display = 'none';
     });
 
     const targetSection = document.getElementById(tabId);
@@ -10151,6 +10150,7 @@ if (error) throw error;
     }
 
     targetSection.classList.remove('hidden');
+    targetSection.style.display = 'block';
 
     document.querySelectorAll('.admin-tab').forEach(tab => {
         tab.classList.remove('bg-slate-900', 'text-amber-400');
