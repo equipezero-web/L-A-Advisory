@@ -1,557 +1,114 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://equipezero-web.github.io",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Content-Type": "application/json",
+  'Access-Control-Allow-Origin': 'https://equipezero-web.github.io',
+  'Access-Control-Allow-Headers': 'apikey, x-client-info, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Content-Type': 'application/json'
 };
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+const SECRET_KEYS = JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS') || '{}');
+const SECRET = SECRET_KEYS.default;
 
 function json(data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: corsHeaders,
-  });
+  return new Response(JSON.stringify(data), { status, headers: corsHeaders });
 }
-
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-
-const SUPABASE_PUBLISHABLE_KEYS = JSON.parse(
-  Deno.env.get('SUPABASE_PUBLISHABLE_KEYS') || '{}'
-);
-
-const SUPABASE_SECRET_KEYS = JSON.parse(
-  Deno.env.get('SUPABASE_SECRET_KEYS') || '{}'
-);
-
-const SUPABASE_PUBLISHABLE_KEY =
-  SUPABASE_PUBLISHABLE_KEYS['default'];
-
-const SUPABASE_SECRET_KEY =
-  SUPABASE_SECRET_KEYS['default'];
-
-function normalizeCpf(value: unknown): string {
-  return String(value || '').replace(/\D/g, '');
-}
-
-function isValidCpf(value: unknown): boolean {
-  const cpf = normalizeCpf(value);
-
-  if (cpf.length !== 11) return false;
-  if (/^(\d)\1{10}$/.test(cpf)) return false;
-
+function emailOf(v: unknown) { return String(v || '').trim().toLowerCase().slice(0, 160); }
+function cpfOf(v: unknown) { return String(v || '').replace(/\D/g, ''); }
+function validCpf(v: unknown) {
+  const cpf = cpfOf(v);
+  if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
   let sum = 0;
-
-  for (let i = 0; i < 9; i++) {
-    sum += Number(cpf[i]) * (10 - i);
-  }
-
-  let digit = (sum * 10) % 11;
-
-  if (digit === 10) {
-    digit = 0;
-  }
-
-  if (digit !== Number(cpf[9])) {
-    return false;
-  }
-
+  for (let i = 0; i < 9; i++) sum += Number(cpf[i]) * (10 - i);
+  let d = (sum * 10) % 11; if (d === 10) d = 0;
+  if (d !== Number(cpf[9])) return false;
   sum = 0;
-
-  for (let i = 0; i < 10; i++) {
-    sum += Number(cpf[i]) * (11 - i);
-  }
-
-  digit = (sum * 10) % 11;
-
-  if (digit === 10) {
-    digit = 0;
-  }
-
-  return digit === Number(cpf[10]);
+  for (let i = 0; i < 10; i++) sum += Number(cpf[i]) * (11 - i);
+  d = (sum * 10) % 11; if (d === 10) d = 0;
+  return d === Number(cpf[10]);
 }
-
-function generateAffiliateCode(): string {
-  const randomPart = crypto
-    .randomUUID()
-    .replaceAll('-', '')
-    .slice(0, 8)
-    .toUpperCase();
-
-  return `AFF${randomPart}`;
+function b64(bytes: Uint8Array) {
+  let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s);
 }
+async function hashPassword(password: string, salt: Uint8Array) {
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 210000, hash: 'SHA-256' }, key, 256);
+  return b64(new Uint8Array(bits));
+}
+function code() { return 'AFF' + crypto.randomUUID().replaceAll('-', '').slice(0, 8).toUpperCase(); }
 
 Deno.serve(async (req) => {
-  /*
-   * CORS
-   */
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', {
-      headers: corsHeaders,
-    });
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+  if (req.method !== 'POST') return json({ error: 'Método não permitido.' }, 405);
+  if (!SECRET) return json({ error: 'Servidor não configurado corretamente.' }, 500);
+
+  const body = await req.json().catch(() => null);
+  if (!body || typeof body !== 'object') return json({ error: 'JSON inválido.' }, 400);
+
+  const name = String(body.name || body.fullName || '').trim().slice(0, 160);
+  const email = emailOf(body.email);
+  const phone = String(body.phone || '').trim().slice(0, 40);
+  const cpf = cpfOf(body.cpf);
+  const pixType = String(body.pixType || '').trim().slice(0, 30);
+  const pixKey = String(body.pixKey || '').trim().slice(0, 200);
+  const instagram = String(body.instagram || '').trim().slice(0, 200);
+  const website = String(body.website || '').trim().slice(0, 300);
+  const password = String(body.password || '');
+
+  if (!name || !email || !phone || !cpf || !pixType || !pixKey || !password) return json({ error: 'Preencha todos os campos obrigatórios.' }, 400);
+  if (!/^\S+@\S+\.\S+$/.test(email)) return json({ error: 'Informe um e-mail válido.' }, 400);
+  if (password.length < 12) return json({ error: 'A senha do afiliado deve ter pelo menos 12 caracteres.' }, 400);
+  if (!validCpf(cpf)) return json({ error: 'Informe um CPF válido.' }, 400);
+
+  const admin = createClient(SUPABASE_URL, SECRET);
+
+  const { data: existingEmail, error: emailError } = await admin.from('affiliates')
+    .select('id,code,status').ilike('affiliate_email', email).maybeSingle();
+  if (emailError) {
+    console.error(emailError);
+    return json({ error: 'Não foi possível verificar o e-mail do afiliado.' }, 500);
   }
+  if (existingEmail) return json({ error: 'Este e-mail já possui uma conta de afiliado. Use Entrar como afiliado ou Recuperar senha.' }, 409);
 
-  /*
-   * Somente POST
-   */
-  if (req.method !== 'POST') {
-    return json(
-      {
-        error: 'Método não permitido.',
-      },
-      405
-    );
-  }
+  const { data: cpfAffiliate, error: cpfError } = await admin.from('affiliates')
+    .select('id').eq('cpf', cpf).maybeSingle();
+  if (cpfError) return json({ error: 'Não foi possível verificar o CPF.' }, 500);
+  if (cpfAffiliate) return json({ error: 'Este CPF já está cadastrado no programa de afiliados.' }, 409);
 
-  /*
-   * Verificação das configurações
-   */
-  if (!SUPABASE_URL) {
-    console.error(
-      'SUPABASE_URL não configurado.'
-    );
+  const { data: customerProfile } = await admin.from('profiles')
+    .select('id,email').ilike('email', email).maybeSingle();
 
-    return json(
-      {
-        error:
-          'Servidor não configurado corretamente.',
-      },
-      500
-    );
-  }
-
-  if (!SUPABASE_PUBLISHABLE_KEY) {
-    console.error(
-      'SUPABASE_PUBLISHABLE_KEYS não configurado.'
-    );
-
-    return json(
-      {
-        error:
-          'Servidor não configurado corretamente.',
-      },
-      500
-    );
-  }
-
-  if (!SUPABASE_SECRET_KEY) {
-    console.error(
-      'SUPABASE_SECRET_KEYS não configurado.'
-    );
-
-    return json(
-      {
-        error:
-          'Servidor não configurado corretamente.',
-      },
-      500
-    );
-  }
-
-  /*
-   * Autenticação
-   */
-  const authorization =
-    req.headers.get('Authorization');
-
-  if (
-    !authorization ||
-    !authorization.startsWith('Bearer ')
-  ) {
-    return json(
-      {
-        error:
-          'Não autenticado.',
-      },
-      401
-    );
-  }
-
-  /*
-   * Cliente com a sessão do usuário.
-   */
-  const userClient = createClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY,
-    {
-      global: {
-        headers: {
-          Authorization:
-            authorization,
-        },
-      },
-    }
-  );
-
-  const {
-    data: { user },
-    error: userError,
-  } = await userClient.auth.getUser();
-
-  if (userError || !user) {
-    console.error(
-      'Erro de autenticação:',
-      userError
-    );
-
-    return json(
-      {
-        error:
-          'Sessão inválida ou expirada.',
-      },
-      401
-    );
-  }
-
-  /*
-   * Cliente administrativo.
-   *
-   * A Secret Key fica exclusivamente
-   * no backend.
-   */
-  const admin = createClient(
-    SUPABASE_URL,
-    SUPABASE_SECRET_KEY
-  );
-
-  /*
-   * Lê o corpo da requisição.
-   */
-  const body =
-    await req.json().catch(() => null);
-
-  if (
-    !body ||
-    typeof body !== 'object'
-  ) {
-    return json(
-      {
-        error:
-          'JSON inválido.',
-      },
-      400
-    );
-  }
-
-  /*
-   * Dados enviados pelo formulário.
-   */
-  const name =
-    String(
-      body.name ||
-      body.fullName ||
-      ''
-    )
-      .trim()
-      .slice(0, 160);
-
-  const phone =
-    String(
-      body.phone || ''
-    )
-      .trim()
-      .slice(0, 40);
-
-  const cpf =
-    normalizeCpf(body.cpf);
-
-  const pixType =
-    String(
-      body.pixType || ''
-    )
-      .trim()
-      .slice(0, 30);
-
-  const pixKey =
-    String(
-      body.pixKey || ''
-    )
-      .trim()
-      .slice(0, 200);
-
-  const instagram =
-    String(
-      body.instagram || ''
-    )
-      .trim()
-      .slice(0, 200);
-
-  const website =
-    String(
-      body.website || ''
-    )
-      .trim()
-      .slice(0, 300);
-
-  /*
-   * Validações
-   */
-  if (!name) {
-    return json(
-      {
-        error:
-          'Informe seu nome completo.',
-      },
-      400
-    );
-  }
-
-  if (!phone) {
-    return json(
-      {
-        error:
-          'Informe seu telefone.',
-      },
-      400
-    );
-  }
-
-  if (!cpf) {
-    return json(
-      {
-        error:
-          'Informe seu CPF.',
-      },
-      400
-    );
-  }
-
-  if (!isValidCpf(cpf)) {
-    return json(
-      {
-        error:
-          'Informe um CPF válido.',
-      },
-      400
-    );
-  }
-
-  /*
-   * Se o usuário já possui cadastro de afiliado,
-   * não cria outro.
-   */
-  const {
-    data: existingAffiliate,
-    error: existingError,
-  } = await admin
-    .from('affiliates')
-    .select(
-      'id,code,status,name,phone,cpf,pix_type,pix_key,instagram,website'
-    )
-    .eq(
-      'user_id',
-      user.id
-    )
-    .maybeSingle();
-
-  if (existingError) {
-    console.error(
-      'Erro ao consultar afiliado:',
-      existingError
-    );
-
-    return json(
-      {
-        error:
-          'Não foi possível verificar seu cadastro.',
-      },
-      500
-    );
-  }
-
-  if (existingAffiliate) {
-    return json({
-      ok: true,
-      existing: true,
-      affiliate: {
-        id:
-          existingAffiliate.id,
-
-        code:
-          existingAffiliate.code,
-
-        status:
-          existingAffiliate.status,
-
-        name:
-          existingAffiliate.name,
-
-        phone:
-          existingAffiliate.phone,
-
-        pixType:
-          existingAffiliate.pix_type,
-
-        instagram:
-          existingAffiliate.instagram,
-
-        website:
-          existingAffiliate.website,
-      },
-    });
-  }
-
-  /*
-   * Verifica se o CPF já pertence
-   * a outro afiliado.
-   */
-  const {
-    data: cpfAffiliate,
-    error: cpfError,
-  } = await admin
-    .from('affiliates')
-    .select('id,user_id')
-    .eq('cpf', cpf)
-    .maybeSingle();
-
-  if (cpfError) {
-    console.error(
-      'Erro ao verificar CPF:',
-      cpfError
-    );
-
-    return json(
-      {
-        error:
-          'Não foi possível verificar o CPF.',
-      },
-      500
-    );
-  }
-
-  if (cpfAffiliate) {
-    return json(
-      {
-        error:
-          'Este CPF já está cadastrado no programa de afiliados.',
-      },
-      409
-    );
-  }
-
-  /*
-   * Gera código único.
-   *
-   * Tentamos algumas vezes para evitar
-   * colisão extremamente improvável.
-   */
-  let affiliateCode = '';
-  let created = false;
-  let lastInsertError: unknown = null;
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const passwordHash = await hashPassword(password, salt);
 
   for (let attempt = 0; attempt < 5; attempt++) {
-    const candidate =
-      generateAffiliateCode();
+    const { data: affiliate, error } = await admin.from('affiliates').insert({
+      id: crypto.randomUUID(),
+      user_id: customerProfile?.id || null,
+      code: code(),
+      status: 'pending',
+      name,
+      email,
+      affiliate_email: email,
+      affiliate_password_hash: passwordHash,
+      affiliate_password_salt: b64(salt),
+      phone,
+      cpf,
+      pix_type: pixType,
+      pix_key: pixKey,
+      instagram: instagram || null,
+      website: website || null,
+      total_sales: 0,
+      total_commission: 0
+    }).select('id,code,status,name,email,affiliate_email,phone,cpf,pix_type,pix_key,instagram,website,user_id,total_sales,total_commission').single();
 
-    const {
-      data: insertedAffiliate,
-      error: insertError,
-    } = await admin
-      .from('affiliates')
-      .insert({
-        id:
-          crypto.randomUUID(),
-
-        user_id:
-          user.id,
-
-        code:
-          candidate,
-
-        status:
-          'pending',
-
-        name:
-          name,
-
-        phone:
-          phone,
-
-        cpf:
-          cpf,
-
-        pix_type:
-          pixType || null,
-
-        pix_key:
-          pixKey || null,
-
-        instagram:
-          instagram || null,
-
-        website:
-          website || null,
-
-        total_sales:
-          0,
-
-        total_commission:
-          0,
-      })
-      .select(
-        'id,code,status,name,phone,pix_type,instagram,website'
-      )
-      .single();
-
-    if (!insertError && insertedAffiliate) {
-      affiliateCode =
-        insertedAffiliate.code;
-
-      created = true;
-
-      return json(
-        {
-          ok: true,
-
-          existing: false,
-
-          affiliate: {
-            id:
-              insertedAffiliate.id,
-
-            code:
-              insertedAffiliate.code,
-
-            status:
-              insertedAffiliate.status,
-
-            name:
-              insertedAffiliate.name,
-
-            phone:
-              insertedAffiliate.phone,
-
-            pixType:
-              insertedAffiliate.pix_type,
-
-            instagram:
-              insertedAffiliate.instagram,
-
-            website:
-              insertedAffiliate.website,
-          },
-
-          message:
-            'Solicitação de afiliado enviada. Aguarde a aprovação.',
-        },
-        201
-      );
+    if (!error && affiliate) {
+      return json({ ok: true, affiliate: { ...affiliate, user_id: affiliate.user_id || affiliate.id, email: affiliate.affiliate_email || affiliate.email || email } }, 201);
     }
-
-    lastInsertError =
-      insertError;
+    if (error?.code !== '23505') {
+      console.error(error);
+      return json({ error: 'Não foi possível criar seu cadastro de afiliado.' }, 500);
+    }
   }
-
-  console.error(
-    'Não foi possível gerar código de afiliado:',
-    lastInsertError
-  );
-
-  return json(
-    {
-      error:
-        'Não foi possível criar seu cadastro de afiliado. Tente novamente.',
-    },
-    500
-  );
+  return json({ error: 'Não foi possível gerar um código de afiliado. Tente novamente.' }, 500);
 });
