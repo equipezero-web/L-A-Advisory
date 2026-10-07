@@ -2,7 +2,10 @@
 verify_jwt = true
 
 [functions.register-affiliate]
-verify_jwt = true
+verify_jwt = false
+
+[functions.affiliate-login]
+verify_jwt = false
 
 [functions.mercado-pago-webhook]
 verify_jwt = false
