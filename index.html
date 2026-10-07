@@ -7926,8 +7926,26 @@ if (error) throw error;
                 });
 if (error) throw error;
                 if (!data.user) throw new Error('Não foi possível criar o usuário.');
-                const session = data.session;
-                if (!session?.access_token) throw new Error('Confirme o e-mail da conta antes de solicitar a afiliação.');
+                let session = data.session;
+
+                // Se o e-mail já pertence a uma conta confirmada, o Supabase
+                // pode retornar o usuário sem criar uma nova sessão no signUp.
+                // Nesse caso, tenta autenticar com a senha informada.
+                if (!session?.access_token && data.user) {
+                    const { data: loginData, error: loginError } = await supabaseClient.auth.signInWithPassword({
+                        email,
+                        password
+                    });
+
+                    if (!loginError && loginData?.session?.access_token) {
+                        session = loginData.session;
+                    }
+                }
+
+                if (!session?.access_token) {
+                    throw new Error('Confirme o e-mail da conta antes de solicitar a afiliação.');
+                }
+
                 const affiliateResponse = await fetch(SUPABASE_FUNCTIONS_BASE + '/register-affiliate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token, 'apikey': SUPABASE_ANON_KEY },
