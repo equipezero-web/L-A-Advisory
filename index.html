@@ -547,83 +547,169 @@
             .hero-orbit { width:360px; height:360px; right:-170px; top:62%; }
             .hero-layer-grid { background-size:45px 45px; }
 
-            /* Cabeçalho mobile: marca e identidade sempre visíveis */
+            /* Cabeçalho mobile premium: menu à esquerda, marca central, logo à direita */
             header .max-w-7xl {
-                height: auto !important;
-                min-height: 0;
-                flex-direction: column;
-                align-items: stretch;
-                gap: .65rem;
-                padding-top: .75rem;
-                padding-bottom: .75rem;
-            }
-            header .max-w-7xl > a[aria-label="Voltar ao início"] {
-                align-self: center;
-            }
-            header .max-w-7xl > a[aria-label="Voltar ao início"] > div {
-                display: none;
-            }
-            header .max-w-7xl > div.text-center {
-                order: -1;
-                width: 100%;
-                min-width: 0;
-            }
-            header .max-w-7xl > div.text-center h1 {
-                display: block !important;
-                overflow: visible;
-                white-space: nowrap;
-                text-overflow: clip;
-                font-size: clamp(.92rem, 4.8vw, 1.35rem);
-                letter-spacing: .14em;
-                line-height: 1.15;
-            }
-            header .max-w-7xl > div.text-center p {
-                display: block !important;
-                font-size: .52rem;
-                letter-spacing: .22em;
-                margin-top: .3rem;
-                white-space: nowrap;
+                position: relative;
+                height: 72px !important;
+                min-height: 72px;
+                display: grid !important;
+                grid-template-columns: 48px minmax(0, 1fr) 48px;
+                align-items: center;
+                gap: .35rem;
+                padding: .45rem .7rem !important;
             }
 
-            /* Navegação principal visível no mobile */
-            header nav {
-                display: flex !important;
-                justify-content: center;
-                align-items: center;
-                flex-wrap: wrap;
-                gap: .45rem;
+            header .max-w-7xl > a[aria-label="Voltar ao início"] {
+                grid-column: 3;
+                grid-row: 1;
+                justify-self: end;
+                align-self: center;
+            }
+
+            header .max-w-7xl > a[aria-label="Voltar ao início"] > div {
+                display: flex;
+                width: 42px;
+                height: 42px;
+                font-size: .85rem;
+                border-radius: .7rem;
+            }
+
+            header .max-w-7xl > div.text-center {
+                grid-column: 2;
+                grid-row: 1;
                 width: 100%;
-                order: 2;
+                min-width: 0;
+                text-align: center;
             }
-            header nav a {
-                font-size: .72rem;
-                padding: .38rem .7rem;
+
+            header .max-w-7xl > div.text-center h1 {
+                display: block !important;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                font-size: clamp(.82rem, 4.2vw, 1.1rem);
+                letter-spacing: .13em;
+                line-height: 1.15;
             }
-            header nav #affiliateNavLink {
+
+            header .max-w-7xl > div.text-center p {
+                display: block !important;
+                font-size: .45rem;
+                letter-spacing: .14em;
+                margin-top: .2rem;
+                white-space: nowrap;
+                color: #D4AF37;
+            }
+
+            /* O bloco original de navegação vira a área de utilidades; o menu mobile fica separado */
+            header .max-w-7xl > div.flex.items-center.justify-end {
+                grid-column: 1 / -1;
+                grid-row: 2;
+                position: absolute;
+                top: 72px;
+                left: .7rem;
+                right: .7rem;
+                z-index: 60;
+                width: auto;
+                justify-content: flex-end;
+                pointer-events: none;
+            }
+
+            header nav,
+            #guestHeaderActions {
                 display: none !important;
             }
 
-            /* Ações do visitante visíveis no mobile */
-            #guestHeaderActions {
-                display: flex !important;
-                justify-content: center;
-                align-items: center;
-                width: 100%;
-                order: 3;
-                gap: .35rem;
-            }
-            #guestHeaderActions button {
-                display: inline-flex !important;
-                font-size: .72rem;
-                padding: .45rem .65rem;
+            #userHeaderActions {
+                display: none !important;
             }
 
-            /* Ações secundárias ficam em uma linha própria */
-            header .max-w-7xl > div.flex.items-center.justify-end {
-                width: 100%;
+            /* Botões de utilidade ficam fora do menu, em posição discreta */
+            #mobileUtilityActions {
+                display: flex !important;
+                align-items: center;
+                justify-content: flex-end;
+                gap: .4rem;
+                position: absolute;
+                top: 78px;
+                right: .7rem;
+                z-index: 55;
+            }
+
+            /* Menu hamburger */
+            #mobileMenuButton {
+                display: flex !important;
+                grid-column: 1;
+                grid-row: 1;
+                justify-self: start;
+                align-items: center;
                 justify-content: center;
-                flex-wrap: wrap;
-                order: 4;
+                width: 42px;
+                height: 42px;
+                border: 1px solid rgba(212,175,55,.32);
+                border-radius: .7rem;
+                color: #D4AF37;
+                background: rgba(12,25,51,.72);
+                backdrop-filter: blur(10px);
+            }
+
+            /* Painel do menu mobile */
+            #mobileMenuPanel {
+                display: none;
+                position: fixed;
+                top: 72px;
+                left: .7rem;
+                right: .7rem;
+                z-index: 100;
+                padding: .8rem;
+                border: 1px solid rgba(212,175,55,.25);
+                border-radius: 1rem;
+                background: rgba(7,16,31,.97);
+                box-shadow: 0 20px 50px rgba(0,0,0,.38);
+                backdrop-filter: blur(18px);
+            }
+
+            #mobileMenuPanel.open {
+                display: flex;
+                flex-direction: column;
+                gap: .45rem;
+            }
+
+            #mobileMenuPanel .mobile-menu-auth {
+                display: flex;
+                gap: .45rem;
+            }
+
+            #mobileMenuPanel .mobile-menu-auth button {
+                flex: 1;
+                min-height: 42px;
+                border-radius: .7rem;
+                font-size: .78rem;
+                font-weight: 800;
+            }
+
+            #mobileMenuPanel .mobile-menu-link {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 40px;
+                border: 1px solid rgba(212,175,55,.18);
+                border-radius: .65rem;
+                color: #F9E7A4;
+                font-size: .76rem;
+                font-weight: 700;
+            }
+
+            body.logged-in #mobileMenuPanel .mobile-menu-auth,
+            body.customer-mode #mobileMenuPanel .mobile-menu-auth {
+                display: none !important;
+            }
+
+            /* Desktop/mobile visibility */
+            #mobileMenuButton,
+            #mobileMenuPanel,
+            #mobileUtilityActions {
+                display: none;
             }
         }
         @media (prefers-reduced-motion: reduce) {
@@ -804,6 +890,49 @@
                         class="w-5 h-5"
                     ></i>
                 </button>
+            </div>
+
+            <!-- Menu hamburger exclusivo do mobile -->
+            <button
+                id="mobileMenuButton"
+                type="button"
+                onclick="toggleMobileMenu()"
+                aria-label="Abrir menu"
+                aria-expanded="false"
+            >
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+
+            <!-- Carrinho e bússola ficam fora do menu -->
+            <div id="mobileUtilityActions" class="hidden">
+                <button
+                    type="button"
+                    onclick="openCartModal()"
+                    class="relative p-2 rounded-full text-amber-400 bg-[#0C1933]/85 border border-amber-400/25"
+                    aria-label="Abrir carrinho"
+                >
+                    <i data-lucide="shopping-cart" class="w-4.5 h-4.5"></i>
+                    <span id="mobileCartCount" class="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-red-500 text-white text-[9px] rounded-full flex items-center justify-center">0</span>
+                </button>
+                <button
+                    type="button"
+                    onclick="openNavigationModal()"
+                    class="p-2 rounded-full text-amber-400 bg-[#0C1933]/85 border border-amber-400/25"
+                    aria-label="Abrir navegação"
+                >
+                    <i data-lucide="compass" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- Painel hamburger mobile -->
+            <div id="mobileMenuPanel" aria-hidden="true">
+                <div class="mobile-menu-auth">
+                    <button type="button" onclick="openAuthModal('customer-login'); closeMobileMenu()">Entrar</button>
+                    <button type="button" onclick="openAuthModal('customer-register'); closeMobileMenu()" class="gradient-gold text-slate-900">Criar conta</button>
+                </div>
+                <a href="#loja" class="mobile-menu-link" onclick="closeMobileMenu()">Loja</a>
+                <a href="#consultoria" class="mobile-menu-link" onclick="closeMobileMenu()">Consultoria</a>
+                <a id="mobileAffiliateLink" href="#afiliados" class="mobile-menu-link" onclick="closeMobileMenu()">Afiliados</a>
             </div>
         </div>
     </header>
@@ -8564,7 +8693,34 @@ if (error) throw error;
         // =====================================================
         // NAVEGAÇÃO E MODAIS
         // =====================================================
-        function openNavigationModal() {
+        function toggleMobileMenu() {
+    const panel = document.getElementById('mobileMenuPanel');
+    const button = document.getElementById('mobileMenuButton');
+    if (!panel || !button) return;
+    const open = panel.classList.toggle('open');
+    panel.setAttribute('aria-hidden', String(!open));
+    button.setAttribute('aria-expanded', String(open));
+    const icon = button.querySelector('[data-lucide]');
+    if (icon) {
+        icon.setAttribute('data-lucide', open ? 'x' : 'menu');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+}
+function closeMobileMenu() {
+    const panel = document.getElementById('mobileMenuPanel');
+    const button = document.getElementById('mobileMenuButton');
+    if (!panel || !button) return;
+    panel.classList.remove('open');
+    panel.setAttribute('aria-hidden', 'true');
+    button.setAttribute('aria-expanded', 'false');
+    const icon = button.querySelector('[data-lucide]');
+    if (icon) {
+        icon.setAttribute('data-lucide', 'menu');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+}
+
+function openNavigationModal() {
             const modal = document.getElementById('navModal');
             if (modal) {
                 modal.classList.remove('hidden');
@@ -11780,6 +11936,8 @@ function escapeAttribute(value) {
         window.openUserMenu = openUserMenu;
         window.closeUserMenu = closeUserMenu;
         window.openNavigationModal = openNavigationModal;
+        window.toggleMobileMenu = toggleMobileMenu;
+        window.closeMobileMenu = closeMobileMenu;
         window.closeNavigationModal = closeNavigationModal;
         window.openConsultingBooking = openConsultingBooking;
         window.closeConsultingBooking = closeConsultingBooking;
