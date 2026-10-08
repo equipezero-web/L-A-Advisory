@@ -11196,7 +11196,7 @@ function openNavigationModal() {
             saveStateToStorage();
         }
 
-        function copyAffiliateLink(inputId) {
+        async function copyAffiliateLink(inputId) {
             const input = document.getElementById(inputId);
             if (!input) return;
             await recordAffiliateLink(input.value, null);
