@@ -856,8 +856,12 @@
 
     #mobileMenuButton {
         display: flex !important; position: relative !important; grid-column: 3 !important; grid-row: 1 !important;
-        justify-self: end !important; width: 34px !important; height: 34px !important; min-width: 34px !important;
-        border-radius: .55rem !important; border-width: 1px !important; z-index: 62 !important;
+        justify-self: end !important; align-items: center !important; justify-content: center !important;
+        width: 34px !important; height: 34px !important; min-width: 34px !important;
+        border-radius: 9999px !important; border: 1px solid rgba(212,175,55,.42) !important;
+        color: #D4AF37 !important; background: rgba(12,25,51,.82) !important;
+        backdrop-filter: blur(10px) !important; box-shadow: 0 8px 24px rgba(0,0,0,.18) !important;
+        z-index: 62 !important;
     }
     #mobileMenuButton svg, #mobileMenuButton i { width: 17px !important; height: 17px !important; }
 
@@ -875,12 +879,34 @@
     }
 
     #mobileMenuPanel {
-        top: 60px !important; right: .55rem !important; width: min(52vw, 220px) !important;
+        top: 60px !important; right: .55rem !important; width: min(88vw, 330px) !important;
+        padding: 0 !important; border-radius: 1rem !important; background: #ffffff !important;
+        border: 1px solid rgba(148,163,184,.25) !important; box-shadow: 0 24px 60px rgba(2,6,23,.28) !important;
+        overflow: hidden !important;
     }
-    #mobileMenuPanel .mobile-menu-auth, #mobileMenuPanel.open { gap: .2rem !important; }
-    #mobileMenuPanel .mobile-menu-auth button, #mobileMenuPanel .mobile-menu-link {
-        min-height: 25px !important; padding: .315rem .42rem !important; border-radius: .45rem !important; font-size: .55rem !important;
+    #mobileMenuPanel.open { display: block !important; }
+    #mobileMenuPanel > div { width: 100%; }
+    .mobile-user-menu-header {
+        display: flex; align-items: center; gap: .75rem; padding: 1rem;
+        background: linear-gradient(135deg, #0c1933, #07101f); color: #fff;
     }
+    .mobile-user-menu-avatar {
+        width: 42px; height: 42px; min-width: 42px; border-radius: 9999px;
+        display: flex; align-items: center; justify-content: center; overflow: hidden;
+        color: #172033; font-weight: 900;
+    }
+    .mobile-user-menu-body { padding: .55rem; }
+    .mobile-user-menu-item {
+        width: 100%; min-height: 40px; display: flex; align-items: center; gap: .65rem;
+        padding: .6rem .7rem; border-radius: .7rem; background: transparent; border: 0;
+        color: #172033; text-align: left; text-decoration: none; font-size: .78rem; font-weight: 800;
+        cursor: pointer; transition: background .18s ease, transform .18s ease;
+    }
+    .mobile-user-menu-item:hover { background: #f8fafc; transform: translateX(-1px); }
+    .mobile-user-menu-primary { background: linear-gradient(135deg,#D4AF37,#F4D03F); }
+    .mobile-user-menu-primary:hover { background: linear-gradient(135deg,#D4AF37,#F4D03F); }
+    .mobile-user-menu-logout { color: #dc2626; }
+    .mobile-user-menu-profile p { max-width: 230px; }
 
     #navModal { padding: .65rem !important; }
     #navModal > div {
@@ -1160,15 +1186,85 @@
                 </button>
             </div>
 
-            <!-- Painel hamburger mobile -->
+            <!-- Menu hamburger mobile: segue o mesmo design do menu de usuário do desktop -->
             <div id="mobileMenuPanel" aria-hidden="true">
-                <div class="mobile-menu-auth">
-                    <button type="button" onclick="openAuthModal('customer-login'); closeMobileMenu()">Entrar</button>
-                    <button type="button" onclick="openAuthModal('customer-register'); closeMobileMenu()" class="gradient-gold text-slate-900">Criar conta</button>
+                <div id="mobileGuestMenu" class="hidden">
+                    <div class="mobile-user-menu-header">
+                        <div class="mobile-user-menu-avatar gradient-gold">L</div>
+                        <div class="min-w-0">
+                            <p class="font-bold text-slate-900">Bem-vindo</p>
+                            <p class="text-xs text-slate-500 mt-1">Acesse sua conta ou crie uma nova.</p>
+                        </div>
+                    </div>
+                    <div class="mobile-user-menu-body">
+                        <button type="button" onclick="openAuthModal('customer-login'); closeMobileMenu()" class="mobile-user-menu-item">
+                            <i data-lucide="log-in" class="w-5 h-5 text-amber-600"></i>
+                            <span>Entrar</span>
+                        </button>
+                        <button type="button" onclick="openAuthModal('customer-register'); closeMobileMenu()" class="mobile-user-menu-item mobile-user-menu-primary">
+                            <i data-lucide="user-plus" class="w-5 h-5 text-slate-900"></i>
+                            <span>Criar conta</span>
+                        </button>
+                        <a href="#loja" class="mobile-user-menu-item" onclick="closeMobileMenu()">
+                            <i data-lucide="shopping-bag" class="w-5 h-5 text-amber-600"></i>
+                            <span>Loja</span>
+                        </a>
+                        <a href="#consultoria" class="mobile-user-menu-item" onclick="closeMobileMenu()">
+                            <i data-lucide="briefcase-business" class="w-5 h-5 text-amber-600"></i>
+                            <span>Consultoria</span>
+                        </a>
+                        <a href="#afiliados" class="mobile-user-menu-item" onclick="closeMobileMenu()">
+                            <i data-lucide="handshake" class="w-5 h-5 text-amber-600"></i>
+                            <span>Afiliados</span>
+                        </a>
+                    </div>
                 </div>
-                <a href="#loja" class="mobile-menu-link" onclick="closeMobileMenu()">Loja</a>
-                <a href="#consultoria" class="mobile-menu-link" onclick="closeMobileMenu()">Consultoria</a>
-                <a id="mobileAffiliateLink" href="#afiliados" class="mobile-menu-link" onclick="closeMobileMenu()">Afiliados</a>
+
+                <div id="mobileLoggedMenu" class="hidden">
+                    <div class="mobile-user-menu-header mobile-user-menu-profile">
+                        <div id="mobileUserMenuAvatar" class="mobile-user-menu-avatar gradient-gold">U</div>
+                        <div class="min-w-0">
+                            <p id="mobileUserMenuName" class="font-bold text-slate-900 truncate">Usuário</p>
+                            <p id="mobileUserMenuEmail" class="text-xs text-slate-500 mt-1 truncate">usuario@email.com</p>
+                        </div>
+                    </div>
+                    <div class="mobile-user-menu-body">
+                        <button type="button" onclick="openCustomerProfile(); closeMobileMenu()" class="mobile-user-menu-item">
+                            <i data-lucide="user-round" class="w-5 h-5 text-amber-600"></i>
+                            <span>Meu perfil</span>
+                        </button>
+                        <button type="button" onclick="openCustomerOrders(); closeMobileMenu()" class="mobile-user-menu-item">
+                            <i data-lucide="package-check" class="w-5 h-5 text-amber-600"></i>
+                            <span>Meus pedidos</span>
+                        </button>
+                        <button type="button" id="mobileAffiliateMenuButton" onclick="openAffiliateStore(); closeMobileMenu()" class="hidden mobile-user-menu-item">
+                            <i data-lucide="crown" class="w-5 h-5 text-amber-600"></i>
+                            <span>Afiliado</span>
+                        </button>
+                        <button type="button" id="mobileAffiliateRequestMenuButton" onclick="openAffiliateRegistrationForCurrentUser(); closeMobileMenu()" class="hidden mobile-user-menu-item">
+                            <i data-lucide="handshake" class="w-5 h-5 text-amber-600"></i>
+                            <span>Solicitar afiliação</span>
+                        </button>
+                        <a href="#loja" class="mobile-user-menu-item" onclick="closeMobileMenu()">
+                            <i data-lucide="shopping-bag" class="w-5 h-5 text-amber-600"></i>
+                            <span>Loja</span>
+                        </a>
+                        <a href="#consultoria" class="mobile-user-menu-item" onclick="closeMobileMenu()">
+                            <i data-lucide="briefcase-business" class="w-5 h-5 text-amber-600"></i>
+                            <span>Consultoria</span>
+                        </a>
+                        <a href="#afiliados" class="mobile-user-menu-item" onclick="closeMobileMenu()">
+                            <i data-lucide="handshake" class="w-5 h-5 text-amber-600"></i>
+                            <span>Afiliados</span>
+                        </a>
+                        <div class="border-t border-slate-200 mt-2 pt-2">
+                            <button type="button" onclick="logoutUser(); closeMobileMenu()" class="mobile-user-menu-item mobile-user-menu-logout">
+                                <i data-lucide="log-out" class="w-5 h-5 text-red-600"></i>
+                                <span>Sair da conta</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
@@ -8836,6 +8932,7 @@ if (error) throw error;
                 }
 
                 updateUserMenu();
+                updateMobileMenu(user);
             } else {
                 document.body.classList.add('guest-mode');
                 loginBtn?.classList.remove('hidden');
@@ -8844,6 +8941,7 @@ if (error) throw error;
                 loggedHeader?.classList.add('hidden');
                 affiliateNav?.classList.add('hidden');
                 affiliateSection?.classList.add('hidden');
+                updateMobileMenu(null);
             }
         }
 
@@ -8860,7 +8958,14 @@ if (error) throw error;
 
             if (nameEl) nameEl.textContent = user.fullName;
             if (emailEl) emailEl.textContent = user.email;
-            if (initialEl) initialEl.textContent = user.fullName?.charAt(0).toUpperCase() || 'U';
+            if (initialEl) {
+                if (user.avatarUrl) {
+                    initialEl.innerHTML = '<img src="' + escapeAttribute(user.avatarUrl) + '" alt="Foto do usuário" class="w-full h-full rounded-full object-cover">';
+                } else {
+                    initialEl.textContent = user.fullName?.charAt(0).toUpperCase() || 'U';
+                }
+            }
+            updateMobileMenu(user);
 
             const linkedAffiliate = state.affiliates.find(a =>
                 a.userId === user.id ||
@@ -8900,6 +9005,56 @@ if (error) throw error;
             lucide.createIcons();
         }
 
+        function updateMobileMenu(user = state.currentUser) {
+            const guestMenu = document.getElementById('mobileGuestMenu');
+            const loggedMenu = document.getElementById('mobileLoggedMenu');
+            const avatar = document.getElementById('mobileUserMenuAvatar');
+            const name = document.getElementById('mobileUserMenuName');
+            const email = document.getElementById('mobileUserMenuEmail');
+            const affiliateBtn = document.getElementById('mobileAffiliateMenuButton');
+            const affiliateRequestBtn = document.getElementById('mobileAffiliateRequestMenuButton');
+
+            if (!user) {
+                guestMenu?.classList.remove('hidden');
+                loggedMenu?.classList.add('hidden');
+                return;
+            }
+
+            guestMenu?.classList.add('hidden');
+            loggedMenu?.classList.remove('hidden');
+
+            if (name) name.textContent = user.fullName || 'Usuário';
+            if (email) email.textContent = user.email || '';
+
+            if (avatar) {
+                if (user.avatarUrl) {
+                    avatar.innerHTML = '<img src="' + escapeAttribute(user.avatarUrl) + '" alt="Foto do usuário" class="w-full h-full rounded-full object-cover">';
+                } else {
+                    avatar.textContent = user.fullName?.charAt(0).toUpperCase() || 'U';
+                }
+            }
+
+            const linkedAffiliate = state.affiliates.find(a =>
+                a.userId === user.id ||
+                String(a.email || a.affiliate_email || '').toLowerCase() === String(user.email || '').toLowerCase()
+            );
+            const approvedAffiliate = user.role === 'affiliate' || (linkedAffiliate && ['active', 'approved'].includes(linkedAffiliate.status));
+
+            affiliateBtn?.classList.toggle('hidden', !approvedAffiliate);
+            affiliateRequestBtn?.classList.toggle('hidden', approvedAffiliate || user.role !== 'customer' || !!linkedAffiliate);
+
+            if (linkedAffiliate?.status === 'pending' && affiliateRequestBtn) {
+                affiliateRequestBtn.classList.remove('hidden');
+                affiliateRequestBtn.innerHTML = '<i data-lucide="clock-3" class="w-5 h-5 text-amber-600"></i><span>Acompanhar solicitação de afiliado</span>';
+                affiliateRequestBtn.onclick = () => {
+                    closeMobileMenu();
+                    alert('Sua solicitação continua em análise. Após a aprovação, esta opção será substituída por Afiliado.');
+                };
+            }
+
+            lucide.createIcons();
+        }
+
         function openAffiliateRegistrationForCurrentUser() {
             if (!supabaseAuthUser || !state.currentUser) {
                 openAuthModal('customer-login');
@@ -8934,6 +9089,7 @@ if (error) throw error;
     const button = document.getElementById('mobileMenuButton');
     if (!panel || !button) return;
     const open = panel.classList.toggle('open');
+    if (open) updateMobileMenu(state.currentUser);
     panel.setAttribute('aria-hidden', String(!open));
     button.setAttribute('aria-expanded', String(open));
     const icon = button.querySelector('[data-lucide]');
