@@ -546,6 +546,85 @@
             #inicio.hero-premium { min-height: 760px; }
             .hero-orbit { width:360px; height:360px; right:-170px; top:62%; }
             .hero-layer-grid { background-size:45px 45px; }
+
+            /* Cabeçalho mobile: marca e identidade sempre visíveis */
+            header .max-w-7xl {
+                height: auto !important;
+                min-height: 0;
+                flex-direction: column;
+                align-items: stretch;
+                gap: .65rem;
+                padding-top: .75rem;
+                padding-bottom: .75rem;
+            }
+            header .max-w-7xl > a[aria-label="Voltar ao início"] {
+                align-self: center;
+            }
+            header .max-w-7xl > a[aria-label="Voltar ao início"] > div {
+                display: none;
+            }
+            header .max-w-7xl > div.text-center {
+                order: -1;
+                width: 100%;
+                min-width: 0;
+            }
+            header .max-w-7xl > div.text-center h1 {
+                display: block !important;
+                overflow: visible;
+                white-space: nowrap;
+                text-overflow: clip;
+                font-size: clamp(.92rem, 4.8vw, 1.35rem);
+                letter-spacing: .14em;
+                line-height: 1.15;
+            }
+            header .max-w-7xl > div.text-center p {
+                display: block !important;
+                font-size: .52rem;
+                letter-spacing: .22em;
+                margin-top: .3rem;
+                white-space: nowrap;
+            }
+
+            /* Navegação principal visível no mobile */
+            header nav {
+                display: flex !important;
+                justify-content: center;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: .45rem;
+                width: 100%;
+                order: 2;
+            }
+            header nav a {
+                font-size: .72rem;
+                padding: .38rem .7rem;
+            }
+            header nav #affiliateNavLink {
+                display: none !important;
+            }
+
+            /* Ações do visitante visíveis no mobile */
+            #guestHeaderActions {
+                display: flex !important;
+                justify-content: center;
+                align-items: center;
+                width: 100%;
+                order: 3;
+                gap: .35rem;
+            }
+            #guestHeaderActions button {
+                display: inline-flex !important;
+                font-size: .72rem;
+                padding: .45rem .65rem;
+            }
+
+            /* Ações secundárias ficam em uma linha própria */
+            header .max-w-7xl > div.flex.items-center.justify-end {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+                order: 4;
+            }
         }
         @media (prefers-reduced-motion: reduce) {
             .hero-eyebrow,.hero-title,.hero-copy,.hero-actions,.hero-proof { opacity:1; transform:none; }
