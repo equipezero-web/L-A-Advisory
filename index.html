@@ -322,6 +322,16 @@
         body.affiliate-mode #loja { min-height: calc(100vh - 90px); }
         body.affiliate-mode #loja > div > div:first-child p { max-width: none; }
         body.affiliate-mode #virtualStoreOpenWrap { display: none !important; }
+        body.affiliate-mode #storeBackHomeButton { display: inline-flex !important; }
+        body.store-open-mode #depoimentos { display: none !important; }
+        body.store-open-mode #afiliados { display: none !important; }
+        body.store-open-mode #storeBackHomeButton { display: inline-flex !important; }
+        body.store-open-mode .non-store-faq-item { display: none !important; }
+        body.affiliate-mode #depoimentos,
+        body.affiliate-mode #consultoria,
+        body.affiliate-mode #afiliados,
+        body.affiliate-mode #faq { display: none !important; }
+        body.affiliate-mode #storeBackHomeButton { display: inline-flex !important; }
         body.guest-mode #affiliateNavLink,
         body.guest-mode #afiliados { display: none !important; }
         body.customer-mode #affiliateNavLink,
@@ -643,6 +653,15 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
                 <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-8 gap-5">
+                        <button
+                            type="button"
+                            id="storeBackHomeButton"
+                            onclick="returnToHomeFromStore()"
+                            class="hidden mb-3 lg:mb-0 px-4 py-2 rounded-xl border border-slate-300 bg-white text-slate-800 font-bold text-sm hover:border-amber-400 hover:text-amber-700 transition"
+                        >
+                            <i data-lucide="arrow-left" class="w-4 h-4 inline mr-1"></i>
+                            Voltar ao início
+                        </button>
                     <div>
                         <span class="text-amber-600 font-bold uppercase text-xs tracking-[0.2em]">
                             Coleção Exclusiva
@@ -1107,7 +1126,7 @@
         </section>
 
         <!-- DEPOIMENTOS -->
-        <section class="py-16 bg-gradient-to-b from-slate-100 to-white">
+        <section id="depoimentos" class="py-16 bg-gradient-to-b from-slate-100 to-white">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-12">
                     <span class="text-amber-600 font-bold uppercase text-xs tracking-[0.2em]">
@@ -1219,7 +1238,7 @@
         </section>
 
         <!-- FAQ -->
-        <section class="py-16 bg-white">
+        <section id="faq" class="py-16 bg-white">
             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-12">
                     <span class="text-amber-600 font-bold uppercase text-xs tracking-[0.2em]">
@@ -1234,7 +1253,7 @@
                 </div>
 
                 <div class="space-y-4">
-                    <details class="bg-slate-50 border border-slate-200 p-5 rounded-xl cursor-pointer group">
+                    <details class="store-faq-item bg-slate-50 border border-slate-200 p-5 rounded-xl cursor-pointer group">
                         <summary class="font-bold text-slate-800 flex justify-between items-center gap-5">
                             <span>
                                 Preciso criar uma conta para navegar pela loja?
@@ -1254,7 +1273,7 @@
                         </p>
                     </details>
 
-                    <details class="bg-slate-50 border border-slate-200 p-5 rounded-xl cursor-pointer group">
+                    <details class="non-store-faq-item bg-slate-50 border border-slate-200 p-5 rounded-xl cursor-pointer group">
                         <summary class="font-bold text-slate-800 flex justify-between items-center gap-5">
                             <span>
                                 Preciso de conta para agendar uma consultoria?
@@ -3909,6 +3928,15 @@
                         <span class="font-bold text-sm text-red-600">
                             Sair da conta
                         </span>
+                    </button>
+                    <button
+                        type="button"
+                        id="affiliateReturnClientButton"
+                        onclick="returnToClientArea()"
+                        class="hidden w-full flex items-center gap-3 p-3 rounded-xl hover:bg-amber-50 text-left transition"
+                    >
+                        <i data-lucide="arrow-left" class="w-5 h-5 text-amber-600"></i>
+                        <span class="font-bold text-sm text-slate-800">Voltar à área de cliente</span>
                     </button>
                 </div>
             </div>
@@ -9798,12 +9826,26 @@ if (error) throw error;
         // =====================================================
         // AFILIADOS
         // =====================================================
+        function setAffiliateMenuMode(active) {
+            const logoutButtons = document.querySelectorAll('button[onclick="logoutUser()"]');
+            const returnButton = document.getElementById('affiliateReturnClientButton');
+
+            logoutButtons.forEach(button => {
+                button.classList.toggle('hidden', active);
+            });
+            if (returnButton) returnButton.classList.toggle('hidden', !active);
+
+            lucide.createIcons();
+        }
+
         function enterAffiliateMode() {
+            document.body.classList.remove('store-open-mode');
             document.body.classList.add('affiliate-mode');
             const banner = document.getElementById('affiliateCatalogStatus');
             if (banner) banner.classList.remove('hidden');
             const openStoreWrap = document.getElementById('virtualStoreOpenWrap');
             if (openStoreWrap) openStoreWrap.classList.add('hidden');
+            setAffiliateMenuMode(true);
             renderCatalog();
             setTimeout(() => document.getElementById('loja')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
         }
@@ -9830,20 +9872,38 @@ if (error) throw error;
         }
 
         function openVirtualStore() {
-            document.body.classList.add('affiliate-mode');
+            document.body.classList.remove('affiliate-mode');
+            document.body.classList.add('store-open-mode');
             const banner = document.getElementById('affiliateCatalogStatus');
             if (banner) banner.classList.add('hidden');
             const openStoreWrap = document.getElementById('virtualStoreOpenWrap');
             if (openStoreWrap) openStoreWrap.classList.add('hidden');
+            setAffiliateMenuMode(false);
             renderCatalog();
             setTimeout(() => document.getElementById('loja')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
         }
 
-        function exitAffiliateMode() {
-            document.body.classList.remove('affiliate-mode');
+        function returnToClientArea() {
+            document.body.classList.remove('affiliate-mode', 'store-open-mode');
             const openStoreWrap = document.getElementById('virtualStoreOpenWrap');
             if (openStoreWrap) openStoreWrap.classList.remove('hidden');
+            setAffiliateMenuMode(false);
+            closeUserMenu();
             renderCatalog();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function returnToHomeFromStore() {
+            document.body.classList.remove('store-open-mode', 'affiliate-mode');
+            const openStoreWrap = document.getElementById('virtualStoreOpenWrap');
+            if (openStoreWrap) openStoreWrap.classList.remove('hidden');
+            setAffiliateMenuMode(false);
+            renderCatalog();
+            setTimeout(() => document.getElementById('inicio')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+        }
+
+        function exitAffiliateMode() {
+            returnToClientArea();
         }
 
         function buyNow(productId) {
@@ -11484,6 +11544,8 @@ function escapeAttribute(value) {
         window.shareProduct = shareProduct;
         window.openAffiliateStore = openAffiliateStore;
         window.openVirtualStore = openVirtualStore;
+        window.returnToClientArea = returnToClientArea;
+        window.returnToHomeFromStore = returnToHomeFromStore;
         window.openAffiliateProfile = openAffiliateProfile;
         window.closeAffiliateProfile = closeAffiliateProfile;
         window.saveAffiliateProfile = saveAffiliateProfile;
