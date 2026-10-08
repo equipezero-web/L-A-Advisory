@@ -5559,6 +5559,60 @@
                 </div>
             </div>
 
+            <!-- PAINEL DE RESULTADOS DO AFILIADO -->
+            <section id="affiliatePerformanceSection" class="hidden mb-8">
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <div>
+                        <h4 class="font-bold text-slate-900">Seus resultados</h4>
+                        <p class="text-xs text-slate-500">Acompanhe vendas com pagamento confirmado, links enviados e comissões.</p>
+                    </div>
+                    <i data-lucide="chart-no-axes-combined" class="w-5 h-5 text-amber-600"></i>
+                </div>
+
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                        <p class="text-[11px] text-slate-500">Vendas concluídas</p>
+                        <p id="affiliateCompletedSales" class="text-2xl font-black text-slate-900 mt-1">0</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                        <p class="text-[11px] text-slate-500">Links enviados</p>
+                        <p id="affiliateSentLinks" class="text-2xl font-black text-slate-900 mt-1">0</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                        <p class="text-[11px] text-slate-500">Comissão a receber</p>
+                        <p id="affiliateCommissionToReceive" class="text-xl font-black text-amber-600 mt-1">R$ 0,00</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                        <p class="text-[11px] text-slate-500">Comissão recebida</p>
+                        <p id="affiliateCommissionReceived" class="text-xl font-black text-emerald-600 mt-1">R$ 0,00</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                    <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                        <p class="text-xs font-bold text-amber-900 mb-2">Comissão do mês atual</p>
+                        <div class="flex justify-between text-xs text-slate-700"><span>A receber</span><strong id="affiliateMonthToReceive">R$ 0,00</strong></div>
+                        <div class="flex justify-between text-xs text-slate-700 mt-1"><span>Recebida</span><strong id="affiliateMonthReceived" class="text-emerald-700">R$ 0,00</strong></div>
+                    </div>
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                        <p class="text-xs font-bold text-slate-900 mb-2">Comissão do ano atual</p>
+                        <div class="flex justify-between text-xs text-slate-700"><span>A receber</span><strong id="affiliateYearToReceive">R$ 0,00</strong></div>
+                        <div class="flex justify-between text-xs text-slate-700 mt-1"><span>Recebida</span><strong id="affiliateYearReceived" class="text-emerald-700">R$ 0,00</strong></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 mt-3">
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                        <p class="text-[11px] text-slate-500">Pedidos em análise do ADM</p>
+                        <p id="affiliateOrdersInReview" class="text-2xl font-black text-amber-600 mt-1">0</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                        <p class="text-[11px] text-slate-500">Pedidos com pagamento confirmado</p>
+                        <p id="affiliatePaidOrders" class="text-2xl font-black text-emerald-600 mt-1">0</p>
+                    </div>
+                </div>
+            </section>
+
             <!-- LINKS DE AFILIADO -->
             <div
                 id="affiliateLinksSection"
