@@ -11130,7 +11130,8 @@ function openNavigationModal() {
             const container = document.getElementById('affiliateSalesList');
             if (!container) return;
 
-            const sales = state.orders.filter(o => o.affiliateCode === affiliate.code && ['paid','shipped','delivered'].includes(o.status));
+            const sourceOrders = affiliate.dashboardOrders || state.orders || [];
+            const sales = sourceOrders.filter(o => String(o.affiliateCode || o.affiliate_code || '').toUpperCase() === String(affiliate.code || '').toUpperCase() && ['paid','shipped','delivered'].includes(String(o.status || '').toLowerCase()));
             sales.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
             if (sales.length === 0) {
@@ -11155,20 +11156,40 @@ function openNavigationModal() {
             `).join('');
         }
 
-        function recordAffiliateLink(url, productId = null) {
-            const affiliate = state.affiliates.find(a => a.userId === state.currentUser?.id && a.status === 'active');
-            if (!affiliate) return;
+        async function recordAffiliateLink(url, productId = null) {
+            const affiliate = state.affiliates.find(a => a.userId === state.currentUser?.id && ['active','approved'].includes(a.status));
+            if (!affiliate || !url) return;
             if (!Array.isArray(state.affiliateLinks)) state.affiliateLinks = [];
-            const existing = state.affiliateLinks.find(x => x.affiliateCode === affiliate.code && x.url === url);
-            if (!existing) state.affiliateLinks.push({ id: 'alink_' + Date.now() + '_' + Math.random().toString(36).slice(2,7), affiliateCode: affiliate.code, productId, url, createdAt: new Date().toISOString(), clicks: 0 });
-            else existing.lastUsedAt = new Date().toISOString();
+            const existing = state.affiliateLinks.find(x => (x.affiliateCode || x.affiliate_code) === affiliate.code && x.url === url);
+
+            if (!existing) {
+                const now = new Date().toISOString();
+                const localLink = { id: 'alink_' + Date.now() + '_' + Math.random().toString(36).slice(2,7), affiliateCode: affiliate.code, productId, url, createdAt: now, clicks: 0 };
+                state.affiliateLinks.push(localLink);
+
+                if (supabaseReady && supabaseAuthUser) {
+                    try {
+                        await supabaseClient.from('affiliate_links').insert({
+                            affiliate_code: affiliate.code,
+                            product_id: productId,
+                            url,
+                            active: true,
+                            created_at: now
+                        });
+                    } catch (error) {
+                        console.warn('Não foi possível registrar o link no Supabase:', error);
+                    }
+                }
+            } else {
+                existing.lastUsedAt = new Date().toISOString();
+            }
             saveStateToStorage();
         }
 
         function copyAffiliateLink(inputId) {
             const input = document.getElementById(inputId);
             if (!input) return;
-            recordAffiliateLink(input.value, null);
+            await recordAffiliateLink(input.value, null);
             input.select();
             document.execCommand('copy');
             alert('Link copiado e registrado no seu painel!');
@@ -11227,7 +11248,8 @@ function openNavigationModal() {
         function renderAffiliateGeneratedLinks(affiliate) {
             const container = document.getElementById('affiliateGeneratedLinksList');
             if (!container) return;
-            const links = (state.affiliateLinks || []).filter(x => x.affiliateCode === affiliate.code).sort((a,b) => new Date(b.createdAt)-new Date(a.createdAt));
+            const sourceLinks = affiliate.dashboardLinks || state.affiliateLinks || [];
+            const links = sourceLinks.filter(x => String(x.affiliateCode || x.affiliate_code || '').toUpperCase() === String(affiliate.code || '').toUpperCase()).sort((a,b) => new Date(b.createdAt || b.created_at)-new Date(a.createdAt || a.created_at));
             if (!links.length) { container.innerHTML = '<p class="text-sm text-slate-500">Nenhum link gerado ainda.</p>'; return; }
             container.innerHTML = links.map(link => {
                 const product = state.products.find(p => p.id === link.productId);
