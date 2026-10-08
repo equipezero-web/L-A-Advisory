@@ -1306,6 +1306,10 @@
                             <i data-lucide="crown" class="w-5 h-5 text-amber-600"></i>
                             <span>Afiliado</span>
                         </button>
+                        <button type="button" id="mobileAffiliateReturnButton" onclick="returnToClientArea(); closeMobileMenu()" class="hidden mobile-user-menu-item">
+                            <i data-lucide="arrow-left" class="w-5 h-5 text-amber-600"></i>
+                            <span>Voltar à área de cliente</span>
+                        </button>
                         <button type="button" id="mobileAffiliateRequestMenuButton" onclick="openAffiliateRegistrationForCurrentUser(); closeMobileMenu()" class="hidden mobile-user-menu-item">
                             <i data-lucide="handshake" class="w-5 h-5 text-amber-600"></i>
                             <span>Solicitar afiliação</span>
@@ -9152,6 +9156,7 @@ if (error) throw error;
             const name = document.getElementById('mobileUserMenuName');
             const email = document.getElementById('mobileUserMenuEmail');
             const affiliateBtn = document.getElementById('mobileAffiliateMenuButton');
+            const affiliateReturnBtn = document.getElementById('mobileAffiliateReturnButton');
             const affiliateRequestBtn = document.getElementById('mobileAffiliateRequestMenuButton');
 
             if (!user) {
@@ -9180,8 +9185,10 @@ if (error) throw error;
             );
             const approvedAffiliate = user.role === 'affiliate' || (linkedAffiliate && ['active', 'approved'].includes(linkedAffiliate.status));
 
-            affiliateBtn?.classList.toggle('hidden', !approvedAffiliate);
-            affiliateRequestBtn?.classList.toggle('hidden', approvedAffiliate || user.role !== 'customer' || !!linkedAffiliate);
+            const affiliateModeActive = document.body.classList.contains('affiliate-mode');
+            affiliateBtn?.classList.toggle('hidden', !approvedAffiliate || affiliateModeActive);
+            affiliateReturnBtn?.classList.toggle('hidden', !affiliateModeActive);
+            affiliateRequestBtn?.classList.toggle('hidden', approvedAffiliate || user.role !== 'customer' || !!linkedAffiliate || affiliateModeActive);
 
             if (linkedAffiliate?.status === 'pending' && affiliateRequestBtn) {
                 affiliateRequestBtn.classList.remove('hidden');
