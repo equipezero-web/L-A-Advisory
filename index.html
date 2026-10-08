@@ -9118,7 +9118,7 @@ if (error) throw error;
             const approvedAffiliate = linkedAffiliate && ['active', 'approved'].includes(linkedAffiliate.status);
 
             if (affiliateBtn) {
-                if (user.role === 'affiliate' || (user.role === 'customer' && approvedAffiliate)) {
+                if (!document.body.classList.contains('affiliate-mode') && (user.role === 'affiliate' || (user.role === 'customer' && approvedAffiliate))) {
                     affiliateBtn.classList.remove('hidden');
                     affiliateBtn.innerHTML = '<i data-lucide="crown" class="w-5 h-5 text-amber-600"></i><span class="font-bold text-sm text-slate-800">Afiliado</span>';
                     affiliateBtn.onclick = () => openAffiliateStore();
@@ -9140,6 +9140,9 @@ if (error) throw error;
                     affiliateRequestBtn.classList.add('hidden');
                 }
             }
+
+            const affiliateReturnBtn = document.getElementById('affiliateReturnClientButton');
+            if (affiliateReturnBtn) affiliateReturnBtn.classList.toggle('hidden', !document.body.classList.contains('affiliate-mode'));
 
             if (adminBtn) {
                 if (user.role === 'admin') adminBtn.classList.remove('hidden');
