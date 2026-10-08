@@ -11786,6 +11786,72 @@ window.toggleHighContrast = toggleHighContrast;
 window.resetAccessibility = resetAccessibility;
     </script>
 
+<script>
+/* L&A ROYAL ADVISORY — LENIS + GSAP SCROLLTRIGGER */
+function initPremiumScrollMotion() {
+    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
+        console.warn('GSAP/ScrollTrigger não carregados.');
+        return;
+    }
+    gsap.registerPlugin(ScrollTrigger);
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    if (typeof Lenis !== 'undefined' && !window.laLenis) {
+        window.laLenis = new Lenis({
+            duration: 1.15,
+            smoothWheel: true,
+            syncTouch: false,
+            wheelMultiplier: 0.9,
+            touchMultiplier: 1.05
+        });
+        window.laLenis.on('scroll', ScrollTrigger.update);
+        gsap.ticker.add((time) => window.laLenis.raf(time * 1000));
+        gsap.ticker.lagSmoothing(1000, 16);
+    }
+
+    const hero = document.querySelector('#inicio.hero-premium');
+    if (!hero) return;
+
+    hero.querySelectorAll('.hero-layer').forEach((layer) => {
+        const speed = parseFloat(layer.dataset.speed || '0.1');
+        gsap.to(layer, {
+            yPercent: speed * -18,
+            ease: 'none',
+            scrollTrigger: {
+                trigger: hero,
+                start: 'top top',
+                end: 'bottom top',
+                scrub: 0.65
+            }
+        });
+    });
+
+    const intro = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    intro.to('.hero-eyebrow', { y: 0, opacity: 1, duration: .75 })
+        .to('.hero-line', { width: 150, duration: .8 }, '-=.45')
+        .to('.hero-title', { y: 0, opacity: 1, duration: 1.05 }, '-=.5')
+        .to('.hero-copy', { y: 0, opacity: 1, duration: .8 }, '-=.65')
+        .to('.hero-actions', { y: 0, opacity: 1, duration: .7 }, '-=.48')
+        .to('.hero-proof', { y: 0, opacity: 1, duration: .65 }, '-=.4');
+
+    gsap.to('.hero-title', {
+        y: -34, ease: 'none',
+        scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: .7 }
+    });
+    gsap.to('.hero-copy', {
+        y: -18, ease: 'none',
+        scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: .8 }
+    });
+    gsap.to('.hero-orbit', {
+        rotation: 18, scale: 1.08, ease: 'none',
+        scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: 1 }
+    });
+
+    ScrollTrigger.refresh();
+}
+document.addEventListener('DOMContentLoaded', initPremiumScrollMotion);
+</script>
+
    <!-- INICIALIZAÇÃO FINAL E PWA -->
 <script>
     /* =====================================================
