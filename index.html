@@ -10898,17 +10898,35 @@ function openNavigationModal() {
             let links = [];
             let payouts = [];
 
+            // Primeiro usa a RPC protegida para enxergar apenas as vendas
+            // pertencentes ao próprio afiliado, mesmo com RLS em orders.
             try {
-                const ordersRes = await supabaseClient
-                    .from('orders')
-                    .select('*')
-                    .eq('affiliate_code', affiliate.code)
-                    .order('created_at', { ascending: false });
-
-                if (!ordersRes.error) orders = (ordersRes.data || []).map(mapOrderFromSupabase);
-                else console.warn('Pedidos do afiliado:', ordersRes.error.message);
+                const dashboardRes = await supabaseClient.rpc('get_affiliate_dashboard', {
+                    p_affiliate_code: affiliate.code
+                });
+                if (!dashboardRes.error && dashboardRes.data) {
+                    const dashboard = dashboardRes.data;
+                    orders = (dashboard.orders || []).map(mapOrderFromSupabase);
+                    payouts = dashboard.payouts || [];
+                } else if (dashboardRes.error) {
+                    console.warn('RPC do painel do afiliado:', dashboardRes.error.message);
+                }
             } catch (error) {
-                console.warn('Não foi possível carregar pedidos indicados:', error);
+                console.warn('RPC do painel indisponível:', error);
+            }
+
+            // Fallback para projetos que ainda não aplicaram a migração da RPC.
+            if (!orders.length) {
+                try {
+                    const ordersRes = await supabaseClient
+                        .from('orders')
+                        .select('*')
+                        .eq('affiliate_code', affiliate.code)
+                        .order('created_at', { ascending: false });
+                    if (!ordersRes.error) orders = (ordersRes.data || []).map(mapOrderFromSupabase);
+                } catch (error) {
+                    console.warn('Não foi possível carregar pedidos indicados:', error);
+                }
             }
 
             try {
