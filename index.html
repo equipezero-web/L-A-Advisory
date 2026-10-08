@@ -11794,6 +11794,12 @@ window.resetAccessibility = resetAccessibility;
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+        // As animações precisam ser inicializadas explicitamente.
+        // Sem esta chamada, as classes .scroll-reveal permanecem ocultas.
+        if (typeof initSiteAnimations === 'function') {
+            initSiteAnimations();
+        }
+
         setTimeout(() => {
             if (typeof renderProducts === 'function') {
                 renderProducts();
