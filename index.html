@@ -11877,11 +11877,11 @@ function initPremiumScrollMotion() {
 
     if (typeof Lenis !== 'undefined' && !window.laLenis) {
         window.laLenis = new Lenis({
-            duration: 1.15,
+            duration: 0.82,
             smoothWheel: true,
             syncTouch: false,
-            wheelMultiplier: 0.9,
-            touchMultiplier: 1.05
+            wheelMultiplier: 0.92,
+            touchMultiplier: 1.02
         });
         window.laLenis.on('scroll', ScrollTrigger.update);
         gsap.ticker.add((time) => window.laLenis.raf(time * 1000));
@@ -11906,12 +11906,12 @@ function initPremiumScrollMotion() {
     });
 
     const intro = gsap.timeline({ defaults: { ease: 'power3.out' } });
-    intro.to('.hero-eyebrow', { y: 0, opacity: 1, duration: .75 })
-        .to('.hero-line', { width: 150, duration: .8 }, '-=.45')
-        .to('.hero-title', { y: 0, opacity: 1, duration: 1.05 }, '-=.5')
-        .to('.hero-copy', { y: 0, opacity: 1, duration: .8 }, '-=.65')
-        .to('.hero-actions', { y: 0, opacity: 1, duration: .7 }, '-=.48')
-        .to('.hero-proof', { y: 0, opacity: 1, duration: .65 }, '-=.4');
+    intro.to('.hero-eyebrow', { y: 0, opacity: 1, duration: .55 })
+        .to('.hero-line', { width: 120, duration: .55 }, '-=.3')
+        .to('.hero-title', { y: 0, opacity: 1, duration: .72 }, '-=.32')
+        .to('.hero-copy', { y: 0, opacity: 1, duration: .58 }, '-=.42')
+        .to('.hero-actions', { y: 0, opacity: 1, duration: .5 }, '-=.34')
+        .to('.hero-proof', { y: 0, opacity: 1, duration: .45 }, '-=.3');
 
     gsap.to('.hero-title', {
         y: -34, ease: 'none',
@@ -11949,7 +11949,7 @@ document.addEventListener('DOMContentLoaded', initPremiumScrollMotion);
             const selectors = 'main h1,main h2,main h3,main h4,main p,main li,main blockquote,main [data-motion-item]';
             let index = 0;
             document.querySelectorAll(selectors).forEach(el => {
-                if (el.closest('.modal') || el.classList.contains('scroll-item') || el.closest('#loja .product-motion-card')) return;
+                if (el.closest('.modal') || el.closest('#inicio') || el.classList.contains('scroll-item') || el.closest('#loja .product-motion-card')) return;
                 el.classList.add('scroll-item');
                 el.dataset.delay = String((index++ % 6) + 1);
                 el.dataset.motion = index % 3 === 0 ? 'left' : index % 3 === 1 ? 'right' : 'scale';
