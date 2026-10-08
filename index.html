@@ -6583,7 +6583,34 @@
                     </div>
                 </div>
 
-                <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                    <p class="text-xs text-amber-800 font-bold">Comissões a pagar</p>
+                    <p id="adminCommissionPendingTotal" class="text-2xl font-black text-slate-900 mt-1">R$ 0,00</p>
+                </div>
+                <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+                    <p class="text-xs text-emerald-800 font-bold">Comissões pagas</p>
+                    <p id="adminCommissionPaidTotal" class="text-2xl font-black text-slate-900 mt-1">R$ 0,00</p>
+                </div>
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                    <p class="text-xs text-slate-600 font-bold">Pagamentos registrados</p>
+                    <p id="adminCommissionPaymentCount" class="text-2xl font-black text-slate-900 mt-1">0</p>
+                </div>
+            </div>
+
+            <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                <div class="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
+                    <div>
+                        <h5 class="font-bold text-slate-900">Pagamento de comissão</h5>
+                        <p class="text-xs text-slate-500">Registre o Pix pago diretamente ao afiliado.</p>
+                    </div>
+                    <button type="button" onclick="openAdminCommissionPayment()" class="px-4 py-2 rounded-lg gradient-gold text-slate-900 text-sm font-bold">
+                        Registrar pagamento
+                    </button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto border border-slate-200 rounded-xl">
                     <table class="w-full text-sm">
                         <thead class="bg-slate-50 text-slate-700">
                             <tr>
@@ -7236,6 +7263,30 @@
                         Salvar alterações
                     </button>
                 </div>
+            </form>
+        </div>
+    </div>
+
+    
+    <div id="adminCommissionPaymentModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[95] hidden flex items-center justify-center p-4">
+        <div class="bg-white text-slate-900 rounded-2xl max-w-xl w-full p-6 sm:p-8 shadow-2xl relative border-2 border-amber-400/30">
+            <button type="button" onclick="closeAdminCommissionPayment()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600" aria-label="Fechar pagamento"><i data-lucide="x" class="w-6 h-6"></i></button>
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 gradient-gold rounded-xl flex items-center justify-center"><i data-lucide="banknote" class="w-6 h-6 text-slate-900"></i></div>
+                <div><h3 class="font-serif text-2xl font-bold">Registrar comissão paga</h3><p class="text-xs text-slate-500">O pagamento será registrado para o afiliado.</p></div>
+            </div>
+            <form id="adminCommissionPaymentForm" onsubmit="saveAdminCommissionPayment(event)" class="space-y-4">
+                <select id="adminCommissionAffiliateId" required class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl">
+                    <option value="">Selecione o afiliado</option>
+                </select>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <input id="adminCommissionAmount" type="number" min="0.01" step="0.01" required placeholder="Valor pago (R$)" class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl">
+                    <input id="adminCommissionPaidAt" type="datetime-local" required class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl">
+                </div>
+                <input id="adminCommissionReference" maxlength="120" placeholder="Referência do Pix (opcional)" class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl">
+                <textarea id="adminCommissionNotes" maxlength="500" placeholder="Observação (opcional)" class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl min-h-24"></textarea>
+                <div id="adminCommissionPaymentMessage" class="hidden p-3 rounded-xl text-sm border"></div>
+                <button type="submit" class="w-full py-3 rounded-xl gradient-gold text-slate-900 font-bold">Confirmar pagamento realizado</button>
             </form>
         </div>
     </div>
@@ -11608,6 +11659,87 @@ function openNavigationModal() {
 
         function refreshAdminOrders() {
             loadAdminOrders();
+        }
+
+        async function openAdminCommissionPayment() {
+            const modal = document.getElementById('adminCommissionPaymentModal');
+            const select = document.getElementById('adminCommissionAffiliateId');
+            if (!modal || !select) return;
+            const active = state.affiliates.filter(a => ['active','approved'].includes(a.status));
+            select.innerHTML = '<option value="">Selecione o afiliado</option>' + active.map(a =>
+                '<option value="' + escapeAttribute(a.id) + '">' + escapeHtml(a.name || a.email || a.code) + ' — ' + escapeHtml(a.code) + '</option>'
+            ).join('');
+            const date = new Date();
+            date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+            document.getElementById('adminCommissionPaidAt').value = date.toISOString().slice(0,16);
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closeAdminCommissionPayment() {
+            const modal = document.getElementById('adminCommissionPaymentModal');
+            if (modal) { modal.classList.add('hidden'); document.body.style.overflow = ''; }
+        }
+
+        async function saveAdminCommissionPayment(event) {
+            event.preventDefault();
+            const affiliateId = document.getElementById('adminCommissionAffiliateId')?.value;
+            const affiliate = state.affiliates.find(a => String(a.id) === String(affiliateId));
+            const amount = Number(document.getElementById('adminCommissionAmount')?.value || 0);
+            const paidAt = document.getElementById('adminCommissionPaidAt')?.value;
+            const reference = document.getElementById('adminCommissionReference')?.value.trim() || null;
+            const notes = document.getElementById('adminCommissionNotes')?.value.trim() || null;
+            if (!affiliate || !Number.isFinite(amount) || amount <= 0 || !paidAt) {
+                showAdminCommissionMessage('Selecione um afiliado e informe um valor/data válidos.', 'error');
+                return;
+            }
+            try {
+                const { error } = await supabaseClient.from('affiliate_commission_payments').insert({
+                    affiliate_id: affiliate.id,
+                    affiliate_code: affiliate.code,
+                    amount,
+                    paid_at: new Date(paidAt).toISOString(),
+                    reference,
+                    notes
+                });
+                if (error) throw error;
+                showAdminCommissionMessage('Pagamento de comissão registrado com sucesso!', 'success');
+                document.getElementById('adminCommissionPaymentForm')?.reset();
+                closeAdminCommissionPayment();
+                await loadAdminCommissionSummary();
+            } catch (error) {
+                console.error('Erro ao registrar comissão:', error);
+                showAdminCommissionMessage(error?.message || 'Não foi possível registrar o pagamento.', 'error');
+            }
+        }
+
+        function showAdminCommissionMessage(message, type) {
+            const el = document.getElementById('adminCommissionPaymentMessage');
+            if (!el) return;
+            el.textContent = message;
+            el.className = 'p-3 rounded-xl text-sm border ' + (type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-red-50 border-red-200 text-red-800');
+        }
+
+        async function loadAdminCommissionSummary() {
+            const pendingEl = document.getElementById('adminCommissionPendingTotal');
+            const paidEl = document.getElementById('adminCommissionPaidTotal');
+            const countEl = document.getElementById('adminCommissionPaymentCount');
+            if (!pendingEl || !paidEl || !countEl) return;
+
+            let paid = 0;
+            try {
+                const res = await supabaseClient.from('affiliate_commission_payments').select('amount,paid_at');
+                if (!res.error) {
+                    paid = (res.data || []).reduce((s,p) => s + Number(p.amount || 0), 0);
+                    countEl.textContent = String((res.data || []).length);
+                }
+            } catch (e) { console.warn(e); }
+
+            const paidOrders = (state.orders || []).filter(o => o.affiliateCode && ['paid','shipped','delivered'].includes(String(o.status || '').toLowerCase()));
+            const due = paidOrders.reduce((s,o) => s + getAffiliateCommissionForOrder(o), 0);
+            pendingEl.textContent = formatCurrency(Math.max(0, due - paid));
+            paidEl.textContent = formatCurrency(paid);
         }
 
         function loadAdminAffiliates() {
