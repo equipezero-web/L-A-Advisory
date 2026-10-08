@@ -323,6 +323,7 @@
         body.affiliate-mode #loja > div > div:first-child p { max-width: none; }
         body.affiliate-mode #virtualStoreOpenWrap { display: none !important; }
         body.affiliate-mode #storeBackHomeButton { display: inline-flex !important; }
+        body.store-open-mode #consultoria { display: none !important; }
         body.store-open-mode #depoimentos { display: none !important; }
         body.store-open-mode #afiliados { display: none !important; }
         body.store-open-mode #storeBackHomeButton { display: inline-flex !important; }
@@ -1292,7 +1293,7 @@
                         </p>
                     </details>
 
-                    <details class="bg-slate-50 border border-slate-200 p-5 rounded-xl cursor-pointer group">
+                    <details class="non-store-faq-item bg-slate-50 border border-slate-200 p-5 rounded-xl cursor-pointer group">
                         <summary class="font-bold text-slate-800 flex justify-between items-center gap-5">
                             <span>
                                 Como funciona o cadastro de afiliado?
@@ -1312,7 +1313,7 @@
                         </p>
                     </details>
 
-                    <details class="bg-slate-50 border border-slate-200 p-5 rounded-xl cursor-pointer group">
+                    <details class="non-store-faq-item bg-slate-50 border border-slate-200 p-5 rounded-xl cursor-pointer group">
                         <summary class="font-bold text-slate-800 flex justify-between items-center gap-5">
                             <span>
                                 Como funciona a comissão do afiliado?
@@ -1332,7 +1333,7 @@
                         </p>
                     </details>
 
-                    <details class="bg-slate-50 border border-slate-200 p-5 rounded-xl cursor-pointer group">
+                    <details class="store-faq-item bg-slate-50 border border-slate-200 p-5 rounded-xl cursor-pointer group">
                         <summary class="font-bold text-slate-800 flex justify-between items-center gap-5">
                             <span>
                                 Quais formas de pagamento estarão disponíveis?
@@ -8102,8 +8103,20 @@ if (error) throw error;
             }
         }
 
-        function signInWithGoogle() {
-            alert('Login com Google será implementado com backend e OAuth.');
+        async function signInWithGoogle() {
+            try {
+                const redirectTo = window.location.origin + window.location.pathname;
+                const { error } = await supabaseClient.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo
+                    }
+                });
+                if (error) throw error;
+            } catch (error) {
+                console.error('Erro no login com Google:', error);
+                showAuthMessage(error?.message || 'Não foi possível entrar com Google. Verifique a configuração do OAuth.', 'error');
+            }
         }
 
         function showAppleLoginInfo() {
