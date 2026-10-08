@@ -9885,6 +9885,8 @@ if (error) throw error;
 
         function returnToClientArea() {
             document.body.classList.remove('affiliate-mode', 'store-open-mode');
+            const banner = document.getElementById('affiliateCatalogStatus');
+            if (banner) banner.classList.add('hidden');
             const openStoreWrap = document.getElementById('virtualStoreOpenWrap');
             if (openStoreWrap) openStoreWrap.classList.remove('hidden');
             setAffiliateMenuMode(false);
