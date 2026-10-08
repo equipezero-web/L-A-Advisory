@@ -321,6 +321,7 @@
         body.affiliate-mode > section:not(#loja) { display: none !important; }
         body.affiliate-mode #loja { min-height: calc(100vh - 90px); }
         body.affiliate-mode #loja > div > div:first-child p { max-width: none; }
+        body.affiliate-mode #virtualStoreOpenWrap { display: none !important; }
         body.guest-mode #affiliateNavLink,
         body.guest-mode #afiliados { display: none !important; }
         body.customer-mode #affiliateNavLink,
@@ -961,11 +962,15 @@
                 </div>
 
                 <!-- CATÁLOGO -->
-                <div
-                    id="catalogContainer"
-                    class="flex gap-6 overflow-x-auto pb-6 scroll-smooth snap-x snap-mandatory no-scrollbar"
-                >
-                    <!-- Produtos serão carregados pelo Supabase -->
+                <div id="catalogContainer" class="space-y-8 pb-6">
+                    <!-- Os carrosséis de produtos serão carregados pelo Supabase -->
+                </div>
+
+                <div id="virtualStoreOpenWrap" class="mt-4 flex justify-center">
+                    <button type="button" id="openVirtualStoreButton" onclick="openVirtualStore()" class="gradient-gold text-slate-900 px-7 py-4 rounded-xl font-bold hover:shadow-gold transition inline-flex items-center gap-2">
+                        <i data-lucide="store" class="w-5 h-5"></i>
+                        Abrir loja virtual L&amp;A Advisory
+                    </button>
                 </div>
             </div>
         </section>
@@ -8194,29 +8199,42 @@ if (error) throw error;
             if (emailEl) emailEl.textContent = user.email;
             if (initialEl) initialEl.textContent = user.fullName?.charAt(0).toUpperCase() || 'U';
 
+            const linkedAffiliate = state.affiliates.find(a =>
+                a.userId === user.id ||
+                String(a.email || a.affiliate_email || '').toLowerCase() === String(user.email || '').toLowerCase()
+            );
+            const approvedAffiliate = linkedAffiliate && ['active', 'approved'].includes(linkedAffiliate.status);
+
             if (affiliateBtn) {
-                if (user.role === 'affiliate') {
+                if (user.role === 'affiliate' || (user.role === 'customer' && approvedAffiliate)) {
                     affiliateBtn.classList.remove('hidden');
+                    affiliateBtn.innerHTML = '<i data-lucide="crown" class="w-5 h-5 text-amber-600"></i><span class="font-bold text-sm text-slate-800">Afiliado</span>';
+                    affiliateBtn.onclick = () => openAffiliateStore();
                 } else {
                     affiliateBtn.classList.add('hidden');
                 }
             }
 
             if (affiliateRequestBtn) {
-                if (user.role === 'customer') {
+                if (user.role === 'customer' && !linkedAffiliate) {
                     affiliateRequestBtn.classList.remove('hidden');
+                    affiliateRequestBtn.innerHTML = '<i data-lucide="handshake" class="w-5 h-5 text-amber-600"></i><span class="font-bold text-sm text-slate-800">Solicitar afiliação</span>';
+                    affiliateRequestBtn.onclick = () => openAffiliateRegistrationForCurrentUser();
+                } else if (user.role === 'customer' && linkedAffiliate?.status === 'pending') {
+                    affiliateRequestBtn.classList.remove('hidden');
+                    affiliateRequestBtn.innerHTML = '<i data-lucide="clock-3" class="w-5 h-5 text-amber-600"></i><span class="font-bold text-sm text-slate-800">Acompanhar solicitação de afiliado</span>';
+                    affiliateRequestBtn.onclick = () => alert('Sua solicitação continua em análise. Após a aprovação, esta opção será substituída por Afiliado.');
                 } else {
                     affiliateRequestBtn.classList.add('hidden');
                 }
             }
 
             if (adminBtn) {
-                if (user.role === 'admin') {
-                    adminBtn.classList.remove('hidden');
-                } else {
-                    adminBtn.classList.add('hidden');
-                }
+                if (user.role === 'admin') adminBtn.classList.remove('hidden');
+                else adminBtn.classList.add('hidden');
             }
+
+            lucide.createIcons();
         }
 
         function openAffiliateRegistrationForCurrentUser() {
@@ -9154,11 +9172,33 @@ if (error) throw error;
              updateCustomerAffiliateSection(affiliate); return affiliate || null;
          }
          function updateCustomerAffiliateSection(affiliate) {
-             const user = state.currentUser, title = document.getElementById('customerAffiliateTitle'), description = document.getElementById('customerAffiliateDescription'), button = document.getElementById('customerAffiliateAction'); if (!title || !description || !button) return;
-             if (!affiliate) { title.textContent='Quer se tornar um afiliado?'; description.textContent='Solicite sua afiliação e aguarde a análise da equipe L&A.'; button.textContent='Solicitar afiliação'; button.onclick=()=>openAffiliateRegistrationForCurrentUser(); }
-             else if (affiliate.status==='pending') { title.textContent='Solicitação de afiliado em análise'; description.textContent='Sua solicitação foi recebida. Aguarde a aprovação da equipe L&A.'; button.textContent='Acompanhar solicitação de afiliado'; button.onclick=()=>alert('Sua solicitação continua em análise. Após a aprovação, esta opção mudará para “Acessar sistema de afiliado”.'); }
-             else if (['active','approved'].includes(affiliate.status)) { title.textContent='Afiliação aprovada'; description.textContent='Sua conta de afiliado foi aprovada. O acesso é separado da sua conta de cliente.'; button.textContent='Acessar sistema de afiliado'; button.onclick=()=>{ closeCustomerProfile(); openAuthModal('affiliate-login'); const input=document.getElementById('affiliateLoginEmail'); if(input) input.value=user?.email || affiliate.email || ''; }; }
-             else { title.textContent='Afiliação indisponível'; description.textContent='Sua solicitação não está ativa no momento.'; button.textContent='Solicitar novamente'; button.onclick=()=>openAffiliateRegistrationForCurrentUser(); }
+             const user = state.currentUser;
+             const title = document.getElementById('customerAffiliateTitle');
+             const description = document.getElementById('customerAffiliateDescription');
+             const button = document.getElementById('customerAffiliateAction');
+             if (!title || !description || !button) return;
+
+             if (!affiliate) {
+                 title.textContent = 'Quer se tornar um afiliado?';
+                 description.textContent = 'Solicite sua afiliação e aguarde a análise da equipe L&A.';
+                 button.textContent = 'Solicitar afiliação';
+                 button.onclick = () => openAffiliateRegistrationForCurrentUser();
+             } else if (affiliate.status === 'pending') {
+                 title.textContent = 'Solicitação de afiliado em análise';
+                 description.textContent = 'Sua solicitação foi recebida. Aguarde a aprovação da equipe L&A.';
+                 button.textContent = 'Acompanhar solicitação de afiliado';
+                 button.onclick = () => alert('Sua solicitação continua em análise. Após a aprovação, esta opção será substituída por Afiliado.');
+             } else if (['active', 'approved'].includes(affiliate.status)) {
+                 title.textContent = 'Afiliação aprovada';
+                 description.textContent = 'Sua conta de afiliado está ativa. Acesse a loja virtual para compartilhar produtos.';
+                 button.textContent = 'Acessar sistema de afiliado';
+                 button.onclick = () => { closeCustomerProfile(); openAffiliateStore(); };
+             } else {
+                 title.textContent = 'Afiliação indisponível';
+                 description.textContent = 'Sua solicitação não está ativa no momento.';
+                 button.textContent = 'Solicitar novamente';
+                 button.onclick = () => openAffiliateRegistrationForCurrentUser();
+             }
          }
 
          async function openCustomerProfile() {
@@ -9762,11 +9802,48 @@ if (error) throw error;
             document.body.classList.add('affiliate-mode');
             const banner = document.getElementById('affiliateCatalogStatus');
             if (banner) banner.classList.remove('hidden');
+            const openStoreWrap = document.getElementById('virtualStoreOpenWrap');
+            if (openStoreWrap) openStoreWrap.classList.add('hidden');
             renderCatalog();
+            setTimeout(() => document.getElementById('loja')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+        }
+
+        function openAffiliateStore() {
+            const user = state.currentUser;
+            const affiliate = state.affiliates.find(a =>
+                a.userId === user?.id ||
+                String(a.email || a.affiliate_email || '').toLowerCase() === String(user?.email || '').toLowerCase()
+            );
+
+            if (!user || (user.role !== 'affiliate' && !affiliate)) {
+                alert('Sua afiliação ainda não está ativa.');
+                return;
+            }
+            if (user.role !== 'affiliate' && !['active', 'approved'].includes(affiliate.status)) {
+                alert('Sua afiliação ainda não foi aprovada.');
+                return;
+            }
+
+            closeUserMenu();
+            closeCustomerProfile();
+            enterAffiliateMode();
+        }
+
+        function openVirtualStore() {
+            document.body.classList.add('affiliate-mode');
+            const banner = document.getElementById('affiliateCatalogStatus');
+            if (banner) banner.classList.add('hidden');
+            const openStoreWrap = document.getElementById('virtualStoreOpenWrap');
+            if (openStoreWrap) openStoreWrap.classList.add('hidden');
+            renderCatalog();
+            setTimeout(() => document.getElementById('loja')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
         }
 
         function exitAffiliateMode() {
             document.body.classList.remove('affiliate-mode');
+            const openStoreWrap = document.getElementById('virtualStoreOpenWrap');
+            if (openStoreWrap) openStoreWrap.classList.remove('hidden');
+            renderCatalog();
         }
 
         function buyNow(productId) {
@@ -10928,174 +11005,81 @@ function calculateAffiliateCommission(product, quantity = 1) {
 }
 
 let catalogShowingAll = false;
-const CATALOG_CAROUSEL_LIMIT = 4;
+const CATALOG_CAROUSEL_LIMIT = 10;
 
 function toggleFullCatalog() {
-    catalogShowingAll = !catalogShowingAll;
     renderCatalog();
 }
 
 function renderCatalog() {
-    const container =
-        document.getElementById('catalogContainer') ||
-        document.getElementById('productsGrid');
+    const container = document.getElementById('catalogContainer') || document.getElementById('productsGrid');
+    if (!container) return;
 
-    if (!container) {
-        console.warn(
-            'Nenhum container de produtos foi encontrado. ' +
-            'Use id="catalogContainer" ou id="productsGrid".'
-        );
-        return;
-    }
+    const availableProducts = state.products.filter(product => Number(product.stock) > 0);
 
-    const availableProducts = state.products.filter(product => {
-        return Number(product.stock) > 0;
-    });
-
-    if (availableProducts.length === 0) {
-        catalogShowingAll = false;
-        const catalogButton = document.getElementById('btn-ver-catalogo');
-        if (catalogButton) catalogButton.classList.add('hidden');
-        container.className = 'flex gap-6 overflow-x-auto pb-6 scroll-smooth snap-x snap-mandatory no-scrollbar';
-        container.innerHTML = `
-            <div class="col-span-full p-8 bg-slate-50 border border-slate-200 rounded-2xl text-center">
-                <i
-                    data-lucide="package-open"
-                    class="w-12 h-12 text-slate-400 mx-auto mb-3"
-                ></i>
-
-                <p class="font-bold text-slate-700">
-                    Nenhum produto disponível no momento.
-                </p>
-
-                <p class="text-sm text-slate-500 mt-1">
-                    Em breve teremos novas soluções para você.
-                </p>
-            </div>
-        `;
-
+    if (!availableProducts.length) {
+        container.className = 'space-y-8 pb-6';
+        container.innerHTML = '<div class="p-8 bg-slate-50 border border-slate-200 rounded-2xl text-center"><i data-lucide="package-open" class="w-12 h-12 text-slate-400 mx-auto mb-3"></i><p class="font-bold text-slate-700">Nenhum produto disponível no momento.</p><p class="text-sm text-slate-500 mt-1">Em breve teremos novas soluções para você.</p></div>';
+        const info = document.getElementById('catalogResultInfo');
+        if (info) info.textContent = 'Nenhum produto disponível no momento.';
         lucide.createIcons();
         return;
     }
 
-    const visibleProducts = catalogShowingAll ? availableProducts : availableProducts.slice(0, CATALOG_CAROUSEL_LIMIT);
-    container.className = catalogShowingAll
-        ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-6'
-        : 'flex gap-6 overflow-x-auto pb-6 scroll-smooth snap-x snap-mandatory no-scrollbar';
+    const groups = [];
+    for (let i = 0; i < availableProducts.length; i += CATALOG_CAROUSEL_LIMIT) {
+        groups.push(availableProducts.slice(i, i + CATALOG_CAROUSEL_LIMIT));
+    }
 
-    container.innerHTML = visibleProducts.map(product => {
-        const cardWidthClass = catalogShowingAll ? 'w-full' : 'w-[360px] sm:w-[380px] flex-shrink-0';
-        const originalPrice = Number(product.price) || 0;
-        const discount = Number(product.discount) || 0;
-        const finalPrice = calculateFinalPrice(product);
-
-        return `
-            <article data-product-id="${escapeAttribute(product.id)}" class="${cardWidthClass} bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col">
-                <div class="relative h-64 bg-slate-100 overflow-hidden">
-                    <img
-                        src="${escapeAttribute(product.image)}"
-                        alt="${escapeAttribute(product.name)}"
-                        class="w-full h-full object-cover hover:scale-105 transition duration-500"
-                        loading="lazy"
-                    >
-
-                    <span class="absolute top-3 left-3 px-3 py-1 rounded-full bg-slate-900/90 text-amber-400 text-xs font-bold">
-                        ${escapeHtml(product.category || 'Produto')}
-                    </span>
-
-                    ${discount > 0 ? `
-                        <span class="absolute top-3 right-3 px-3 py-1 rounded-full bg-amber-400 text-slate-900 text-xs font-extrabold">
-                            ${formatPercentage(discount)}% OFF
-                        </span>
-                    ` : ''}
-                </div>
-
-                <div class="p-5 flex flex-col flex-1">
-                    <h3 class="font-serif text-xl font-bold text-slate-900">
-                        ${escapeHtml(product.name)}
-                    </h3>
-
-                    <p class="text-sm text-slate-600 leading-relaxed mt-2 flex-1">
-                        ${escapeHtml(product.description)}
-                    </p>
-
-                    <div class="mt-5">
-                        ${discount > 0 ? `
-                            <p class="text-sm text-slate-400 line-through">
-                                ${formatCurrency(originalPrice)}
-                            </p>
-                        ` : ''}
-
-                        <p class="text-2xl font-bold text-slate-900">
-                            ${formatCurrency(finalPrice)}
-                        </p>
-
-                        <p class="text-xs text-slate-500 mt-1">
-                            ${Number(product.stock)} ${
-                                Number(product.stock) === 1
-                                    ? 'unidade disponível'
-                                    : 'unidades disponíveis'
-                            }
-                        </p>
-                    </div>
-
-                    <div class="mt-5">
-                        ${document.body.classList.contains('affiliate-mode') ? `
-                            <button
-                                type="button"
-                                onclick="shareProduct('${escapeAttribute(product.id)}')"
-                                class="w-full gradient-gold text-slate-900 py-3 rounded-xl font-bold hover:shadow-gold transition text-sm"
-                            >
-                                <i data-lucide="share-2" class="w-4 h-4 inline mr-1"></i>
-                                Compartilhar produto
-                            </button>
-                        ` : `
-                            <div class="grid grid-cols-2 gap-2">
-                                <button
-                                    type="button"
-                                    onclick="addToCart('${escapeAttribute(product.id)}')"
-                                    class="w-full gradient-gold text-slate-900 py-3 rounded-xl font-bold hover:shadow-gold transition text-sm"
-                                >
-                                    <i data-lucide="shopping-cart" class="w-4 h-4 inline mr-1"></i>
-                                    Adicionar
-                                </button>
-
-                                <button
-                                    type="button"
-                                    onclick="buyNow('${escapeAttribute(product.id)}')"
-                                    class="w-full bg-slate-900 text-amber-400 py-3 rounded-xl font-bold hover:bg-slate-800 transition text-sm border border-slate-700"
-                                >
-                                    <i data-lucide="credit-card" class="w-4 h-4 inline mr-1"></i>
-                                    Comprar agora
-                                </button>
+    container.className = 'space-y-8 pb-6';
+    container.innerHTML = groups.map((group, groupIndex) => `
+        <div class="product-carousel-group">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-serif text-xl font-bold text-white">${groupIndex === 0 ? 'Produtos em destaque' : 'Mais produtos'}</h3>
+                <span class="text-xs text-slate-400">${group.length} produto${group.length === 1 ? '' : 's'}</span>
+            </div>
+            <div class="flex gap-6 overflow-x-auto pb-4 scroll-smooth snap-x snap-mandatory no-scrollbar">
+                ${group.map(product => {
+                    const finalPrice = calculateFinalPrice(product);
+                    const discount = Number(product.discount) || 0;
+                    return `
+                        <article data-product-id="${escapeAttribute(product.id)}" class="w-[360px] sm:w-[380px] flex-shrink-0 snap-start bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col">
+                            <div class="relative h-64 bg-slate-100 overflow-hidden">
+                                <img src="${escapeAttribute(product.image)}" alt="${escapeAttribute(product.name)}" class="w-full h-full object-cover hover:scale-105 transition duration-500" loading="lazy">
+                                <span class="absolute top-3 left-3 px-3 py-1 rounded-full bg-slate-900/90 text-amber-400 text-xs font-bold">${escapeHtml(product.category || 'Produto')}</span>
+                                ${discount > 0 ? `<span class="absolute top-3 right-3 px-3 py-1 rounded-full bg-amber-400 text-slate-900 text-xs font-extrabold">${formatPercentage(discount)}% OFF</span>` : ''}
                             </div>
-                        `}
-                    </div>
-                </div>
-            </article>
-        `;
-    }).join('');
+                            <div class="p-5 flex flex-col flex-1">
+                                <h3 class="font-serif text-xl font-bold text-slate-900">${escapeHtml(product.name)}</h3>
+                                <p class="text-sm text-slate-600 leading-relaxed mt-2 flex-1">${escapeHtml(product.description)}</p>
+                                <div class="mt-5">
+                                    ${discount > 0 ? `<p class="text-sm text-slate-400 line-through">${formatCurrency(Number(product.price) || 0)}</p>` : ''}
+                                    <p class="text-2xl font-bold text-slate-900">${formatCurrency(finalPrice)}</p>
+                                    <p class="text-xs text-slate-500 mt-1">${Number(product.stock)} ${Number(product.stock) === 1 ? 'unidade disponível' : 'unidades disponíveis'}</p>
+                                </div>
+                                <div class="mt-5">
+                                    ${document.body.classList.contains('affiliate-mode') ? `
+                                        <button type="button" onclick="shareProduct('${escapeAttribute(product.id)}')" class="w-full gradient-gold text-slate-900 py-3 rounded-xl font-bold hover:shadow-gold transition text-sm"><i data-lucide="share-2" class="w-4 h-4 inline mr-1"></i> Compartilhar produto</button>
+                                    ` : `
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <button type="button" onclick="addToCart('${escapeAttribute(product.id)}')" class="w-full gradient-gold text-slate-900 py-3 rounded-xl font-bold hover:shadow-gold transition text-sm"><i data-lucide="shopping-cart" class="w-4 h-4 inline mr-1"></i> Adicionar</button>
+                                            <button type="button" onclick="buyNow('${escapeAttribute(product.id)}')" class="w-full bg-slate-900 text-amber-400 py-3 rounded-xl font-bold hover:bg-slate-800 transition text-sm border border-slate-700"><i data-lucide="credit-card" class="w-4 h-4 inline mr-1"></i> Comprar agora</button>
+                                        </div>
+                                    `}
+                                </div>
+                            </div>
+                        </article>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+    `).join('');
 
-    const catalogButton = document.getElementById('btn-ver-catalogo');
-    if (catalogButton) {
-        if (availableProducts.length > CATALOG_CAROUSEL_LIMIT) {
-            catalogButton.classList.remove('hidden');
-            catalogButton.innerHTML = catalogShowingAll
-                ? '<i data-lucide="chevron-up" class="w-4 h-4"></i> Ocultar catálogo'
-                : '<i data-lucide="grid-3x3" class="w-4 h-4"></i> Ver catálogo completo';
-            catalogButton.onclick = toggleFullCatalog;
-        } else {
-            catalogButton.classList.add('hidden');
-            catalogShowingAll = false;
-        }
-    }
+    const info = document.getElementById('catalogResultInfo');
+    if (info) info.textContent = availableProducts.length + ' produto' + (availableProducts.length === 1 ? '' : 's') + ' disponível' + (availableProducts.length === 1 ? '' : 'eis') + '.';
 
-    const resultInfo = document.getElementById('catalogResultInfo');
-    if (resultInfo) {
-        resultInfo.textContent = availableProducts.length > CATALOG_CAROUSEL_LIMIT && !catalogShowingAll
-            ? 'Mostrando ' + visibleProducts.length + ' produtos em destaque de ' + availableProducts.length + ' disponíveis.'
-            : availableProducts.length + ' produto(s) disponível(is).';
-    }
+    const oldCatalogButton = document.getElementById('btn-ver-catalogo');
+    if (oldCatalogButton) oldCatalogButton.classList.add('hidden');
 
     lucide.createIcons();
 }
