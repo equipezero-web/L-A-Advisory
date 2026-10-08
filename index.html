@@ -10787,10 +10787,10 @@ function openNavigationModal() {
         function setAffiliateMenuMode(active) {
             const logoutButtons = document.querySelectorAll('button[onclick="logoutUser()"]');
             const returnButton = document.getElementById('affiliateReturnClientButton');
+            const affiliateButtons = document.querySelectorAll('button[onclick="openAffiliateStore()"], button[onclick="openAffiliateDashboard()"], #mobileAffiliateMenuButton');
 
-            logoutButtons.forEach(button => {
-                button.classList.toggle('hidden', active);
-            });
+            logoutButtons.forEach(button => button.classList.toggle('hidden', active));
+            affiliateButtons.forEach(button => button.classList.toggle('hidden', active));
             if (returnButton) returnButton.classList.toggle('hidden', !active);
 
             lucide.createIcons();
@@ -10827,6 +10827,7 @@ function openNavigationModal() {
             closeUserMenu();
             closeCustomerProfile();
             enterAffiliateMode();
+            openAffiliateDashboard();
         }
 
         function openVirtualStore() {
@@ -10880,9 +10881,126 @@ function openNavigationModal() {
             startCheckout();
         }
 
+        async function loadAffiliateDashboardData(affiliate) {
+            if (!affiliate) return { orders: [], links: state.affiliateLinks || [], payouts: [] };
+
+            let orders = [];
+            let links = [];
+            let payouts = [];
+
+            try {
+                const ordersRes = await supabaseClient
+                    .from('orders')
+                    .select('*')
+                    .eq('affiliate_code', affiliate.code)
+                    .order('created_at', { ascending: false });
+
+                if (!ordersRes.error) orders = (ordersRes.data || []).map(mapOrderFromSupabase);
+                else console.warn('Pedidos do afiliado:', ordersRes.error.message);
+            } catch (error) {
+                console.warn('Não foi possível carregar pedidos indicados:', error);
+            }
+
+            try {
+                const linksRes = await supabaseClient
+                    .from('affiliate_links')
+                    .select('*')
+                    .eq('affiliate_code', affiliate.code)
+                    .eq('active', true)
+                    .order('created_at', { ascending: false });
+
+                if (!linksRes.error) links = linksRes.data || [];
+                else console.warn('Links do afiliado:', linksRes.error.message);
+            } catch (error) {
+                console.warn('Não foi possível carregar links do afiliado:', error);
+            }
+
+            // Se a tabela de pagamentos de comissão já estiver disponível, usa-a
+            // para diferenciar comissão recebida de comissão apenas devida.
+            try {
+                const payoutsRes = await supabaseClient
+                    .from('affiliate_commission_payments')
+                    .select('*')
+                    .eq('affiliate_code', affiliate.code)
+                    .order('paid_at', { ascending: false });
+
+                if (!payoutsRes.error) payouts = payoutsRes.data || [];
+            } catch (error) {
+                console.warn('Pagamentos de comissão ainda não disponíveis:', error);
+            }
+
+            if (!orders.length) {
+                orders = (state.orders || []).filter(order => String(order.affiliateCode || order.affiliate_code || '').toUpperCase() === String(affiliate.code || '').toUpperCase());
+            }
+            if (!links.length) {
+                links = (state.affiliateLinks || []).filter(link => String(link.affiliateCode || link.affiliate_code || '').toUpperCase() === String(affiliate.code || '').toUpperCase());
+            }
+
+            return { orders, links, payouts };
+        }
+
+        function getAffiliateCommissionForOrder(order) {
+            return calculateAffiliateCommission(order);
+        }
+
+        function isAffiliatePaidOrder(order) {
+            return ['paid', 'shipped', 'delivered'].includes(String(order.status || '').toLowerCase()) ||
+                String(order.paymentStatus || '').toLowerCase() === 'approved';
+        }
+
+        function isAffiliateCompletedOrder(order) {
+            return String(order.status || '').toLowerCase() === 'delivered';
+        }
+
+        function renderAffiliatePerformance(data) {
+            const affiliate = data.affiliate;
+            const orders = data.orders || [];
+            const links = data.links || [];
+            const payouts = data.payouts || [];
+            const paidOrders = orders.filter(isAffiliatePaidOrder);
+            const completedOrders = orders.filter(isAffiliateCompletedOrder);
+            const pendingAdminOrders = orders.filter(order => ['pending', 'processing', 'awaiting_payment', 'in_analysis', 'under_review'].includes(String(order.status || '').toLowerCase()));
+
+            const commissionToReceive = paidOrders.reduce((sum, order) => sum + getAffiliateCommissionForOrder(order), 0);
+            const commissionReceived = payouts.reduce((sum, payout) => sum + Number(payout.amount || payout.commission || payout.total || 0), 0);
+
+            const now = new Date();
+            const month = now.getMonth();
+            const year = now.getFullYear();
+            const inPeriod = (value, period) => {
+                const date = new Date(value);
+                return !Number.isNaN(date.getTime()) && date.getFullYear() === year && (period === 'year' || date.getMonth() === month);
+            };
+
+            const monthToReceive = paidOrders.filter(o => inPeriod(o.paidAt || o.createdAt, 'month')).reduce((s,o) => s + getAffiliateCommissionForOrder(o), 0);
+            const yearToReceive = paidOrders.filter(o => inPeriod(o.paidAt || o.createdAt, 'year')).reduce((s,o) => s + getAffiliateCommissionForOrder(o), 0);
+            const monthReceived = payouts.filter(p => inPeriod(p.paid_at || p.paidAt || p.created_at, 'month')).reduce((s,p) => s + Number(p.amount || p.commission || p.total || 0), 0);
+            const yearReceived = payouts.filter(p => inPeriod(p.paid_at || p.paidAt || p.created_at, 'year')).reduce((s,p) => s + Number(p.amount || p.commission || p.total || 0), 0);
+
+            const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+            set('affiliateCompletedSales', completedOrders.length);
+            set('affiliateSentLinks', links.length);
+            set('affiliateCommissionToReceive', formatCurrency(commissionToReceive));
+            set('affiliateCommissionReceived', formatCurrency(commissionReceived));
+            set('affiliateMonthToReceive', formatCurrency(monthToReceive));
+            set('affiliateMonthReceived', formatCurrency(monthReceived));
+            set('affiliateYearToReceive', formatCurrency(yearToReceive));
+            set('affiliateYearReceived', formatCurrency(yearReceived));
+            set('affiliateOrdersInReview', pendingAdminOrders.length);
+            set('affiliatePaidOrders', paidOrders.length);
+
+            set('affiliateTotalSales', paidOrders.length);
+            set('affiliatePendingCommission', formatCurrency(commissionToReceive));
+            set('affiliatePaidCommission', formatCurrency(commissionReceived));
+            set('affiliateTotalCommission', formatCurrency(commissionToReceive + commissionReceived));
+
+            renderAffiliateSales({ ...affiliate, dashboardOrders: orders });
+            renderAffiliateGeneratedLinks({ ...affiliate, dashboardLinks: links });
+        }
+
         function openAffiliateDashboard() {
             const user = state.currentUser;
-            if (!user || user.role !== 'affiliate') {
+            if (!user || (user.role !== 'affiliate' && !state.affiliates.some(a => a.userId === user.id))) {
                 alert('Acesso restrito a afiliados.');
                 return;
             }
@@ -10892,10 +11010,17 @@ function openNavigationModal() {
             const modal = document.getElementById('affiliateDashboardModal');
             if (!modal) return;
 
-            const affiliate = state.affiliates.find(a => a.userId === user.id);
+            const affiliate = state.affiliates.find(a =>
+                a.userId === user.id ||
+                String(a.email || a.affiliate_email || '').toLowerCase() === String(user.email || '').toLowerCase()
+            );
+            if (!affiliate) {
+                alert('Dados do afiliado não encontrados.');
+                return;
+            }
 
-            document.getElementById('affiliateHeaderName').textContent = user.fullName;
-            document.getElementById('affiliateHeaderEmail').textContent = user.email;
+            document.getElementById('affiliateHeaderName').textContent = user.fullName || affiliate.name || 'Afiliado';
+            document.getElementById('affiliateHeaderEmail').textContent = user.email || affiliate.email || '';
 
             const statusSection = document.getElementById('affiliateStatusSection');
             const statusIcon = document.getElementById('affiliateStatusIcon');
@@ -10904,40 +11029,43 @@ function openNavigationModal() {
             const statusDetails = document.getElementById('affiliateStatusDetails');
 
             const summarySection = document.getElementById('affiliateSummarySection');
+            const performanceSection = document.getElementById('affiliatePerformanceSection');
             const linksSection = document.getElementById('affiliateLinksSection');
             const pixSection = document.getElementById('affiliatePixSection');
             const salesSection = document.getElementById('affiliateSalesSection');
-             [summarySection, linksSection, pixSection, salesSection].forEach(section => section?.classList.add('hidden'));
-             document.querySelector('#affiliateDashboardModal [onclick="openAffiliateProfile()"]')?.classList.add('hidden');
-             const catalogButton = document.querySelector('#affiliateDashboardModal [onclick="openAffiliateCatalog()"]');
-             if (catalogButton) { catalogButton.classList.remove('hidden'); catalogButton.innerHTML = '<i data-lucide="share-2" class="w-4 h-4 inline mr-1"></i> Compartilhar produto'; }
+            const generatedLinksSection = document.getElementById('affiliateGeneratedLinksSection');
 
-            if (!affiliate || affiliate.status === 'pending') {
+            [summarySection, performanceSection, linksSection, pixSection, salesSection, generatedLinksSection].forEach(section => section?.classList.add('hidden'));
+
+            if (affiliate.status === 'pending') {
                 if (statusIcon) {
                     statusIcon.className = 'w-12 h-12 rounded-xl flex items-center justify-center bg-amber-100';
                     statusIcon.innerHTML = '<i data-lucide="clock" class="w-6 h-6 text-amber-700"></i>';
                 }
                 if (statusTitle) statusTitle.textContent = 'Solicitação em análise';
                 if (statusDesc) statusDesc.textContent = 'Seu cadastro está sendo revisado pela equipe.';
-                if (statusDetails) statusDetails.textContent = 'Você será notificado por e-mail quando aprovado.';
-
-                if (summarySection) summarySection.classList.add('hidden');
-                if (linksSection) linksSection.classList.add('hidden');
-                if (pixSection) pixSection.classList.add('hidden');
-                if (salesSection) salesSection.classList.add('hidden');
-
-            } else if (affiliate.status === 'active') {
+                if (statusDetails) statusDetails.textContent = 'Os resultados aparecerão após a aprovação.';
+            } else if (affiliate.status === 'active' || affiliate.status === 'approved') {
                 if (statusIcon) {
                     statusIcon.className = 'w-12 h-12 rounded-xl flex items-center justify-center bg-emerald-100';
                     statusIcon.innerHTML = '<i data-lucide="circle-check" class="w-6 h-6 text-emerald-700"></i>';
                 }
                 if (statusTitle) statusTitle.textContent = 'Afiliado ativo';
-                if (statusDesc) statusDesc.textContent = 'Seu código de afiliado está liberado.';
-                if (statusDetails) statusDetails.textContent = `Código: ${affiliate.code}`;
+                if (statusDesc) statusDesc.textContent = 'Seu painel mostra as vendas atribuídas ao seu código e as comissões.';
+                if (statusDetails) statusDetails.textContent = 'As comissões são pagas pelo ADM diretamente no Pix cadastrado e conferido por você.';
 
-                [summarySection, linksSection, pixSection, salesSection].forEach(section => section?.classList.add('hidden'));
+                [summarySection, performanceSection, linksSection, pixSection, salesSection, generatedLinksSection].forEach(section => section?.classList.remove('hidden'));
 
-            } else if (affiliate.status === 'blocked') {
+                const pixType = document.getElementById('affiliatePixType');
+                const pixKey = document.getElementById('affiliatePixKey');
+                if (pixType) pixType.textContent = translatePixType(affiliate.pixType || '-');
+                if (pixKey) pixKey.textContent = affiliate.pixKey || '-';
+
+                loadAffiliateDashboardData(affiliate).then(data => {
+                    renderAffiliatePerformance({ ...data, affiliate });
+                    lucide.createIcons();
+                });
+            } else {
                 if (statusIcon) {
                     statusIcon.className = 'w-12 h-12 rounded-xl flex items-center justify-center bg-red-100';
                     statusIcon.innerHTML = '<i data-lucide="circle-x" class="w-6 h-6 text-red-700"></i>';
@@ -10945,11 +11073,6 @@ function openNavigationModal() {
                 if (statusTitle) statusTitle.textContent = 'Afiliado bloqueado';
                 if (statusDesc) statusDesc.textContent = 'Entre em contato com o suporte para mais informações.';
                 if (statusDetails) statusDetails.textContent = '';
-
-                if (summarySection) summarySection.classList.add('hidden');
-                if (linksSection) linksSection.classList.add('hidden');
-                if (pixSection) pixSection.classList.add('hidden');
-                if (salesSection) salesSection.classList.add('hidden');
             }
 
             modal.classList.remove('hidden');
