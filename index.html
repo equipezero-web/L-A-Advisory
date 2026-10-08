@@ -7860,6 +7860,7 @@
                 discount: Number(order.discount ?? 0),
                 trackingCode: order.trackingCode || order.tracking_code || '',
                 paidAt: order.paidAt || order.paid_at || null,
+                commissionAmount: Number(order.commissionAmount ?? order.commission_amount ?? 0),
                 address: order.address?.text || order.address_text || order.address || ''
             };
         }
@@ -10968,6 +10969,9 @@ function openNavigationModal() {
         }
 
         function getAffiliateCommissionForOrder(order) {
+            if (Number.isFinite(Number(order?.commissionAmount)) && Number(order.commissionAmount) > 0) {
+                return Number(order.commissionAmount);
+            }
             return calculateAffiliateCommission(order);
         }
 
