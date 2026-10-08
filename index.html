@@ -969,6 +969,69 @@
     main .max-w-7xl, main .max-w-4xl { padding-left: .8rem !important; padding-right: .8rem !important; }
 }
 
+
+        /* POP-UPS DA ÁREA DO CLIENTE/AFILIADO: mesma linguagem visual do menu */
+        .account-popover-shell {
+            overflow: hidden !important;
+            padding: 0 !important;
+            border-width: 1px !important;
+            border-color: rgba(148,163,184,.25) !important;
+            border-radius: 1rem !important;
+        }
+        .account-popover-shell > button[aria-label^="Fechar"] {
+            z-index: 5;
+            top: .9rem !important;
+            right: .9rem !important;
+            width: 36px;
+            height: 36px;
+            border-radius: 9999px;
+            background: rgba(255,255,255,.12);
+            color: #fff !important;
+        }
+        .account-popover-shell > .flex.flex-col.sm\:flex-row,
+        .account-popover-shell > .flex.flex-col.lg\:flex-row {
+            padding: 1.1rem 1.25rem;
+            margin: 0 !important;
+            background: linear-gradient(135deg,#0c1933,#07101f);
+            color: #fff;
+        }
+        .account-popover-shell > .flex.flex-col.sm\:flex-row h3,
+        .account-popover-shell > .flex.flex-col.lg\:flex-row h3 {
+            color: #fff !important;
+        }
+        .account-popover-shell > .flex.flex-col.sm\:flex-row p,
+        .account-popover-shell > .flex.flex-col.lg\:flex-row p {
+            color: #d7dce5 !important;
+        }
+        .account-popover-shell > form,
+        .account-popover-shell > #customerOrdersList,
+        .account-popover-shell > #affiliateStatusSection,
+        .account-popover-shell > #affiliateSummarySection,
+        .account-popover-shell > #affiliateLinksSection,
+        .account-popover-shell > #affiliatePixSection,
+        .account-popover-shell > #affiliateSalesSection,
+        .account-popover-shell > #affiliateGeneratedLinksSection {
+            margin-left: 1.25rem;
+            margin-right: 1.25rem;
+        }
+        @media (max-width: 768px) {
+            .account-popover-shell {
+                width: min(94vw, 520px) !important;
+                max-height: 92vh !important;
+            }
+            .account-popover-shell > form,
+            .account-popover-shell > #customerOrdersList,
+            .account-popover-shell > #affiliateStatusSection,
+            .account-popover-shell > #affiliateSummarySection,
+            .account-popover-shell > #affiliateLinksSection,
+            .account-popover-shell > #affiliatePixSection,
+            .account-popover-shell > #affiliateSalesSection,
+            .account-popover-shell > #affiliateGeneratedLinksSection {
+                margin-left: .8rem;
+                margin-right: .8rem;
+            }
+        }
+
 </style>
 
     <!-- Registro do Service Worker -->
@@ -4314,6 +4377,39 @@
                             </div>
                         </div>
 
+                        <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl space-y-3">
+                            <div class="flex items-start gap-3">
+                                <i data-lucide="scroll-text" class="w-5 h-5 text-amber-700 shrink-0 mt-0.5"></i>
+                                <div>
+                                    <h4 class="font-bold text-slate-900">Como funciona o programa de afiliados</h4>
+                                    <p class="text-xs text-slate-700 mt-1 leading-relaxed">
+                                        Você divulga os produtos da L&A Royal Advisory usando seus links de afiliado. Quando uma compra for identificada pelo seu código e o pagamento do cliente for confirmado, a venda poderá gerar comissão conforme as regras vigentes.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-700">
+                                <div class="p-3 bg-white/80 border border-amber-200 rounded-lg">
+                                    <strong class="block text-slate-900 mb-1">Comissão</strong>
+                                    A porcentagem de comissão é a definida pela L&A para cada produto e pode ser consultada antes da divulgação.
+                                </div>
+                                <div class="p-3 bg-white/80 border border-amber-200 rounded-lg">
+                                    <strong class="block text-slate-900 mb-1">Quando a comissão é gerada</strong>
+                                    A venda precisa ter o pagamento do cliente confirmado e permanecer válida conforme as regras do programa.
+                                </div>
+                                <div class="p-3 bg-white/80 border border-amber-200 rounded-lg">
+                                    <strong class="block text-slate-900 mb-1">Como você recebe</strong>
+                                    O pagamento da comissão é feito diretamente pelo ADM da L&A para o Pix cadastrado e aprovado no seu perfil.
+                                </div>
+                                <div class="p-3 bg-white/80 border border-red-200 rounded-lg">
+                                    <strong class="block text-red-700 mb-1">Atenção ao Pix</strong>
+                                    Confira cuidadosamente tipo e chave Pix antes de enviar. O afiliado é responsável por manter os dados corretos e atualizados. Um Pix informado incorretamente pode impedir ou atrasar o recebimento.
+                                </div>
+                            </div>
+                            <p class="text-[11px] text-amber-900 leading-relaxed">
+                                Ao solicitar a afiliação, você declara que leu e concorda com estas condições, com a análise e aprovação pelo ADM e com o uso do Pix cadastrado exclusivamente para pagamento das comissões aprovadas.
+                            </p>
+                        </div>
+
                         <div class="flex items-start gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl">
                             <input
                                 type="checkbox"
@@ -4657,7 +4753,7 @@
         id="customerProfileModal"
         class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[85] hidden flex items-center justify-center p-4 overflow-y-auto"
     >
-        <div class="bg-white text-slate-900 rounded-2xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl relative border-2 border-amber-400/30 my-8 max-h-[92vh] overflow-y-auto">
+        <div class="account-popover-shell bg-white text-slate-900 rounded-2xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl relative border-2 border-amber-400/30 my-8 max-h-[92vh] overflow-y-auto">
             <button
                 type="button"
                 onclick="closeCustomerProfile()"
@@ -5034,7 +5130,7 @@
         id="customerOrdersModal"
         class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[85] hidden flex items-center justify-center p-4 overflow-y-auto"
     >
-        <div class="bg-white text-slate-900 rounded-2xl max-w-5xl w-full p-6 sm:p-8 shadow-2xl relative border-2 border-amber-400/30 my-8 max-h-[92vh] overflow-y-auto">
+        <div class="account-popover-shell bg-white text-slate-900 rounded-2xl max-w-5xl w-full p-6 sm:p-8 shadow-2xl relative border-2 border-amber-400/30 my-8 max-h-[92vh] overflow-y-auto">
             <button
                 type="button"
                 onclick="closeCustomerOrders()"
@@ -5300,7 +5396,7 @@
         id="affiliateDashboardModal"
         class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[85] hidden flex items-center justify-center p-4 overflow-y-auto"
     >
-        <div class="bg-white text-slate-900 rounded-2xl max-w-7xl w-full p-6 sm:p-8 shadow-2xl relative border-2 border-amber-400/30 my-8 max-h-[92vh] overflow-y-auto">
+        <div class="account-popover-shell bg-white text-slate-900 rounded-2xl max-w-7xl w-full p-6 sm:p-8 shadow-2xl relative border-2 border-amber-400/30 my-8 max-h-[92vh] overflow-y-auto">
             <button
                 type="button"
                 onclick="closeAffiliateDashboard()"
