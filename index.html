@@ -988,6 +988,14 @@
         body.account-modal-open { overflow: hidden !important; }
         html.account-modal-open { overflow: hidden !important; }
 
+        /* Garantia: a área interna do perfil/pedidos/painel continua sendo o scroller
+           mesmo com a regra geral do account-popover-shell. */
+        .account-popover-shell.account-modal-scroll {
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            overscroll-behavior: contain !important;
+        }
+
         /* POP-UPS DA ÁREA DO CLIENTE/AFILIADO: mesma linguagem visual do menu */
         .account-popover-shell {
             overflow: hidden !important;
@@ -5157,7 +5165,7 @@
         id="customerOrdersModal"
         class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[85] hidden flex items-center justify-center p-4 overflow-y-auto"
     >
-        <div class="account-popover-shell bg-white text-slate-900 rounded-2xl max-w-5xl w-full p-6 sm:p-8 shadow-2xl relative border-2 border-amber-400/30 my-8 max-h-[92vh] overflow-y-auto">
+        <div class="account-popover-shell account-modal-scroll bg-white text-slate-900 rounded-2xl max-w-5xl w-full p-6 sm:p-8 shadow-2xl relative border-2 border-amber-400/30 my-8 max-h-[92vh]">
             <button
                 type="button"
                 onclick="closeCustomerOrders()"
@@ -10937,11 +10945,11 @@ function openNavigationModal() {
             );
 
             if (!user || (user.role !== 'affiliate' && !affiliate)) {
-                alert('Sua afiliação ainda não está ativa.');
+                document.getElementById('afiliados')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 return;
             }
             if (user.role !== 'affiliate' && !['active', 'approved'].includes(affiliate.status)) {
-                alert('Sua afiliação ainda não foi aprovada.');
+                document.getElementById('afiliados')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 return;
             }
 
