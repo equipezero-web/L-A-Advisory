@@ -11851,6 +11851,10 @@ function escapeAttribute(value) {
     window.showSiteAlert = showSiteAlert;
     window.closeSiteAlert = closeSiteAlert;
 
+    // Instala o alerta central imediatamente. Assim, nenhum alert() do site
+    // volta ao alerta nativo do navegador após a página carregar.
+    window.alert = showSiteAlert;
+
     document.addEventListener('DOMContentLoaded', () => {
         const overlay = document.getElementById('siteAlertOverlay');
         const okButton = document.getElementById('siteAlertOk');
@@ -11872,9 +11876,6 @@ function escapeAttribute(value) {
             window.__pendingSiteAlert = null;
             showSiteAlert(pending);
         }
-
-        // Todo alert() do site passa a usar o aviso central premium.
-        window.alert = showSiteAlert;
     });
 
     // =====================================================
