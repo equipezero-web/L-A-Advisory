@@ -391,6 +391,88 @@
             border-color: #f4d03f !important;
         }
 
+        /* Alertas premium: substitui o alert nativo por uma mensagem central com OK */
+        #siteAlertOverlay {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: rgba(2, 6, 23, 0.38);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        #siteAlertOverlay.open {
+            display: flex;
+            animation: siteAlertFadeIn 180ms ease-out;
+        }
+
+        #siteAlertBox {
+            width: min(92vw, 430px);
+            border: 1px solid rgba(212, 175, 55, 0.38);
+            border-radius: 1.15rem;
+            padding: 1.35rem;
+            background: linear-gradient(145deg, rgba(12,25,51,.98), rgba(7,16,31,.98));
+            box-shadow: 0 24px 80px rgba(0,0,0,.42), 0 0 35px rgba(212,175,55,.10);
+            color: #fff;
+            text-align: center;
+        }
+
+        #siteAlertIcon {
+            width: 42px;
+            height: 42px;
+            margin: 0 auto .8rem;
+            border: 1px solid rgba(212,175,55,.35);
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #F4D03F;
+            background: rgba(212,175,55,.08);
+        }
+
+        #siteAlertMessage {
+            color: #D7DCE5;
+            font-size: .92rem;
+            line-height: 1.55;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        #siteAlertOk {
+            width: 100%;
+            margin-top: 1rem;
+            min-height: 42px;
+            border: 1px solid rgba(212,175,55,.45);
+            border-radius: .75rem;
+            background: linear-gradient(135deg, #D4AF37, #F4D03F);
+            color: #172033;
+            font-weight: 900;
+            cursor: pointer;
+            transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+        }
+
+        #siteAlertOk:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 28px rgba(212,175,55,.24);
+            filter: brightness(1.03);
+        }
+
+        @keyframes siteAlertFadeIn {
+            from { opacity: 0; transform: scale(.97); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @media (max-width: 640px) {
+            #siteAlertBox {
+                width: min(90vw, 360px);
+                padding: 1.15rem;
+            }
+        }
+
         .auth-required-overlay {
             backdrop-filter: blur(6px);
         }
@@ -764,6 +846,17 @@
 </head>
 
 <body class="bg-slate-900 text-white min-h-screen flex flex-col">
+
+    <!-- ALERTA PREMIUM CENTRAL -->
+    <div id="siteAlertOverlay" role="alertdialog" aria-modal="true" aria-labelledby="siteAlertMessage" aria-hidden="true">
+        <div id="siteAlertBox">
+            <div id="siteAlertIcon" aria-hidden="true">
+                <i data-lucide="info" class="w-5 h-5"></i>
+            </div>
+            <div id="siteAlertMessage"></div>
+            <button id="siteAlertOk" type="button">OK</button>
+        </div>
+    </div>
 
     <!-- BARRA SUPERIOR -->
     <div class="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-slate-300 px-4 py-2.5 flex justify-between items-center text-xs z-50 border-b border-blue-800/30">
@@ -11721,6 +11814,69 @@ function escapeAttribute(value) {
                 .catch(() => {});
         }
         
+    // =====================================================
+    // ALERTA PREMIUM CENTRAL — substitui o alert() nativo
+    // =====================================================
+    function showSiteAlert(message) {
+        const text = String(message ?? '');
+        const overlay = document.getElementById('siteAlertOverlay');
+
+        if (!overlay) {
+            // Fallback somente se o HTML ainda não estiver disponível.
+            window.__pendingSiteAlert = text;
+            return;
+        }
+
+        const messageEl = document.getElementById('siteAlertMessage');
+        const okButton = document.getElementById('siteAlertOk');
+
+        if (messageEl) messageEl.textContent = text;
+
+        overlay.classList.add('open');
+        overlay.setAttribute('aria-hidden', 'false');
+
+        if (okButton) {
+            okButton.focus();
+        }
+    }
+
+    function closeSiteAlert() {
+        const overlay = document.getElementById('siteAlertOverlay');
+        if (!overlay) return;
+
+        overlay.classList.remove('open');
+        overlay.setAttribute('aria-hidden', 'true');
+    }
+
+    window.showSiteAlert = showSiteAlert;
+    window.closeSiteAlert = closeSiteAlert;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const overlay = document.getElementById('siteAlertOverlay');
+        const okButton = document.getElementById('siteAlertOk');
+
+        okButton?.addEventListener('click', closeSiteAlert);
+
+        overlay?.addEventListener('click', (event) => {
+            if (event.target === overlay) closeSiteAlert();
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && overlay?.classList.contains('open')) {
+                closeSiteAlert();
+            }
+        });
+
+        if (window.__pendingSiteAlert) {
+            const pending = window.__pendingSiteAlert;
+            window.__pendingSiteAlert = null;
+            showSiteAlert(pending);
+        }
+
+        // Todo alert() do site passa a usar o aviso central premium.
+        window.alert = showSiteAlert;
+    });
+
     // =====================================================
     // FUNÇÕES ADICIONAIS: FILTROS, CARROSSEL E ACESSIBILIDADE
     // =====================================================
