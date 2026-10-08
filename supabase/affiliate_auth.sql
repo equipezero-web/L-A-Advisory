@@ -30,7 +30,7 @@ COMMENT ON COLUMN public.affiliates.affiliate_password_salt IS
 -- ============================================================
 CREATE TABLE IF NOT EXISTS public.affiliate_commission_payments (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  affiliate_id uuid REFERENCES public.affiliates(id) ON DELETE CASCADE,
+  affiliate_id text REFERENCES public.affiliates(id) ON DELETE CASCADE,
   affiliate_code text NOT NULL,
   amount numeric(12,2) NOT NULL CHECK (amount >= 0),
   paid_at timestamptz NOT NULL DEFAULT now(),
