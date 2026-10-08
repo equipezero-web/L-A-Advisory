@@ -817,6 +817,130 @@
             .hero-eyebrow,.hero-title,.hero-copy,.hero-actions,.hero-proof { opacity:1; transform:none; }
         }
 
+
+/* RESPONSIVIDADE FINAL — DESKTOP PRESERVADO / MOBILE */
+@media (min-width: 769px) {
+    header nav { display: flex !important; align-items: center; }
+    #mobileMenuButton, #mobileMenuPanel, #mobileUtilityActions { display: none !important; }
+    header .max-w-7xl > div.flex.items-center.justify-end {
+        position: static !important; width: auto !important; pointer-events: auto !important; display: flex !important;
+    }
+}
+@media (max-width: 768px) {
+    html { font-size: 92%; }
+    body { font-size: .92rem; overflow-x: hidden; }
+
+    body > section.bg-slate-950 .max-w-7xl {
+        gap: .3rem !important; padding-top: .35rem !important; padding-bottom: .35rem !important;
+        overflow-x: auto; justify-content: center !important;
+    }
+    body > section.bg-slate-950 .max-w-7xl > span { font-size: .62rem !important; }
+    body > section.bg-slate-950 button { padding: .3rem .5rem !important; font-size: .65rem !important; }
+
+    header .max-w-7xl {
+        height: 64px !important; min-height: 64px !important;
+        grid-template-columns: 42px minmax(0,1fr) auto !important;
+        gap: .25rem !important; padding: .35rem .55rem !important;
+    }
+    header .max-w-7xl > a[aria-label="Voltar ao início"] > div {
+        width: 36px !important; height: 36px !important; font-size: .72rem !important; border-width: 1px !important;
+    }
+    header .max-w-7xl > div.text-center h1 {
+        font-size: clamp(.72rem, 3.7vw, .95rem) !important; letter-spacing: .09em !important;
+    }
+    header .max-w-7xl > div.text-center p {
+        font-size: .4rem !important; letter-spacing: .1em !important; margin-top: .08rem !important;
+    }
+
+    header .max-w-7xl > div.flex.items-center.justify-end { display: none !important; }
+
+    #mobileMenuButton {
+        display: flex !important; position: relative !important; grid-column: 3 !important; grid-row: 1 !important;
+        justify-self: end !important; width: 34px !important; height: 34px !important; min-width: 34px !important;
+        border-radius: .55rem !important; border-width: 1px !important; z-index: 62 !important;
+    }
+    #mobileMenuButton svg, #mobileMenuButton i { width: 17px !important; height: 17px !important; }
+
+    #mobileUtilityActions {
+        display: flex !important; position: absolute !important; top: 15px !important; right: 3rem !important;
+        z-index: 61 !important; align-items: center !important; gap: .22rem !important; pointer-events: auto !important;
+    }
+    #mobileUtilityActions button {
+        width: 31px !important; height: 31px !important; min-width: 31px !important; padding: .35rem !important; border-radius: .55rem !important;
+    }
+    #mobileUtilityActions svg, #mobileUtilityActions i { width: 15px !important; height: 15px !important; }
+    #mobileUtilityActions span {
+        min-width: 13px !important; height: 13px !important; font-size: 7px !important; line-height: 13px !important;
+        padding: 0 2px !important; top: -3px !important; right: -3px !important;
+    }
+
+    #mobileMenuPanel {
+        top: 60px !important; right: .55rem !important; width: min(52vw, 220px) !important;
+    }
+    #mobileMenuPanel .mobile-menu-auth, #mobileMenuPanel.open { gap: .2rem !important; }
+    #mobileMenuPanel .mobile-menu-auth button, #mobileMenuPanel .mobile-menu-link {
+        min-height: 35px !important; padding: .45rem .6rem !important; border-radius: .55rem !important; font-size: .68rem !important;
+    }
+
+    #navModal { padding: .65rem !important; }
+    #navModal > div {
+        width: min(88vw, 300px) !important; max-width: 300px !important; padding: 1rem !important; border-radius: 1rem !important;
+    }
+    #navModal h3 { font-size: 1.25rem !important; margin-bottom: .85rem !important; }
+    #navModal .grid { gap: .45rem !important; }
+    #navModal a { padding: .65rem !important; gap: .65rem !important; border-width: 1px !important; border-radius: .7rem !important; }
+    #navModal a > div:first-child { padding: .55rem !important; border-radius: .55rem !important; }
+    #navModal a svg, #navModal a i { width: 18px !important; height: 18px !important; }
+    #navModal h4 { font-size: .82rem !important; }
+    #navModal p { font-size: .6rem !important; }
+
+    #cartModal { padding: .65rem !important; }
+    #cartModal > div {
+        width: min(88vw, 320px) !important; max-width: 320px !important; max-height: 82vh !important;
+        padding: 1rem !important; border-radius: 1rem !important;
+    }
+    #cartModal h3 { font-size: 1.25rem !important; }
+    #cartModal .flex.items-center.gap-3.mb-5 { margin-bottom: .75rem !important; gap: .55rem !important; }
+    #cartModal .flex.items-center.gap-3.mb-5 > div:first-child { width: 34px !important; height: 34px !important; border-radius: .6rem !important; }
+    #cartModal #cartItems { max-height: 42vh !important; margin-bottom: .8rem !important; }
+    #cartModal button { font-size: .72rem !important; }
+
+    #loja { overflow-x: hidden !important; }
+    #loja h2 { font-size: clamp(1.5rem, 7vw, 2rem) !important; }
+    #loja .product-motion-card {
+        width: min(78vw, 285px) !important; max-width: 285px !important; min-width: 0 !important;
+    }
+    #loja .product-motion-card img, #loja .product-card-image {
+        height: 10rem !important; max-height: 10rem !important;
+    }
+    #loja .product-motion-card h3 { font-size: .9rem !important; line-height: 1.2 !important; }
+    #loja .product-motion-card p { font-size: .72rem !important; line-height: 1.35 !important; }
+    #loja .product-motion-card button, #loja .product-motion-card a {
+        font-size: .68rem !important; padding: .5rem .65rem !important; min-height: 34px !important;
+    }
+
+    main h2 { font-size: clamp(1.45rem, 6.5vw, 2rem) !important; }
+    main h3 { font-size: clamp(1rem, 4.8vw, 1.35rem) !important; }
+    main p { font-size: .82rem; line-height: 1.5; }
+    main button, main a { font-size: .78rem; }
+
+    #inicio.hero-premium {
+        min-height: 650px !important; padding-top: 3.5rem !important; padding-bottom: 3.5rem !important;
+    }
+    #inicio .hero-title { font-size: clamp(2rem, 10vw, 3.2rem) !important; }
+    #inicio .hero-copy { font-size: .9rem !important; }
+    #inicio .hero-actions a { padding: .65rem .85rem !important; min-height: 38px !important; }
+
+    #consultoria article, #depoimentos article, #afiliados article { padding: 1rem !important; }
+    #consultoria article button { padding: .65rem !important; min-height: 38px !important; }
+
+    #faq details { padding: .8rem !important; }
+    #faq summary { font-size: .78rem !important; }
+    #faq p { font-size: .72rem !important; }
+
+    main .max-w-7xl, main .max-w-4xl { padding-left: .8rem !important; padding-right: .8rem !important; }
+}
+
 </style>
 
     <!-- Registro do Service Worker -->
