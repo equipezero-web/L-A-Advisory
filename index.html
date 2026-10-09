@@ -9266,7 +9266,7 @@ if (error) throw error;
 
             const affiliateReturnBtn = document.getElementById('affiliateReturnClientButton');
             if (affiliateReturnBtn) affiliateReturnBtn.classList.toggle('hidden', !document.body.classList.contains('affiliate-mode'));
-            const canUseAffiliateArea = user.role === 'affiliate' || (linkedAffiliate && ['active', 'approved'].includes(linkedAffiliate.status));
+            const canUseAffiliateArea = !!linkedAffiliate && ['active', 'approved'].includes(linkedAffiliate.status);
             affiliateDashboardBtn?.classList.toggle('hidden', !canUseAffiliateArea);
             affiliateBtn?.classList.toggle('hidden', !canUseAffiliateArea || document.body.classList.contains('affiliate-mode'));
 
@@ -9313,7 +9313,7 @@ if (error) throw error;
                 a.userId === user.id ||
                 String(a.email || a.affiliate_email || '').toLowerCase() === String(user.email || '').toLowerCase()
             );
-            const approvedAffiliate = user.role === 'affiliate' || (linkedAffiliate && ['active', 'approved'].includes(linkedAffiliate.status));
+            const approvedAffiliate = !!linkedAffiliate && ['active', 'approved'].includes(linkedAffiliate.status);
 
             const affiliateModeActive = document.body.classList.contains('affiliate-mode');
             affiliateBtn?.classList.toggle('hidden', !approvedAffiliate || affiliateModeActive);
