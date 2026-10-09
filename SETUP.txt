@@ -1,23 +1,37 @@
 L&A Royal Advisory — Supabase Edge Functions
 
-1. No Supabase Dashboard, abra Edge Functions e crie/deploy:
-   - create-checkout
-   - register-affiliate
-   - mercado-pago-webhook
+Frontend atual
+- index.html
+- URL: https://equipezero-web.github.io/L-A-Advisory
 
-2. Secrets necessários nas Edge Functions:
-   MP_ACCESS_TOKEN = seu Access Token de PRODUÇÃO do Mercado Pago
-   SUPABASE_SERVICE_ROLE_KEY = chave secreta/service role do projeto (somente servidor)
-   SITE_URL = https://equipezero-web.github.io/L-A-Advisory
+Scripts SQL disponíveis
+1. 001_security_checkout.sql (raiz do repositório)
+2. supabase/affiliate_auth.sql
 
-   SUPABASE_URL e SUPABASE_ANON_KEY são fornecidos pelo ambiente do Supabase.
+Leia cada script e confirme as dependências existentes no banco antes de executar em produção.
 
-3. Webhook do Mercado Pago:
-   https://fqisewatypluagngmgka.supabase.co/functions/v1/mercado-pago-webhook
+Secrets usados pelo código atual
+- SUPABASE_URL
+- SUPABASE_SECRET_KEYS (JSON com a chave service-role em "default") ou SUPABASE_SERVICE_ROLE_KEY, conforme a função
+- SUPABASE_PUBLISHABLE_KEYS (JSON com a chave pública em "default") ou SUPABASE_ANON_KEY, conforme a função
+- MP_ACCESS_TOKEN
+- MP_WEBHOOK_SECRET
+- SITE_URL=https://equipezero-web.github.io/L-A-Advisory
 
-4. Não coloque MP_ACCESS_TOKEN nem SUPABASE_SERVICE_ROLE_KEY no index.html, GitHub Pages ou JavaScript do navegador.
+Não use MERCADOPAGO_ACCESS_TOKEN: o código atual lê MP_ACCESS_TOKEN.
+Nunca coloque MP_ACCESS_TOKEN, MP_WEBHOOK_SECRET ou a chave service-role no HTML/GitHub Pages.
 
-5. O frontend atual já chama:
-   /functions/v1/create-checkout
+Funções presentes
+- affiliate-login
+- register-affiliate
+- create-checkout
+- create-order
+- create-test-checkout
+- mercado-pago-webhook
 
-6. Antes de produção, aplicar uma operação SQL atômica para baixa de estoque e comissão, evitando dupla baixa em webhooks simultâneos.
+Antes de deploy, confirme no index.html qual função de checkout está sendo chamada e publique essa função junto com suas dependências.
+
+Webhook Mercado Pago
+https://fqisewatypluagngmgka.supabase.co/functions/v1/mercado-pago-webhook
+
+Antes de produção, teste autenticação, recuperação de senha, aprovação de afiliado, geração de links, checkout, webhook, estoque, comissão e políticas RLS.
