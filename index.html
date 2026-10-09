@@ -566,17 +566,17 @@
         body.affiliate-mode #loja { min-height: calc(100vh - 90px); }
         body.affiliate-mode #loja > div > div:first-child p { max-width: none; }
         body.affiliate-mode #virtualStoreOpenWrap { display: none !important; }
-        body.affiliate-mode #storeBackHomeButton { display: inline-flex !important; }
+        body.affiliate-mode #storeBackHomeButton { display: none !important; }
         body.store-open-mode #consultoria { display: none !important; }
         body.store-open-mode #depoimentos { display: none !important; }
         body.store-open-mode #afiliados { display: none !important; }
-        body.store-open-mode #storeBackHomeButton { display: inline-flex !important; }
+        body.store-open-mode #storeBackHomeButton { display: none !important; }
         body.store-open-mode .non-store-faq-item { display: none !important; }
         body.affiliate-mode #depoimentos,
         body.affiliate-mode #consultoria,
         body.affiliate-mode #afiliados,
         body.affiliate-mode #faq { display: none !important; }
-        body.affiliate-mode #storeBackHomeButton { display: inline-flex !important; }
+        body.affiliate-mode #storeBackHomeButton { display: none !important; }
         body.guest-mode #affiliateNavLink,
         body.guest-mode #afiliados { display: none !important; }
         body.customer-mode #affiliateNavLink,
@@ -1084,6 +1084,53 @@
             });
         }
     </script>
+
+<style id="la-mobile-store-image-fix">
+/* Ajuste exclusivo para celular: catálogo principal e loja acessada por link de afiliado usam as mesmas imagens e produtos. */
+@media (max-width: 767px) {
+  #catalogContainer .product-carousel-group article,
+  #catalogContainer .product-motion-card {
+    width: min(78vw, 285px) !important;
+    max-width: 285px !important;
+  }
+  #catalogContainer .product-motion-card > div:first-child {
+    height: 190px !important;
+    min-height: 190px !important;
+    background: #fff !important;
+    border: 0 !important;
+    padding: 0 !important;
+  }
+  #catalogContainer .product-motion-card > div:first-child img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+  #catalogContainer .product-motion-card > div:nth-child(2) {
+    padding: .75rem !important;
+  }
+  #catalogContainer .product-motion-card h3 {
+    font-size: .98rem !important;
+    line-height: 1.35 !important;
+    overflow-wrap: anywhere;
+  }
+  #catalogContainer .product-motion-card p {
+    font-size: .82rem;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+  #catalogContainer .product-motion-card .text-2xl {
+    font-size: 1.15rem !important;
+  }
+  #storeBackHomeButton,
+  .la-return-current-page {
+    display: none !important;
+  }
+}
+</style>
 </head>
 
 <body class="bg-slate-900 text-white min-h-screen flex flex-col">
@@ -13477,34 +13524,10 @@ body.guest-mode #afiliados { display: block !important; }
   }, true);
 
   function addReturnButtons() {
-    ['mobileGuestMenu','mobileLoggedMenu'].forEach(id => {
-      const menu = $(id);
-      if (!menu || menu.querySelector('.la-return-current-page')) return;
-      const header = menu.querySelector('.mobile-user-menu-header');
-      if (!header) return;
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'la-return-current-page';
-      button.innerHTML = '<span aria-hidden="true">←</span><span>Voltar ao site</span>';
-      button.addEventListener('click', () => {
-        if (typeof window.closeMobileMenu === 'function') window.closeMobileMenu();
-      });
-      header.insertAdjacentElement('afterend', button);
-    });
-    const desktopMenu = $('userMenuModal');
-    const desktopList = desktopMenu?.querySelector('.p-3');
-    if (desktopList && !desktopList.querySelector('.la-return-current-page')) {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'la-return-current-page';
-      button.style.background = '#f8fafc';
-      button.style.color = '#111827';
-      button.innerHTML = '<span aria-hidden="true">←</span><span>Voltar ao site</span>';
-      button.addEventListener('click', () => {
-        if (typeof window.closeUserMenu === 'function') window.closeUserMenu();
-      });
-      desktopList.insertBefore(button, desktopList.firstChild);
-    }
+    // O botão "Voltar ao site" não deve aparecer nos menus do computador ou mobile.
+    document.querySelectorAll('.la-return-current-page').forEach(button => button.remove());
+    const storeBackButton = $('storeBackHomeButton');
+    if (storeBackButton) storeBackButton.style.setProperty('display', 'none', 'important');
   }
 
   // Modal de agendamento: scroll interno e bloqueio real da página de fundo.
