@@ -1,4 +1,4 @@
-const CACHE_NAME = "la-royal-advisory-v33";
+const CACHE_NAME = "la-royal-advisory-v34";
 
 const urlsToCache = [
     "./",
@@ -63,7 +63,10 @@ self.addEventListener("fetch", event => {
 });
 
 self.addEventListener("message", event => {
-    if (event.data === "SKIP_WAITING") {
+    if (
+        event.data === "SKIP_WAITING" ||
+        event.data?.tipo === "ATUALIZAR_AGORA"
+    ) {
         self.skipWaiting();
     }
 });
