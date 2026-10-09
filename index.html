@@ -12518,7 +12518,7 @@ function renderCatalog() {
                     const finalPrice = calculateFinalPrice(product);
                     const discount = Number(product.discount) || 0;
                     return `
-                        <article data-product-id="${escapeAttribute(product.id)}" data-delay="${(group.indexOf(product)%10)+1}" class="product-motion-card w-[360px] sm:w-[380px] flex-shrink-0 snap-start bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col">
+                        <article data-product-id="${escapeAttribute(product.id)}" data-delay="${(group.indexOf(product)%10)+1}" class="product-motion-card w-[260px] sm:w-[285px] flex-shrink-0 snap-start bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col">
                             <div class="relative h-64 bg-slate-100 overflow-hidden motion-image parallax-layer" data-parallax="0.035">
                                 <img src="${escapeAttribute(product.image)}" alt="${escapeAttribute(product.name)}" class="w-full h-full object-cover hover:scale-105 transition duration-500" loading="lazy">
                                 <span class="absolute top-3 left-3 px-3 py-1 rounded-full bg-slate-900/90 text-amber-400 text-xs font-bold">${escapeHtml(product.category || 'Produto')}</span>
@@ -13239,5 +13239,276 @@ document.addEventListener('DOMContentLoaded', initPremiumScrollMotion);
         });
     }
 </script>
+
+<style id="la-royal-refinement-fixes">
+/* Fotografias de produto: imagem integral, sem moldura e cartões mais proporcionais. */
+#catalogContainer .product-carousel-group article,
+#catalogContainer .product-motion-card { width: min(78vw, 285px) !important; border: 0 !important; }
+#catalogContainer .product-motion-card > div:first-child { height: 210px !important; background: #fff !important; border: 0 !important; }
+#catalogContainer .product-motion-card > div:first-child img { object-fit: contain !important; object-position: center !important; padding: 2px !important; transform: none !important; }
+#catalogContainer .product-motion-card > div:nth-child(2) { padding: .9rem !important; }
+#catalogContainer .product-motion-card h3 { font-size: 1rem !important; line-height: 1.35 !important; }
+#catalogContainer .product-motion-card p { overflow-wrap: anywhere; }
+#catalogContainer .product-motion-card .text-2xl { font-size: 1.25rem !important; }
+/* Cabeçalho/menu: identidade e botões. */
+#mobileUserMenuName, #mobileUserMenuEmail, #userMenuName, #userMenuEmail { color: #fff !important; }
+#profileHeaderName, #customerProfileModal .profile-section-title,
+#customerProfileModal [data-profile-title], #customerProfileModal .text-xs.uppercase.tracking-wider { color: #fff !important; }
+#profileHeaderEmail { color: #fff !important; }
+#customerProfileModal #changeProfileAvatarButton,
+#customerProfileModal button[onclick*="changeProfileAvatar"],
+#customerProfileModal label[for="profileAvatarInput"] { background: linear-gradient(135deg,#f8df85,#d4af37) !important; color: #111827 !important; border: 0 !important; }
+#removeProfileAvatarButton { background: #fff !important; color: #dc2626 !important; border: 1px solid #fecaca !important; }
+#customerOrdersModal .text-amber-600, #customerOrdersModal .text-amber-500 { color: #d4af37 !important; }
+#customerOrdersModal button[onclick*="openCustomerProfile"], #customerOrdersModal #editProfileButton,
+#customerOrdersModal button[data-action="edit-profile"] { background: #fff !important; color: #111827 !important; border: 1px solid #e5e7eb !important; }
+/* Modal/painel: rolagem apenas no conteúdo interno. */
+#consultingModal { overflow: hidden !important; overscroll-behavior: contain !important; touch-action: pan-y; }
+#consultingModal > div { max-height: calc(100dvh - 2rem) !important; overflow-y: auto !important; overscroll-behavior: contain !important; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
+#consultingModal, #navModal, #cartModal, #checkoutModal, #affiliateDashboardModal,
+#customerProfileModal, #customerOrdersModal, #affiliateProfileModal, #catalogFiltersModal { overscroll-behavior: contain; }
+#consultingModal > div, #navModal > div, #cartModal > div, #checkoutModal > div,
+#affiliateDashboardModal > div, #customerProfileModal > div, #customerOrdersModal > div,
+#affiliateProfileModal > div, #catalogFiltersModal > div { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+/* Painel do afiliado: destaque dourado e aba de dados clara. */
+#affiliateDashboardModal .text-amber-600, #affiliateDashboardModal .text-amber-500 { color: #d4af37 !important; }
+#affiliateDashboardModal button[onclick="openAffiliateProfile()"] { background: #fff !important; color: #111827 !important; border: 1px solid #e5e7eb !important; }
+#affiliateDashboardModal button[onclick="openAffiliateProfile()"] i { color: #111827 !important; }
+/* Na área da loja do afiliado, deixar só a entrada do perfil/menu no topo. */
+body.affiliate-mode header nav { display: none !important; }
+body.affiliate-mode #mobileUtilityActions,
+body.affiliate-mode header [aria-label="Abrir carrinho"],
+body.affiliate-mode header [aria-label="Abrir navegação"] { display: none !important; }
+/* Visitantes não veem o carrinho na barra superior. */
+body.guest-mode #mobileUtilityActions button[aria-label="Abrir carrinho"] { display: none !important; }
+/* Filtros rápidos acima do primeiro carrossel. */
+#storeCategoryQuickFilterWrap { display:flex; align-items:center; gap:.65rem; flex-wrap:wrap; margin:0 0 1rem; }
+#storeCategoryQuickFilterWrap label { color:#d4af37; font-size:.8rem; font-weight:800; }
+#storeCategoryQuickFilter { min-width:min(100%, 250px); max-width:100%; background:#fff; color:#111827; border:1px solid #d4af37; border-radius:.75rem; padding:.7rem .9rem; font-weight:700; }
+.la-return-current-page { width:100%; display:flex; align-items:center; justify-content:center; gap:.5rem; margin:.35rem 0 .55rem; padding:.65rem .8rem; border:1px solid rgba(212,175,55,.45); border-radius:.7rem; background:rgba(212,175,55,.14); color:#fff; font-size:.8rem; font-weight:800; }
+</style>
+<script id="la-royal-refinement-behavior">
+(function () {
+  'use strict';
+  const SITE_BASE = window.location.origin + window.location.pathname;
+  const $ = (id) => document.getElementById(id);
+
+  function currentAffiliate() {
+    const user = window.state?.currentUser;
+    if (!user) return null;
+    return (window.state?.affiliates || []).find(a =>
+      a.userId === user.id ||
+      String(a.email || a.affiliate_email || '').toLowerCase() === String(user.email || '').toLowerCase()
+    ) || null;
+  }
+
+  function populateAffiliateReferralFields() {
+    const affiliate = currentAffiliate();
+    const code = String(affiliate?.code || affiliate?.affiliateCode || '').trim().toUpperCase();
+    const codeInput = $('affiliateCode');
+    const linkInput = $('affiliateMainLink');
+    if (!code) {
+      if (codeInput) codeInput.value = '';
+      if (linkInput) linkInput.value = '';
+      return;
+    }
+    if (codeInput) codeInput.value = code;
+    if (linkInput) linkInput.value = SITE_BASE + '?ref=' + encodeURIComponent(code);
+  }
+
+  // Garante preenchimento automático no checkout a partir do link de indicação.
+  window.prepareCheckoutAffiliateField = function () {
+    const input = $('checkoutAffiliateCode');
+    const message = $('checkoutAffiliateMessage');
+    if (!input) return;
+    let code = '';
+    try { code = String(sessionStorage.getItem('laAffiliateReferralCode') || '').trim().toUpperCase(); } catch (_) {}
+    if (!code) {
+      const queryCode = new URLSearchParams(window.location.search).get('ref');
+      if (queryCode) code = queryCode.trim().toUpperCase();
+    }
+    if (code) {
+      input.value = code;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      if (message) {
+        message.textContent = 'Código de afiliado preenchido automaticamente pelo link de indicação.';
+        message.className = 'text-xs mt-2 text-emerald-700';
+      }
+    }
+  };
+
+  // Se o código vier na URL, preserva-o durante a navegação e restaura o campo antes da compra.
+  try {
+    const queryCode = new URLSearchParams(window.location.search).get('ref');
+    if (queryCode) sessionStorage.setItem('laAffiliateReferralCode', queryCode.trim().toUpperCase());
+  } catch (_) {}
+  document.addEventListener('click', function (event) {
+    const target = event.target.closest?.('[onclick*="openCheckoutModal"], [onclick*="startCheckout"], [onclick*="buyNow"], [onclick*="openCartModal"]');
+    if (!target) return;
+    setTimeout(() => window.prepareCheckoutAffiliateField(), 0);
+  }, true);
+  const checkoutObserver = new MutationObserver(() => {
+    const modal = $('checkoutModal');
+    if (modal && !modal.classList.contains('hidden')) window.prepareCheckoutAffiliateField();
+  });
+  if ($('checkoutModal')) checkoutObserver.observe($('checkoutModal'), { attributes:true, attributeFilter:['class'] });
+
+  // O painel passa a exibir sempre o código e o link principal gerados com o código ativo.
+  const originalOpenAffiliateDashboard = window.openAffiliateDashboard;
+  if (typeof originalOpenAffiliateDashboard === 'function') {
+    window.openAffiliateDashboard = function () {
+      const result = originalOpenAffiliateDashboard.apply(this, arguments);
+      setTimeout(populateAffiliateReferralFields, 0);
+      setTimeout(populateAffiliateReferralFields, 250);
+      return result;
+    };
+  }
+
+  // O programa de afiliados deve aparecer depois dos botões Salvar/Cancelar do perfil.
+  function placeAffiliateSection() {
+    const section = $('customerAffiliateSection');
+    const form = $('customerProfileForm');
+    if (section && form && section.parentElement !== form.parentElement) form.insertAdjacentElement('afterend', section);
+  }
+
+  function setupQuickCategoryFilter() {
+    const catalog = $('catalogContainer');
+    const select = $('filterCategory');
+    if (!catalog || !select) return;
+    let wrap = $('storeCategoryQuickFilterWrap');
+    if (!wrap) {
+      wrap = document.createElement('div');
+      wrap.id = 'storeCategoryQuickFilterWrap';
+      wrap.innerHTML = '<label for="storeCategoryQuickFilter">Filtrar por categoria</label><select id="storeCategoryQuickFilter" aria-label="Filtrar produtos por categoria"><option value="all">Todas as categorias</option></select>';
+      catalog.parentElement.insertBefore(wrap, catalog);
+    }
+    const quick = $('storeCategoryQuickFilter');
+    const products = (window.state?.products || []).filter(p => Number(p.stock) > 0 && p.category);
+    const categories = [...new Set(products.map(p => String(p.category).trim()).filter(Boolean))]
+      .sort((a,b) => a.localeCompare(b, 'pt-BR'));
+    const oldValue = quick.value || select.value || 'all';
+    quick.innerHTML = '<option value="all">Todas as categorias</option>' + categories.map(c =>
+      '<option value="' + c.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;') + '">' +
+      c.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</option>'
+    ).join('');
+    if ([...quick.options].some(o => o.value === oldValue)) quick.value = oldValue;
+    quick.onchange = function () {
+      const value = quick.value;
+      if (![...select.options].some(o => o.value === value)) {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = value;
+        select.appendChild(option);
+      }
+      select.value = value;
+      if (typeof window.renderCatalog === 'function') window.renderCatalog();
+    };
+    if (select.value !== quick.value && [...quick.options].some(o => o.value === select.value)) quick.value = select.value;
+  }
+
+  // A navegação sempre fecha o menu/modal e leva à seção correta, também nos links do rodapé.
+  function navigateToSection(id) {
+    if (!id || !$(id)) return false;
+    if (document.body.classList.contains('affiliate-mode') || document.body.classList.contains('store-open-mode')) {
+      if (typeof window.returnToHomeFromStore === 'function') window.returnToHomeFromStore();
+    }
+    if (typeof window.closeMobileMenu === 'function') window.closeMobileMenu();
+    if (typeof window.closeNavigationModal === 'function') window.closeNavigationModal();
+    if (id === 'consultoria' && typeof window.openConsultingBooking === 'function') {
+      // Não usa dados pessoais/financeiros como tipo de consultoria.
+      $('consultingType') && ($('consultingType').value = 'Consultoria');
+    }
+    setTimeout(() => {
+      const el = $(id);
+      if (el) window.scrollTo({ top: Math.max(0, el.getBoundingClientRect().top + window.scrollY - 88), behavior:'smooth' });
+    }, 80);
+    return true;
+  }
+  document.addEventListener('click', function (event) {
+    const anchor = event.target.closest?.('a[href="#consultoria"], a[href="#afiliados"]');
+    if (!anchor) return;
+    const id = anchor.getAttribute('href').slice(1);
+    if (navigateToSection(id)) event.preventDefault();
+  }, true);
+
+  function addReturnButtons() {
+    ['mobileGuestMenu','mobileLoggedMenu'].forEach(id => {
+      const menu = $(id);
+      if (!menu || menu.querySelector('.la-return-current-page')) return;
+      const header = menu.querySelector('.mobile-user-menu-header');
+      if (!header) return;
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'la-return-current-page';
+      button.innerHTML = '<span aria-hidden="true">←</span><span>Voltar ao site</span>';
+      button.addEventListener('click', () => {
+        if (typeof window.closeMobileMenu === 'function') window.closeMobileMenu();
+      });
+      header.insertAdjacentElement('afterend', button);
+    });
+  }
+
+  // Modal de agendamento: scroll interno e bloqueio real da página de fundo.
+  const originalOpenConsulting = window.openConsultingBooking;
+  if (typeof originalOpenConsulting === 'function') {
+    window.openConsultingBooking = function (type, value) {
+      const safeType = /meu financeiro|financeiro pessoal/i.test(String(type || '')) ? 'Consultoria' : (type || 'Consultoria');
+      const result = originalOpenConsulting.call(this, safeType, value);
+      document.body.style.overflow = 'hidden';
+      if (window.laLenis?.stop) window.laLenis.stop();
+      const modal = $('consultingModal');
+      if (modal) {
+        modal.style.overflow = 'hidden';
+        const panel = modal.firstElementChild;
+        if (panel) {
+          panel.style.maxHeight = 'calc(100dvh - 2rem)';
+          panel.style.overflowY = 'auto';
+          panel.style.overscrollBehavior = 'contain';
+          panel.style.webkitOverflowScrolling = 'touch';
+        }
+      }
+      return result;
+    };
+  }
+  const originalCloseConsulting = window.closeConsultingBooking;
+  if (typeof originalCloseConsulting === 'function') {
+    window.closeConsultingBooking = function () {
+      const result = originalCloseConsulting.apply(this, arguments);
+      if (window.laLenis?.start) window.laLenis.start();
+      return result;
+    };
+  }
+
+  // Scroll interno de modais: impede que wheel/toque "vaze" para a página de trás.
+  document.addEventListener('wheel', event => {
+    const panel = event.target.closest?.('#consultingModal > div, #navModal > div, #cartModal > div, #checkoutModal > div, #affiliateDashboardModal > div, #customerProfileModal > div, #customerOrdersModal > div, #affiliateProfileModal > div, #catalogFiltersModal > div');
+    if (panel) event.stopPropagation();
+  }, {capture:true, passive:true});
+  document.addEventListener('touchmove', event => {
+    const panel = event.target.closest?.('#consultingModal > div, #navModal > div, #cartModal > div, #checkoutModal > div, #affiliateDashboardModal > div, #customerProfileModal > div, #customerOrdersModal > div, #affiliateProfileModal > div, #catalogFiltersModal > div');
+    if (panel) event.stopPropagation();
+  }, {capture:true, passive:true});
+
+  function applyAll() {
+    placeAffiliateSection();
+    setupQuickCategoryFilter();
+    addReturnButtons();
+    if (document.body.classList.contains('guest-mode')) {
+      document.querySelectorAll('#mobileUtilityActions button[aria-label="Abrir carrinho"]').forEach(el => el.style.display = 'none');
+    }
+    if (document.body.classList.contains('affiliate-mode')) populateAffiliateReferralFields();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', applyAll, {once:true});
+  else applyAll();
+  const uiObserver = new MutationObserver(() => {
+    placeAffiliateSection();
+    setupQuickCategoryFilter();
+    addReturnButtons();
+  });
+  uiObserver.observe(document.body, { childList:true, subtree:true });
+  window.addEventListener('pageshow', applyAll);
+})();
+</script>
+
 </body>
 </html>
