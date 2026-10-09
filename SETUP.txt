@@ -1,8 +1,12 @@
-L&A Royal Advisory — Supabase Edge Functions
+L&A Royal Advisory — GitHub Pages + Supabase Edge Functions
 
-Frontend atual
-- index.html
-- URL: https://equipezero-web.github.io/L-A-Advisory
+Publicação do frontend
+- Plataforma: GitHub Pages.
+- Branch/pasta esperada: main / (root).
+- Arquivo de entrada: index.html.
+- URL: https://equipezero-web.github.io/L-A-Advisory/
+- Origem CORS: https://equipezero-web.github.io (sem o caminho /L-A-Advisory).
+- GitHub Pages hospeda apenas arquivos estáticos; não executa server.js nem package.json.
 
 Scripts SQL disponíveis
 1. 001_security_checkout.sql (raiz do repositório)
@@ -18,6 +22,8 @@ Secrets usados pelo código atual
 - MP_WEBHOOK_SECRET
 - SITE_URL=https://equipezero-web.github.io/L-A-Advisory
 
+Defina SITE_URL nos secrets das Supabase Edge Functions. Use a URL do projeto sem barra final. Não tente configurar secrets no GitHub Pages: a hospedagem estática não disponibiliza variáveis de ambiente ao HTML.
+
 Não use MERCADOPAGO_ACCESS_TOKEN: o código atual lê MP_ACCESS_TOKEN.
 Nunca coloque MP_ACCESS_TOKEN, MP_WEBHOOK_SECRET ou a chave service-role no HTML/GitHub Pages.
 
@@ -29,7 +35,9 @@ Funções presentes
 - create-test-checkout
 - mercado-pago-webhook
 
-Antes de deploy, confirme no index.html qual função de checkout está sendo chamada e publique essa função junto com suas dependências.
+O checkout do frontend chama /functions/v1/create-order; publique essa Edge Function após atualizar o repositório. A função usa SITE_URL para URLs de retorno ao GitHub Pages. As funções create-checkout e create-test-checkout são endpoints distintos.
+
+CORS para as funções chamadas pelo navegador: Access-Control-Allow-Origin deve ser exatamente https://equipezero-web.github.io (origem, sem caminho). Permita authorization, apikey e content-type quando usados e responda OPTIONS. Não use '*' junto com credenciais. CORS não substitui autenticação/autorização e não valida a assinatura do webhook.
 
 Webhook Mercado Pago
 https://fqisewatypluagngmgka.supabase.co/functions/v1/mercado-pago-webhook
