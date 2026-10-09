@@ -12424,26 +12424,23 @@ let catalogShowingAll = false;
 const CATALOG_CAROUSEL_LIMIT = 10;
 
 function clearCatalogFilters() {
-    const search = document.getElementById('productSearch');
-    const category = document.getElementById('productCategory');
-    const sort = document.getElementById('productSort');
-    const minPrice = document.getElementById('minPrice');
-    const maxPrice = document.getElementById('maxPrice');
+    const defaults = {
+        searchProduct: '',
+        filterCategory: 'all',
+        filterMinPrice: '',
+        filterMaxPrice: '',
+        filterColor: 'all',
+        filterSize: 'all',
+        filterStock: 'all',
+        sortProducts: 'relevance'
+    };
 
-    [search, category, sort, minPrice, maxPrice].forEach(field => {
-        if (!field) return;
-        if (field.tagName === 'SELECT') field.selectedIndex = 0;
-        else field.value = '';
+    Object.entries(defaults).forEach(([id, value]) => {
+        const field = document.getElementById(id);
+        if (field) field.value = value;
     });
 
-    // Also clear any other catalog controls wired to filterCatalog().
-    document.querySelectorAll('#loja [data-catalog-filter]').forEach(field => {
-        if (field.type === 'checkbox' || field.type === 'radio') field.checked = false;
-        else field.value = '';
-    });
-
-    if (typeof filterCatalog === 'function') filterCatalog();
-    else renderCatalog();
+    renderCatalog();
 }
 
 function toggleFullCatalog() {
@@ -12454,7 +12451,50 @@ function renderCatalog() {
     const container = document.getElementById('catalogContainer') || document.getElementById('productsGrid');
     if (!container) return;
 
-    const availableProducts = state.products.filter(product => Number(product.stock) > 0);
+    const searchTerm = (document.getElementById('searchProduct')?.value || '').trim().toLocaleLowerCase('pt-BR');
+    const categoryFilter = document.getElementById('filterCategory')?.value || 'all';
+    const minPriceValue = document.getElementById('filterMinPrice')?.value;
+    const maxPriceValue = document.getElementById('filterMaxPrice')?.value;
+    const minPrice = minPriceValue === '' || minPriceValue == null ? null : Number(minPriceValue);
+    const maxPrice = maxPriceValue === '' || maxPriceValue == null ? null : Number(maxPriceValue);
+    const colorFilter = document.getElementById('filterColor')?.value || 'all';
+    const sizeFilter = document.getElementById('filterSize')?.value || 'all';
+    const stockFilter = document.getElementById('filterStock')?.value || 'all';
+    const sortMode = document.getElementById('sortProducts')?.value || 'relevance';
+
+    const availableProducts = state.products.filter(product => {
+        const stock = Number(product.stock) || 0;
+        const price = calculateFinalPrice(product);
+        const searchText = [product.name, product.description, product.category, product.brand]
+            .filter(Boolean).join(' ').toLocaleLowerCase('pt-BR');
+        const category = String(product.category || '').toLocaleLowerCase('pt-BR');
+        const colors = [product.color, product.colors, product.variations?.color]
+            .flat().filter(Boolean).map(value => String(value).toLocaleLowerCase('pt-BR'));
+        const sizes = [product.size, product.sizes, product.variations?.size]
+            .flat().filter(Boolean).map(value => String(value).toLocaleLowerCase('pt-BR'));
+
+        if (searchTerm && !searchText.includes(searchTerm)) return false;
+        if (categoryFilter !== 'all' && category !== String(categoryFilter).toLocaleLowerCase('pt-BR')) return false;
+        if (minPrice !== null && Number.isFinite(minPrice) && price < minPrice) return false;
+        if (maxPrice !== null && Number.isFinite(maxPrice) && price > maxPrice) return false;
+        if (colorFilter !== 'all' && !colors.some(value => value.includes(String(colorFilter).toLocaleLowerCase('pt-BR')))) return false;
+        if (sizeFilter !== 'all' && !sizes.some(value => value === String(sizeFilter).toLocaleLowerCase('pt-BR'))) return false;
+        if (stockFilter === 'available' && stock <= 0) return false;
+        if (stockFilter === 'out-of-stock' && stock > 0) return false;
+        if (stockFilter === 'all' && stock <= 0) return false;
+        return true;
+    }).sort((a, b) => {
+        const priceA = calculateFinalPrice(a);
+        const priceB = calculateFinalPrice(b);
+        switch (sortMode) {
+            case 'lowest-price': return priceA - priceB;
+            case 'highest-price': return priceB - priceA;
+            case 'name-az': return String(a.name || '').localeCompare(String(b.name || ''), 'pt-BR');
+            case 'name-za': return String(b.name || '').localeCompare(String(a.name || ''), 'pt-BR');
+            case 'newest': return new Date(b.createdAt || b.created_at || 0) - new Date(a.createdAt || a.created_at || 0);
+            default: return 0;
+        }
+    });
 
     if (!availableProducts.length) {
         container.className = 'space-y-8 pb-6';
