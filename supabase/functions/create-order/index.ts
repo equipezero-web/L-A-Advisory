@@ -9,7 +9,7 @@ const cors = {
 };
 
 // GitHub Pages é estático; SITE_URL é configurado como secret da Edge Function.
-const SITE_URL = (Deno.env.get('SITE_URL') || 'https://equipezero-web.github.io/L-A-Advisory').replace(/\\/+$/, '');
+const SITE_URL = (Deno.env.get('SITE_URL') || 'https://equipezero-web.github.io/L-A-Advisory').replace(/\/+$/, '');
 
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
