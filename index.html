@@ -13293,6 +13293,9 @@ body.guest-mode #mobileUtilityActions button[aria-label="Abrir carrinho"] { disp
   const SITE_BASE = window.location.origin + window.location.pathname;
   const $ = (id) => document.getElementById(id);
 
+  // Expose the existing application state for this UI enhancement layer.
+  try { window.state = state; } catch (_) {}
+
   function currentAffiliate() {
     const user = window.state?.currentUser;
     if (!user) return null;
@@ -13368,7 +13371,7 @@ body.guest-mode #mobileUtilityActions button[aria-label="Abrir carrinho"] { disp
   function placeAffiliateSection() {
     const section = $('customerAffiliateSection');
     const form = $('customerProfileForm');
-    if (section && form && section.parentElement !== form.parentElement) form.insertAdjacentElement('afterend', section);
+    if (section && form && form.nextElementSibling !== section) form.insertAdjacentElement('afterend', section);
   }
 
   function setupQuickCategoryFilter() {
@@ -13387,10 +13390,14 @@ body.guest-mode #mobileUtilityActions button[aria-label="Abrir carrinho"] { disp
     const categories = [...new Set(products.map(p => String(p.category).trim()).filter(Boolean))]
       .sort((a,b) => a.localeCompare(b, 'pt-BR'));
     const oldValue = quick.value || select.value || 'all';
-    quick.innerHTML = '<option value="all">Todas as categorias</option>' + categories.map(c =>
+    const optionMarkup = '<option value="all">Todas as categorias</option>' + categories.map(c =>
       '<option value="' + c.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;') + '">' +
       c.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</option>'
     ).join('');
+    if (quick.dataset.categoryOptions !== optionMarkup) {
+      quick.innerHTML = optionMarkup;
+      quick.dataset.categoryOptions = optionMarkup;
+    }
     if ([...quick.options].some(o => o.value === oldValue)) quick.value = oldValue;
     quick.onchange = function () {
       const value = quick.value;
