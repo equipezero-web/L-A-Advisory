@@ -8,6 +8,7 @@ Publicação atual
 - URL pública: https://equipezero-web.github.io/L-A-Advisory/
 - Origem CORS correta (somente domínio, sem caminho): https://equipezero-web.github.io
 - O caminho /L-A-Advisory/ faz parte da URL do site, mas NÃO faz parte do cabeçalho Origin do navegador.
+- No Supabase Dashboard > Authentication > URL Configuration, configure o Site URL como https://equipezero-web.github.io/L-A-Advisory/ e inclua essa mesma URL em Redirect URLs para recuperação de senha e confirmação de e-mail.
 - server.js, package.json e wrangler.jsonc não são usados pelo GitHub Pages; são artefatos para outras formas de hospedagem. O GitHub Pages não executa Node.js nem funções de servidor.
 - Não é necessário criar workflow de deploy se Pages estiver configurado em Settings > Pages > Deploy from a branch > main > /(root).
 - Nunca publique chaves secretas no HTML, no GitHub ou no navegador.
