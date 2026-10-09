@@ -1,42 +1,49 @@
-L&A Royal Advisory — migração Firebase -> Supabase
+L&A Royal Advisory — configuração atual do repositório
 
-1) O arquivo index_supabase_migrated.html já aponta para:
-   https://fqisewatypluagngmgka.supabase.co
-   e usa somente a chave pública publishable no navegador.
+Frontend
+- Página principal atual: index.html (não existe index_supabase_migrated.html na raiz).
+- URL GitHub Pages configurada no frontend: https://equipezero-web.github.io/L-A-Advisory
+- Nunca publique chaves secretas no HTML, no GitHub ou no navegador.
 
-2) NUNCA coloque SUPABASE_SERVICE_ROLE_KEY ou MERCADOPAGO_ACCESS_TOKEN no HTML/GitHub.
+SQL
+- A migração de segurança do checkout está na raiz: 001_security_checkout.sql.
+- A autenticação separada e pagamentos de comissão de afiliados estão em: supabase/affiliate_auth.sql.
+- Revise e aplique cada script no Supabase SQL Editor antes de publicar as funções que dependem dele.
 
-3) Execute primeiro:
-   supabase/001_security_checkout.sql
+Secrets usados pelas Edge Functions
+- SUPABASE_URL
+- SUPABASE_SECRET_KEYS (JSON com a chave service-role em "default") ou SUPABASE_SERVICE_ROLE_KEY, conforme a função
+- SUPABASE_PUBLISHABLE_KEYS (JSON com a chave pública em "default") ou SUPABASE_ANON_KEY, conforme a função
+- MP_ACCESS_TOKEN
+- MP_WEBHOOK_SECRET
+- SITE_URL=https://equipezero-web.github.io/L-A-Advisory
 
-4) Configure os secrets das Edge Functions:
-   SUPABASE_URL
-   SUPABASE_ANON_KEY
-   SUPABASE_SERVICE_ROLE_KEY
-   MERCADOPAGO_ACCESS_TOKEN
-   SITE_URL=https://equipezero-web.github.io/L-A-Advisory
+Não use MERCADOPAGO_ACCESS_TOKEN: as funções atuais leem MP_ACCESS_TOKEN.
+Nunca coloque chave service-role, MP_ACCESS_TOKEN ou MP_WEBHOOK_SECRET no frontend.
 
-5) Faça deploy das funções:
-   supabase functions deploy create-checkout
-   supabase functions deploy register-affiliate
-   supabase functions deploy mercado-pago-webhook
+Edge Functions presentes no repositório
+- affiliate-login
+- register-affiliate
+- create-checkout
+- create-order
+- create-test-checkout
+- mercado-pago-webhook
 
-6) O Mercado Pago deve apontar o webhook para:
-   https://fqisewatypluagngmgka.supabase.co/functions/v1/mercado-pago-webhook
+Confira qual endpoint é chamado pelo frontend antes de fazer deploy. Não remova funções que ainda tenham chamadas ativas.
 
-7) Antes de apagar Firebase, teste em produção:
-   - cadastro de cliente
-   - confirmação de e-mail (se habilitada)
-   - login/logout
-   - recuperação de senha
-   - cadastro de afiliado
-   - aprovação de afiliado pelo admin
-   - criação de link de afiliado
-   - checkout
-   - retorno Mercado Pago
-   - webhook e atualização do pedido
-   - baixa de estoque
-   - comissão
-   - RLS com usuário cliente tentando acessar dados de outro usuário
+Webhook Mercado Pago
+https://fqisewatypluagngmgka.supabase.co/functions/v1/mercado-pago-webhook
 
-8) O Turnstile foi configurado no projeto Supabase. Para a autenticação exigir o CAPTCHA no navegador, o widget/site key do Cloudflare ainda precisa ser colocado no HTML e o token enviado nas chamadas de Auth. Não invente uma site key.
+Checklist obrigatório antes de produção
+- cadastro, login, logout e recuperação de senha
+- aprovação e bloqueio de afiliados
+- links de afiliado e atribuição de vendas
+- checkout Pix/cartão
+- confirmação de pagamento pelo webhook assinado
+- baixa de estoque sem duplicação
+- comissão correta e pagamento de comissão
+- RLS: um cliente não pode ler dados de outro cliente
+- teste de layout e rolagem em desktop e celular
+
+Observação
+O arquivo de configuração do Turnstile e a integração de CAPTCHA no navegador precisam ser verificados antes de afirmar que a autenticação exige CAPTCHA.
