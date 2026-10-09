@@ -13257,6 +13257,7 @@ document.addEventListener('DOMContentLoaded', initPremiumScrollMotion);
 #profileHeaderEmail { color: #fff !important; }
 #customerProfileModal #changeProfileAvatarButton,
 #customerProfileModal button[onclick*="changeProfileAvatar"],
+#customerProfileModal button[onclick*="profileAvatarInput"],
 #customerProfileModal label[for="profileAvatarInput"] { background: linear-gradient(135deg,#f8df85,#d4af37) !important; color: #111827 !important; border: 0 !important; }
 #removeProfileAvatarButton { background: #fff !important; color: #dc2626 !important; border: 1px solid #fecaca !important; }
 #customerOrdersModal .text-amber-600, #customerOrdersModal .text-amber-500 { color: #d4af37 !important; }
@@ -13281,6 +13282,8 @@ body.affiliate-mode header [aria-label="Abrir carrinho"],
 body.affiliate-mode header [aria-label="Abrir navegação"] { display: none !important; }
 /* Visitantes não veem o carrinho na barra superior. */
 body.guest-mode #mobileUtilityActions button[aria-label="Abrir carrinho"] { display: none !important; }
+body.guest-mode #affiliateNavLink { display: inline-flex !important; }
+body.guest-mode #afiliados { display: block !important; }
 /* Filtros rápidos acima do primeiro carrossel. */
 #storeCategoryQuickFilterWrap { display:flex; align-items:center; gap:.65rem; flex-wrap:wrap; margin:0 0 1rem; }
 #storeCategoryQuickFilterWrap label { color:#d4af37; font-size:.8rem; font-weight:800; }
@@ -13355,6 +13358,14 @@ body.guest-mode #mobileUtilityActions button[aria-label="Abrir carrinho"] { disp
     if (modal && !modal.classList.contains('hidden')) window.prepareCheckoutAffiliateField();
   });
   if ($('checkoutModal')) checkoutObserver.observe($('checkoutModal'), { attributes:true, attributeFilter:['class'] });
+
+  // Captura também acionamentos por HTML inline, mesmo se a função original estiver encapsulada.
+  document.addEventListener('click', function (event) {
+    if (event.target.closest?.('[onclick*="openAffiliateDashboard"]')) {
+      setTimeout(populateAffiliateReferralFields, 0);
+      setTimeout(populateAffiliateReferralFields, 250);
+    }
+  }, true);
 
   // O painel passa a exibir sempre o código e o link principal gerados com o código ativo.
   const originalOpenAffiliateDashboard = window.openAffiliateDashboard;
