@@ -1094,17 +1094,18 @@
     max-width: 285px !important;
   }
   #catalogContainer .product-motion-card > div:first-child {
-    height: 190px !important;
-    min-height: 190px !important;
-    background: #fff !important;
+    height: 230px !important;
+    min-height: 230px !important;
+    background: #f8fafc !important;
     border: 0 !important;
     padding: 0 !important;
+    overflow: hidden !important;
   }
   #catalogContainer .product-motion-card > div:first-child img {
     display: block !important;
     width: 100% !important;
     height: 100% !important;
-    object-fit: contain !important;
+    object-fit: cover !important;
     object-position: center !important;
     padding: 0 !important;
     transform: none !important;
@@ -13279,11 +13280,11 @@ document.addEventListener('DOMContentLoaded', initPremiumScrollMotion);
 </script>
 
 <style id="la-royal-refinement-fixes">
-/* Fotografias de produto: imagem integral, sem moldura e cartões mais proporcionais. */
+/* Fotografias de produto: ocupar o quadro sem margens artificiais. */
 #catalogContainer .product-carousel-group article,
-#catalogContainer .product-motion-card { width: min(78vw, 285px) !important; border: 0 !important; }
-#catalogContainer .product-motion-card > div:first-child { height: 210px !important; background: #fff !important; border: 0 !important; }
-#catalogContainer .product-motion-card > div:first-child img { object-fit: contain !important; object-position: center !important; padding: 2px !important; transform: none !important; }
+#catalogContainer .product-motion-card { border: 0 !important; }
+#catalogContainer .product-motion-card > div:first-child { height: 240px !important; background: #f8fafc !important; border: 0 !important; padding: 0 !important; overflow: hidden !important; }
+#catalogContainer .product-motion-card > div:first-child img { width: 100% !important; height: 100% !important; object-fit: cover !important; object-position: center !important; padding: 0 !important; transform: none !important; }
 #catalogContainer .product-motion-card > div:nth-child(2) { padding: .9rem !important; }
 #catalogContainer .product-motion-card h3 { font-size: 1rem !important; line-height: 1.35 !important; }
 #catalogContainer .product-motion-card p { overflow-wrap: anywhere; }
