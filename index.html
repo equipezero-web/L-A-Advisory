@@ -7909,7 +7909,7 @@
             }
         }
 
-        function startProductAutoRefresh() {
+        async function startProductAutoRefresh() {
             if (window.laProductRefreshTimer) {
                 clearInterval(window.laProductRefreshTimer);
             }
@@ -8265,7 +8265,7 @@
             document.body.style.overflow = '';
         }
 
-        function setupOrderRealtimeSync() {
+        async function setupOrderRealtimeSync() {
             realtimeChannels.forEach(ch => supabaseClient.removeChannel(ch));
             realtimeChannels = [];
             if (!supabaseAuthUser) return;
