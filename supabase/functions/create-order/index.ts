@@ -1,11 +1,15 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const cors = {
+  // A origem contém somente o domínio, sem o caminho /L-A-Advisory.
   'Access-Control-Allow-Origin': 'https://equipezero-web.github.io',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Content-Type': 'application/json'
 };
+
+// GitHub Pages é estático; SITE_URL é configurado como secret da Edge Function.
+const SITE_URL = (Deno.env.get('SITE_URL') || 'https://equipezero-web.github.io/L-A-Advisory').replace(/\\/+$/, '');
 
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -506,13 +510,13 @@ Deno.serve(async (req) => {
           statement_descriptor: 'LA ROYAL ADVISORY',
           online: {
             success_url:
-              'https://equipezero-web.github.io/L-A-Advisory/?payment=success&order=' +
+              `${SITE_URL}/?payment=success&order=` +
               encodeURIComponent(orderId),
             failure_url:
-              'https://equipezero-web.github.io/L-A-Advisory/?payment=failure&order=' +
+              `${SITE_URL}/?payment=failure&order=` +
               encodeURIComponent(orderId),
             pending_url:
-              'https://equipezero-web.github.io/L-A-Advisory/?payment=pending&order=' +
+              `${SITE_URL}/?payment=pending&order=` +
               encodeURIComponent(orderId),
             auto_return: 'approved'
           }
