@@ -13322,6 +13322,33 @@ body.guest-mode #afiliados { display: block !important; }
     if (linkInput) linkInput.value = SITE_BASE + '?ref=' + encodeURIComponent(code);
   }
 
+  async function refreshAffiliateReferralFields() {
+    populateAffiliateReferralFields();
+    const cached = currentAffiliate();
+    if (cached?.code || typeof supabaseClient === 'undefined' || !supabaseClient || !state.currentUser?.id) return;
+    const user = state.currentUser;
+    try {
+      let result = await supabaseClient.from('affiliates')
+        .select('id,user_id,code,status,name,affiliate_email')
+        .eq('user_id', user.id).limit(1).maybeSingle();
+      if ((!result.data || result.error) && user.email) {
+        result = await supabaseClient.from('affiliates')
+          .select('id,user_id,code,status,name,affiliate_email')
+          .eq('affiliate_email', String(user.email).trim().toLowerCase())
+          .order('created_at', { ascending: false }).limit(1).maybeSingle();
+      }
+      const data = result?.data;
+      if (data && ['active','approved'].includes(String(data.status || '').toLowerCase()) && data.code) {
+        const mapped = { ...data, userId: data.user_id || user.id, email: data.affiliate_email || user.email };
+        state.affiliates = [...(state.affiliates || []).filter(a => a.userId !== mapped.userId && String(a.email || a.affiliate_email || '').toLowerCase() !== String(user.email || '').toLowerCase()), mapped];
+        window.state = state;
+        populateAffiliateReferralFields();
+      }
+    } catch (error) {
+      console.warn('Não foi possível atualizar o código de indicação do afiliado:', error);
+    }
+  }
+
   // Garante preenchimento automático no checkout a partir do link de indicação.
   window.prepareCheckoutAffiliateField = function () {
     const input = $('checkoutAffiliateCode');
@@ -13362,8 +13389,8 @@ body.guest-mode #afiliados { display: block !important; }
   // Captura também acionamentos por HTML inline, mesmo se a função original estiver encapsulada.
   document.addEventListener('click', function (event) {
     if (event.target.closest?.('[onclick*="openAffiliateDashboard"]')) {
-      setTimeout(populateAffiliateReferralFields, 0);
-      setTimeout(populateAffiliateReferralFields, 250);
+      setTimeout(() => refreshAffiliateReferralFields(), 0);
+      setTimeout(() => refreshAffiliateReferralFields(), 250);
     }
   }, true);
 
@@ -13372,8 +13399,8 @@ body.guest-mode #afiliados { display: block !important; }
   if (typeof originalOpenAffiliateDashboard === 'function') {
     window.openAffiliateDashboard = function () {
       const result = originalOpenAffiliateDashboard.apply(this, arguments);
-      setTimeout(populateAffiliateReferralFields, 0);
-      setTimeout(populateAffiliateReferralFields, 250);
+      setTimeout(() => refreshAffiliateReferralFields(), 0);
+      setTimeout(() => refreshAffiliateReferralFields(), 250);
       return result;
     };
   }
