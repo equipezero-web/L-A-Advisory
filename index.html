@@ -13464,6 +13464,20 @@ body.guest-mode #afiliados { display: block !important; }
       });
       header.insertAdjacentElement('afterend', button);
     });
+    const desktopMenu = $('userMenuModal');
+    const desktopList = desktopMenu?.querySelector('.p-3');
+    if (desktopList && !desktopList.querySelector('.la-return-current-page')) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'la-return-current-page';
+      button.style.background = '#f8fafc';
+      button.style.color = '#111827';
+      button.innerHTML = '<span aria-hidden="true">←</span><span>Voltar ao site</span>';
+      button.addEventListener('click', () => {
+        if (typeof window.closeUserMenu === 'function') window.closeUserMenu();
+      });
+      desktopList.insertBefore(button, desktopList.firstChild);
+    }
   }
 
   // Modal de agendamento: scroll interno e bloqueio real da página de fundo.
