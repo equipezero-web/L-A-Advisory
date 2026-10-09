@@ -4725,7 +4725,7 @@
                 <button
                     type="button"
                     id="affiliateUserMenuButton"
-                    onclick="openAffiliateDashboard()"
+                    onclick="openAffiliateStore()"
                     class="hidden w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 text-left transition"
                 >
                     <i
@@ -4734,8 +4734,18 @@
                     ></i>
 
                     <span class="font-bold text-sm text-slate-800">
-                        Painel de afiliado
+                        Loja do afiliado
                     </span>
+                </button>
+
+                <button
+                    type="button"
+                    id="affiliateDashboardUserMenuButton"
+                    onclick="openAffiliateDashboard()"
+                    class="hidden w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 text-left transition"
+                >
+                    <i data-lucide="layout-dashboard" class="w-5 h-5 text-amber-600"></i>
+                    <span class="font-bold text-sm text-slate-800">Painel de afiliado</span>
                 </button>
 
                 <button
@@ -9209,6 +9219,7 @@ if (error) throw error;
             const emailEl = document.getElementById('userMenuEmail');
             const initialEl = document.getElementById('userMenuInitial');
             const affiliateBtn = document.getElementById('affiliateUserMenuButton');
+            const affiliateDashboardBtn = document.getElementById('affiliateDashboardUserMenuButton');
             const affiliateRequestBtn = document.getElementById('affiliateRequestUserMenuButton');
             const adminBtn = document.getElementById('adminUserMenuButton');
 
@@ -9232,7 +9243,7 @@ if (error) throw error;
             if (affiliateBtn) {
                 if (!document.body.classList.contains('affiliate-mode') && (user.role === 'affiliate' || (user.role === 'customer' && approvedAffiliate))) {
                     affiliateBtn.classList.remove('hidden');
-                    affiliateBtn.innerHTML = '<i data-lucide="crown" class="w-5 h-5 text-amber-600"></i><span class="font-bold text-sm text-slate-800">Afiliado</span>';
+                    affiliateBtn.innerHTML = '<i data-lucide="shopping-bag" class="w-5 h-5 text-amber-600"></i><span class="font-bold text-sm text-slate-800">Loja do afiliado</span>';
                     affiliateBtn.onclick = () => openAffiliateStore();
                 } else {
                     affiliateBtn.classList.add('hidden');
@@ -9255,10 +9266,9 @@ if (error) throw error;
 
             const affiliateReturnBtn = document.getElementById('affiliateReturnClientButton');
             if (affiliateReturnBtn) affiliateReturnBtn.classList.toggle('hidden', !document.body.classList.contains('affiliate-mode'));
-            const affiliateDashboardBtn = document.getElementById('affiliateUserMenuButton');
-            if (affiliateDashboardBtn) {
-                affiliateDashboardBtn.classList.toggle('hidden', !(user.role === 'affiliate' && ['active', 'approved'].includes(user.affiliateStatus)));
-            }
+            const canUseAffiliateArea = user.role === 'affiliate' || (linkedAffiliate && ['active', 'approved'].includes(linkedAffiliate.status));
+            affiliateDashboardBtn?.classList.toggle('hidden', !canUseAffiliateArea);
+            affiliateBtn?.classList.toggle('hidden', !canUseAffiliateArea || document.body.classList.contains('affiliate-mode'));
 
             if (adminBtn) {
                 if (user.role === 'admin') adminBtn.classList.remove('hidden');
@@ -9307,6 +9317,7 @@ if (error) throw error;
 
             const affiliateModeActive = document.body.classList.contains('affiliate-mode');
             affiliateBtn?.classList.toggle('hidden', !approvedAffiliate || affiliateModeActive);
+            affiliateDashboardBtn?.classList.toggle('hidden', !approvedAffiliate);
             affiliateReturnBtn?.classList.toggle('hidden', !affiliateModeActive);
             affiliateRequestBtn?.classList.toggle('hidden', approvedAffiliate || user.role !== 'customer' || !!linkedAffiliate || affiliateModeActive);
 
@@ -10916,7 +10927,7 @@ function openNavigationModal() {
             // Entrar na loja não pode esconder a conta, o painel ou o logout.
             const returnButton = document.getElementById('affiliateReturnClientButton');
             const storeButtons = document.querySelectorAll('#affiliateUserMenuButton, #mobileAffiliateMenuButton');
-            const dashboardButtons = document.querySelectorAll('#affiliateUserMenuButton, #mobileAffiliateDashboardButton');
+            const dashboardButtons = document.querySelectorAll('#affiliateDashboardUserMenuButton, #mobileAffiliateDashboardButton');
 
             storeButtons.forEach(button => button.classList.toggle('hidden', active));
             dashboardButtons.forEach(button => {
@@ -10940,6 +10951,7 @@ function openNavigationModal() {
             const openStoreWrap = document.getElementById('virtualStoreOpenWrap');
             if (openStoreWrap) openStoreWrap.classList.add('hidden');
             setAffiliateMenuMode(true);
+            updateUserMenu();
             renderCatalog();
             setTimeout(() => document.getElementById('loja')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
         }
@@ -10984,6 +10996,7 @@ function openNavigationModal() {
             const openStoreWrap = document.getElementById('virtualStoreOpenWrap');
             if (openStoreWrap) openStoreWrap.classList.remove('hidden');
             setAffiliateMenuMode(false);
+            updateUserMenu();
             closeUserMenu();
             renderCatalog();
             window.scrollTo({ top: 0, behavior: 'smooth' });
