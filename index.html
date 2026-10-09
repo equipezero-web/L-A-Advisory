@@ -1113,35 +1113,50 @@
     margin: 0 !important;
     transform: none !important;
   }
+  /* Evita que a foto do produto fique presa no topo com área vazia abaixo. */
+  #catalogContainer .product-motion-card > div:first-child {
+    height: 190px !important;
+    min-height: 190px !important;
+    flex: 0 0 190px !important;
+    position: relative !important;
+    display: block !important;
+    background: #fff !important;
+    overflow: hidden !important;
+  }
+  #catalogContainer .product-motion-card > div:first-child img {
+    position: absolute !important;
+    inset: 0 !important;
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
   #catalogContainer .product-motion-card > div:nth-child(2) {
-    padding: .55rem .7rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 0 auto !important;
+    padding: .65rem !important;
     margin: 0 !important;
     gap: .2rem !important;
   }
   #catalogContainer .product-motion-card h3 {
-    margin-top: 0 !important;
+    margin: 0 !important;
     font-size: 1rem !important;
     line-height: 1.3 !important;
+    overflow-wrap: anywhere;
   }
   #catalogContainer .product-motion-card p {
     margin-top: .25rem !important;
+    font-size: .82rem !important;
     line-height: 1.35 !important;
+    overflow-wrap: anywhere;
   }
   #catalogContainer .product-motion-card .mt-5 {
     margin-top: .65rem !important;
-  }
-  #catalogContainer .product-motion-card > div:nth-child(2) {
-    padding: .75rem !important;
-  }
-  #catalogContainer .product-motion-card h3 {
-    font-size: .98rem !important;
-    line-height: 1.35 !important;
-    overflow-wrap: anywhere;
-  }
-  #catalogContainer .product-motion-card p {
-    font-size: .82rem;
-    line-height: 1.45;
-    overflow-wrap: anywhere;
   }
   #catalogContainer .product-motion-card .text-2xl {
     font-size: 1.15rem !important;
