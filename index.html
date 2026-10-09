@@ -5755,7 +5755,7 @@
                         </p>
 
                         <p
-                            id="affiliatePixType"
+                            id="affiliatePixTypeDisplay"
                             class="font-bold text-slate-900 mt-1 text-sm"
                         >
                             -
@@ -5768,7 +5768,7 @@
                         </p>
 
                         <p
-                            id="affiliatePixKey"
+                            id="affiliatePixKeyDisplay"
                             class="font-bold text-slate-900 mt-1 text-sm"
                         >
                             -
@@ -10915,11 +10915,18 @@ function openNavigationModal() {
             // A loja do afiliado e o painel são áreas diferentes.
             // Entrar na loja não pode esconder a conta, o painel ou o logout.
             const returnButton = document.getElementById('affiliateReturnClientButton');
-            const storeButtons = document.querySelectorAll('button[onclick="openAffiliateStore()"], #mobileAffiliateMenuButton');
-            const dashboardButtons = document.querySelectorAll('button[onclick="openAffiliateDashboard()"], #mobileAffiliateDashboardButton');
+            const storeButtons = document.querySelectorAll('#affiliateUserMenuButton, #mobileAffiliateMenuButton');
+            const dashboardButtons = document.querySelectorAll('#affiliateUserMenuButton, #mobileAffiliateDashboardButton');
 
             storeButtons.forEach(button => button.classList.toggle('hidden', active));
-            dashboardButtons.forEach(button => button.classList.remove('hidden'));
+            dashboardButtons.forEach(button => {
+                const user = state.currentUser;
+                const linked = state.affiliates.some(a =>
+                    a.userId === user?.id ||
+                    String(a.email || a.affiliate_email || '').toLowerCase() === String(user?.email || '').toLowerCase()
+                );
+                button.classList.toggle('hidden', !(user && (user.role === 'affiliate' || linked)));
+            });
             if (returnButton) returnButton.classList.toggle('hidden', !active);
 
             lucide.createIcons();
@@ -11205,8 +11212,8 @@ function openNavigationModal() {
 
                 [summarySection, performanceSection, linksSection, pixSection, salesSection, generatedLinksSection].forEach(section => section?.classList.remove('hidden'));
 
-                const pixType = document.getElementById('affiliatePixType');
-                const pixKey = document.getElementById('affiliatePixKey');
+                const pixType = document.getElementById('affiliatePixTypeDisplay');
+                const pixKey = document.getElementById('affiliatePixKeyDisplay');
                 if (pixType) pixType.textContent = translatePixType(affiliate.pixType || '-');
                 if (pixKey) pixKey.textContent = affiliate.pixKey || '-';
 
@@ -11352,7 +11359,7 @@ function openNavigationModal() {
             container.innerHTML = state.products.map(product => {
                 const grossPrice = Number(product.price) || 0;
                 const finalPrice = calculateFinalPrice(product);
-                const commission = calculateAffiliateCommission(product).toFixed(2);
+                const commission = calculateProductAffiliateCommission(product).toFixed(2);
                 const affiliate = state.affiliates.find(a => a.userId === state.currentUser?.id);
                 const productLink = affiliate ? window.location.origin + '?ref=' + affiliate.code + '&prod=' + product.id : '';
 
@@ -12396,12 +12403,35 @@ loadAdminProducts();
     return price * (1 - discount / 100);
 }
 
-function calculateAffiliateCommission(product, quantity = 1) {
+function calculateProductAffiliateCommission(product, quantity = 1) {
     return (Number(product?.price) || 0) * (Number(quantity) || 0) * 0.20;
 }
 
 let catalogShowingAll = false;
 const CATALOG_CAROUSEL_LIMIT = 10;
+
+function clearCatalogFilters() {
+    const search = document.getElementById('productSearch');
+    const category = document.getElementById('productCategory');
+    const sort = document.getElementById('productSort');
+    const minPrice = document.getElementById('minPrice');
+    const maxPrice = document.getElementById('maxPrice');
+
+    [search, category, sort, minPrice, maxPrice].forEach(field => {
+        if (!field) return;
+        if (field.tagName === 'SELECT') field.selectedIndex = 0;
+        else field.value = '';
+    });
+
+    // Also clear any other catalog controls wired to filterCatalog().
+    document.querySelectorAll('#loja [data-catalog-filter]').forEach(field => {
+        if (field.type === 'checkbox' || field.type === 'radio') field.checked = false;
+        else field.value = '';
+    });
+
+    if (typeof filterCatalog === 'function') filterCatalog();
+    else renderCatalog();
+}
 
 function toggleFullCatalog() {
     renderCatalog();
