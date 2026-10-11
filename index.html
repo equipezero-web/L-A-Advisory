@@ -13356,15 +13356,58 @@ document.addEventListener('DOMContentLoaded', initPremiumScrollMotion);
 </script>
 
 <style id="la-royal-refinement-fixes">
-/* Fotografias de produto: ocupar o quadro sem margens artificiais. */
+/* Imagens de produto: centralizadas, sem bordas artificiais e com a foto inteira visível. */
 #catalogContainer .product-carousel-group article,
 #catalogContainer .product-motion-card { border: 0 !important; }
-#catalogContainer .product-motion-card > div:first-child { height: 225px !important; min-height: 0 !important; background: #fff !important; border: 0 !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important; flex: 0 0 225px !important; }
-#catalogContainer .product-motion-card > div:first-child img { display: block !important; width: 100% !important; height: 100% !important; object-fit: cover !important; object-position: center !important; padding: 0 !important; margin: 0 !important; transform: none !important; }
-#catalogContainer .product-motion-card > div:nth-child(2) { padding: .65rem !important; margin: 0 !important; gap: .25rem !important; }
-#catalogContainer .product-motion-card h3 { font-size: 1rem !important; line-height: 1.35 !important; }
+#catalogContainer .product-motion-card > div:first-child {
+    height: 165px !important;
+    min-height: 0 !important;
+    background: #fff !important;
+    border: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    flex: 0 0 165px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+#catalogContainer .product-motion-card > div:first-child img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    object-position: center center !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    transform: none !important;
+}
+/* O mobile mostra dois cartões por linha, sem aumentar desnecessariamente a altura. */
+@media (max-width: 768px) {
+    #catalogContainer .product-motion-card > div:first-child {
+        height: clamp(105px, 31vw, 165px) !important;
+        flex-basis: clamp(105px, 31vw, 165px) !important;
+    }
+    #catalogContainer .product-motion-card > div:nth-child(2) {
+        padding: .55rem !important;
+        margin: 0 !important;
+        gap: .2rem !important;
+    }
+    #catalogContainer .product-motion-card h3 {
+        font-size: clamp(.76rem, 3.3vw, .95rem) !important;
+        line-height: 1.3 !important;
+    }
+    #catalogContainer .product-motion-card .text-2xl {
+        font-size: 1rem !important;
+    }
+}
+@media (min-width: 769px) {
+    #catalogContainer .product-motion-card > div:first-child {
+        height: 225px !important;
+        flex-basis: 225px !important;
+    }
+}
 #catalogContainer .product-motion-card p { overflow-wrap: anywhere; }
-#catalogContainer .product-motion-card .text-2xl { font-size: 1.25rem !important; }
 /* Cabeçalho/menu: identidade e botões. */
 #mobileUserMenuName, #mobileUserMenuEmail, #userMenuName, #userMenuEmail { color: #fff !important; }
 #profileHeaderName, #customerProfileModal .profile-section-title,
