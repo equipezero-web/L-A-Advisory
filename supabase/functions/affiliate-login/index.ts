@@ -26,6 +26,23 @@ async function hashPassword(password: string, salt: Uint8Array) {
   const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 210000, hash: 'SHA-256' }, key, 256);
   return b64(new Uint8Array(bits));
 }
+function b64url(bytes: Uint8Array) {
+  let s = ''; for (const b of bytes) s += String.fromCharCode(b);
+  return btoa(s).replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/g, '');
+}
+async function createAffiliateSession(affiliateId: string) {
+  const secret = Deno.env.get('AFFILIATE_SESSION_SECRET') || '';
+  if (secret.length < 32) throw new Error('Sessão segura de afiliado não configurada.');
+  const claims = b64url(new TextEncoder().encode(JSON.stringify({
+    sub: affiliateId,
+    typ: 'affiliate_session',
+    exp: Math.floor(Date.now() / 1000) + 60 * 60
+  })));
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const signature = new Uint8Array(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(claims)));
+  return claims + '.' + b64url(signature);
+}
+
 function equal(a: string, b: string) {
   if (a.length !== b.length) return false;
   let diff = 0; for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
@@ -88,6 +105,14 @@ Deno.serve(async (req) => {
   }
   if (affiliate.status === 'blocked') return json({ error: 'Seu perfil de afiliado está bloqueado. Contate o suporte.' }, 403);
 
+  let sessionToken = '';
+  try {
+    sessionToken = await createAffiliateSession(String(affiliate.id));
+  } catch (error) {
+    console.error('Sessão de afiliado não configurada:', error);
+    return json({ error: 'O acesso de afiliado está temporariamente indisponível. Tente novamente mais tarde.' }, 503);
+  }
+
   const safeAffiliate = {
     id: affiliate.id,
     code: affiliate.code,
@@ -103,5 +128,5 @@ Deno.serve(async (req) => {
     total_commission: Number(affiliate.total_commission || 0)
   };
 
-  return json({ ok: true, affiliate: safeAffiliate });
+  return json({ ok: true, affiliate: safeAffiliate, sessionToken, expiresIn: 3600 });
 });
