@@ -94,10 +94,8 @@ Deno.serve(async (req) => {
     status: affiliate.status,
     name: affiliate.name,
     email: affiliate.affiliate_email || email,
-    phone: affiliate.phone,
-    cpf: affiliate.cpf,
-    pix_type: affiliate.pix_type,
-    pix_key: affiliate.pix_key,
+    // Dados pessoais e de pagamento não são enviados na resposta de login.
+    // Devem ser consultados apenas por fluxo autenticado e autorizado.
     instagram: affiliate.instagram,
     website: affiliate.website,
     user_id: affiliate.user_id || affiliate.id,
