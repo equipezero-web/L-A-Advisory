@@ -27,6 +27,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="L&A Royal">
 
+    <!-- Cloudflare Turnstile CAPTCHA -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -3762,6 +3764,7 @@
                         id="authMessage"
                         class="hidden mb-5 p-4 rounded-xl text-sm"
                     ></div>
+                    <div id="authTurnstileWrap" class="mb-4 flex justify-center" aria-label="Verificação de segurança"><div id="authTurnstile"></div></div>
 <!-- =================================================
                          LOGIN CLIENTE
                     ================================================== -->
@@ -8597,14 +8600,29 @@ function initializeApp() {
         // =====================================================
         // AUTENTICAÇÃO
         // =====================================================
+        const CLOUDFLARE_TURNSTILE_SITE_KEY = '0x4AAAAAAFVfC4-0L4pXMgnJ';
+        let authTurnstileWidgetId = null, authTurnstileResolver = null, authTurnstileRejecter = null;
+        function getAuthCaptchaToken() {
+            return new Promise((resolve, reject) => {
+                if (!window.turnstile) { reject(new Error('A verificação de segurança ainda está carregando. Atualize a página e tente novamente.')); return; }
+                const container = document.getElementById('authTurnstile');
+                if (!container) { reject(new Error('Não foi possível carregar a verificação de segurança.')); return; }
+                authTurnstileResolver = resolve; authTurnstileRejecter = reject;
+                try {
+                    if (authTurnstileWidgetId === null) authTurnstileWidgetId = window.turnstile.render(container, {
+                        sitekey: CLOUDFLARE_TURNSTILE_SITE_KEY, execution: 'execute', appearance: 'interaction-only',
+                        callback: token => { const done = authTurnstileResolver; authTurnstileResolver = null; authTurnstileRejecter = null; if (done) done(token); },
+                        'error-callback': () => { const fail = authTurnstileRejecter; authTurnstileResolver = null; authTurnstileRejecter = null; if (fail) fail(new Error('A verificação de segurança falhou. Tente novamente.')); },
+                        'expired-callback': () => { const fail = authTurnstileRejecter; authTurnstileResolver = null; authTurnstileRejecter = null; if (fail) fail(new Error('A verificação expirou. Tente novamente.')); }
+                    });
+                    window.turnstile.execute(authTurnstileWidgetId);
+                } catch (error) { authTurnstileResolver = null; authTurnstileRejecter = null; reject(error); }
+            });
+        }
+        function resetAuthCaptcha() { if (window.turnstile && authTurnstileWidgetId !== null) { try { window.turnstile.reset(authTurnstileWidgetId); } catch (_) {} } }
         function openAuthModal(screen = 'customer-login') {
-            const modal = document.getElementById('authModal');
-            if (!modal) return;
-
-            modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-
-            switchAuthScreen(screen);
+            const modal = document.getElementById('authModal'); if (!modal) return;
+            modal.classList.remove('hidden'); document.body.style.overflow = 'hidden'; switchAuthScreen(screen);
         }
 
         function closeAuthModal() {
@@ -8814,10 +8832,9 @@ function initializeApp() {
             }
 
             try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({
-                    email,
-                    password
-                });
+                const captchaToken = await getAuthCaptchaToken();
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password, options: { captchaToken } });
+                resetAuthCaptcha();
 if (error) throw error;
                 if (!data?.user || !data?.session) throw new Error('Sessão não foi criada.');
 
@@ -8913,14 +8930,9 @@ if (error) throw error;
             }
 
             try {
-                const { data, error } = await supabaseClient.auth.signUp({
-                    email,
-                    password,
-                    options: {
-                        data: { full_name: fullName },
-                        emailRedirectTo: window.location.origin + window.location.pathname
-                    }
-                });
+                const captchaToken = await getAuthCaptchaToken();
+                const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { captchaToken, data: { full_name: fullName }, emailRedirectTo: window.location.origin + window.location.pathname } });
+                resetAuthCaptcha();
 if (error) throw error;
                 if (!data?.user) throw new Error('O Supabase não retornou o usuário criado.');
 
@@ -8995,11 +9007,9 @@ async function handleAffiliateLogin(event) {
             const password = document.getElementById('affiliateLoginPassword')?.value;
             if (!email || !password) { showAuthMessage('Preencha e-mail e senha.', 'error'); return; }
             try {
-                const response = await fetch(SUPABASE_FUNCTIONS_BASE + '/affiliate-login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
-                    body: JSON.stringify({ email, password })
-                });
+                const captchaToken = await getAuthCaptchaToken();
+                const response = await fetch(SUPABASE_FUNCTIONS_BASE + '/affiliate-login', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY }, body: JSON.stringify({ email, password, captchaToken }) });
+                resetAuthCaptcha();
                 const result = await response.json().catch(() => ({}));
                 if (!response.ok) throw new Error(result.error || 'E-mail ou senha de afiliado incorretos.');
                 const affiliate = mapAffiliateFromSupabase(result.affiliate);
@@ -9033,11 +9043,9 @@ async function handleAffiliateLogin(event) {
             if (!isValidCpf(cpf)) { showAuthMessage('Informe um CPF válido.', 'error'); return; }
             if (!terms) { showAuthMessage('Você precisa aceitar os termos para solicitar a afiliação.', 'error'); return; }
             try {
-                const response = await fetch(SUPABASE_FUNCTIONS_BASE + '/register-affiliate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
-                    body: JSON.stringify({ name, email, phone, cpf, pixType, pixKey, password })
-                });
+                const captchaToken = await getAuthCaptchaToken();
+                const response = await fetch(SUPABASE_FUNCTIONS_BASE + '/register-affiliate', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY }, body: JSON.stringify({ name, email, phone, cpf, pixType, pixKey, password, captchaToken }) });
+                resetAuthCaptcha();
                 const result = await response.json().catch(() => ({}));
                 if (!response.ok) throw new Error(result.error || 'Não foi possível enviar a solicitação.');
                 const affiliate = mapAffiliateFromSupabase(result.affiliate);
@@ -9150,9 +9158,9 @@ if (error) throw error;
             }
 
             try {
-                const { error } = await supabaseClient.auth.resetPasswordForEmail(raw, {
-                    redirectTo: window.location.origin + window.location.pathname
-                });
+                const captchaToken = await getAuthCaptchaToken();
+                const { error } = await supabaseClient.auth.resetPasswordForEmail(raw, { redirectTo: window.location.origin + window.location.pathname, captchaToken });
+                resetAuthCaptcha();
 if (error) throw error;
                 showAuthMessage('Link de recuperação enviado. Verifique seu e-mail e a caixa de spam.', 'success');
             } catch (error) {
