@@ -36,7 +36,6 @@ Edge Functions presentes no repositório
 - register-affiliate
 - create-checkout
 - create-order
-- create-test-checkout
 - mercado-pago-webhook
 
 O frontend chama atualmente /functions/v1/create-order no Supabase. Publique essa função depois de atualizar o código. create-checkout e create-test-checkout são funções separadas; não confunda os endpoints.
