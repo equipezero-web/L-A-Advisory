@@ -9128,8 +9128,26 @@ if (error) throw error;
                 if (profile.role !== 'admin' || !profile.is_active) throw new Error('Usuário sem permissão administrativa.');
                 localStorage.setItem('laAdminPanelActive', 'true');
                 await applySupabaseSession(data.session);
+
+                // Garante que a sessão carregada mantenha o perfil administrativo validado.
+                if (!state.currentUser || state.currentUser.id !== data.user.id || state.currentUser.role !== 'admin') {
+                    state.currentUser = {
+                        id: data.user.id,
+                        fullName: profile.full_name || data.user.user_metadata?.full_name || 'Administrador',
+                        email: profile.email || data.user.email || email,
+                        role: 'admin',
+                        status: 'active',
+                        avatarUrl: data.user.user_metadata?.avatar_url || ''
+                    };
+                    updateAuthUI();
+                }
+
                 closeAuthModal();
-                openAdminDashboard();
+                updateAuthUI();
+                // Abre após fechar a tela de autenticação para evitar disputa de camadas.
+                window.setTimeout(() => {
+                    openAdminDashboard();
+                }, 80);
                 alert('Login administrativo realizado com sucesso.');
             } catch (error) {
                 console.error(error);
@@ -9535,6 +9553,10 @@ function openNavigationModal() {
             const modal = document.getElementById('navModal');
             if (modal) {
                 modal.classList.add('hidden');
+                modal.style.display = '';
+                modal.style.visibility = '';
+                modal.style.opacity = '';
+                modal.style.zIndex = '';
                 document.body.style.overflow = '';
             }
         }
@@ -11718,11 +11740,20 @@ function openNavigationModal() {
             document.getElementById('adminHeaderEmail').textContent = user.email;
 
             const modal = document.getElementById('adminDashboardModal');
-            if (!modal) return;
+            if (!modal) {
+                console.error('Painel administrativo não encontrado no HTML.');
+                alert('Não foi possível localizar o painel administrativo. Atualize a página e tente novamente.');
+                return;
+            }
 
             loadAdminDashboard();
 
+            // Reforça a exibição do painel mesmo se outra regra de estilo interferir.
             modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+            modal.style.visibility = 'visible';
+            modal.style.opacity = '1';
+            modal.style.zIndex = '99999';
             document.body.style.overflow = 'hidden';
             lucide.createIcons();
         }
