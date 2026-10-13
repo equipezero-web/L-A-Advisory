@@ -12428,7 +12428,7 @@ loadAdminProducts();
                 }).eq('id', id);
                 if (error) throw error;
                 const { error: privateError } = await supabaseClient.from('affiliate_private_data').upsert({
-                    affiliate_id: id, phone, cpf: cpf.replace(/\\D/g, ''), pix_type: pixType, pix_key: pixKey, updated_at: new Date().toISOString()
+                    affiliate_id: id, phone, cpf: cpf.replace(/\D/g, ''), pix_type: pixType, pix_key: pixKey, updated_at: new Date().toISOString()
                 }, { onConflict: 'affiliate_id' });
                 if (privateError) throw privateError;
 
