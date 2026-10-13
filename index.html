@@ -11764,9 +11764,10 @@ function openNavigationModal() {
 
             // Reforça a exibição do painel mesmo se outra regra de estilo interferir.
             modal.classList.remove('hidden');
-            modal.style.display = 'flex';
-            modal.style.visibility = 'visible';
-            modal.style.opacity = '1';
+            modal.style.setProperty('display', 'flex', 'important');
+            modal.style.setProperty('visibility', 'visible', 'important');
+            modal.style.setProperty('opacity', '1', 'important');
+            modal.style.setProperty('pointer-events', 'auto', 'important');
             modal.style.zIndex = '99999';
             document.body.style.overflow = 'hidden';
             lucide.createIcons();
@@ -11775,11 +11776,13 @@ function openNavigationModal() {
         function closeAdminDashboard() {
             const modal = document.getElementById('adminDashboardModal');
             if (modal) {
+                // Força o fechamento mesmo se outra regra CSS definir display:flex.
                 modal.classList.add('hidden');
-                modal.style.display = '';
-                modal.style.visibility = '';
-                modal.style.opacity = '';
-                modal.style.zIndex = '';
+                modal.style.setProperty('display', 'none', 'important');
+                modal.style.setProperty('visibility', 'hidden', 'important');
+                modal.style.setProperty('opacity', '0', 'important');
+                modal.style.setProperty('pointer-events', 'none', 'important');
+                modal.style.removeProperty('z-index');
                 document.body.style.overflow = '';
             }
         }
