@@ -11678,8 +11678,8 @@ function openNavigationModal() {
 
             const modal = document.getElementById('affiliateProfileModal');
             if (!modal) return;
-            if (affiliateSessionToken) {
-                try {
+            try {
+                if (affiliateSessionToken) {
                     const response = await fetch(SUPABASE_FUNCTIONS_BASE + '/affiliate-private-data', { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + affiliateSessionToken } });
                     const result = await response.json().catch(() => ({}));
                     if (!response.ok) throw new Error(result.error || 'Sessão de afiliado expirada. Entre novamente.');
@@ -11688,10 +11688,19 @@ function openNavigationModal() {
                     affiliate.cpf = privateData.cpf || '';
                     affiliate.pixType = privateData.pix_type || '';
                     affiliate.pixKey = privateData.pix_key || '';
-                } catch (error) {
-                    alert(error.message || 'Não foi possível carregar seus dados privados.');
-                    return;
+                } else if (supabaseAuthUser && affiliate.userId === supabaseAuthUser.id) {
+                    const { data, error } = await supabaseClient.from('affiliate_private_data').select('phone,cpf,pix_type,pix_key').eq('affiliate_id', affiliate.id).maybeSingle();
+                    if (error) throw error;
+                    affiliate.phone = data?.phone || '';
+                    affiliate.cpf = data?.cpf || '';
+                    affiliate.pixType = data?.pix_type || '';
+                    affiliate.pixKey = data?.pix_key || '';
+                } else {
+                    throw new Error('Entre novamente pela conta de afiliado para acessar os dados privados.');
                 }
+            } catch (error) {
+                alert(error.message || 'Não foi possível carregar seus dados privados.');
+                return;
             }
 
             document.getElementById('affiliateProfileName').value = affiliate.name || '';
@@ -11736,18 +11745,23 @@ function openNavigationModal() {
                 showAffiliateProfileMessage('Preencha todos os campos obrigatórios.', 'error');
                 return;
             }
-            if (!affiliateSessionToken) {
-                showAffiliateProfileMessage('Sua sessão de afiliado expirou. Entre novamente para salvar seus dados.', 'error');
-                return;
-            }
             try {
-                const response = await fetch(SUPABASE_FUNCTIONS_BASE + '/affiliate-private-data', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + affiliateSessionToken },
-                    body: JSON.stringify({ phone, cpf, pix_type: pixType, pix_key: pixKey })
-                });
-                const result = await response.json().catch(() => ({}));
-                if (!response.ok) throw new Error(result.error || 'Não foi possível salvar os dados privados.');
+                if (affiliateSessionToken) {
+                    const response = await fetch(SUPABASE_FUNCTIONS_BASE + '/affiliate-private-data', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + affiliateSessionToken },
+                        body: JSON.stringify({ phone, cpf, pix_type: pixType, pix_key: pixKey })
+                    });
+                    const result = await response.json().catch(() => ({}));
+                    if (!response.ok) throw new Error(result.error || 'Não foi possível salvar os dados privados.');
+                } else if (supabaseAuthUser && affiliate.userId === supabaseAuthUser.id) {
+                    const { error } = await supabaseClient.from('affiliate_private_data').upsert({
+                        affiliate_id: affiliate.id, phone, cpf: cpf.replace(/\D/g, ''), pix_type: pixType, pix_key: pixKey, updated_at: new Date().toISOString()
+                    }, { onConflict: 'affiliate_id' });
+                    if (error) throw error;
+                } else {
+                    throw new Error('Sua sessão de afiliado expirou. Entre novamente para salvar seus dados.');
+                }
             } catch (error) {
                 showAffiliateProfileMessage(error.message || 'Não foi possível salvar os dados privados.', 'error');
                 return;
