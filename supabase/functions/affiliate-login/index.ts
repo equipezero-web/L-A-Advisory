@@ -32,6 +32,25 @@ function equal(a: string, b: string) {
   return diff === 0;
 }
 
+async function verifyTurnstile(token: unknown) {
+  const secret = Deno.env.get('TURNSTILE_SECRET_KEY');
+  if (!secret || typeof token !== 'string' || !token.trim()) return false;
+  try {
+    const form = new URLSearchParams({ secret, response: token, remoteip: '' });
+    form.delete('remoteip');
+    const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: form
+    });
+    const result = await response.json();
+    return response.ok && result.success === true && result.hostname === 'equipezero-web.github.io';
+  } catch (error) {
+    console.error('Falha na validação Turnstile:', error);
+    return false;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return json({ error: 'Método não permitido.' }, 405);
@@ -41,6 +60,7 @@ Deno.serve(async (req) => {
   const email = String(body?.email || '').trim().toLowerCase();
   const password = String(body?.password || '');
   if (!email || !password) return json({ error: 'Preencha e-mail e senha.' }, 400);
+  if (!(await verifyTurnstile(body?.captchaToken))) return json({ error: 'Falha na verificação de segurança. Atualize a página e tente novamente.' }, 403);
 
   const admin = createClient(SUPABASE_URL, SECRET);
   const { data: affiliate, error } = await admin.from('affiliates')
