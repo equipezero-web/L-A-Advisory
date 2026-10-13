@@ -838,10 +838,7 @@ Deno.serve(async (req) => {
       .eq('id', orderId);
 
     return json(
-      {
-        error: 'Não foi possível abrir o checkout do Mercado Pago.',
-        debug: mercadoPagoDebug,
-      },
+      { error: 'Não foi possível iniciar o pagamento. Tente novamente ou contate o suporte.' },
       502
     );
   }
