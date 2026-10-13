@@ -3812,6 +3812,16 @@
                         onsubmit="handleCustomerLogin(event)"
                         class="auth-form space-y-5"
                     >
+                        <div class="mb-1 text-right">
+                            <button
+                                type="button"
+                                onclick="switchAuthScreen('admin-login')"
+                                class="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-bold text-slate-800 hover:bg-amber-100 transition"
+                            >
+                                <i data-lucide="shield-check" class="w-4 h-4 text-amber-700"></i>
+                                Acesso administrativo
+                            </button>
+                        </div>
                         <div>
                             <label
                                 for="customerLoginEmail"
@@ -3943,16 +3953,6 @@
                             </button>
                         </p>
 
-                        <div class="pt-2 text-center border-t border-slate-200">
-                            <button
-                                type="button"
-                                onclick="switchAuthScreen('admin-login')"
-                                class="inline-flex items-center justify-center gap-2 text-xs font-bold text-slate-500 hover:text-amber-700 transition"
-                            >
-                                <i data-lucide="shield-check" class="w-4 h-4"></i>
-                                Acesso administrativo
-                            </button>
-                        </div>
                     </form>
 
                     <!-- =================================================
