@@ -9070,12 +9070,12 @@ async function handleAffiliateLogin(event) {
                 if (affiliateSessionToken) {
                     const privateResponse = await fetch(SUPABASE_FUNCTIONS_BASE + '/affiliate-private-data', { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + affiliateSessionToken } });
                     const privateResult = await privateResponse.json().catch(() => ({}));
-                    if (privateResponse.ok && privateResult.privateData) {
-                        affiliate.phone = privateResult.privateData.phone || '';
-                        affiliate.cpf = privateResult.privateData.cpf || '';
-                        affiliate.pixType = privateResult.privateData.pix_type || '';
-                        affiliate.pixKey = privateResult.privateData.pix_key || '';
-                    }
+                    if (!privateResponse.ok) throw new Error(privateResult.error || 'Não foi possível carregar os dados privados do afiliado.');
+                    const privateData = privateResult.privateData || {};
+                    affiliate.phone = privateData.phone || '';
+                    affiliate.cpf = privateData.cpf || '';
+                    affiliate.pixType = privateData.pix_type || '';
+                    affiliate.pixKey = privateData.pix_key || '';
                 }
                 state.affiliates = [affiliate];
                 state.currentUser = {
