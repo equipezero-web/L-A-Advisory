@@ -13480,6 +13480,106 @@ document.addEventListener('DOMContentLoaded', initPremiumScrollMotion);
 #consultingModal > div, #navModal > div, #cartModal > div, #checkoutModal > div,
 #affiliateDashboardModal > div, #customerProfileModal > div, #customerOrdersModal > div,
 #affiliateProfileModal > div, #catalogFiltersModal > div { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+/* CORREÇÃO GLOBAL DE ROLAGEM DOS MODAIS
+   Impede que a rolagem dos formulários/painéis passe para a página inicial. */
+#consultingModal,
+#checkoutModal,
+#customerProfileModal,
+#customerOrdersModal,
+#trackingModal,
+#returnRequestModal,
+#orderDetailsModal,
+#affiliateDashboardModal,
+#affiliateCatalogModal,
+#affiliateProfileModal,
+#adminDashboardModal,
+#adminProductFormModal,
+#adminOrderFormModal,
+#adminAffiliateFormModal,
+#adminUserFormModal,
+#adminCommissionPaymentModal {
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+}
+#consultingModal > div,
+#checkoutModal > div,
+#customerProfileModal > div,
+#customerOrdersModal > div,
+#trackingModal > div,
+#returnRequestModal > div,
+#orderDetailsModal > div,
+#affiliateDashboardModal > div,
+#affiliateCatalogModal > div,
+#affiliateProfileModal > div,
+#adminDashboardModal > div,
+#adminProductFormModal > div,
+#adminOrderFormModal > div,
+#adminAffiliateFormModal > div,
+#adminUserFormModal > div,
+#adminCommissionPaymentModal > div {
+    max-height: calc(100vh - 2rem) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior-y: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
+}
+@supports (height: 100dvh) {
+    #consultingModal > div,
+    #checkoutModal > div,
+    #customerProfileModal > div,
+    #customerOrdersModal > div,
+    #trackingModal > div,
+    #returnRequestModal > div,
+    #orderDetailsModal > div,
+    #affiliateDashboardModal > div,
+    #affiliateCatalogModal > div,
+    #affiliateProfileModal > div,
+    #adminDashboardModal > div,
+    #adminProductFormModal > div,
+    #adminOrderFormModal > div,
+    #adminAffiliateFormModal > div,
+    #adminUserFormModal > div,
+    #adminCommissionPaymentModal > div {
+        max-height: calc(100dvh - 2rem) !important;
+    }
+}
+/* Bloqueia o scroll do documento enquanto um destes modais estiver aberto. */
+html:has(#consultingModal:not(.hidden)),
+body:has(#consultingModal:not(.hidden)),
+html:has(#checkoutModal:not(.hidden)),
+body:has(#checkoutModal:not(.hidden)),
+html:has(#customerProfileModal:not(.hidden)),
+body:has(#customerProfileModal:not(.hidden)),
+html:has(#customerOrdersModal:not(.hidden)),
+body:has(#customerOrdersModal:not(.hidden)),
+html:has(#trackingModal:not(.hidden)),
+body:has(#trackingModal:not(.hidden)),
+html:has(#returnRequestModal:not(.hidden)),
+body:has(#returnRequestModal:not(.hidden)),
+html:has(#orderDetailsModal:not(.hidden)),
+body:has(#orderDetailsModal:not(.hidden)),
+html:has(#affiliateDashboardModal:not(.hidden)),
+body:has(#affiliateDashboardModal:not(.hidden)),
+html:has(#affiliateCatalogModal:not(.hidden)),
+body:has(#affiliateCatalogModal:not(.hidden)),
+html:has(#affiliateProfileModal:not(.hidden)),
+body:has(#affiliateProfileModal:not(.hidden)),
+html:has(#adminDashboardModal:not(.hidden)),
+body:has(#adminDashboardModal:not(.hidden)),
+html:has(#adminProductFormModal:not(.hidden)),
+body:has(#adminProductFormModal:not(.hidden)),
+html:has(#adminOrderFormModal:not(.hidden)),
+body:has(#adminOrderFormModal:not(.hidden)),
+html:has(#adminAffiliateFormModal:not(.hidden)),
+body:has(#adminAffiliateFormModal:not(.hidden)),
+html:has(#adminUserFormModal:not(.hidden)),
+body:has(#adminUserFormModal:not(.hidden)),
+html:has(#adminCommissionPaymentModal:not(.hidden)),
+body:has(#adminCommissionPaymentModal:not(.hidden)) {
+    overflow: hidden !important;
+}
+
 /* Painel do afiliado: destaque dourado e aba de dados clara. */
 #affiliateDashboardModal .text-amber-600, #affiliateDashboardModal .text-amber-500 { color: #d4af37 !important; }
 #affiliateDashboardModal button[onclick="openAffiliateProfile()"] { background: #fff !important; color: #111827 !important; border: 1px solid #e5e7eb !important; }
