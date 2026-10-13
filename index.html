@@ -998,6 +998,45 @@
             overscroll-behavior: contain !important;
         }
 
+        /* CORREÇÃO DA ROLAGEM DO PAINEL/CATÁLOGO DE AFILIADO
+           O fundo fica fixo; somente o conteúdo do modal recebe a rolagem. */
+        #affiliateDashboardModal,
+        #affiliateCatalogModal {
+            overflow: hidden !important;
+            overscroll-behavior: none !important;
+            align-items: flex-start !important;
+        }
+        #affiliateDashboardModal > .account-popover-shell {
+            height: calc(100vh - 2rem) !important;
+            max-height: calc(100vh - 2rem) !important;
+            margin-top: 1rem !important;
+            margin-bottom: 1rem !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            overscroll-behavior-y: contain !important;
+            -webkit-overflow-scrolling: touch !important;
+            touch-action: pan-y !important;
+        }
+        #affiliateCatalogModal > div {
+            max-height: calc(100vh - 2rem) !important;
+            margin-top: 1rem !important;
+            margin-bottom: 1rem !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            overscroll-behavior-y: contain !important;
+            -webkit-overflow-scrolling: touch !important;
+            touch-action: pan-y !important;
+        }
+        @supports (height: 100dvh) {
+            #affiliateDashboardModal > .account-popover-shell {
+                height: calc(100dvh - 2rem) !important;
+                max-height: calc(100dvh - 2rem) !important;
+            }
+            #affiliateCatalogModal > div {
+                max-height: calc(100dvh - 2rem) !important;
+            }
+        }
+
         /* POP-UPS DA ÁREA DO CLIENTE/AFILIADO: mesma linguagem visual do menu */
         .account-popover-shell {
             overflow: hidden !important;
