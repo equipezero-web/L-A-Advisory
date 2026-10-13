@@ -11872,7 +11872,7 @@ function openNavigationModal() {
                     <td class="p-3"><span class="px-2 py-1 rounded text-[10px] font-bold bg-slate-100">${escapeHtml(u.role)}</span></td>
                     <td class="p-3"><span class="px-2 py-1 rounded text-[10px] font-bold ${u.status === 'active' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">${escapeHtml(u.status)}</span></td>
                     <td class="p-3">
-                        <button type="button" onclick="openAdminUserForm('${u.id}')" class="px-2 py-1 rounded bg-slate-900 text-amber-400 text-[10px] font-bold">Editar</button>
+                        <button type="button" onclick="openAdminUserForm('${String(u.id).replace(/[^a-zA-Z0-9_-]/g, '')}')" class="px-2 py-1 rounded bg-slate-900 text-amber-400 text-[10px] font-bold">Editar</button>
                     </td>
                 </tr>
             `).join('');
@@ -11893,8 +11893,8 @@ function openNavigationModal() {
                     <p class="text-xs text-slate-500 mb-2">${formatCurrency(calculateFinalPrice(p))}</p>
                     <p class="text-xs text-slate-500 mb-3">Estoque: ${escapeHtml(p.stock)}</p>
                     <div class="flex gap-2">
-                        <button type="button" onclick="openAdminProductForm('${p.id}')" class="flex-1 px-2 py-1 rounded bg-slate-900 text-amber-400 text-[10px] font-bold">Editar</button>
-                        <button type="button" onclick="deleteProduct('${p.id}')" class="px-2 py-1 rounded border border-red-300 text-red-700 text-[10px] font-bold">Excluir</button>
+                        <button type="button" onclick="openAdminProductForm('${String(p.id).replace(/[^a-zA-Z0-9_-]/g, '')}')" class="flex-1 px-2 py-1 rounded bg-slate-900 text-amber-400 text-[10px] font-bold">Editar</button>
+                        <button type="button" onclick="deleteProduct('${String(p.id).replace(/[^a-zA-Z0-9_-]/g, '')}')" class="px-2 py-1 rounded border border-red-300 text-red-700 text-[10px] font-bold">Excluir</button>
                     </div>
                 </div>
             `).join('');
@@ -12028,7 +12028,7 @@ function openNavigationModal() {
                     <td class="p-3 font-mono text-xs">${escapeHtml(a.code)}</td>
                     <td class="p-3"><span class="px-2 py-1 rounded text-[10px] font-bold ${a.status === 'active' ? 'bg-emerald-100 text-emerald-800' : a.status === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'}">${escapeHtml(a.status)}</span></td>
                     <td class="p-3">
-                        <button type="button" onclick="openAdminAffiliateForm('${a.id}')" class="px-2 py-1 rounded bg-slate-900 text-amber-400 text-[10px] font-bold">Editar</button>
+                        <button type="button" onclick="openAdminAffiliateForm('${String(a.id).replace(/[^a-zA-Z0-9_-]/g, '')}')" class="px-2 py-1 rounded bg-slate-900 text-amber-400 text-[10px] font-bold">Editar</button>
                     </td>
                 </tr>
             `).join('');
