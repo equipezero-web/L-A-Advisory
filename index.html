@@ -7932,6 +7932,7 @@
 
         let supabaseReady = false;
         let supabaseAuthUser = null;
+        let affiliateSessionToken = null; // token temporário em memória; nunca persistir no navegador
         let realtimeChannels = [];
 
         document.addEventListener('DOMContentLoaded', async () => {
@@ -8088,7 +8089,7 @@
                 supabaseClient.from('customer_private').select('*').eq('user_id', uid).maybeSingle(),
                 supabaseClient.from('products').select('*').eq('active', true).order('created_at', { ascending: false }),
                 supabaseClient.from('orders').select('*').eq('user_id', uid).order('created_at', { ascending: false }),
-                supabaseClient.from('affiliates').select('*').eq('user_id', uid).maybeSingle()
+                supabaseClient.from('affiliates').select('id,user_id,code,status,name,affiliate_email,instagram,website,total_sales,total_commission,created_at,updated_at').eq('user_id', uid).maybeSingle()
             ]);
 
             for (const r of [profileRes, privateRes, productsRes, ordersRes, affiliatesRes]) {
@@ -8185,14 +8186,20 @@
             state.affiliates = affiliate ? [mapAffiliateFromSupabase(affiliate)] : [];
 
             if (profile?.role === 'admin' && profile.is_active) {
-                const [allOrdersRes, allAffiliatesRes] = await Promise.all([
+                const [allOrdersRes, allAffiliatesRes, allAffiliatePrivateRes] = await Promise.all([
                     supabaseClient.from('orders').select('*').order('created_at', { ascending: false }),
-                    supabaseClient.from('affiliates').select('id,user_id,code,status,name,affiliate_email,phone,cpf,pix_type,pix_key,instagram,website,total_sales,total_commission,created_at,updated_at').order('created_at', { ascending: false })
+                    supabaseClient.from('affiliates').select('id,user_id,code,status,name,affiliate_email,instagram,website,total_sales,total_commission,created_at,updated_at').order('created_at', { ascending: false }),
+                    supabaseClient.from('affiliate_private_data').select('affiliate_id,phone,cpf,pix_type,pix_key')
                 ]);
                 if (allOrdersRes.error) console.warn('Supabase pedidos ADM:', allOrdersRes.error.message);
                 if (allAffiliatesRes.error) console.warn('Supabase afiliados ADM:', allAffiliatesRes.error.message);
+                if (allAffiliatePrivateRes.error) console.warn('Supabase dados privados dos afiliados ADM:', allAffiliatePrivateRes.error.message);
                 state.orders = (allOrdersRes.data || []).map(mapOrderFromSupabase);
-                state.affiliates = (allAffiliatesRes.data || []).map(mapAffiliateFromSupabase);
+                const privateByAffiliateId = Object.fromEntries((allAffiliatePrivateRes.data || []).map(row => [row.affiliate_id, row]));
+                state.affiliates = (allAffiliatesRes.data || []).map(row => {
+                    const privateData = privateByAffiliateId[row.id] || {};
+                    return { ...mapAffiliateFromSupabase(row), phone: privateData.phone || '', cpf: privateData.cpf || '', pixType: privateData.pix_type || '', pixKey: privateData.pix_key || '' };
+                });
 
                 if (state.orders.length) {
                     const orderIds = state.orders.map(o => o.id);
@@ -9059,6 +9066,17 @@ async function handleAffiliateLogin(event) {
                 const result = await response.json().catch(() => ({}));
                 if (!response.ok) throw new Error(result.error || 'E-mail ou senha de afiliado incorretos.');
                 const affiliate = mapAffiliateFromSupabase(result.affiliate);
+                affiliateSessionToken = result.sessionToken || null;
+                if (affiliateSessionToken) {
+                    const privateResponse = await fetch(SUPABASE_FUNCTIONS_BASE + '/affiliate-private-data', { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + affiliateSessionToken } });
+                    const privateResult = await privateResponse.json().catch(() => ({}));
+                    if (privateResponse.ok && privateResult.privateData) {
+                        affiliate.phone = privateResult.privateData.phone || '';
+                        affiliate.cpf = privateResult.privateData.cpf || '';
+                        affiliate.pixType = privateResult.privateData.pix_type || '';
+                        affiliate.pixKey = privateResult.privateData.pix_key || '';
+                    }
+                }
                 state.affiliates = [affiliate];
                 // Conta de cliente e conta de afiliado permanecem separadas.
                 closeAuthModal();
@@ -9276,6 +9294,7 @@ if (error) throw error;
         async function logoutUser() {
             const wasAffiliate = state.currentUser?.role === 'affiliate';
             const wasAdmin = state.currentUser?.role === 'admin';
+            if (wasAffiliate) affiliateSessionToken = null;
 
             if (!wasAffiliate) {
                 try {
@@ -10455,7 +10474,7 @@ function openNavigationModal() {
         async function refreshCustomerAffiliateStatus() {
              const user = state.currentUser; if (!user || user.role !== 'customer') return null;
              let affiliate = state.affiliates.find(a => a.userId === user.id || String(a.email || '').toLowerCase() === String(user.email || '').toLowerCase());
-             try { const { data, error } = await supabaseClient.from('affiliates').select('id,user_id,code,status,name,affiliate_email,phone,cpf,pix_type,pix_key,instagram,website,total_sales,total_commission,created_at,updated_at').eq('affiliate_email', String(user.email || '').trim().toLowerCase()).order('created_at', { ascending: false }).limit(1).maybeSingle(); if (!error && data) { affiliate = mapAffiliateFromSupabase(data); state.affiliates = [affiliate]; } } catch (error) { console.warn('Status da afiliação:', error); }
+             try { const { data, error } = await supabaseClient.from('affiliates').select('id,user_id,code,status,name,affiliate_email,instagram,website,total_sales,total_commission,created_at,updated_at').eq('affiliate_email', String(user.email || '').trim().toLowerCase()).order('created_at', { ascending: false }).limit(1).maybeSingle(); if (!error && data) { affiliate = mapAffiliateFromSupabase(data); state.affiliates = [affiliate]; } } catch (error) { console.warn('Status da afiliação:', error); }
              updateCustomerAffiliateSection(affiliate); return affiliate || null;
          }
          function updateCustomerAffiliateSection(affiliate) {
@@ -11635,7 +11654,7 @@ function openNavigationModal() {
             }
         }
 
-        function openAffiliateProfile() {
+        async function openAffiliateProfile() {
             const user = state.currentUser;
             const affiliate = state.affiliates.find(a => a.userId === user?.id);
 
@@ -11648,8 +11667,23 @@ function openNavigationModal() {
 
             const modal = document.getElementById('affiliateProfileModal');
             if (!modal) return;
+            if (affiliateSessionToken) {
+                try {
+                    const response = await fetch(SUPABASE_FUNCTIONS_BASE + '/affiliate-private-data', { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + affiliateSessionToken } });
+                    const result = await response.json().catch(() => ({}));
+                    if (!response.ok) throw new Error(result.error || 'Sessão de afiliado expirada. Entre novamente.');
+                    const privateData = result.privateData || {};
+                    affiliate.phone = privateData.phone || '';
+                    affiliate.cpf = privateData.cpf || '';
+                    affiliate.pixType = privateData.pix_type || '';
+                    affiliate.pixKey = privateData.pix_key || '';
+                } catch (error) {
+                    alert(error.message || 'Não foi possível carregar seus dados privados.');
+                    return;
+                }
+            }
 
-            document.getElementById('affiliateProfileName').value = affiliate.name;
+            document.getElementById('affiliateProfileName').value = affiliate.name || '';
             document.getElementById('affiliateProfileEmail').value = affiliate.email;
             document.getElementById('affiliateProfilePhone').value = affiliate.phone;
             document.getElementById('affiliateProfileCpf').value = affiliate.cpf;
@@ -11672,7 +11706,7 @@ function openNavigationModal() {
             }
         }
 
-        function saveAffiliateProfile(event) {
+        async function saveAffiliateProfile(event) {
             event.preventDefault();
 
             const user = state.currentUser;
@@ -11689,6 +11723,22 @@ function openNavigationModal() {
 
             if (!name || !phone || !cpf || !pixType || !pixKey) {
                 showAffiliateProfileMessage('Preencha todos os campos obrigatórios.', 'error');
+                return;
+            }
+            if (!affiliateSessionToken) {
+                showAffiliateProfileMessage('Sua sessão de afiliado expirou. Entre novamente para salvar seus dados.', 'error');
+                return;
+            }
+            try {
+                const response = await fetch(SUPABASE_FUNCTIONS_BASE + '/affiliate-private-data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + affiliateSessionToken },
+                    body: JSON.stringify({ phone, cpf, pix_type: pixType, pix_key: pixKey })
+                });
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(result.error || 'Não foi possível salvar os dados privados.');
+            } catch (error) {
+                showAffiliateProfileMessage(error.message || 'Não foi possível salvar os dados privados.', 'error');
                 return;
             }
 
@@ -11708,8 +11758,6 @@ function openNavigationModal() {
             const userIndex = state.users.findIndex(u => u.id === user.id);
             if (userIndex !== -1) {
                 state.users[userIndex].fullName = name;
-                state.users[userIndex].phone = phone;
-                state.users[userIndex].cpf = cpf;
             }
 
             saveStateToStorage();
@@ -12362,25 +12410,22 @@ loadAdminProducts();
                 const { error } = await supabaseClient.from('affiliates').update({
                     name,
                     affiliate_email: affiliateEmail,
-                    phone,
-                    cpf,
                     status,
-                    pix_type: pixType,
-                    pix_key: pixKey,
                     instagram: instagram || null,
                     website: website || null,
                     updated_at: new Date().toISOString()
                 }).eq('id', id);
-
                 if (error) throw error;
+                const { error: privateError } = await supabaseClient.from('affiliate_private_data').upsert({
+                    affiliate_id: id, phone, cpf: cpf.replace(/\\D/g, ''), pix_type: pixType, pix_key: pixKey, updated_at: new Date().toISOString()
+                }, { onConflict: 'affiliate_id' });
+                if (privateError) throw privateError;
 
                 Object.assign(affiliate, { name, email: affiliateEmail, affiliate_email: affiliateEmail, phone, cpf, status, pixType, pixKey, instagram, website });
 
                 const user = state.users.find(u => u.id === affiliate.userId);
                 if (user) {
                     user.fullName = name;
-                    user.phone = phone;
-                    user.cpf = cpf;
                     user.affiliateStatus = status;
                 }
 
