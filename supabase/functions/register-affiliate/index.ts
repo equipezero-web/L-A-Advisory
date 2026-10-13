@@ -36,6 +36,15 @@ async function hashPassword(password: string, salt: Uint8Array) {
   return b64(new Uint8Array(bits));
 }
 function code() { return 'AFF' + crypto.randomUUID().replaceAll('-', '').slice(0, 8).toUpperCase(); }
+function b64url(bytes: Uint8Array) { let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s).replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/g, ''); }
+async function createAffiliateSession(affiliateId: string) {
+  const secret = Deno.env.get('AFFILIATE_SESSION_SECRET') || '';
+  if (secret.length < 32) throw new Error('Sessão segura de afiliado não configurada.');
+  const claims = b64url(new TextEncoder().encode(JSON.stringify({ sub: affiliateId, typ: 'affiliate_session', exp: Math.floor(Date.now() / 1000) + 3600 })));
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const signature = new Uint8Array(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(claims)));
+  return claims + '.' + b64url(signature);
+}
 
 async function verifyTurnstile(token: unknown) {
   const secret = Deno.env.get('TURNSTILE_SECRET_KEY');
@@ -60,6 +69,7 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return json({ error: 'Método não permitido.' }, 405);
   if (!SECRET) return json({ error: 'Servidor não configurado corretamente.' }, 500);
+  if ((Deno.env.get('AFFILIATE_SESSION_SECRET') || '').length < 32) return json({ error: 'O acesso de afiliado está temporariamente indisponível.' }, 503);
 
   const body = await req.json().catch(() => null);
   if (!body || typeof body !== 'object') return json({ error: 'JSON inválido.' }, 400);
@@ -95,8 +105,8 @@ Deno.serve(async (req) => {
     return json({ error: 'Este e-mail já possui uma conta de afiliado. Use Entrar como afiliado ou Recuperar senha.' }, 409);
   }
 
-  const { data: cpfAffiliate, error: cpfError } = await admin.from('affiliates')
-    .select('id').eq('cpf', cpf).maybeSingle();
+  const { data: cpfAffiliate, error: cpfError } = await admin.from('affiliate_private_data')
+    .select('affiliate_id').eq('cpf', cpf).maybeSingle();
   if (cpfError) return json({ error: 'Não foi possível verificar o CPF.' }, 500);
   if (cpfAffiliate) return json({ error: 'Este CPF já está cadastrado no programa de afiliados.' }, 409);
 
@@ -116,18 +126,24 @@ Deno.serve(async (req) => {
       affiliate_email: email,
       affiliate_password_hash: passwordHash,
       affiliate_password_salt: b64(salt),
-      phone,
-      cpf,
-      pix_type: pixType,
-      pix_key: pixKey,
       instagram: instagram || null,
       website: website || null,
       total_sales: 0,
       total_commission: 0
-    }).select('id,code,status,name,affiliate_email,phone,cpf,pix_type,pix_key,instagram,website,user_id,total_sales,total_commission').single();
+    }).select('id,code,status,name,affiliate_email,instagram,website,user_id,total_sales,total_commission').single();
 
     if (!error && affiliate) {
-      return json({ ok: true, affiliate: { ...affiliate, user_id: affiliate.user_id || affiliate.id, email: affiliate.affiliate_email || affiliate.email || email } }, 201);
+      const { error: privateError } = await admin.from('affiliate_private_data').upsert({
+        affiliate_id: affiliate.id, phone, cpf, pix_type: pixType, pix_key: pixKey, updated_at: new Date().toISOString()
+      }, { onConflict: 'affiliate_id' });
+      if (privateError) {
+        console.error('Falha ao salvar dados privados do novo afiliado:', privateError.message);
+        await admin.from('affiliates').delete().eq('id', affiliate.id);
+        return json({ error: 'Não foi possível salvar os dados privados do cadastro.' }, 500);
+      }
+      const sessionToken = await createAffiliateSession(String(affiliate.id));
+      const safeAffiliate = { ...affiliate, user_id: affiliate.user_id || affiliate.id, email: affiliate.affiliate_email || affiliate.email || email };
+      return json({ ok: true, affiliate: safeAffiliate, sessionToken, expiresIn: 3600 }, 201);
     }
     if (error?.code !== '23505') {
       console.error(error);
