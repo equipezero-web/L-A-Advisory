@@ -543,15 +543,7 @@ Deno.serve(async (req) => {
       .eq('id', orderId);
 
     return json(
-      {
-        error: 'Mercado Pago recusou a order.',
-        status: mp.status,
-        message: data.message || data.error || null,
-        cause: data.cause || null,
-        error_code: data.error_code || data.code || null,
-        details: data.details || data.errors || null,
-        debug: data
-      },
+      { error: 'Não foi possível iniciar o pagamento. Tente novamente ou contate o suporte.' },
       502
     );
   }
