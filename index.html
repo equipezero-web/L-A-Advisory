@@ -1453,6 +1453,10 @@
                             <i data-lucide="package-check" class="w-5 h-5 text-amber-600"></i>
                             <span>Meus pedidos</span>
                         </button>
+                        <button type="button" id="mobileAdminMenuButton" onclick="closeMobileMenu(); openAdminDashboard()" class="hidden mobile-user-menu-item">
+                            <i data-lucide="shield-check" class="w-5 h-5 text-amber-600"></i>
+                            <span>Painel administrativo</span>
+                        </button>
                         <button type="button" id="mobileAffiliateMenuButton" onclick="openAffiliateStore(); closeMobileMenu()" class="hidden mobile-user-menu-item">
                             <i data-lucide="shopping-bag" class="w-5 h-5 text-amber-600"></i>
                             <span>Loja do afiliado</span>
@@ -9434,8 +9438,10 @@ if (error) throw error;
             const affiliateReturnBtn = document.getElementById('mobileAffiliateReturnButton');
             const affiliateRequestBtn = document.getElementById('mobileAffiliateRequestMenuButton');
             const affiliateDashboardBtn = document.getElementById('mobileAffiliateDashboardButton');
+            const adminBtn = document.getElementById('mobileAdminMenuButton');
 
             if (!user) {
+                adminBtn?.classList.add('hidden');
                 guestMenu?.classList.remove('hidden');
                 loggedMenu?.classList.add('hidden');
                 return;
@@ -9462,6 +9468,11 @@ if (error) throw error;
             const approvedAffiliate = !!linkedAffiliate && ['active', 'approved'].includes(linkedAffiliate.status);
 
             const affiliateModeActive = document.body.classList.contains('affiliate-mode');
+            const isAuthorizedAdmin =
+                String(user.email || '').toLowerCase() === 'lucaalves17.20@gmail.com' &&
+                user.role === 'admin' &&
+                user.status === 'active';
+            adminBtn?.classList.toggle('hidden', !isAuthorizedAdmin);
             affiliateBtn?.classList.toggle('hidden', !approvedAffiliate || affiliateModeActive);
             affiliateDashboardBtn?.classList.toggle('hidden', !approvedAffiliate);
             affiliateReturnBtn?.classList.toggle('hidden', !affiliateModeActive);
