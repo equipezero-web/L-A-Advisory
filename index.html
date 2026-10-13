@@ -13593,6 +13593,62 @@ body.affiliate-mode header [aria-label="Abrir navegação"] { display: none !imp
 body.guest-mode #mobileUtilityActions button[aria-label="Abrir carrinho"] { display: none !important; }
 body.guest-mode #affiliateNavLink { display: inline-flex !important; }
 body.guest-mode #afiliados { display: block !important; }
+/* MOBILE: dois cards compactos por linha, sem sobreposição.
+   Cada grupo continua contendo até 10 produtos (5 linhas de 2). */
+@media (max-width: 768px) {
+    #catalogContainer .product-carousel-group {
+        display: block !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        overflow: visible !important;
+    }
+    #catalogContainer .product-carousel-group .product-cards-layout {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        grid-auto-flow: row !important;
+        align-items: stretch !important;
+        gap: .55rem !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        overflow: visible !important;
+        padding: 0 0 .5rem !important;
+    }
+    #catalogContainer .product-carousel-group .product-motion-card {
+        display: flex !important;
+        position: relative !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        flex: none !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+        transform: none !important;
+        align-self: stretch !important;
+        overflow: hidden !important;
+    }
+    #catalogContainer .product-carousel-group .product-motion-card.revealed,
+    #catalogContainer .product-carousel-group .product-motion-card:hover {
+        transform: none !important;
+    }
+    #catalogContainer .product-carousel-group .product-motion-card > div:first-child {
+        width: 100% !important;
+        height: clamp(78px, 25vw, 112px) !important;
+        min-height: 0 !important;
+        flex: 0 0 clamp(78px, 25vw, 112px) !important;
+    }
+    #catalogContainer .product-carousel-group .product-motion-card > div:nth-child(2) {
+        width: 100% !important;
+        min-width: 0 !important;
+        padding: .45rem !important;
+        box-sizing: border-box !important;
+    }
+    #catalogContainer .product-carousel-group .product-motion-card h3,
+    #catalogContainer .product-carousel-group .product-motion-card p {
+        max-width: 100% !important;
+        overflow-wrap: anywhere !important;
+    }
+}
 /* Filtros rápidos acima do primeiro carrossel. */
 #storeCategoryQuickFilterWrap { display:flex; align-items:center; gap:.65rem; flex-wrap:wrap; margin:0 0 1rem; }
 #storeCategoryQuickFilterWrap label { color:#d4af37; font-size:.8rem; font-weight:800; }
