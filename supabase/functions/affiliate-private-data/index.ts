@@ -18,6 +18,18 @@ function b64url(bytes: Uint8Array) {
   let s = ''; for (const b of bytes) s += String.fromCharCode(b);
   return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
 }
+function validCpf(value: string) {
+  const cpf = value.replace(/\D/g, '');
+  if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+  let sum = 0;
+  for (let i = 0; i < 9; i++) sum += Number(cpf[i]) * (10 - i);
+  let digit = (sum * 10) % 11; if (digit === 10) digit = 0;
+  if (digit !== Number(cpf[9])) return false;
+  sum = 0;
+  for (let i = 0; i < 10; i++) sum += Number(cpf[i]) * (11 - i);
+  digit = (sum * 10) % 11; if (digit === 10) digit = 0;
+  return digit === Number(cpf[10]);
+}
 function fromB64url(value: string) {
   const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
   const s = atob(normalized + '='.repeat((4 - normalized.length % 4) % 4));
@@ -48,6 +60,12 @@ Deno.serve(async (req) => {
   if (!claims || claims.typ !== 'affiliate_session') return json({ error: 'Sessão inválida ou expirada. Entre novamente.' }, 401);
 
   const admin = createClient(SUPABASE_URL, DB_SECRET);
+  const { data: affiliate, error: affiliateError } = await admin.from('affiliates').select('id,status').eq('id', claims.sub).maybeSingle();
+  if (affiliateError) {
+    console.error('Falha ao verificar o status do afiliado:', affiliateError.message);
+    return json({ error: 'Não foi possível validar a conta de afiliado.' }, 500);
+  }
+  if (!affiliate || affiliate.status === 'blocked') return json({ error: 'A conta de afiliado não está disponível.' }, 403);
   if (req.method === 'GET') {
     const { data, error } = await admin.from('affiliate_private_data')
       .select('phone,cpf,pix_type,pix_key,updated_at')
@@ -64,7 +82,7 @@ Deno.serve(async (req) => {
   const cpf = String(body?.cpf || '').replace(/\D/g, '').slice(0, 11);
   const pix_type = String(body?.pix_type || '').trim().slice(0, 30);
   const pix_key = String(body?.pix_key || '').trim().slice(0, 200);
-  if (!phone || cpf.length !== 11 || !pix_type || !pix_key) {
+  if (!phone || !validCpf(cpf) || !pix_type || !pix_key) {
     return json({ error: 'Informe telefone, CPF e dados Pix válidos.' }, 400);
   }
   const { error } = await admin.from('affiliate_private_data').upsert({
