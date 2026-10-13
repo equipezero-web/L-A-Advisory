@@ -28,7 +28,7 @@ async function hashPassword(password: string, salt: Uint8Array) {
 }
 function b64url(bytes: Uint8Array) {
   let s = ''; for (const b of bytes) s += String.fromCharCode(b);
-  return btoa(s).replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/g, '');
+  return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
 }
 async function createAffiliateSession(affiliateId: string) {
   const secret = Deno.env.get('AFFILIATE_SESSION_SECRET') || '';
