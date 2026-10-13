@@ -11,7 +11,7 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.create-test-checkout]
-verify_jwt = false
+verify_jwt = true
 
 [functions.create-order]
 verify_jwt = true
