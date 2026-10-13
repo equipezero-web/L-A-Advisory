@@ -82,8 +82,11 @@ Deno.serve(async (req) => {
   const cpf = String(body?.cpf || '').replace(/\D/g, '').slice(0, 11);
   const pix_type = String(body?.pix_type || '').trim().slice(0, 30);
   const pix_key = String(body?.pix_key || '').trim().slice(0, 200);
-  if (!phone || !validCpf(cpf) || !pix_type || !pix_key) {
-    return json({ error: 'Informe telefone, CPF e dados Pix válidos.' }, 400);
+  const name = String(body?.name || '').trim().slice(0, 160);
+  const instagram = String(body?.instagram || '').trim().slice(0, 200);
+  const website = String(body?.website || '').trim().slice(0, 300);
+  if (!name || !phone || !validCpf(cpf) || !pix_type || !pix_key) {
+    return json({ error: 'Informe nome, telefone, CPF e dados Pix válidos.' }, 400);
   }
   const { error } = await admin.from('affiliate_private_data').upsert({
     affiliate_id: claims.sub, phone, cpf, pix_type, pix_key, updated_at: new Date().toISOString()
@@ -91,6 +94,13 @@ Deno.serve(async (req) => {
   if (error) {
     console.error('Falha ao atualizar dados privados de afiliado:', error.message);
     return json({ error: 'Não foi possível salvar os dados privados.' }, 500);
+  }
+  const { error: profileError } = await admin.from('affiliates').update({
+    name, instagram: instagram || null, website: website || null, updated_at: new Date().toISOString()
+  }).eq('id', claims.sub);
+  if (profileError) {
+    console.error('Falha ao atualizar perfil público de afiliado:', profileError.message);
+    return json({ error: 'Os dados privados foram salvos, mas não foi possível atualizar o perfil.' }, 500);
   }
   return json({ ok: true });
 });
