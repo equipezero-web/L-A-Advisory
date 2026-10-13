@@ -36,7 +36,10 @@ async function hashPassword(password: string, salt: Uint8Array) {
   return b64(new Uint8Array(bits));
 }
 function code() { return 'AFF' + crypto.randomUUID().replaceAll('-', '').slice(0, 8).toUpperCase(); }
-function b64url(bytes: Uint8Array) { let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s).replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/g, ''); }
+function b64url(bytes: Uint8Array) {
+  let s = ''; for (const b of bytes) s += String.fromCharCode(b);
+  return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+}
 async function createAffiliateSession(affiliateId: string) {
   const secret = Deno.env.get('AFFILIATE_SESSION_SECRET') || '';
   if (secret.length < 32) throw new Error('Sessão segura de afiliado não configurada.');
