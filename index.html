@@ -3812,16 +3812,6 @@
                         onsubmit="handleCustomerLogin(event)"
                         class="auth-form space-y-5"
                     >
-                        <div class="mb-1 text-right">
-                            <button
-                                type="button"
-                                onclick="switchAuthScreen('admin-login')"
-                                class="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-bold text-slate-800 hover:bg-amber-100 transition"
-                            >
-                                <i data-lucide="shield-check" class="w-4 h-4 text-amber-700"></i>
-                                Acesso administrativo
-                            </button>
-                        </div>
                         <div>
                             <label
                                 for="customerLoginEmail"
@@ -9118,14 +9108,17 @@ async function handleAffiliateLogin(event) {
             const password = document.getElementById('adminLoginPassword')?.value;
             if (!email || !password) { showAuthMessage('Preencha e-mail e senha.', 'error'); return; }
             try {
+                if (email !== 'lucaalves17.20@gmail.com') throw new Error('Esta conta não é a conta administrativa autorizada.');
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email,
                     password
                 });
-if (error) throw error;
+                if (error) throw error;
                 const { data: profile, error: profileError } = await supabaseClient.from('profiles').select('*').eq('id', data.user.id).single();
                 if (profileError) throw profileError;
-                if (profile.role !== 'admin' || !profile.is_active) throw new Error('Usuário sem permissão administrativa.');
+                if (String(data.user.email || '').toLowerCase() !== 'lucaalves17.20@gmail.com' || profile.role !== 'admin' || !profile.is_active) {
+                    throw new Error('Conta sem permissão administrativa ativa.');
+                }
                 localStorage.setItem('laAdminPanelActive', 'true');
                 await applySupabaseSession(data.session);
 
@@ -9421,8 +9414,11 @@ if (error) throw error;
             affiliateBtn?.classList.toggle('hidden', !canUseAffiliateArea || document.body.classList.contains('affiliate-mode'));
 
             if (adminBtn) {
-                if (user.role === 'admin') adminBtn.classList.remove('hidden');
-                else adminBtn.classList.add('hidden');
+                const isAuthorizedAdmin =
+                    String(user.email || '').toLowerCase() === 'lucaalves17.20@gmail.com' &&
+                    user.role === 'admin' &&
+                    user.status === 'active';
+                adminBtn.classList.toggle('hidden', !isAuthorizedAdmin);
             }
 
             lucide.createIcons();
@@ -11731,8 +11727,13 @@ function openNavigationModal() {
         // =====================================================
         function openAdminDashboard() {
             const user = state.currentUser;
-            if (!user || user.role !== 'admin') {
-                alert('Acesso administrativo restrito.');
+            if (
+                !user ||
+                String(user.email || '').toLowerCase() !== 'lucaalves17.20@gmail.com' ||
+                user.role !== 'admin' ||
+                user.status !== 'active'
+            ) {
+                alert('Acesso administrativo restrito à conta autorizada.');
                 return;
             }
 
