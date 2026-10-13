@@ -9751,7 +9751,7 @@ function openNavigationModal() {
                 const div = document.createElement('div');
                 div.className = 'flex justify-between text-sm';
                 div.innerHTML = `
-                    <span>${item.quantity}x ${item.name}</span>
+                    <span>${escapeHtml(item.quantity)}x ${escapeHtml(item.name)}</span>
                     <span class="font-bold">${formatCurrency(item.price * item.quantity)}</span>
                 `;
                 container.appendChild(div);
@@ -10795,7 +10795,7 @@ function openNavigationModal() {
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                         <div>
                             <p class="text-xs text-slate-500">Pedido</p>
-                            <p class="font-bold text-slate-900">${order.code}</p>
+                            <p class="font-bold text-slate-900">${escapeHtml(order.code)}</p>
                         </div>
 
                         <div class="flex items-center gap-3">
@@ -10808,18 +10808,18 @@ function openNavigationModal() {
                     </div>
 
                     <div class="flex flex-wrap gap-2">
-                        <button type="button" onclick="viewOrderDetails('${order.id}')" class="px-3 py-2 rounded-lg bg-slate-900 text-amber-400 text-xs font-bold hover:bg-slate-800 transition">
+                        <button type="button" onclick="viewOrderDetails('${String(order.id).replace(/[^a-zA-Z0-9_-]/g, '')}')" class="px-3 py-2 rounded-lg bg-slate-900 text-amber-400 text-xs font-bold hover:bg-slate-800 transition">
                             Ver detalhes
                         </button>
 
                         ${order.trackingCode ? `
-                            <button type="button" onclick="openTrackingModal('${order.id}')" class="px-3 py-2 rounded-lg border border-slate-300 text-slate-700 text-xs font-bold hover:border-amber-500 transition">
+                            <button type="button" onclick="openTrackingModal('${String(order.id).replace(/[^a-zA-Z0-9_-]/g, '')}')" class="px-3 py-2 rounded-lg border border-slate-300 text-slate-700 text-xs font-bold hover:border-amber-500 transition">
                                 Rastrear
                             </button>
                         ` : ''}
 
                         ${order.status === 'delivered' ? `
-                            <button type="button" onclick="openReturnRequest('${order.id}')" class="px-3 py-2 rounded-lg border border-slate-300 text-slate-700 text-xs font-bold hover:border-amber-500 transition">
+                            <button type="button" onclick="openReturnRequest('${String(order.id).replace(/[^a-zA-Z0-9_-]/g, '')}')" class="px-3 py-2 rounded-lg border border-slate-300 text-slate-700 text-xs font-bold hover:border-amber-500 transition">
                                 Troca/Devolução
                             </button>
                         ` : ''}
@@ -11470,7 +11470,7 @@ function openNavigationModal() {
             container.innerHTML = sales.map(order => `
                 <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
                     <div class="flex justify-between items-center mb-2">
-                        <p class="font-bold text-sm">${order.code}</p>
+                        <p class="font-bold text-sm">${escapeHtml(order.code)}</p>
                         <span class="px-2 py-1 rounded text-xs font-bold ${getStatusBadgeClass(order.status)}">${translateOrderStatus(order.status)}</span>
                     </div>
 
@@ -11537,9 +11537,9 @@ function openNavigationModal() {
 
                 return `
                     <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
-                        <img src="${product.image}" alt="${product.name}" class="w-full h-40 object-cover rounded-xl mb-3">
+                        <img src="${escapeAttribute(product.image)}" alt="${escapeAttribute(product.name)}" class="w-full h-40 object-cover rounded-xl mb-3">
 
-                        <h4 class="font-bold text-slate-900 text-sm mb-1">${product.name}</h4>
+                        <h4 class="font-bold text-slate-900 text-sm mb-1">${escapeHtml(product.name)}</h4>
 
                         <p class="text-xs text-slate-500 mb-2">${formatCurrency(finalPrice)}</p>
 
@@ -11550,7 +11550,7 @@ function openNavigationModal() {
 
                         <button
                             type="button"
-                            onclick="shareProduct('${product.id}')"
+                            onclick="shareProduct('${String(product.id).replace(/[^a-zA-Z0-9_-]/g, '')}')"
                             class="w-full px-3 py-3 rounded-lg gradient-gold text-slate-900 text-xs font-bold hover:shadow-gold transition"
                         >
                             <i data-lucide="share-2" class="w-4 h-4 inline mr-1"></i>
@@ -12702,7 +12702,7 @@ function renderCatalog() {
                     const finalPrice = calculateFinalPrice(product);
                     const discount = Number(product.discount) || 0;
                     return `
-                        <article role="button" tabindex="0" aria-label="Ver detalhes de ${escapeAttribute(product.name)}" onclick="showProductDetails('${escapeAttribute(product.id)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showProductDetails('${escapeAttribute(product.id)}')}" data-product-id="${escapeAttribute(product.id)}" data-delay="${(group.indexOf(product)%10)+1}" class="product-motion-card product-summary-card w-full min-w-0 md:w-[285px] md:flex-shrink-0 md:snap-start bg-white rounded-xl md:rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col cursor-pointer">
+                        <article role="button" tabindex="0" aria-label="Ver detalhes de ${escapeAttribute(product.name)}" onclick="showProductDetails('${String(product.id).replace(/[^a-zA-Z0-9_-]/g, '')}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showProductDetails('${String(product.id).replace(/[^a-zA-Z0-9_-]/g, '')}')}" data-product-id="${escapeAttribute(product.id)}" data-delay="${(group.indexOf(product)%10)+1}" class="product-motion-card product-summary-card w-full min-w-0 md:w-[285px] md:flex-shrink-0 md:snap-start bg-white rounded-xl md:rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col cursor-pointer">
                             <div class="relative h-32 min-[400px]:h-36 sm:h-40 md:h-64 bg-white overflow-hidden flex items-center justify-center">
                                 <img src="${escapeAttribute(product.image)}" alt="${escapeAttribute(product.name)}" class="product-card-image w-full h-full object-contain" loading="lazy">
                                 ${discount > 0 ? `<span class="absolute top-2 right-2 px-2 py-1 rounded-full bg-amber-400 text-slate-900 text-[10px] md:text-xs font-extrabold">${formatPercentage(discount)}% OFF</span>` : ''}
@@ -12770,11 +12770,11 @@ function showProductDetails(productId) {
                 </div>
                 <div class="mt-5">
                     ${isAffiliate ? `
-                        <button type="button" onclick="shareProduct('${escapeAttribute(product.id)}')" class="w-full gradient-gold text-slate-900 py-3 rounded-xl font-bold"><i data-lucide="share-2" class="w-4 h-4 inline mr-1"></i> Compartilhar produto</button>
+                        <button type="button" onclick="shareProduct('${String(product.id).replace(/[^a-zA-Z0-9_-]/g, '')}')" class="w-full gradient-gold text-slate-900 py-3 rounded-xl font-bold"><i data-lucide="share-2" class="w-4 h-4 inline mr-1"></i> Compartilhar produto</button>
                     ` : `
                         <div class="grid grid-cols-2 gap-2">
-                            <button type="button" onclick="addToCart('${escapeAttribute(product.id)}')" class="w-full gradient-gold text-slate-900 py-3 rounded-xl font-bold text-sm"><i data-lucide="shopping-cart" class="w-4 h-4 inline mr-1"></i> Adicionar ao carrinho</button>
-                            <button type="button" onclick="buyNow('${escapeAttribute(product.id)}')" class="w-full bg-slate-900 text-amber-400 py-3 rounded-xl font-bold text-sm border border-slate-700"><i data-lucide="credit-card" class="w-4 h-4 inline mr-1"></i> Comprar agora</button>
+                            <button type="button" onclick="addToCart('${String(product.id).replace(/[^a-zA-Z0-9_-]/g, '')}')" class="w-full gradient-gold text-slate-900 py-3 rounded-xl font-bold text-sm"><i data-lucide="shopping-cart" class="w-4 h-4 inline mr-1"></i> Adicionar ao carrinho</button>
+                            <button type="button" onclick="buyNow('${String(product.id).replace(/[^a-zA-Z0-9_-]/g, '')}')" class="w-full bg-slate-900 text-amber-400 py-3 rounded-xl font-bold text-sm border border-slate-700"><i data-lucide="credit-card" class="w-4 h-4 inline mr-1"></i> Comprar agora</button>
                         </div>
                     `}
                 </div>
