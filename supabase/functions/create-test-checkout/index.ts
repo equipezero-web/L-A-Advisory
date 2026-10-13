@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://equipezero-web.github.io",
@@ -21,6 +22,44 @@ serve(async (req) => {
       JSON.stringify({ error: "Method not allowed" }),
       { status: 405, headers: corsHeaders },
     );
+  }
+
+  const authorization = req.headers.get("Authorization") || "";
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+
+  if (!authorization.startsWith("Bearer ") || !supabaseUrl || !anonKey || !serviceRoleKey) {
+    return new Response(JSON.stringify({ error: "Acesso não autorizado." }), {
+      status: 401,
+      headers: corsHeaders,
+    });
+  }
+
+  const userClient = createClient(supabaseUrl, anonKey, {
+    global: { headers: { Authorization: authorization } },
+  });
+  const { data: { user }, error: userError } = await userClient.auth.getUser();
+
+  if (userError || !user) {
+    return new Response(JSON.stringify({ error: "Sessão inválida ou expirada." }), {
+      status: 401,
+      headers: corsHeaders,
+    });
+  }
+
+  const adminClient = createClient(supabaseUrl, serviceRoleKey);
+  const { data: profile, error: profileError } = await adminClient
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (profileError || profile?.role !== "admin") {
+    return new Response(JSON.stringify({ error: "Apenas administradores podem criar pedidos de teste." }), {
+      status: 403,
+      headers: corsHeaders,
+    });
   }
 
   const MP_ACCESS_TOKEN = (Deno.env.get("MP_ACCESS_TOKEN") || "").trim();
