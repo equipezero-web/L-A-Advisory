@@ -12026,7 +12026,7 @@ function openNavigationModal() {
                     <td class="p-3">${escapeHtml(a.name)}</td>
                     <td class="p-3">${escapeHtml(a.email)}</td>
                     <td class="p-3 font-mono text-xs">${escapeHtml(a.code)}</td>
-                    <td class="p-3"><span class="px-2 py-1 rounded text-[10px] font-bold ${a.status === 'active' ? 'bg-emerald-100 text-emerald-800' : a.status === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'}">${a.status}</span></td>
+                    <td class="p-3"><span class="px-2 py-1 rounded text-[10px] font-bold ${a.status === 'active' ? 'bg-emerald-100 text-emerald-800' : a.status === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'}">${escapeHtml(a.status)}</span></td>
                     <td class="p-3">
                         <button type="button" onclick="openAdminAffiliateForm('${a.id}')" class="px-2 py-1 rounded bg-slate-900 text-amber-400 text-[10px] font-bold">Editar</button>
                     </td>
