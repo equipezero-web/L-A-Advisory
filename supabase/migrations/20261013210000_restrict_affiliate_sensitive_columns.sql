@@ -1,6 +1,6 @@
 -- Impede que clientes autenticados leiam CPF, telefone e dados Pix diretamente
 -- da tabela pública de afiliados. Esses campos são servidos por affiliate_private_data.
-REVOKE SELECT ON TABLE public.affiliates FROM anon, authenticated;
+REVOKE SELECT ON TABLE public.affiliates FROM PUBLIC, anon, authenticated;
 
 GRANT SELECT (
   id,
