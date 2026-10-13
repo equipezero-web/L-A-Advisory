@@ -37,6 +37,25 @@ async function hashPassword(password: string, salt: Uint8Array) {
 }
 function code() { return 'AFF' + crypto.randomUUID().replaceAll('-', '').slice(0, 8).toUpperCase(); }
 
+async function verifyTurnstile(token: unknown) {
+  const secret = Deno.env.get('TURNSTILE_SECRET_KEY');
+  if (!secret || typeof token !== 'string' || !token.trim()) return false;
+  try {
+    const form = new URLSearchParams({ secret, response: token, remoteip: '' });
+    form.delete('remoteip');
+    const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: form
+    });
+    const result = await response.json();
+    return response.ok && result.success === true && result.hostname === 'equipezero-web.github.io';
+  } catch (error) {
+    console.error('Falha na validação Turnstile:', error);
+    return false;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return json({ error: 'Método não permitido.' }, 405);
@@ -44,6 +63,7 @@ Deno.serve(async (req) => {
 
   const body = await req.json().catch(() => null);
   if (!body || typeof body !== 'object') return json({ error: 'JSON inválido.' }, 400);
+  if (!(await verifyTurnstile(body.captchaToken))) return json({ error: 'Falha na verificação de segurança. Atualize a página e tente novamente.' }, 403);
 
   const name = String(body.name || body.fullName || '').trim().slice(0, 160);
   const email = emailOf(body.email);
