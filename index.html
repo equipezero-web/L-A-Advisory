@@ -9078,6 +9078,13 @@ async function handleAffiliateLogin(event) {
                     }
                 }
                 state.affiliates = [affiliate];
+                state.currentUser = {
+                    id: affiliate.userId,
+                    fullName: affiliate.name || 'Afiliado',
+                    email: affiliate.email || email,
+                    role: 'affiliate',
+                    isActive: true
+                };
                 // Conta de cliente e conta de afiliado permanecem separadas.
                 closeAuthModal();
                 updateAuthUI();
