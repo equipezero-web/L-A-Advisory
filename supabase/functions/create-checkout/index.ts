@@ -661,16 +661,7 @@ Deno.serve(async (req) => {
     );
 
     return json(
-      {
-        error:
-          'Não foi possível criar o pedido.',
-        debug: {
-          code: orderError.code || null,
-          message: orderError.message || null,
-          details: orderError.details || null,
-          hint: orderError.hint || null,
-        },
-      },
+      { error: 'Não foi possível criar o pedido.' },
       500
     );
   }
