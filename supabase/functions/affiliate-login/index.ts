@@ -81,7 +81,7 @@ Deno.serve(async (req) => {
 
   const admin = createClient(SUPABASE_URL, SECRET);
   const { data: affiliate, error } = await admin.from('affiliates')
-    .select('id,code,status,name,affiliate_email,affiliate_password_hash,affiliate_password_salt,phone,cpf,pix_type,pix_key,instagram,website,user_id,total_sales,total_commission')
+    .select('id,code,status,name,affiliate_email,affiliate_password_hash,affiliate_password_salt,instagram,website,user_id,total_sales,total_commission')
     .ilike('affiliate_email', email)
     .maybeSingle();
 
