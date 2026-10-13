@@ -11757,7 +11757,7 @@ function openNavigationModal() {
                     const response = await fetch(SUPABASE_FUNCTIONS_BASE + '/affiliate-private-data', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + affiliateSessionToken },
-                        body: JSON.stringify({ phone, cpf, pix_type: pixType, pix_key: pixKey })
+                        body: JSON.stringify({ name, phone, cpf, pix_type: pixType, pix_key: pixKey, instagram, website })
                     });
                     const result = await response.json().catch(() => ({}));
                     if (!response.ok) throw new Error(result.error || 'Não foi possível salvar os dados privados.');
@@ -11766,6 +11766,10 @@ function openNavigationModal() {
                         affiliate_id: affiliate.id, phone, cpf: cpf.replace(/\D/g, ''), pix_type: pixType, pix_key: pixKey, updated_at: new Date().toISOString()
                     }, { onConflict: 'affiliate_id' });
                     if (error) throw error;
+                    const { error: publicProfileError } = await supabaseClient.from('affiliates').update({
+                        name, instagram: instagram || null, website: website || null, updated_at: new Date().toISOString()
+                    }).eq('id', affiliate.id);
+                    if (publicProfileError) throw publicProfileError;
                 } else {
                     throw new Error('Sua sessão de afiliado expirou. Entre novamente para salvar seus dados.');
                 }
@@ -11792,7 +11796,6 @@ function openNavigationModal() {
                 state.users[userIndex].fullName = name;
             }
 
-            saveStateToStorage();
             showAffiliateProfileMessage('Dados atualizados com sucesso!', 'success');
         }
 
