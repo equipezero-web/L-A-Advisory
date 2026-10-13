@@ -11842,7 +11842,7 @@ function openNavigationModal() {
             if (recentOrdersEl) {
                 recentOrdersEl.innerHTML = recentOrders.map(o => `
                     <div class="flex justify-between items-center text-sm">
-                        <span class="font-bold">${o.code}</span>
+                        <span class="font-bold">${escapeHtml(o.code)}</span>
                         <span class="text-slate-500">${formatCurrency(o.total)}</span>
                     </div>
                 `).join('') || '<p class="text-sm text-slate-500">Nenhum pedido.</p>';
@@ -11853,8 +11853,8 @@ function openNavigationModal() {
             if (recentAffiliatesEl) {
                 recentAffiliatesEl.innerHTML = recentAffiliates.map(a => `
                     <div class="flex justify-between items-center text-sm">
-                        <span class="font-bold">${a.name}</span>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold ${a.status === 'active' ? 'bg-emerald-100 text-emerald-800' : a.status === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'}">${a.status}</span>
+                        <span class="font-bold">${escapeHtml(a.name)}</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold ${a.status === 'active' ? 'bg-emerald-100 text-emerald-800' : a.status === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'}">${escapeHtml(a.status)}</span>
                     </div>
                 `).join('') || '<p class="text-sm text-slate-500">Nenhum afiliado.</p>';
             }
@@ -11866,11 +11866,11 @@ function openNavigationModal() {
 
             tbody.innerHTML = state.users.map(u => `
                 <tr class="hover:bg-slate-50">
-                    <td class="p-3">${u.fullName}</td>
-                    <td class="p-3">${u.email}</td>
-                    <td class="p-3">${u.role === 'customer' ? 'Protegido' : (u.cpf || '—')}</td>
-                    <td class="p-3"><span class="px-2 py-1 rounded text-[10px] font-bold bg-slate-100">${u.role}</span></td>
-                    <td class="p-3"><span class="px-2 py-1 rounded text-[10px] font-bold ${u.status === 'active' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">${u.status}</span></td>
+                    <td class="p-3">${escapeHtml(u.fullName)}</td>
+                    <td class="p-3">${escapeHtml(u.email)}</td>
+                    <td class="p-3">${escapeHtml(u.role === 'customer' ? 'Protegido' : (u.cpf || '—'))}</td>
+                    <td class="p-3"><span class="px-2 py-1 rounded text-[10px] font-bold bg-slate-100">${escapeHtml(u.role)}</span></td>
+                    <td class="p-3"><span class="px-2 py-1 rounded text-[10px] font-bold ${u.status === 'active' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">${escapeHtml(u.status)}</span></td>
                     <td class="p-3">
                         <button type="button" onclick="openAdminUserForm('${u.id}')" class="px-2 py-1 rounded bg-slate-900 text-amber-400 text-[10px] font-bold">Editar</button>
                     </td>
@@ -11888,10 +11888,10 @@ function openNavigationModal() {
 
             container.innerHTML = state.products.map(p => `
                 <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
-                    <img src="${p.image}" alt="${p.name}" class="w-full h-32 object-cover rounded-xl mb-3">
-                    <h4 class="font-bold text-sm mb-1">${p.name}</h4>
+                    <img src="${escapeAttribute(p.image)}" alt="${escapeAttribute(p.name)}" class="w-full h-32 object-cover rounded-xl mb-3">
+                    <h4 class="font-bold text-sm mb-1">${escapeHtml(p.name)}</h4>
                     <p class="text-xs text-slate-500 mb-2">${formatCurrency(calculateFinalPrice(p))}</p>
-                    <p class="text-xs text-slate-500 mb-3">Estoque: ${p.stock}</p>
+                    <p class="text-xs text-slate-500 mb-3">Estoque: ${escapeHtml(p.stock)}</p>
                     <div class="flex gap-2">
                         <button type="button" onclick="openAdminProductForm('${p.id}')" class="flex-1 px-2 py-1 rounded bg-slate-900 text-amber-400 text-[10px] font-bold">Editar</button>
                         <button type="button" onclick="deleteProduct('${p.id}')" class="px-2 py-1 rounded border border-red-300 text-red-700 text-[10px] font-bold">Excluir</button>
@@ -12023,9 +12023,9 @@ function openNavigationModal() {
 
             tbody.innerHTML = affiliates.map(a => `
                 <tr class="hover:bg-slate-50">
-                    <td class="p-3">${a.name}</td>
-                    <td class="p-3">${a.email}</td>
-                    <td class="p-3 font-mono text-xs">${a.code}</td>
+                    <td class="p-3">${escapeHtml(a.name)}</td>
+                    <td class="p-3">${escapeHtml(a.email)}</td>
+                    <td class="p-3 font-mono text-xs">${escapeHtml(a.code)}</td>
                     <td class="p-3"><span class="px-2 py-1 rounded text-[10px] font-bold ${a.status === 'active' ? 'bg-emerald-100 text-emerald-800' : a.status === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'}">${a.status}</span></td>
                     <td class="p-3">
                         <button type="button" onclick="openAdminAffiliateForm('${a.id}')" class="px-2 py-1 rounded bg-slate-900 text-amber-400 text-[10px] font-bold">Editar</button>
