@@ -13593,41 +13593,46 @@ body.affiliate-mode header [aria-label="Abrir navegação"] { display: none !imp
 body.guest-mode #mobileUtilityActions button[aria-label="Abrir carrinho"] { display: none !important; }
 body.guest-mode #affiliateNavLink { display: inline-flex !important; }
 body.guest-mode #afiliados { display: block !important; }
-/* MOBILE: dois cards compactos por linha, sem sobreposição.
-   Cada grupo continua contendo até 10 produtos (5 linhas de 2). */
+/* MOBILE: carrossel horizontal com cards a 75% da largura da tela.
+   A primeira posição fica alinhada; os próximos produtos ficam próximos,
+   em sequência, até 10 por carrossel. */
 @media (max-width: 768px) {
     #catalogContainer .product-carousel-group {
         display: block !important;
         width: 100% !important;
         min-width: 0 !important;
-        overflow: visible !important;
+        overflow: hidden !important;
     }
     #catalogContainer .product-carousel-group .product-cards-layout {
-        display: grid !important;
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        grid-auto-flow: row !important;
+        display: flex !important;
+        flex-flow: row nowrap !important;
         align-items: stretch !important;
         gap: .2rem !important;
         column-gap: .2rem !important;
-        row-gap: .45rem !important;
+        row-gap: 0 !important;
         width: 100% !important;
         min-width: 0 !important;
         max-width: 100% !important;
-        overflow: visible !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        scroll-snap-type: x proximity !important;
+        scroll-padding-left: 0 !important;
+        -webkit-overflow-scrolling: touch !important;
         padding: 0 !important;
+        margin: 0 !important;
     }
     #catalogContainer .product-carousel-group .product-motion-card {
         display: flex !important;
         position: relative !important;
-        width: 100% !important;
-        justify-self: stretch !important;
-        min-width: 0 !important;
-        max-width: 100% !important;
-        flex: none !important;
+        width: 75vw !important;
+        min-width: 75vw !important;
+        max-width: 75vw !important;
+        flex: 0 0 75vw !important;
         margin: 0 !important;
         box-sizing: border-box !important;
         transform: none !important;
         align-self: stretch !important;
+        scroll-snap-align: start !important;
         overflow: hidden !important;
     }
     #catalogContainer .product-carousel-group .product-motion-card.revealed,
