@@ -362,7 +362,7 @@ Deno.serve(async (req) => {
 
   const orderId = String(payment.external_reference || '').trim();
   if (!orderId) return json({ received: true });
-  const admin = createClient(URL, SERVICE);
+  const admin = createClient(SUPABASE_URL, SERVICE);
   const { data: order } = await admin.from('orders').select('*').eq('id', orderId).maybeSingle();
   if (!order) return json({ received: true });
 
@@ -388,7 +388,6 @@ Deno.serve(async (req) => {
   const newOrderStatus = approved ? 'paid' : paymentStatus === 'refunded' ? 'refunded' : paymentStatus === 'rejected' ? 'cancelled' : 'pending';
   const orderUpdate: Record<string, unknown> = { payment_status: paymentStatus, status: newOrderStatus };
   if (approved) orderUpdate.paid_at = new Date().toISOString();
-  await admin.from('orders').update(orderUpdate).eq('id', orderId);
 
   // Idempotency: claim the approval transition atomically before applying
   // stock/commission, preventing duplicate concurrent webhooks from double-counting.
