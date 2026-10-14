@@ -8,7 +8,8 @@ const corsHeaders = {
 };
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SECRET_KEYS = JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS') || '{}');
-const DB_SECRET = SECRET_KEYS.default;
+// Prefere a chave secreta atual; usa a chave legada como fallback em projetos que ainda a disponibilizam.
+const DB_SECRET = SECRET_KEYS.default || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
 const SESSION_SECRET = Deno.env.get('AFFILIATE_SESSION_SECRET') || '';
 
 function json(data: unknown, status = 200) {
