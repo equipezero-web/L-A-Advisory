@@ -18,3 +18,6 @@ verify_jwt = true
 verify_jwt = false
 [functions.admin-affiliate-update]
 verify_jwt = true
+
+[functions.affiliate-communication]
+verify_jwt = false
