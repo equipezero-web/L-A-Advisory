@@ -7969,7 +7969,7 @@
             try {
                 const { data: { session }, error } = await withTimeout(supabaseClient.auth.getSession(), 8000, 'A conexão de autenticação do Supabase');
                 if (error) throw error;
-                await applySupabaseSession(session);
+                await withTimeout(applySupabaseSession(session), 8000, 'A validação da sessão');
 
                 // Produtos são públicos e devem ser carregados do Supabase
                 // para visitante, cliente e afiliado.
