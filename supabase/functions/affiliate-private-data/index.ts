@@ -2,9 +2,10 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://equipezero-web.github.io',
-  'Access-Control-Allow-Headers': 'apikey, x-client-info, content-type, authorization',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Content-Type': 'application/json'
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-api-version',
+  'Access-Control-Max-Age': '86400',
+  'Vary': 'Origin'
 };
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SECRET_KEYS = JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS') || '{}');
@@ -13,7 +14,10 @@ const DB_SECRET = SECRET_KEYS.default || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY
 const SESSION_SECRET = Deno.env.get('AFFILIATE_SESSION_SECRET') || '';
 
 function json(data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), { status, headers: corsHeaders });
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+  });
 }
 function b64url(bytes: Uint8Array) {
   let s = ''; for (const b of bytes) s += String.fromCharCode(b);
@@ -51,7 +55,9 @@ async function verifyToken(token: string) {
 }
 
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }
   if (!['GET', 'POST'].includes(req.method)) return json({ error: 'Método não permitido.' }, 405);
   if (!DB_SECRET || !SESSION_SECRET) return json({ error: 'Serviço de dados privados não configurado.' }, 503);
 
