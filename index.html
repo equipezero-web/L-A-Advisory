@@ -7942,13 +7942,21 @@
             await initializeSupabase();
         });
 
+        function withTimeout(promise, ms, label) {
+            let timer;
+            const timeout = new Promise((_, reject) => {
+                timer = setTimeout(() => reject(new Error(label + ' excedeu o tempo limite.')), ms);
+            });
+            return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+        }
+
         async function initializeSupabase() {
             // Registra o listener ANTES de getSession(), pois a validação do link
             // pode disparar PASSWORD_RECOVERY durante a inicialização do cliente.
             supabaseClient.auth.onAuthStateChange((event, session) => {
                 setTimeout(async () => {
                     try {
-                        await applySupabaseSession(session);
+                        await withTimeout(applySupabaseSession(session), 8000, 'A validação da sessão');
                         if (event === 'PASSWORD_RECOVERY') {
                             openAuthModal('password-recovery');
                         }
@@ -7959,13 +7967,13 @@
             });
 
             try {
-                const { data: { session }, error } = await supabaseClient.auth.getSession();
+                const { data: { session }, error } = await withTimeout(supabaseClient.auth.getSession(), 8000, 'A conexão de autenticação do Supabase');
                 if (error) throw error;
                 await applySupabaseSession(session);
 
                 // Produtos são públicos e devem ser carregados do Supabase
                 // para visitante, cliente e afiliado.
-                await loadPublicProducts();
+                await withTimeout(loadPublicProducts(), 8000, 'O carregamento dos produtos');
 
                 supabaseReady = true;
                 initializeApp();
