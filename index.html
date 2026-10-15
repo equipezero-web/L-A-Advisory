@@ -12850,7 +12850,7 @@ function showProductDetails(productId) {
     modal.setAttribute('aria-modal', 'true');
     modal.setAttribute('aria-label', 'Detalhes do produto');
     modal.innerHTML = `
-        <div class="product-details-panel account-modal-scroll relative bg-white w-full max-w-2xl max-h-[92dvh] overflow-y-auto overscroll-contain rounded-2xl shadow-2xl" data-lenis-prevent data-lenis-prevent-wheel>
+        <div class="product-details-panel relative bg-white w-full max-w-2xl max-h-[92dvh] overflow-y-auto rounded-2xl shadow-2xl">
             <button type="button" onclick="document.getElementById('productDetailsModal')?.remove()" aria-label="Fechar detalhes" class="sticky top-2 float-right mr-2 mt-2 z-10 w-10 h-10 rounded-full bg-slate-900 text-amber-400 text-2xl font-bold">&times;</button>
             <div class="p-4 sm:p-6">
                 <div class="w-full h-52 sm:h-72 bg-white flex items-center justify-center rounded-xl overflow-hidden">
