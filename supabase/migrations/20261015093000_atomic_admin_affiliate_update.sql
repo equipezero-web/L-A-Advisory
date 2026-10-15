@@ -39,7 +39,7 @@ BEGIN
     IF p_affiliate_id IS NULL OR pg_catalog.btrim(p_affiliate_id) = ''
        OR p_name IS NULL OR pg_catalog.btrim(p_name) = ''
        OR p_email IS NULL OR p_email !~* '^\S+@\S+\.\S+$'
-       OR p_status NOT IN ('pending', 'active', 'blocked')
+       OR p_status IS NULL OR p_status NOT IN ('pending', 'active', 'blocked')
        OR p_phone IS NULL OR pg_catalog.btrim(p_phone) = ''
        OR p_cpf IS NULL OR p_cpf !~ '^[0-9]{11}$'
        OR p_pix_type IS NULL OR pg_catalog.btrim(p_pix_type) = ''
