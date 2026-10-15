@@ -270,5 +270,6 @@
     if (relevantModalAdded) apply();
   });
   modalObserver.observe(document.body, { childList:true, subtree:true });
+  window.openAffiliateChat = openAffiliateChat;
   window.addEventListener('pageshow', apply);
 })();
