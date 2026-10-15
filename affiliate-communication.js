@@ -34,10 +34,16 @@
     else alert(message);
   }
   function isAffiliate() {
-    return window.state?.currentUser?.role === 'affiliate' && window.state?.currentUser?.affiliateStatus === 'active';
+    const user = window.state?.currentUser;
+    if (user?.role !== 'affiliate') return false;
+    const affiliates = Array.isArray(window.state?.affiliates) ? window.state.affiliates : [];
+    const affiliate = affiliates.find(a => String(a.id) === String(user.id) || String(a.userId) === String(user.id));
+    return user.affiliateStatus === 'active' || affiliate?.status === 'active';
   }
   function isAdmin() {
-    return window.state?.currentUser?.role === 'admin' && window.state?.currentUser?.status === 'active';
+    // A visibilidade do botão é apenas interface; a Edge Function valida a sessão
+    // e a função administrativa no servidor antes de permitir qualquer operação.
+    return window.state?.currentUser?.role === 'admin';
   }
   function ensureStyles() {
     if ($('laAffiliateCommunicationStyles')) return;
