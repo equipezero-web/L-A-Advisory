@@ -249,17 +249,6 @@
       button.onclick = openAdminMessages;
       (panel || adminModal).prepend(button);
     }
-    const affiliateModal = $('affiliateDashboardModal') || $('affiliateProfileModal');
-    if (affiliateModal && !affiliateModal.querySelector('#laAffiliateChangeRequestEntry')) {
-      const button = document.createElement('button');
-      button.id = 'laAffiliateChangeRequestEntry';
-      button.type = 'button';
-      button.className = 'la-comm-btn la-comm-gold';
-      button.style.cssText = 'display:block;margin:12px auto;max-width:100%';
-      button.textContent = 'Solicitar alteração de dados';
-      button.onclick = profileChangeForm;
-      affiliateModal.appendChild(button);
-    }
   }
   function apply() {
     ensureStyles();
