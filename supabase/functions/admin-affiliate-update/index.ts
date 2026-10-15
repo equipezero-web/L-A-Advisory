@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
   const pix_type = String(body?.pix_type || '').trim().slice(0, 30);
   const pix_key = String(body?.pix_key || '').trim().slice(0, 200);
 
-  if (!id || !name || !/^\S+@\S+\.\S+$/.test(email) || !['pending', 'active', 'approved', 'blocked', 'rejected'].includes(status)) {
+  if (!id || !name || !/^\S+@\S+\.\S+$/.test(email) || !['pending', 'active', 'blocked'].includes(status)) {
     return json({ error: 'Dados de afiliado inválidos.' }, 400);
   }
   if (!phone || cpf.length !== 11 || !pix_type || !pix_key) {
