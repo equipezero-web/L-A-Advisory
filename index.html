@@ -11210,7 +11210,10 @@ function openNavigationModal() {
             updateUserMenu();
             closeUserMenu();
             renderCatalog();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Ao sair da área de afiliado, garantir que nenhum bloqueio de modal
+            // ou da rolagem suave permaneça ativo.
+            unlockAccountModalScroll();
+            window.scrollTo({ top: 0, behavior: 'auto' });
         }
 
         function returnToHomeFromStore() {
@@ -11219,7 +11222,8 @@ function openNavigationModal() {
             if (openStoreWrap) openStoreWrap.classList.remove('hidden');
             setAffiliateMenuMode(false);
             renderCatalog();
-            setTimeout(() => document.getElementById('inicio')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+            unlockAccountModalScroll();
+            setTimeout(() => document.getElementById('inicio')?.scrollIntoView({ behavior: 'auto', block: 'start' }), 50);
         }
 
         function exitAffiliateMode() {
