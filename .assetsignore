@@ -1,0 +1,25 @@
+# Exclude repository metadata and server-side project files from public static assets
+.git
+**/.git
+.wrangler
+**/.wrangler
+supabase
+**/supabase
+node_modules
+**/node_modules
+.github
+**/.github
+.env
+.env.*
+**/.env
+**/.env.*
+wrangler.jsonc
+.assetsignore
+package.json
+bun.lock
+bun.lockb
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+*.sql
+**/*.sql
