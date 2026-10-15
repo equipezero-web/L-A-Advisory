@@ -112,19 +112,26 @@ Deno.serve(async (req) => {
   if (!name || !phone || !validCpf(cpf) || !pix_type || !pix_key) {
     return json({ error: 'Informe nome, telefone, CPF e dados Pix válidos.' }, 400);
   }
-  const { error } = await admin.from('affiliate_private_data').upsert({
-    affiliate_id: affiliateId, phone, cpf, pix_type, pix_key, updated_at: new Date().toISOString()
-  }, { onConflict: 'affiliate_id' });
-  if (error) {
-    console.error('Falha ao atualizar dados privados de afiliado:', error.message);
-    return json({ error: 'Não foi possível salvar os dados privados.' }, 500);
-  }
-  const { error: profileError } = await admin.from('affiliates').update({
-    name, instagram: instagram || null, website: website || null, updated_at: new Date().toISOString()
-  }).eq('id', affiliateId);
-  if (profileError) {
-    console.error('Falha ao atualizar perfil público de afiliado:', profileError.message);
-    return json({ error: 'Os dados privados foram salvos, mas não foi possível atualizar o perfil.' }, 500);
+  // Public profile and private payout/contact fields are committed together.
+  const { error: updateError } = await admin.rpc('affiliate_update_profile_atomic', {
+    p_affiliate_id: affiliateId,
+    p_name: name,
+    p_instagram: instagram || null,
+    p_website: website || null,
+    p_phone: phone,
+    p_cpf: cpf,
+    p_pix_type: pix_type,
+    p_pix_key: pix_key
+  });
+  if (updateError) {
+    console.error('Falha na atualização atômica do perfil de afiliado:', updateError.message);
+    if (updateError.code === 'P0002') {
+      return json({ error: 'A conta de afiliado não está disponível.' }, 403);
+    }
+    if (updateError.code === '22023') {
+      return json({ error: 'Informe nome, telefone, CPF e dados Pix válidos.' }, 400);
+    }
+    return json({ error: 'Não foi possível salvar o perfil do afiliado.' }, 500);
   }
   return json({ ok: true });
 });
