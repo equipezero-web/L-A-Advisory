@@ -57,11 +57,34 @@ Deno.serve(async (req) => {
 
   const bearer = req.headers.get('Authorization') || '';
   const token = bearer.startsWith('Bearer ') ? bearer.slice(7).trim() : '';
-  const claims = await verifyToken(token).catch(() => null);
-  if (!claims || claims.typ !== 'affiliate_session') return json({ error: 'Sessão inválida ou expirada. Entre novamente.' }, 401);
+  if (!token) return json({ error: 'Sessão inválida ou expirada. Entre novamente.' }, 401);
 
-  const admin = createClient(SUPABASE_URL, DB_SECRET);
-  const { data: affiliate, error: affiliateError } = await admin.from('affiliates').select('id,status').eq('id', claims.sub).maybeSingle();
+  const admin = createClient(SUPABASE_URL, DB_SECRET, {
+    auth: { persistSession: false, autoRefreshToken: false }
+  });
+
+  // Aceita a sessão própria de afiliado ou uma sessão Supabase válida
+  // vinculada explicitamente ao registro de afiliado.
+  const claims = await verifyToken(token).catch(() => null);
+  let affiliateId = claims?.typ === 'affiliate_session' ? String(claims.sub) : '';
+
+  if (!affiliateId) {
+    const { data: authData, error: authError } = await admin.auth.getUser(token);
+    if (authError || !authData.user) return json({ error: 'Sessão inválida ou expirada. Entre novamente.' }, 401);
+    const { data: linkedAffiliate, error: linkedError } = await admin
+      .from('affiliates')
+      .select('id')
+      .eq('user_id', authData.user.id)
+      .maybeSingle();
+    if (linkedError) {
+      console.error('Falha ao verificar vínculo do usuário com afiliado:', linkedError.message);
+      return json({ error: 'Não foi possível validar a conta de afiliado.' }, 500);
+    }
+    if (!linkedAffiliate) return json({ error: 'Esta conta não está vinculada a um afiliado.' }, 403);
+    affiliateId = String(linkedAffiliate.id);
+  }
+
+  const { data: affiliate, error: affiliateError } = await admin.from('affiliates').select('id,status').eq('id', affiliateId).maybeSingle();
   if (affiliateError) {
     console.error('Falha ao verificar o status do afiliado:', affiliateError.message);
     return json({ error: 'Não foi possível validar a conta de afiliado.' }, 500);
@@ -70,7 +93,7 @@ Deno.serve(async (req) => {
   if (req.method === 'GET') {
     const { data, error } = await admin.from('affiliate_private_data')
       .select('phone,cpf,pix_type,pix_key,updated_at')
-      .eq('affiliate_id', claims.sub).maybeSingle();
+      .eq('affiliate_id', affiliateId).maybeSingle();
     if (error) {
       console.error('Falha ao consultar dados privados de afiliado:', error.message);
       return json({ error: 'Não foi possível carregar os dados privados.' }, 500);
@@ -89,19 +112,26 @@ Deno.serve(async (req) => {
   if (!name || !phone || !validCpf(cpf) || !pix_type || !pix_key) {
     return json({ error: 'Informe nome, telefone, CPF e dados Pix válidos.' }, 400);
   }
-  const { error } = await admin.from('affiliate_private_data').upsert({
-    affiliate_id: claims.sub, phone, cpf, pix_type, pix_key, updated_at: new Date().toISOString()
-  }, { onConflict: 'affiliate_id' });
-  if (error) {
-    console.error('Falha ao atualizar dados privados de afiliado:', error.message);
-    return json({ error: 'Não foi possível salvar os dados privados.' }, 500);
-  }
-  const { error: profileError } = await admin.from('affiliates').update({
-    name, instagram: instagram || null, website: website || null, updated_at: new Date().toISOString()
-  }).eq('id', claims.sub);
-  if (profileError) {
-    console.error('Falha ao atualizar perfil público de afiliado:', profileError.message);
-    return json({ error: 'Os dados privados foram salvos, mas não foi possível atualizar o perfil.' }, 500);
+  // Public profile and private payout/contact fields are committed together.
+  const { error: updateError } = await admin.rpc('affiliate_update_profile_atomic', {
+    p_affiliate_id: affiliateId,
+    p_name: name,
+    p_instagram: instagram || null,
+    p_website: website || null,
+    p_phone: phone,
+    p_cpf: cpf,
+    p_pix_type: pix_type,
+    p_pix_key: pix_key
+  });
+  if (updateError) {
+    console.error('Falha na atualização atômica do perfil de afiliado:', updateError.message);
+    if (updateError.code === 'P0002') {
+      return json({ error: 'A conta de afiliado não está disponível.' }, 403);
+    }
+    if (updateError.code === '22023') {
+      return json({ error: 'Informe nome, telefone, CPF e dados Pix válidos.' }, 400);
+    }
+    return json({ error: 'Não foi possível salvar o perfil do afiliado.' }, 500);
   }
   return json({ ok: true });
 });
