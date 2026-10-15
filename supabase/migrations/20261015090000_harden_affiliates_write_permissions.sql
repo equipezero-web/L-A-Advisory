@@ -61,4 +61,32 @@ GRANT UPDATE (
 ON TABLE public.affiliates
 TO authenticated;
 
+
+-- Restrict direct client writes to private affiliate contact and payout data.
+REVOKE INSERT, UPDATE
+ON TABLE public.affiliate_private_data
+FROM authenticated;
+
+REVOKE INSERT (
+    affiliate_id,
+    phone,
+    cpf,
+    pix_type,
+    pix_key,
+    updated_at
+)
+ON TABLE public.affiliate_private_data
+FROM authenticated;
+
+REVOKE UPDATE (
+    affiliate_id,
+    phone,
+    cpf,
+    pix_type,
+    pix_key,
+    updated_at
+)
+ON TABLE public.affiliate_private_data
+FROM authenticated;
+
 COMMIT;
