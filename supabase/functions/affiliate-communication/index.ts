@@ -3,9 +3,19 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://equipezero-web.github.io',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'authorization, apikey, x-client-info, content-type, x-supabase-api-version',
+  'Access-Control-Allow-Headers': [
+    'authorization',
+    'apikey',
+    'x-client-info',
+    'content-type',
+    'x-supabase-api-version',
+    'x-supabase-client-platform',
+    'x-supabase-client-platform-version',
+    'x-supabase-client-runtime',
+    'x-supabase-client-runtime-version',
+  ].join(', '),
   'Access-Control-Max-Age': '86400',
-  'Vary': 'Origin'
+  'Vary': 'Origin',
 };
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || '';
 const SECRET_KEYS = JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS') || '{}');
