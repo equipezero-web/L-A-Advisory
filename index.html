@@ -11735,71 +11735,50 @@ function openNavigationModal() {
 
         async function saveAffiliateProfile(event) {
             event.preventDefault();
-
             const user = state.currentUser;
             const affiliate = state.affiliates.find(a => a.userId === user?.id);
-            if (!affiliate) return;
+            if (!user || !affiliate) return;
 
-            const name = document.getElementById('affiliateProfileName')?.value.trim();
-            const phone = document.getElementById('affiliateProfilePhone')?.value.trim();
-            const cpf = document.getElementById('affiliateProfileCpf')?.value.trim();
-            const pixType = document.getElementById('affiliateProfilePixType')?.value;
-            const pixKey = document.getElementById('affiliateProfilePixKey')?.value.trim();
-            const instagram = document.getElementById('affiliateProfileInstagram')?.value.trim();
-            const website = document.getElementById('affiliateProfileWebsite')?.value.trim();
+            const name = document.getElementById('affiliateProfileName')?.value.trim() || '';
+            const phone = document.getElementById('affiliateProfilePhone')?.value.trim() || '';
+            const cpf = document.getElementById('affiliateProfileCpf')?.value.trim() || '';
+            const pixType = document.getElementById('affiliateProfilePixType')?.value || '';
+            const pixKey = document.getElementById('affiliateProfilePixKey')?.value.trim() || '';
+            const instagram = document.getElementById('affiliateProfileInstagram')?.value.trim() || '';
+            const website = document.getElementById('affiliateProfileWebsite')?.value.trim() || '';
 
             if (!name || !phone || !cpf || !pixType || !pixKey) {
-                showAffiliateProfileMessage('Preencha todos os campos obrigatórios.', 'error');
+                showAffiliateProfileMessage('Preencha todos os campos obrigatórios para enviar a solicitação.', 'error');
                 return;
             }
+
             try {
-                if (affiliateSessionToken) {
-                    const response = await fetch(SUPABASE_FUNCTIONS_BASE + '/affiliate-private-data', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + affiliateSessionToken },
-                        body: JSON.stringify({ name, phone, cpf, pix_type: pixType, pix_key: pixKey, instagram, website })
-                    });
-                    const result = await response.json().catch(() => ({}));
-                    if (!response.ok) throw new Error(result.error || 'Não foi possível salvar os dados privados.');
-                } else if (supabaseAuthUser && affiliate.userId === supabaseAuthUser.id) {
-                    const { data: authData, error: authError } = await supabaseClient.auth.getSession();
-                    if (authError) throw authError;
-                    const accessToken = authData?.session?.access_token;
-                    if (!accessToken) throw new Error('Sua sessão expirou. Entre novamente para salvar seus dados.');
-                    const response = await fetch(SUPABASE_FUNCTIONS_BASE + '/affiliate-private-data', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + accessToken },
-                        body: JSON.stringify({ name, phone, cpf, pix_type: pixType, pix_key: pixKey, instagram, website })
-                    });
-                    const result = await response.json().catch(() => ({}));
-                    if (!response.ok) throw new Error(result.error || 'Não foi possível salvar os dados do perfil.');
-                } else {
-                    throw new Error('Sua sessão de afiliado expirou. Entre novamente para salvar seus dados.');
+                let accessToken = affiliateSessionToken || '';
+                if (!accessToken && supabaseClient) {
+                    const { data, error } = await supabaseClient.auth.getSession();
+                    if (error) throw error;
+                    accessToken = data?.session?.access_token || '';
                 }
+                if (!accessToken) throw new Error('Sua sessão expirou. Entre novamente.');
+
+                const response = await fetch(SUPABASE_FUNCTIONS_BASE + '/affiliate-communication', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': 'Bearer ' + accessToken
+                    },
+                    body: JSON.stringify({
+                        action: 'request_profile_change',
+                        changes: { name, phone, cpf, pix_type: pixType, pix_key: pixKey, instagram, website }
+                    })
+                });
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(result.error || 'Não foi possível enviar a solicitação.');
+                showAffiliateProfileMessage('Solicitação enviada ao administrador. Os dados só serão alterados após a aprovação.', 'success');
             } catch (error) {
-                showAffiliateProfileMessage(error.message || 'Não foi possível salvar os dados privados.', 'error');
-                return;
+                showAffiliateProfileMessage(error.message || 'Não foi possível enviar a solicitação.', 'error');
             }
-
-            affiliate.name = name;
-            affiliate.phone = phone;
-            affiliate.cpf = cpf;
-            affiliate.pixType = pixType;
-            affiliate.pixKey = pixKey;
-            affiliate.instagram = instagram;
-            affiliate.website = website;
-
-            const affIndex = state.affiliates.findIndex(a => a.id === affiliate.id);
-            if (affIndex !== -1) {
-                state.affiliates[affIndex] = affiliate;
-            }
-
-            const userIndex = state.users.findIndex(u => u.id === user.id);
-            if (userIndex !== -1) {
-                state.users[userIndex].fullName = name;
-            }
-
-            showAffiliateProfileMessage('Dados atualizados com sucesso!', 'success');
         }
 
         function showAffiliateProfileMessage(message, type) {
