@@ -269,6 +269,17 @@
     if (window.lucide?.createIcons) window.lucide.createIcons();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply, { once:true }); else apply();
-  new MutationObserver(apply).observe(document.body, { childList:true, subtree:true });
+  // Observe somente a criação dos painéis relevantes. Observar todas as alterações
+  // do site e executar apply() a cada mutação deixa a página pesada durante a renderização.
+  const relevantModalIds = new Set(['adminDashboardModal', 'affiliateDashboardModal', 'affiliateProfileModal']);
+  const modalObserver = new MutationObserver(records => {
+    const relevantModalAdded = records.some(record => Array.from(record.addedNodes).some(node => {
+      if (node.nodeType !== 1) return false;
+      if (relevantModalIds.has(node.id)) return true;
+      return Array.from(relevantModalIds).some(id => node.querySelector?.('#' + id));
+    }));
+    if (relevantModalAdded) apply();
+  });
+  modalObserver.observe(document.body, { childList:true, subtree:true });
   window.addEventListener('pageshow', apply);
 })();
