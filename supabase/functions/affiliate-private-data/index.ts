@@ -107,37 +107,11 @@ Deno.serve(async (req) => {
     return json({ ok: true, privateData: data || { phone: '', cpf: '', pix_type: '', pix_key: '' } });
   }
 
-  const body = await req.json().catch(() => null);
-  const phone = String(body?.phone || '').trim().slice(0, 30);
-  const cpf = String(body?.cpf || '').replace(/\D/g, '').slice(0, 11);
-  const pix_type = String(body?.pix_type || '').trim().slice(0, 30);
-  const pix_key = String(body?.pix_key || '').trim().slice(0, 200);
-  const name = String(body?.name || '').trim().slice(0, 160);
-  const instagram = String(body?.instagram || '').trim().slice(0, 200);
-  const website = String(body?.website || '').trim().slice(0, 300);
-  if (!name || !phone || !validCpf(cpf) || !pix_type || !pix_key) {
-    return json({ error: 'Informe nome, telefone, CPF e dados Pix válidos.' }, 400);
-  }
-  // Public profile and private payout/contact fields are committed together.
-  const { error: updateError } = await admin.rpc('affiliate_update_profile_atomic', {
-    p_affiliate_id: affiliateId,
-    p_name: name,
-    p_instagram: instagram || null,
-    p_website: website || null,
-    p_phone: phone,
-    p_cpf: cpf,
-    p_pix_type: pix_type,
-    p_pix_key: pix_key
-  });
-  if (updateError) {
-    console.error('Falha na atualização atômica do perfil de afiliado:', updateError.message);
-    if (updateError.code === 'P0002') {
-      return json({ error: 'A conta de afiliado não está disponível.' }, 403);
-    }
-    if (updateError.code === '22023') {
-      return json({ error: 'Informe nome, telefone, CPF e dados Pix válidos.' }, 400);
-    }
-    return json({ error: 'Não foi possível salvar o perfil do afiliado.' }, 500);
-  }
-  return json({ ok: true });
+  // A função continua sendo a via autenticada para leitura de dados privados.
+  // Alterações enviadas pelo afiliado devem passar pela fila de aprovação administrativa
+  // em affiliate-communication e só são aplicadas após aprovação.
+  return json({
+    error: 'Alterações de perfil precisam ser enviadas para aprovação do administrador.',
+    code: 'PROFILE_CHANGE_REQUIRES_APPROVAL'
+  }, 403);
 });
