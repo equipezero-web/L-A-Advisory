@@ -48,6 +48,17 @@ BEGIN
             USING ERRCODE = '22023';
     END IF;
 
+    -- The existing protection trigger uses auth.uid()/is_admin(). The caller
+    -- has already been authenticated and checked above, so expose that verified
+    -- admin identity to the trigger for this transaction only.
+    PERFORM pg_catalog.set_config('request.jwt.claim.sub', p_admin_user_id::text, true);
+    PERFORM pg_catalog.set_config(
+        'request.jwt.claims',
+        pg_catalog.json_build_object('sub', p_admin_user_id::text, 'role', 'authenticated')::text,
+        true
+    );
+    PERFORM pg_catalog.set_config('request.jwt.claim.role', 'authenticated', true);
+
     UPDATE public.affiliates
     SET name = pg_catalog.btrim(p_name),
         affiliate_email = pg_catalog.lower(pg_catalog.btrim(p_email)),
