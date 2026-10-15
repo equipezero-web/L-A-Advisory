@@ -8366,13 +8366,20 @@
         }
 
         function unlockAccountModalScroll() {
-            const visible = Array.from(document.querySelectorAll('[id$="Modal"]')).some(el =>
-                el && el.id !== 'siteAlertOverlay' && !el.classList.contains('hidden')
-            );
+            // Só manter a rolagem bloqueada quando houver outro modal realmente visível.
+            const visible = Array.from(document.querySelectorAll('[id$="Modal"]')).some(el => {
+                if (!el || el.id === 'siteAlertOverlay' || el.classList.contains('hidden')) return false;
+                const style = window.getComputedStyle(el);
+                return style.display !== 'none' &&
+                    style.visibility !== 'hidden' &&
+                    Number(style.opacity || 1) > 0 &&
+                    el.getClientRects().length > 0;
+            });
             if (visible) return;
             document.documentElement.classList.remove('account-modal-open');
             document.body.classList.remove('account-modal-open');
-            document.body.style.overflow = '';
+            document.body.style.removeProperty('overflow');
+            document.documentElement.style.removeProperty('overflow');
             if (window.laLenis && typeof window.laLenis.start === 'function') window.laLenis.start();
         }
 
@@ -11614,7 +11621,7 @@ function openNavigationModal() {
             const modal = document.getElementById('affiliateCatalogModal');
             if (modal) {
                 modal.classList.add('hidden');
-                document.body.style.overflow = '';
+                unlockAccountModalScroll();
             }
         }
 
