@@ -56,8 +56,7 @@ FROM authenticated;
 GRANT UPDATE (
     name,
     instagram,
-    website,
-    updated_at
+    website
 )
 ON TABLE public.affiliates
 TO authenticated;
