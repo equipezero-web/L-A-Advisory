@@ -2394,6 +2394,7 @@
                             <div class="flex flex-wrap gap-3 mt-6">
                                 <button
                                     type="button"
+                                    id="affiliateLandingRegisterButton"
                                     onclick="openAuthModal('affiliate-register')"
                                     class="gradient-gold text-slate-900 px-6 py-3 rounded-xl font-bold hover:shadow-gold transition btn-premium"
                                 >
@@ -2402,11 +2403,13 @@
 
                                 <button
                                     type="button"
+                                    id="affiliateLandingLoginButton"
                                     onclick="openAuthModal('affiliate-login')"
                                     class="px-6 py-3 rounded-xl border border-amber-400/40 text-amber-300 hover:bg-amber-400 hover:text-slate-900 transition font-bold"
                                 >
                                     Entrar como afiliado
                                 </button>
+                                <p id="affiliatePendingApprovalNotice" class="hidden mt-6 rounded-xl border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-sm font-bold text-amber-200" role="status">Sua solicitação de afiliação está em análise. Aguarde a aceitação do administrador.</p>
                             </div>
                         </div>
 
@@ -5616,6 +5619,19 @@
 
                     <button
                         type="button"
+                        onclick="openAffiliateChat()"
+                        class="px-4 py-3 rounded-xl border border-emerald-300 text-emerald-800 bg-emerald-50 font-bold hover:bg-emerald-100 transition"
+                    >
+                        <i
+                            data-lucide="message-circle"
+                            class="w-4 h-4 inline mr-1"
+                        ></i>
+
+                        Enviar mensagem ao ADM
+                    </button>
+
+                    <button
+                        type="button"
                         onclick="openAffiliateCatalog()"
                         class="px-4 py-3 gradient-gold text-slate-900 rounded-xl font-bold hover:shadow-gold transition"
                     >
@@ -7942,13 +7958,21 @@
             await initializeSupabase();
         });
 
+        function withTimeout(promise, ms, label) {
+            let timer;
+            const timeout = new Promise((_, reject) => {
+                timer = setTimeout(() => reject(new Error(label + ' excedeu o tempo limite.')), ms);
+            });
+            return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+        }
+
         async function initializeSupabase() {
             // Registra o listener ANTES de getSession(), pois a validação do link
             // pode disparar PASSWORD_RECOVERY durante a inicialização do cliente.
             supabaseClient.auth.onAuthStateChange((event, session) => {
                 setTimeout(async () => {
                     try {
-                        await applySupabaseSession(session);
+                        await withTimeout(applySupabaseSession(session), 8000, 'A validação da sessão');
                         if (event === 'PASSWORD_RECOVERY') {
                             openAuthModal('password-recovery');
                         }
@@ -7959,13 +7983,13 @@
             });
 
             try {
-                const { data: { session }, error } = await supabaseClient.auth.getSession();
+                const { data: { session }, error } = await withTimeout(supabaseClient.auth.getSession(), 8000, 'A conexão de autenticação do Supabase');
                 if (error) throw error;
-                await applySupabaseSession(session);
+                await withTimeout(applySupabaseSession(session), 8000, 'A validação da sessão');
 
                 // Produtos são públicos e devem ser carregados do Supabase
                 // para visitante, cliente e afiliado.
-                await loadPublicProducts();
+                await withTimeout(loadPublicProducts(), 8000, 'O carregamento dos produtos');
 
                 supabaseReady = true;
                 initializeApp();
@@ -8224,7 +8248,7 @@
                     role: profile.role || 'customer',
                     status: profile.is_active ? 'active' : 'blocked',
                     affiliateStatus: affiliate?.status || null,
-                    avatarUrl: user.user_metadata?.avatar_url || '',
+                    avatarUrl: profile.avatar_url || user.user_metadata?.avatar_url || '',
                     privacyConsent: privateData?.privacy_consent || null,
                     ...(privateData ? {
                         phone: privateData.phone || '',
@@ -8358,13 +8382,20 @@
         }
 
         function unlockAccountModalScroll() {
-            const visible = Array.from(document.querySelectorAll('[id$="Modal"]')).some(el =>
-                el && el.id !== 'siteAlertOverlay' && !el.classList.contains('hidden')
-            );
+            // Só manter a rolagem bloqueada quando houver outro modal realmente visível.
+            const visible = Array.from(document.querySelectorAll('[id$="Modal"]')).some(el => {
+                if (!el || el.id === 'siteAlertOverlay' || el.classList.contains('hidden')) return false;
+                const style = window.getComputedStyle(el);
+                return style.display !== 'none' &&
+                    style.visibility !== 'hidden' &&
+                    Number(style.opacity || 1) > 0 &&
+                    el.getClientRects().length > 0;
+            });
             if (visible) return;
             document.documentElement.classList.remove('account-modal-open');
             document.body.classList.remove('account-modal-open');
-            document.body.style.overflow = '';
+            document.body.style.removeProperty('overflow');
+            document.documentElement.style.removeProperty('overflow');
             if (window.laLenis && typeof window.laLenis.start === 'function') window.laLenis.start();
         }
 
@@ -9172,7 +9203,7 @@ async function handleAffiliateLogin(event) {
                         email: profile.email || data.user.email || email,
                         role: 'admin',
                         status: 'active',
-                        avatarUrl: data.user.user_metadata?.avatar_url || ''
+                        avatarUrl: profile.avatar_url || data.user.user_metadata?.avatar_url || ''
                     };
                     updateAuthUI();
                 }
@@ -9394,6 +9425,74 @@ if (error) throw error;
                 affiliateNav?.classList.add('hidden');
                 affiliateSection?.classList.add('hidden');
                 updateMobileMenu(null);
+            }
+            void syncAffiliateLandingSection(user);
+        }
+
+        async function syncAffiliateLandingSection(user) {
+            const section = document.getElementById('afiliados');
+            const registerButton = document.getElementById('affiliateLandingRegisterButton');
+            const loginButton = document.getElementById('affiliateLandingLoginButton');
+            const pendingNotice = document.getElementById('affiliatePendingApprovalNotice');
+            if (!section || !registerButton || !loginButton || !pendingNotice) return;
+
+            const resetLandingState = () => {
+                section.style.removeProperty('display');
+                registerButton.classList.remove('hidden');
+                loginButton.classList.remove('hidden');
+                pendingNotice.classList.add('hidden');
+            };
+
+            if (!user || user.role === 'admin') {
+                resetLandingState();
+                return;
+            }
+
+            let affiliate = (state.affiliates || []).find(a =>
+                a.userId === user.id || a.user_id === user.id ||
+                String(a.email || a.affiliate_email || '').toLowerCase() === String(user.email || '').toLowerCase()
+            ) || null;
+
+            try {
+                let result = await supabaseClient.from('affiliates')
+                    .select('id,user_id,status,affiliate_email,created_at')
+                    .eq('user_id', user.id)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .maybeSingle();
+                if ((!result.data || result.error) && user.email) {
+                    result = await supabaseClient.from('affiliates')
+                        .select('id,user_id,status,affiliate_email,created_at')
+                        .eq('affiliate_email', String(user.email).trim().toLowerCase())
+                        .order('created_at', { ascending: false })
+                        .limit(1)
+                        .maybeSingle();
+                }
+                if (state.currentUser?.id !== user.id) return;
+                if (!result.error && result.data) affiliate = result.data;
+            } catch (error) {
+                console.warn('Não foi possível atualizar o status público da afiliação:', error);
+            }
+
+            if (state.currentUser?.id !== user.id) return;
+            const status = String(affiliate?.status || user.affiliateStatus || '').toLowerCase();
+            if (['active', 'approved'].includes(status)) {
+                section.style.setProperty('display', 'none', 'important');
+                registerButton.classList.add('hidden');
+                loginButton.classList.add('hidden');
+                pendingNotice.classList.add('hidden');
+                return;
+            }
+
+            section.style.removeProperty('display');
+            if (status === 'pending') {
+                registerButton.classList.add('hidden');
+                loginButton.classList.add('hidden');
+                pendingNotice.classList.remove('hidden');
+            } else {
+                registerButton.classList.remove('hidden');
+                loginButton.classList.remove('hidden');
+                pendingNotice.classList.add('hidden');
             }
         }
 
@@ -10714,11 +10813,21 @@ function openNavigationModal() {
 
             try {
                 const avatarUrl = await compressProfileImage(file);
-                const { data, error } = await supabaseClient.auth.updateUser({
-                    data: { avatar_url: avatarUrl }
-                });
+                // A foto fica na tabela profiles. Dados em user_metadata entram em TODO token
+                // de login (JWT); uma imagem ali deixa o cabeçalho Authorization grande demais
+                // e as Edge Functions passam a falhar com "Failed to fetch".
+                const { error: profileError } = await supabaseClient
+                    .from('profiles')
+                    .update({ avatar_url: avatarUrl })
+                    .eq('id', user.id);
 
-                if (error) throw error;
+                if (profileError) throw profileError;
+
+                // Limpa qualquer foto antiga que ainda esteja no token (best effort).
+                const { data, error: metaError } = await supabaseClient.auth.updateUser({
+                    data: { avatar_url: null }
+                });
+                if (metaError) console.warn('Não foi possível limpar a foto antiga do token:', metaError.message);
 
                 state.currentUser = { ...state.currentUser, avatarUrl };
                 if (data?.user) supabaseAuthUser = data.user;
@@ -10738,6 +10847,13 @@ function openNavigationModal() {
             if (!user || !supabaseAuthUser) return;
 
             try {
+                const { error: profileError } = await supabaseClient
+                    .from('profiles')
+                    .update({ avatar_url: null })
+                    .eq('id', user.id);
+
+                if (profileError) throw profileError;
+
                 const { data, error } = await supabaseClient.auth.updateUser({
                     data: { avatar_url: null }
                 });
@@ -11195,7 +11311,10 @@ function openNavigationModal() {
             updateUserMenu();
             closeUserMenu();
             renderCatalog();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Ao sair da área de afiliado, garantir que nenhum bloqueio de modal
+            // ou da rolagem suave permaneça ativo.
+            unlockAccountModalScroll();
+            window.scrollTo({ top: 0, behavior: 'auto' });
         }
 
         function returnToHomeFromStore() {
@@ -11204,7 +11323,8 @@ function openNavigationModal() {
             if (openStoreWrap) openStoreWrap.classList.remove('hidden');
             setAffiliateMenuMode(false);
             renderCatalog();
-            setTimeout(() => document.getElementById('inicio')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+            unlockAccountModalScroll();
+            setTimeout(() => document.getElementById('inicio')?.scrollIntoView({ behavior: 'auto', block: 'start' }), 50);
         }
 
         function exitAffiliateMode() {
@@ -11606,7 +11726,7 @@ function openNavigationModal() {
             const modal = document.getElementById('affiliateCatalogModal');
             if (modal) {
                 modal.classList.add('hidden');
-                document.body.style.overflow = '';
+                unlockAccountModalScroll();
             }
         }
 
@@ -11729,77 +11849,56 @@ function openNavigationModal() {
             const modal = document.getElementById('affiliateProfileModal');
             if (modal) {
                 modal.classList.add('hidden');
-                document.body.style.overflow = '';
+                unlockAccountModalScroll();
             }
         }
 
         async function saveAffiliateProfile(event) {
             event.preventDefault();
-
             const user = state.currentUser;
             const affiliate = state.affiliates.find(a => a.userId === user?.id);
-            if (!affiliate) return;
+            if (!user || !affiliate) return;
 
-            const name = document.getElementById('affiliateProfileName')?.value.trim();
-            const phone = document.getElementById('affiliateProfilePhone')?.value.trim();
-            const cpf = document.getElementById('affiliateProfileCpf')?.value.trim();
-            const pixType = document.getElementById('affiliateProfilePixType')?.value;
-            const pixKey = document.getElementById('affiliateProfilePixKey')?.value.trim();
-            const instagram = document.getElementById('affiliateProfileInstagram')?.value.trim();
-            const website = document.getElementById('affiliateProfileWebsite')?.value.trim();
+            const name = document.getElementById('affiliateProfileName')?.value.trim() || '';
+            const phone = document.getElementById('affiliateProfilePhone')?.value.trim() || '';
+            const cpf = document.getElementById('affiliateProfileCpf')?.value.trim() || '';
+            const pixType = document.getElementById('affiliateProfilePixType')?.value || '';
+            const pixKey = document.getElementById('affiliateProfilePixKey')?.value.trim() || '';
+            const instagram = document.getElementById('affiliateProfileInstagram')?.value.trim() || '';
+            const website = document.getElementById('affiliateProfileWebsite')?.value.trim() || '';
 
             if (!name || !phone || !cpf || !pixType || !pixKey) {
-                showAffiliateProfileMessage('Preencha todos os campos obrigatórios.', 'error');
+                showAffiliateProfileMessage('Preencha todos os campos obrigatórios para enviar a solicitação.', 'error');
                 return;
             }
+
             try {
-                if (affiliateSessionToken) {
-                    const response = await fetch(SUPABASE_FUNCTIONS_BASE + '/affiliate-private-data', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + affiliateSessionToken },
-                        body: JSON.stringify({ name, phone, cpf, pix_type: pixType, pix_key: pixKey, instagram, website })
-                    });
-                    const result = await response.json().catch(() => ({}));
-                    if (!response.ok) throw new Error(result.error || 'Não foi possível salvar os dados privados.');
-                } else if (supabaseAuthUser && affiliate.userId === supabaseAuthUser.id) {
-                    const { data: authData, error: authError } = await supabaseClient.auth.getSession();
-                    if (authError) throw authError;
-                    const accessToken = authData?.session?.access_token;
-                    if (!accessToken) throw new Error('Sua sessão expirou. Entre novamente para salvar seus dados.');
-                    const response = await fetch(SUPABASE_FUNCTIONS_BASE + '/affiliate-private-data', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + accessToken },
-                        body: JSON.stringify({ name, phone, cpf, pix_type: pixType, pix_key: pixKey, instagram, website })
-                    });
-                    const result = await response.json().catch(() => ({}));
-                    if (!response.ok) throw new Error(result.error || 'Não foi possível salvar os dados do perfil.');
-                } else {
-                    throw new Error('Sua sessão de afiliado expirou. Entre novamente para salvar seus dados.');
+                let accessToken = affiliateSessionToken || '';
+                if (!accessToken && supabaseClient) {
+                    const { data, error } = await supabaseClient.auth.getSession();
+                    if (error) throw error;
+                    accessToken = data?.session?.access_token || '';
                 }
+                if (!accessToken) throw new Error('Sua sessão expirou. Entre novamente.');
+
+                const response = await fetch(SUPABASE_FUNCTIONS_BASE + '/affiliate-communication', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': 'Bearer ' + accessToken
+                    },
+                    body: JSON.stringify({
+                        action: 'request_profile_change',
+                        changes: { name, phone, cpf, pix_type: pixType, pix_key: pixKey, instagram, website }
+                    })
+                });
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(result.error || 'Não foi possível enviar a solicitação.');
+                showAffiliateProfileMessage('Solicitação enviada ao administrador. Os dados só serão alterados após a aprovação.', 'success');
             } catch (error) {
-                showAffiliateProfileMessage(error.message || 'Não foi possível salvar os dados privados.', 'error');
-                return;
+                showAffiliateProfileMessage(error.message || 'Não foi possível enviar a solicitação.', 'error');
             }
-
-            affiliate.name = name;
-            affiliate.phone = phone;
-            affiliate.cpf = cpf;
-            affiliate.pixType = pixType;
-            affiliate.pixKey = pixKey;
-            affiliate.instagram = instagram;
-            affiliate.website = website;
-
-            const affIndex = state.affiliates.findIndex(a => a.id === affiliate.id);
-            if (affIndex !== -1) {
-                state.affiliates[affIndex] = affiliate;
-            }
-
-            const userIndex = state.users.findIndex(u => u.id === user.id);
-            if (userIndex !== -1) {
-                state.users[userIndex].fullName = name;
-            }
-
-            showAffiliateProfileMessage('Dados atualizados com sucesso!', 'success');
         }
 
         function showAffiliateProfileMessage(message, type) {
@@ -12839,8 +12938,8 @@ function showProductDetails(productId) {
     modal.setAttribute('aria-modal', 'true');
     modal.setAttribute('aria-label', 'Detalhes do produto');
     modal.innerHTML = `
-        <div class="product-details-panel relative bg-white w-full max-w-2xl max-h-[92dvh] overflow-y-auto rounded-2xl shadow-2xl">
-            <button type="button" onclick="document.getElementById('productDetailsModal')?.remove()" aria-label="Fechar detalhes" class="sticky top-2 float-right mr-2 mt-2 z-10 w-10 h-10 rounded-full bg-slate-900 text-amber-400 text-2xl font-bold">&times;</button>
+        <div class="product-details-panel account-modal-scroll relative bg-white w-full max-w-2xl max-h-[92dvh] overflow-y-auto overscroll-contain rounded-2xl shadow-2xl">
+            <button type="button" onclick="document.getElementById('productDetailsModal')?.remove(); unlockAccountModalScroll()" aria-label="Fechar detalhes" class="sticky top-2 float-right mr-2 mt-2 z-10 w-10 h-10 rounded-full bg-slate-900 text-amber-400 text-2xl font-bold">&times;</button>
             <div class="p-4 sm:p-6">
                 <div class="w-full h-52 sm:h-72 bg-white flex items-center justify-center rounded-xl overflow-hidden">
                     <img src="${escapeAttribute(product.image)}" alt="${escapeAttribute(product.name)}" class="w-full h-full object-contain">
@@ -12870,8 +12969,18 @@ function showProductDetails(productId) {
                 </div>
             </div>
         </div>`;
-    modal.addEventListener('click', event => { if (event.target === modal) modal.remove(); });
+    modal.addEventListener('click', event => {
+        if (event.target === modal) {
+            modal.remove();
+            unlockAccountModalScroll();
+        }
+    });
     document.body.appendChild(modal);
+    document.documentElement.classList.add('account-modal-open');
+    document.body.classList.add('account-modal-open');
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    if (window.laLenis && typeof window.laLenis.stop === 'function') window.laLenis.stop();
     if (window.lucide) lucide.createIcons();
 }
 
@@ -14081,5 +14190,7 @@ body.guest-mode #afiliados { display: block !important; }
 })();
 </script>
 
+
+<script src="./affiliate-communication.js"></script>
 </body>
 </html>
