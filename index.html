@@ -12250,8 +12250,17 @@ function openNavigationModal() {
             }
 
             hideAdminProductMessage();
+            // O formulário precisa ficar acima do painel administrativo e rolar por conta própria.
             modal.classList.remove('hidden');
+            modal.style.setProperty('display', 'flex', 'important');
+            modal.style.setProperty('visibility', 'visible', 'important');
+            modal.style.setProperty('opacity', '1', 'important');
+            modal.style.setProperty('pointer-events', 'auto', 'important');
+            modal.style.setProperty('z-index', '100000', 'important');
+            modal.style.setProperty('position', 'fixed', 'important');
+            modal.style.setProperty('inset', '0', 'important');
             document.body.style.overflow = 'hidden';
+            if (window.laLenis?.stop) window.laLenis.stop();
             lucide.createIcons();
         }
 
@@ -12259,7 +12268,26 @@ function openNavigationModal() {
             const modal = document.getElementById('adminProductFormModal');
             if (modal) {
                 modal.classList.add('hidden');
-                document.body.style.overflow = '';
+                modal.style.setProperty('display', 'none', 'important');
+                modal.style.setProperty('visibility', 'hidden', 'important');
+                modal.style.setProperty('opacity', '0', 'important');
+                modal.style.setProperty('pointer-events', 'none', 'important');
+                modal.style.removeProperty('z-index');
+                modal.style.removeProperty('position');
+                modal.style.removeProperty('inset');
+            }
+            // O painel administrativo continua aberto atrás do formulário.
+            const adminPanel = document.getElementById('adminDashboardModal');
+            const anotherModalOpen = Array.from(document.querySelectorAll('[id$="Modal"]')).some(el =>
+                el && el.id !== 'adminProductFormModal' && !el.classList.contains('hidden') &&
+                getComputedStyle(el).display !== 'none' && el.getClientRects().length > 0
+            );
+            if (anotherModalOpen || (adminPanel && !adminPanel.classList.contains('hidden'))) {
+                document.body.style.overflow = 'hidden';
+                if (window.laLenis?.stop) window.laLenis.stop();
+            } else {
+                document.body.style.removeProperty('overflow');
+                if (window.laLenis?.start) window.laLenis.start();
             }
         }
 
@@ -13806,6 +13834,29 @@ document.addEventListener('DOMContentLoaded', initPremiumScrollMotion);
         max-height: calc(100dvh - 2rem) !important;
     }
 }
+/* O editor de produto deve aparecer acima do painel administrativo e manter scroll próprio. */
+#adminProductFormModal {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 100000 !important;
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+    touch-action: pan-y !important;
+}
+#adminProductFormModal > div {
+    position: relative !important;
+    width: min(100%, 48rem) !important;
+    max-height: calc(100vh - 2rem) !important;
+    margin: auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
+}
+@supports (height: 100dvh) {
+    #adminProductFormModal > div { max-height: calc(100dvh - 2rem) !important; }
+}
 /* Bloqueia o scroll do documento enquanto um destes modais estiver aberto. */
 html:has(#consultingModal:not(.hidden)),
 body:has(#consultingModal:not(.hidden)),
@@ -14161,11 +14212,11 @@ body.guest-mode #afiliados { display: block !important; }
 
   // Scroll interno de modais: impede que wheel/toque "vaze" para a página de trás.
   document.addEventListener('wheel', event => {
-    const panel = event.target.closest?.('#consultingModal > div, #navModal > div, #cartModal > div, #checkoutModal > div, #affiliateDashboardModal > div, #customerProfileModal > div, #customerOrdersModal > div, #affiliateProfileModal > div, #catalogFiltersModal > div');
+    const panel = event.target.closest?.('#consultingModal > div, #navModal > div, #cartModal > div, #checkoutModal > div, #affiliateDashboardModal > div, #customerProfileModal > div, #customerOrdersModal > div, #affiliateProfileModal > div, #catalogFiltersModal > div, #adminDashboardModal > div, #adminProductFormModal > div, #adminOrderFormModal > div, #adminAffiliateFormModal > div, #adminUserFormModal > div, #adminCommissionPaymentModal > div');
     if (panel) event.stopPropagation();
   }, {capture:true, passive:true});
   document.addEventListener('touchmove', event => {
-    const panel = event.target.closest?.('#consultingModal > div, #navModal > div, #cartModal > div, #checkoutModal > div, #affiliateDashboardModal > div, #customerProfileModal > div, #customerOrdersModal > div, #affiliateProfileModal > div, #catalogFiltersModal > div');
+    const panel = event.target.closest?.('#consultingModal > div, #navModal > div, #cartModal > div, #checkoutModal > div, #affiliateDashboardModal > div, #customerProfileModal > div, #customerOrdersModal > div, #affiliateProfileModal > div, #catalogFiltersModal > div, #adminDashboardModal > div, #adminProductFormModal > div, #adminOrderFormModal > div, #adminAffiliateFormModal > div, #adminUserFormModal > div, #adminCommissionPaymentModal > div');
     if (panel) event.stopPropagation();
   }, {capture:true, passive:true});
 
