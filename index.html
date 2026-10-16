@@ -11342,6 +11342,15 @@ function openNavigationModal() {
             }
             saveStateToStorage();
             updateCartIcon();
+
+            // Ao comprar pela janela de detalhes, feche os detalhes primeiro
+            // para que o Checkout Inteligente apareça na frente, sem ficar por baixo.
+            const productDetailsModal = document.getElementById('productDetailsModal');
+            if (productDetailsModal) productDetailsModal.remove();
+            if (typeof unlockAccountModalScroll === 'function') {
+                unlockAccountModalScroll();
+            }
+
             startCheckout();
         }
 
