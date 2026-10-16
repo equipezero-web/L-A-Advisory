@@ -13879,6 +13879,34 @@ document.addEventListener('DOMContentLoaded', initPremiumScrollMotion);
 @supports (height: 100dvh) {
     #adminProductFormModal > div { max-height: calc(100dvh - 2rem) !important; }
 }
+/* Os formulários de edição precisam ficar acima do painel administrativo.
+   Reforço em CSS para evitar que dependam apenas das classes z-index do Tailwind. */
+#adminAffiliateFormModal,
+#adminUserFormModal {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 100004 !important;
+    isolation: isolate !important;
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+}
+#adminAffiliateFormModal > div,
+#adminUserFormModal > div {
+    position: relative !important;
+    z-index: 1 !important;
+    max-height: calc(100vh - 2rem) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior-y: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
+}
+@supports (height: 100dvh) {
+    #adminAffiliateFormModal > div,
+    #adminUserFormModal > div {
+        max-height: calc(100dvh - 2rem) !important;
+    }
+}
 /* Bloqueia o scroll do documento enquanto um destes modais estiver aberto. */
 html:has(#consultingModal:not(.hidden)),
 body:has(#consultingModal:not(.hidden)),
