@@ -337,7 +337,8 @@ Deno.serve(async (req) => {
     subtotal = money(subtotal + itemSubtotal);
 
     orderItems.push({
-      id: generateCode('ITEM'),
+      // Deixa o banco gerar o id padrão (UUID) de order_items.
+      // O código legível do pedido fica em orders.code; não usar ITEM... em id UUID.
       product_id: product.id,
       product_name: product.name,
       image: product.image || '',
