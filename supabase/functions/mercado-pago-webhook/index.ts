@@ -362,7 +362,7 @@ Deno.serve(async (req) => {
 
   const orderId = String(payment.external_reference || '').trim();
   if (!orderId) return json({ received: true });
-  const admin = createClient(URL, SERVICE);
+  const admin = createClient(SUPABASE_URL, SERVICE);
   const { data: order } = await admin.from('orders').select('*').eq('id', orderId).maybeSingle();
   if (!order) return json({ received: true });
 
