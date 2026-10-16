@@ -12503,6 +12503,7 @@ loadAdminProducts();
             const payload = {
                 status: document.getElementById('adminOrderStatus')?.value,
                 tracking_code: document.getElementById('adminOrderTrackingCode')?.value.trim() || null,
+                carrier: document.getElementById('adminOrderCarrier')?.value.trim() || null,
                 observations: document.getElementById('adminOrderObservations')?.value.trim() || null
             };
 
