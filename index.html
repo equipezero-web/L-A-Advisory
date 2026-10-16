@@ -8245,7 +8245,7 @@
                     role: profile.role || 'customer',
                     status: profile.is_active ? 'active' : 'blocked',
                     affiliateStatus: affiliate?.status || null,
-                    avatarUrl: user.user_metadata?.avatar_url || '',
+                    avatarUrl: profile.avatar_url || user.user_metadata?.avatar_url || '',
                     privacyConsent: privateData?.privacy_consent || null,
                     ...(privateData ? {
                         phone: privateData.phone || '',
@@ -9200,7 +9200,7 @@ async function handleAffiliateLogin(event) {
                         email: profile.email || data.user.email || email,
                         role: 'admin',
                         status: 'active',
-                        avatarUrl: data.user.user_metadata?.avatar_url || ''
+                        avatarUrl: profile.avatar_url || data.user.user_metadata?.avatar_url || ''
                     };
                     updateAuthUI();
                 }
@@ -10742,11 +10742,21 @@ function openNavigationModal() {
 
             try {
                 const avatarUrl = await compressProfileImage(file);
-                const { data, error } = await supabaseClient.auth.updateUser({
-                    data: { avatar_url: avatarUrl }
-                });
+                // A foto fica na tabela profiles. Dados em user_metadata entram em TODO token
+                // de login (JWT); uma imagem ali deixa o cabeçalho Authorization grande demais
+                // e as Edge Functions passam a falhar com "Failed to fetch".
+                const { error: profileError } = await supabaseClient
+                    .from('profiles')
+                    .update({ avatar_url: avatarUrl })
+                    .eq('id', user.id);
 
-                if (error) throw error;
+                if (profileError) throw profileError;
+
+                // Limpa qualquer foto antiga que ainda esteja no token (best effort).
+                const { data, error: metaError } = await supabaseClient.auth.updateUser({
+                    data: { avatar_url: null }
+                });
+                if (metaError) console.warn('Não foi possível limpar a foto antiga do token:', metaError.message);
 
                 state.currentUser = { ...state.currentUser, avatarUrl };
                 if (data?.user) supabaseAuthUser = data.user;
@@ -10766,6 +10776,13 @@ function openNavigationModal() {
             if (!user || !supabaseAuthUser) return;
 
             try {
+                const { error: profileError } = await supabaseClient
+                    .from('profiles')
+                    .update({ avatar_url: null })
+                    .eq('id', user.id);
+
+                if (profileError) throw profileError;
+
                 const { data, error } = await supabaseClient.auth.updateUser({
                     data: { avatar_url: null }
                 });

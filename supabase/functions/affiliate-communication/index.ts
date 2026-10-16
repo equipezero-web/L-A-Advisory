@@ -159,8 +159,14 @@ Deno.serve(async (req) => {
     const withPhotos = await Promise.all((affiliates || []).map(async a => {
       let avatar_url = '';
       if (a.user_id) {
-        const { data: authUser } = await admin.auth.admin.getUserById(String(a.user_id));
-        avatar_url = String(authUser?.user?.user_metadata?.avatar_url || '');
+        // A foto fica em profiles.avatar_url; user_metadata é só fallback para contas antigas
+        // (e links curtos de login social). Imagens em user_metadata incham o JWT.
+        const { data: profile } = await admin.from('profiles').select('avatar_url').eq('id', String(a.user_id)).maybeSingle();
+        avatar_url = String(profile?.avatar_url || '');
+        if (!avatar_url) {
+          const { data: authUser } = await admin.auth.admin.getUserById(String(a.user_id));
+          avatar_url = String(authUser?.user?.user_metadata?.avatar_url || '');
+        }
       }
       return { ...a, avatar_url, unread_count: unreadById[a.id] || 0, last_message: lastById[a.id] || null };
     }));
