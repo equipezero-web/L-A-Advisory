@@ -75,10 +75,19 @@ Deno.serve(async (req) => {
     const { data: authData, error: authError } = await admin.auth.getUser(token);
     if (authError || !authData.user) return json({ error: 'Sessão inválida ou expirada.' }, 401);
     const { data: profile, error: profileError } = await admin.from('profiles').select('id,role,is_active').eq('id', authData.user.id).maybeSingle();
-    if (profileError || !profile || profile.role !== 'admin' || profile.is_active !== true) {
-      return json({ error: 'Acesso restrito a administradores ativos.' }, 403);
+    if (profileError || !profile || profile.is_active !== true) {
+      return json({ error: 'A conta não está ativa.' }, 403);
     }
-    adminUserId = authData.user.id;
+    if (profile.role === 'admin') {
+      adminUserId = authData.user.id;
+    } else {
+      // Cliente com sessão normal do Supabase vinculado a um registro de afiliado
+      // (mesma regra de affiliate-private-data). O status 'active' é checado adiante.
+      const { data: linked, error: linkedError } = await admin.from('affiliates').select('id').eq('user_id', authData.user.id).maybeSingle();
+      if (linkedError) { console.error('Vínculo com afiliado:', linkedError.message); return json({ error: 'Não foi possível validar a conta de afiliado.' }, 500); }
+      if (!linked) return json({ error: 'Esta conta não está vinculada a um afiliado.' }, 403);
+      affiliateId = String(linked.id);
+    }
   }
 
   const body = await req.json().catch(() => null);
