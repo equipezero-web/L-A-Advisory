@@ -14034,9 +14034,12 @@ body.guest-mode #afiliados { display: block !important; }
     }
 }
 /* Filtros rápidos acima do primeiro carrossel. */
-#storeCategoryQuickFilterWrap { display:flex; align-items:center; gap:.65rem; flex-wrap:wrap; margin:0 0 1rem; }
+#storeCategoryQuickFilterWrap { display:flex; flex-direction:column; align-items:stretch; gap:.65rem; width:100%; max-width:100%; margin:0 0 1rem; }
 #storeCategoryQuickFilterWrap label { color:#d4af37; font-size:.8rem; font-weight:800; }
-#storeCategoryQuickFilter { min-width:min(100%, 250px); max-width:100%; background:#fff; color:#111827; border:1px solid #d4af37; border-radius:.75rem; padding:.7rem .9rem; font-weight:700; }
+#storeCategoryQuickFilterButtons { display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-start; gap:.5rem; width:100%; max-width:100%; }
+#storeCategoryQuickFilterButtons .store-category-chip { flex:0 0 auto; max-width:100%; padding:.55rem .85rem; border:1px solid #d4af37; border-radius:999px; background:#fff; color:#111827; font-size:.8rem; font-weight:700; line-height:1.25; text-align:center; white-space:normal; overflow-wrap:anywhere; cursor:pointer; }
+#storeCategoryQuickFilterButtons .store-category-chip.is-active { background:#d4af37; color:#111827; border-color:#d4af37; }
+#storeCategoryQuickFilterButtons .store-category-chip:focus-visible { outline:2px solid #d4af37; outline-offset:2px; }
 .la-return-current-page { width:100%; display:flex; align-items:center; justify-content:center; gap:.5rem; margin:.35rem 0 .55rem; padding:.65rem .8rem; border:1px solid rgba(212,175,55,.45); border-radius:.7rem; background:rgba(212,175,55,.14); color:#fff; font-size:.8rem; font-weight:800; }
 </style>
 <script id="la-royal-refinement-behavior">
@@ -14169,26 +14172,33 @@ body.guest-mode #afiliados { display: block !important; }
     if (!wrap) {
       wrap = document.createElement('div');
       wrap.id = 'storeCategoryQuickFilterWrap';
-      wrap.innerHTML = '<label for="storeCategoryQuickFilter">Filtrar por categoria</label><select id="storeCategoryQuickFilter" aria-label="Filtrar produtos por categoria"><option value="all">Todas as categorias</option></select>';
+      wrap.innerHTML = '<label>Filtrar por categoria</label><div id="storeCategoryQuickFilterButtons" role="group" aria-label="Filtrar produtos por categoria"></div>';
       catalog.parentElement.insertBefore(wrap, catalog);
     }
-    const quick = $('storeCategoryQuickFilter');
+    const quick = $('storeCategoryQuickFilterButtons');
+    if (!quick) return;
     const products = (window.state?.products || []).filter(p => Number(p.stock) > 0 && p.category);
     const categories = [...new Set(products.map(p => String(p.category).trim()).filter(Boolean))]
       .sort((a,b) => a.localeCompare(b, 'pt-BR'));
-    const oldValue = quick.value || select.value || 'all';
-    const optionMarkup = '<option value="all">Todas as categorias</option>' + categories.map(c =>
-      '<option value="' + c.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;') + '">' +
-      c.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</option>'
-    ).join('');
-    if (quick.dataset.categoryOptions !== optionMarkup) {
-      quick.innerHTML = optionMarkup;
-      quick.dataset.categoryOptions = optionMarkup;
+    const escapeHtml = value => String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    const buttonMarkup = [{ value:'all', label:'Todas as categorias' }, ...categories.map(c => ({ value:c, label:c }))]
+      .map(item => '<button type="button" class="store-category-chip" data-category="' + escapeHtml(item.value) + '">' + escapeHtml(item.label) + '</button>')
+      .join('');
+    if (quick.dataset.categoryOptions !== buttonMarkup) {
+      quick.innerHTML = buttonMarkup;
+      quick.dataset.categoryOptions = buttonMarkup;
     }
-    if ([...quick.options].some(o => o.value === oldValue)) quick.value = oldValue;
-    quick.onchange = function () {
-      const value = quick.value;
-      if (![...select.options].some(o => o.value === value)) {
+    const selectedValue = select.value || 'all';
+    quick.querySelectorAll('button[data-category]').forEach(button => {
+      const active = button.dataset.category === selectedValue;
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+    quick.onclick = function (event) {
+      const button = event.target.closest('button[data-category]');
+      if (!button) return;
+      const value = button.dataset.category || 'all';
+      if (![...select.options].some(option => option.value === value)) {
         const option = document.createElement('option');
         option.value = value;
         option.textContent = value;
@@ -14196,8 +14206,12 @@ body.guest-mode #afiliados { display: block !important; }
       }
       select.value = value;
       if (typeof window.renderCatalog === 'function') window.renderCatalog();
+      quick.querySelectorAll('button[data-category]').forEach(item => {
+        const active = item.dataset.category === value;
+        item.classList.toggle('is-active', active);
+        item.setAttribute('aria-pressed', String(active));
+      });
     };
-    if (select.value !== quick.value && [...quick.options].some(o => o.value === select.value)) quick.value = select.value;
   }
 
   // A navegação sempre fecha o menu/modal e leva à seção correta, também nos links do rodapé.
