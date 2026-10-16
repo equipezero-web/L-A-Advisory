@@ -2394,6 +2394,7 @@
                             <div class="flex flex-wrap gap-3 mt-6">
                                 <button
                                     type="button"
+                                    id="affiliateLandingRegisterButton"
                                     onclick="openAuthModal('affiliate-register')"
                                     class="gradient-gold text-slate-900 px-6 py-3 rounded-xl font-bold hover:shadow-gold transition btn-premium"
                                 >
@@ -2402,11 +2403,13 @@
 
                                 <button
                                     type="button"
+                                    id="affiliateLandingLoginButton"
                                     onclick="openAuthModal('affiliate-login')"
                                     class="px-6 py-3 rounded-xl border border-amber-400/40 text-amber-300 hover:bg-amber-400 hover:text-slate-900 transition font-bold"
                                 >
                                     Entrar como afiliado
                                 </button>
+                                <p id="affiliatePendingApprovalNotice" class="hidden mt-6 rounded-xl border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-sm font-bold text-amber-200" role="status">Sua solicitação de afiliação está em análise. Aguarde a aceitação do administrador.</p>
                             </div>
                         </div>
 
@@ -9422,6 +9425,74 @@ if (error) throw error;
                 affiliateNav?.classList.add('hidden');
                 affiliateSection?.classList.add('hidden');
                 updateMobileMenu(null);
+            }
+            void syncAffiliateLandingSection(user);
+        }
+
+        async function syncAffiliateLandingSection(user) {
+            const section = document.getElementById('afiliados');
+            const registerButton = document.getElementById('affiliateLandingRegisterButton');
+            const loginButton = document.getElementById('affiliateLandingLoginButton');
+            const pendingNotice = document.getElementById('affiliatePendingApprovalNotice');
+            if (!section || !registerButton || !loginButton || !pendingNotice) return;
+
+            const resetLandingState = () => {
+                section.style.removeProperty('display');
+                registerButton.classList.remove('hidden');
+                loginButton.classList.remove('hidden');
+                pendingNotice.classList.add('hidden');
+            };
+
+            if (!user || user.role === 'admin') {
+                resetLandingState();
+                return;
+            }
+
+            let affiliate = (state.affiliates || []).find(a =>
+                a.userId === user.id || a.user_id === user.id ||
+                String(a.email || a.affiliate_email || '').toLowerCase() === String(user.email || '').toLowerCase()
+            ) || null;
+
+            try {
+                let result = await supabaseClient.from('affiliates')
+                    .select('id,user_id,status,affiliate_email,created_at')
+                    .eq('user_id', user.id)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .maybeSingle();
+                if ((!result.data || result.error) && user.email) {
+                    result = await supabaseClient.from('affiliates')
+                        .select('id,user_id,status,affiliate_email,created_at')
+                        .eq('affiliate_email', String(user.email).trim().toLowerCase())
+                        .order('created_at', { ascending: false })
+                        .limit(1)
+                        .maybeSingle();
+                }
+                if (state.currentUser?.id !== user.id) return;
+                if (!result.error && result.data) affiliate = result.data;
+            } catch (error) {
+                console.warn('Não foi possível atualizar o status público da afiliação:', error);
+            }
+
+            if (state.currentUser?.id !== user.id) return;
+            const status = String(affiliate?.status || user.affiliateStatus || '').toLowerCase();
+            if (['active', 'approved'].includes(status)) {
+                section.style.setProperty('display', 'none', 'important');
+                registerButton.classList.add('hidden');
+                loginButton.classList.add('hidden');
+                pendingNotice.classList.add('hidden');
+                return;
+            }
+
+            section.style.removeProperty('display');
+            if (status === 'pending') {
+                registerButton.classList.add('hidden');
+                loginButton.classList.add('hidden');
+                pendingNotice.classList.remove('hidden');
+            } else {
+                registerButton.classList.remove('hidden');
+                loginButton.classList.remove('hidden');
+                pendingNotice.classList.add('hidden');
             }
         }
 
