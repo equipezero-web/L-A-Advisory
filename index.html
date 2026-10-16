@@ -11961,14 +11961,27 @@ function openNavigationModal() {
         function closeAdminDashboard() {
             const modal = document.getElementById('adminDashboardModal');
             if (modal) {
-                // Força o fechamento mesmo se outra regra CSS definir display:flex.
+                // Fecha o painel sem deixar a página presa no bloqueio de rolagem.
                 modal.classList.add('hidden');
                 modal.style.setProperty('display', 'none', 'important');
                 modal.style.setProperty('visibility', 'hidden', 'important');
                 modal.style.setProperty('opacity', '0', 'important');
                 modal.style.setProperty('pointer-events', 'none', 'important');
                 modal.style.removeProperty('z-index');
-                document.body.style.overflow = '';
+            }
+
+            // Só libera a página principal quando nenhum outro modal estiver aberto.
+            const anotherModalOpen = Array.from(document.querySelectorAll('[id$="Modal"]')).some(el =>
+                el && el.id !== 'adminDashboardModal' && !el.classList.contains('hidden') &&
+                getComputedStyle(el).display !== 'none' && el.getClientRects().length > 0
+            );
+            if (anotherModalOpen) {
+                document.body.style.overflow = 'hidden';
+                if (window.laLenis?.stop) window.laLenis.stop();
+            } else {
+                document.body.style.removeProperty('overflow');
+                document.documentElement.style.removeProperty('overflow');
+                if (window.laLenis?.start) window.laLenis.start();
             }
         }
 
