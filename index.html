@@ -8604,7 +8604,8 @@ function prepareCheckoutAffiliateField() {
 function handlePaymentReturn() {
     const params = new URLSearchParams(window.location.search);
     const status = params.get('status') || params.get('payment');
-    const externalReference = params.get('external_reference');
+    // O create-order devolve o pedido em "order"; "external_reference" é o parâmetro do Mercado Pago.
+    const externalReference = params.get('external_reference') || params.get('order');
     if (!status && !externalReference) return;
     if (externalReference) sessionStorage.setItem('laPendingPaymentOrder', externalReference);
     const order = state.orders.find(o => o.id === externalReference || o.code === externalReference);
@@ -11523,8 +11524,10 @@ function openNavigationModal() {
             const completedOrders = orders.filter(isAffiliateCompletedOrder);
             const pendingAdminOrders = orders.filter(order => ['pending', 'processing', 'awaiting_payment', 'in_analysis', 'under_review'].includes(String(order.status || '').toLowerCase()));
 
-            const commissionToReceive = paidOrders.reduce((sum, order) => sum + getAffiliateCommissionForOrder(order), 0);
+            const commissionAccrued = paidOrders.reduce((sum, order) => sum + getAffiliateCommissionForOrder(order), 0);
             const commissionReceived = payouts.reduce((sum, payout) => sum + Number(payout.amount || payout.commission || payout.total || 0), 0);
+            // Saldo a receber = comissão gerada - pagamentos já registrados (nunca negativo).
+            const commissionToReceive = Math.max(0, Math.round((commissionAccrued - commissionReceived) * 100) / 100);
 
             const now = new Date();
             const month = now.getMonth();
