@@ -1208,6 +1208,71 @@
   }
 }
 </style>
+
+<style id="la-product-carousel-scroll-fix">
+/* Navegação explícita e rolagem horizontal confiável do carrossel de produtos. */
+#catalogContainer .product-carousel-group .product-cards-layout {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pan-y;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+}
+#catalogContainer .product-carousel-group .product-cards-layout::-webkit-scrollbar {
+    display: none;
+}
+#catalogContainer .product-carousel-group .la-carousel-nav {
+    display: flex;
+    align-items: center;
+}
+#catalogContainer .product-carousel-group .la-carousel-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    border: 1px solid rgba(212, 175, 55, .65);
+    border-radius: 9999px;
+    background: #0c1933;
+    color: #f4d03f;
+    font-size: 23px;
+    line-height: 1;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+#catalogContainer .product-carousel-group .la-carousel-arrow:hover {
+    background: #d4af37;
+    color: #07101f;
+}
+#catalogContainer .product-carousel-group .la-carousel-arrow:focus-visible,
+#catalogContainer .product-carousel-group .product-cards-layout:focus-visible {
+    outline: 2px solid #f4d03f;
+    outline-offset: 3px;
+}
+@media (max-width: 768px) {
+    #catalogContainer .product-carousel-group .product-cards-layout {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        flex-wrap: nowrap !important;
+        gap: .35rem !important;
+        padding: 0 0 .35rem !important;
+        scroll-snap-type: x proximity !important;
+    }
+    #catalogContainer .product-carousel-group .product-motion-card {
+        flex: 0 0 38vw !important;
+        width: 38vw !important;
+        min-width: 38vw !important;
+    }
+    #catalogContainer .product-carousel-group {
+        overflow: visible !important;
+    }
+}
+</style>
+
 </head>
 
 <body class="bg-slate-900 text-white min-h-screen flex flex-col">
@@ -12935,11 +13000,17 @@ function renderCatalog() {
     container.className = 'space-y-8 pb-6';
     container.innerHTML = groups.map((group, groupIndex) => `
         <div class="product-carousel-group">
-            <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center justify-between gap-3 mb-3">
                 <h3 class="font-serif text-xl font-bold text-white">${groupIndex === 0 ? 'Produtos em destaque' : 'Mais produtos'}</h3>
-                <span class="text-xs text-slate-400">${group.length} produto${group.length === 1 ? '' : 's'}</span>
+                <div class="flex items-center gap-2 shrink-0">
+                    <span class="text-xs text-slate-400">${group.length} produto${group.length === 1 ? '' : 's'}</span>
+                    <div class="la-carousel-nav flex items-center gap-1">
+                        <button type="button" aria-label="Ver produtos anteriores" title="Produtos anteriores" class="la-carousel-arrow" onclick="event.stopPropagation(); const c=this.closest('.product-carousel-group').querySelector('.product-cards-layout'); c.scrollBy({left:-Math.max(180,c.clientWidth*0.8),behavior:'smooth'});">‹</button>
+                        <button type="button" aria-label="Ver próximos produtos" title="Próximos produtos" class="la-carousel-arrow" onclick="event.stopPropagation(); const c=this.closest('.product-carousel-group').querySelector('.product-cards-layout'); c.scrollBy({left:Math.max(180,c.clientWidth*0.8),behavior:'smooth'});">›</button>
+                    </div>
+                </div>
             </div>
-            <div class="product-cards-layout grid grid-cols-2 gap-3 md:flex md:gap-6 md:overflow-x-auto md:pb-4 md:scroll-smooth md:snap-x md:snap-mandatory no-scrollbar">
+            <div class="product-cards-layout grid grid-cols-2 gap-3 md:flex md:gap-6 md:overflow-x-auto md:pb-4 md:scroll-smooth md:snap-x md:snap-mandatory no-scrollbar" tabindex="0" aria-label="Carrossel de produtos">
                 ${group.map(product => {
                     const finalPrice = calculateFinalPrice(product);
                     const discount = Number(product.discount) || 0;
