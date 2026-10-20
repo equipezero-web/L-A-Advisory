@@ -12897,10 +12897,12 @@ loadAdminProducts();
         // =====================================================
         function calculateFinalPrice(product) {
     const salePrice = Number(product?.salePrice);
-    if (Number.isFinite(salePrice) && salePrice > 0) return salePrice;
     const price = Number(product?.price) || 0;
+    const baseSalePrice = Number.isFinite(salePrice) && salePrice > 0
+        ? salePrice
+        : price;
     const discount = Math.min(Math.max(Number(product?.discount) || 0, 0), 100);
-    return price * (1 - discount / 100);
+    return Math.max(0, baseSalePrice * (1 - discount / 100));
 }
 
 function calculateProductAffiliateCommission(product, quantity = 1) {
