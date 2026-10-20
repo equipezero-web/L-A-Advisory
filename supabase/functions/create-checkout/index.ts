@@ -481,10 +481,14 @@ Deno.serve(async (req) => {
       ? Number(product.sale_price)
       : NaN;
 
-    const unitPrice =
+    const baseSalePrice =
       Number.isFinite(salePriceRaw) && salePriceRaw > 0
-        ? money(salePriceRaw)
-        : money(price * (1 - discount / 100));
+        ? salePriceRaw
+        : price;
+
+    // O desconto incide sobre o preço de venda, não sobre o preço bruto.
+    const unitPrice =
+      money(baseSalePrice * (1 - discount / 100));
 
     const itemSubtotal =
       money(
