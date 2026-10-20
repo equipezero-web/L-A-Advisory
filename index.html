@@ -12048,10 +12048,14 @@ function openNavigationModal() {
             }
 
             // Só libera a página principal quando nenhum outro modal estiver aberto.
-            const anotherModalOpen = Array.from(document.querySelectorAll('[id$="Modal"]')).some(el =>
-                el && el.id !== 'adminDashboardModal' && !el.classList.contains('hidden') &&
-                getComputedStyle(el).display !== 'none' && el.getClientRects().length > 0
-            );
+            const anotherModalOpen = Array.from(document.querySelectorAll('[id$="Modal"]')).some(el => {
+                if (!el || el.id === 'adminDashboardModal' || el.id === 'siteAlertOverlay' || el.classList.contains('hidden')) return false;
+                const style = getComputedStyle(el);
+                return style.display !== 'none' &&
+                    style.visibility !== 'hidden' &&
+                    Number(style.opacity || 1) > 0 &&
+                    el.getClientRects().length > 0;
+            });
             if (anotherModalOpen) {
                 document.body.style.overflow = 'hidden';
                 if (window.laLenis?.stop) window.laLenis.stop();
