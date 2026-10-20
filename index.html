@@ -12056,6 +12056,9 @@ function openNavigationModal() {
                 document.body.style.overflow = 'hidden';
                 if (window.laLenis?.stop) window.laLenis.stop();
             } else {
+                // Restaura também as classes que bloqueiam a rolagem global.
+                document.body.classList.remove('account-modal-open');
+                document.documentElement.classList.remove('account-modal-open');
                 document.body.style.removeProperty('overflow');
                 document.documentElement.style.removeProperty('overflow');
                 if (window.laLenis?.start) window.laLenis.start();
