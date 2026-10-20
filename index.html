@@ -13025,7 +13025,6 @@ function renderCatalog() {
                             <div class="p-2.5 md:p-5 flex flex-col flex-1">
                                 <h3 class="font-serif text-sm md:text-xl font-bold text-slate-900 leading-snug line-clamp-2">${escapeHtml(product.name)}</h3>
                                 <div class="mt-2 md:mt-5">
-                                    ${discount > 0 ? `<p class="text-[10px] md:text-sm text-slate-400 line-through">${formatCurrency(Number(product.price) || 0)}</p>` : ''}
                                     <p class="text-base md:text-2xl font-bold text-slate-900">${formatCurrency(finalPrice)}</p>
                                 </div>
                                 <p class="text-[10px] md:text-xs text-amber-700 font-bold mt-2">Ver detalhes <span aria-hidden="true">›</span></p>
@@ -13073,7 +13072,6 @@ function showProductDetails(productId) {
                 <p class="text-xs font-bold uppercase tracking-wide text-amber-700 mt-4">${escapeHtml(product.category || 'Produto')}</p>
                 <h2 class="font-serif text-xl sm:text-2xl font-bold text-slate-900 mt-1">${escapeHtml(product.name)}</h2>
                 <div class="mt-3">
-                    ${discount > 0 ? `<p class="text-sm text-slate-400 line-through">${formatCurrency(Number(product.price) || 0)}</p>` : ''}
                     <p class="text-2xl sm:text-3xl font-bold text-slate-900">${formatCurrency(finalPrice)}</p>
                 </div>
                 <p class="text-sm sm:text-base text-slate-600 leading-relaxed mt-4 whitespace-pre-line">${escapeHtml(product.description || 'Mais informações sobre este produto em breve.')}</p>
