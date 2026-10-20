@@ -13000,8 +13000,10 @@ function renderCatalog() {
     }
 
     container.className = 'space-y-8 pb-6';
+    const showFullCatalog = document.body.classList.contains('store-open-mode') ||
+        document.body.classList.contains('affiliate-mode');
     container.innerHTML = groups.map((group, groupIndex) => `
-        <div class="product-carousel-group">
+        <div class="product-carousel-group ${groupIndex >= 3 && !showFullCatalog ? 'hidden' : ''}">
             <div class="flex items-center justify-between gap-3 mb-3">
                 <h3 class="font-serif text-xl font-bold text-white">${groupIndex === 0 ? 'Produtos em destaque' : 'Mais produtos'}</h3>
                 <div class="flex items-center gap-2 shrink-0">
