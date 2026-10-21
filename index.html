@@ -5408,19 +5408,6 @@
                     </p>
                 </div>
 
-                <button
-                    id="customerEditProfileButton"
-                    type="button"
-                    onclick="openCustomerProfile()"
-                    class="px-4 py-3 rounded-xl border border-slate-300 text-slate-700 font-bold hover:border-amber-500 hover:text-amber-700 transition"
-                >
-                    <i
-                        data-lucide="user-round"
-                        class="w-4 h-4 inline mr-1"
-                    ></i>
-
-                    Editar perfil
-                </button>
             </div>
 
             <div
@@ -14578,5 +14565,67 @@ body.guest-mode #afiliados { display: block !important; }
     #adminDashboardModal table, #affiliateDashboardModal table { min-width: 580px; }
 }
 </style>
+
+<style id="la-customer-orders-scroll-hotfix">
+/* Meus pedidos: um único contêiner com rolagem vertical real, inclusive em mobile. */
+#customerOrdersModal {
+  position: fixed !important;
+  inset: 0 !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  padding: max(8px, env(safe-area-inset-top)) 10px max(8px, env(safe-area-inset-bottom)) !important;
+  overflow: hidden !important;
+  touch-action: pan-y !important;
+}
+#customerOrdersModal.hidden { display: none !important; }
+#customerOrdersModal > .account-popover-shell {
+  box-sizing: border-box !important;
+  width: min(100%, 980px) !important;
+  height: calc(100vh - 16px) !important;
+  max-height: calc(100vh - 16px) !important;
+  min-height: 0 !important;
+  margin: 8px auto !important;
+  padding: 58px 16px 20px !important;
+  overflow-y: scroll !important;
+  overflow-x: hidden !important;
+  overscroll-behavior-y: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-y !important;
+  scrollbar-width: thin !important;
+}
+@supports (height: 100dvh) {
+  #customerOrdersModal > .account-popover-shell {
+    height: calc(100dvh - 16px) !important;
+    max-height: calc(100dvh - 16px) !important;
+  }
+}
+#customerOrdersModal #customerOrdersList,
+#customerOrdersModal #customerOrdersList * {
+  pointer-events: auto;
+}
+#customerOrdersModal button[onclick^="viewOrderDetails"] {
+  position: relative !important;
+  z-index: 2 !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+}
+#orderDetailsModal {
+  z-index: 100000 !important;
+}
+#orderDetailsModal > div {
+  box-sizing: border-box !important;
+  max-height: calc(100vh - 16px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-y !important;
+}
+@supports (height: 100dvh) {
+  #orderDetailsModal > div { max-height: calc(100dvh - 16px) !important; }
+}
+</style>
+
 </body>
 </html>
