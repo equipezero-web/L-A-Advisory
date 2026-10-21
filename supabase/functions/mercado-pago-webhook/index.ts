@@ -36,7 +36,10 @@ async function logSaleToSheet(
   orderId: string,
   paidAtIso: string,
 ) {
-  if (!SHEETS_WEBHOOK_URL || !SHEETS_WEBHOOK_SECRET) return;
+  if (!SHEETS_WEBHOOK_URL || !SHEETS_WEBHOOK_SECRET) {
+    console.error('Planilha não conectada: configure SHEETS_WEBHOOK_URL e SHEETS_WEBHOOK_SECRET nos secrets da Edge Function mercado-pago-webhook.');
+    return;
+  }
   try {
     const { data: order } = await admin
       .from('orders')
@@ -76,7 +79,20 @@ async function logSaleToSheet(
       redirect: 'follow',
       signal: AbortSignal.timeout(8000),
     });
-    if (!res.ok) console.error('Falha ao registrar venda na planilha:', res.status);
+    const responseText = await res.text();
+    if (!res.ok || /exception|error|failed/i.test(responseText)) {
+      console.error('Falha ao registrar venda na planilha:', {
+        status: res.status,
+        response: responseText.slice(0, 300),
+        order_id: orderId,
+      });
+    } else {
+      console.log('Registro enviado à planilha:', {
+        order_id: orderId,
+        item_count: rows.length,
+        http_status: res.status,
+      });
+    }
   } catch (error) {
     console.error('Falha ao registrar venda na planilha:', error instanceof Error ? error.message : error);
   }
