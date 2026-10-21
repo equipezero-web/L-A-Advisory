@@ -12349,6 +12349,24 @@ function openNavigationModal() {
             const affiliateCodeOf = order => String(order?.affiliateCode || order?.affiliate_code || '').trim().toUpperCase();
             const referralOrders = (state.orders || []).filter(order => affiliateCodeOf(order))
                 .sort((a,b) => new Date(b.created_at || b.createdAt || 0) - new Date(a.created_at || a.createdAt || 0));
+
+            // Realtime pode atualizar orders sem anexar order_items; recarrega os itens necessários ao cálculo.
+            const ordersMissingItems = referralOrders.filter(order => !Array.isArray(order.items) || !order.items.length);
+            if (ordersMissingItems.length) {
+                const ids = ordersMissingItems.map(order => order.id).filter(Boolean);
+                if (ids.length) {
+                    const { data: commissionItems, error: commissionItemsError } = await supabaseClient
+                        .from('order_items').select('*').in('order_id', ids);
+                    if (commissionItemsError) {
+                        console.warn('Itens para cálculo de comissão no ADM:', commissionItemsError.message);
+                    } else {
+                        const itemsByOrder = {};
+                        for (const item of commissionItems || []) (itemsByOrder[item.order_id] ||= []).push(item);
+                        for (const order of ordersMissingItems) order.items = itemsByOrder[order.id] || [];
+                    }
+                }
+            }
+
             const paidOrders = referralOrders.filter(order =>
                 ['paid','shipped','delivered'].includes(String(order.status || '').toLowerCase()) ||
                 String(order.paymentStatus || order.payment_status || '').toLowerCase() === 'approved'
