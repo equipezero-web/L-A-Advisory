@@ -12200,6 +12200,7 @@ function openNavigationModal() {
                     </div>
                 `).join('') || '<p class="text-sm text-slate-500">Nenhum afiliado.</p>';
             }
+            loadAdminCommissionSummary();
         }
 
         function loadAdminUsers() {
@@ -12698,6 +12699,7 @@ loadAdminProducts();
                 if (local) Object.assign(local, payload);
                 showAdminOrderMessage('Pedido atualizado com sucesso!', 'success');
                 loadAdminOrders();
+                await loadAdminCommissionSummary();
             } catch (error) {
                 console.error('Erro ao atualizar pedido:', error);
                 showAdminOrderMessage(error.message || 'Não foi possível atualizar o pedido.', 'error');
