@@ -5409,6 +5409,7 @@
                 </div>
 
                 <button
+                    id="customerEditProfileButton"
                     type="button"
                     onclick="openCustomerProfile()"
                     class="px-4 py-3 rounded-xl border border-slate-300 text-slate-700 font-bold hover:border-amber-500 hover:text-amber-700 transition"
@@ -6862,6 +6863,27 @@
                 </div>
             </div>
 
+            <div id="adminAffiliateCommissionOrders" class="overflow-x-auto border border-slate-200 rounded-xl bg-white">
+                <div class="p-4 border-b border-slate-200">
+                    <h5 class="font-bold text-slate-900">Pedidos com indicação de afiliado</h5>
+                    <p class="text-xs text-slate-500 mt-1">Código utilizado e comissão prevista por pedido.</p>
+                </div>
+                <table class="w-full text-sm">
+                    <thead class="bg-slate-50 text-slate-700">
+                        <tr>
+                            <th class="text-left p-3 font-bold">Pedido / Cliente</th>
+                            <th class="text-left p-3 font-bold">Afiliado</th>
+                            <th class="text-left p-3 font-bold">Código usado</th>
+                            <th class="text-left p-3 font-bold">Status</th>
+                            <th class="text-left p-3 font-bold">Comissão prevista</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminAffiliateCommissionOrdersBody" class="divide-y divide-slate-200">
+                        <tr><td colspan="5" class="p-4 text-center text-slate-500">Carregando indicações…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
             <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
                 <div class="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
                     <div>
@@ -7417,6 +7439,8 @@
                     <div class="sm:col-span-2"><p class="text-[11px] uppercase font-bold text-slate-500">Itens</p><div id="adminOrderItems" class="mt-2 space-y-1 text-sm">-</div></div>
                     <div><p class="text-[11px] uppercase font-bold text-slate-500">Pagamento</p><p id="adminOrderPaymentStatus" class="font-bold mt-1">-</p></div>
                     <div><p class="text-[11px] uppercase font-bold text-slate-500">ID Mercado Pago</p><p id="adminOrderPaymentId" class="font-mono text-xs mt-1 break-all">-</p></div>
+                    <div><p class="text-[11px] uppercase font-bold text-slate-500">Código de afiliado</p><p id="adminOrderAffiliateCode" class="font-mono font-bold mt-1 break-all">Sem indicação</p></div>
+                    <div><p class="text-[11px] uppercase font-bold text-slate-500">Comissão prevista</p><p id="adminOrderAffiliateCommission" class="font-bold text-amber-700 mt-1">R$ 0,00</p></div>
                 </div>
 
                 <div>
@@ -7448,7 +7472,7 @@
                             Entregue
                         </option>
 
-                        <option value="canceled">
+                        <option value="cancelled">
                             Cancelado
                         </option>
                     </select>
@@ -8181,6 +8205,7 @@
                 updatedAt: order.updatedAt || order.updated_at,
                 status: order.status || order.payment_status || 'pending',
                 paymentStatus: order.paymentStatus || order.payment_status || 'pending',
+                affiliateCode: order.affiliateCode || order.affiliate_code || '',
                 paymentId: order.paymentId || order.payment_id || null,
                 total: Number(order.total ?? order.total_amount ?? 0),
                 subtotal: Number(order.subtotal ?? 0),
@@ -11049,7 +11074,7 @@ function openNavigationModal() {
                     </div>
 
                     <div class="flex flex-wrap gap-2">
-                        <button type="button" onclick="viewOrderDetails('${String(order.id).replace(/[^a-zA-Z0-9_-]/g, '')}')" class="px-3 py-2 rounded-lg bg-slate-900 text-amber-400 text-xs font-bold hover:bg-slate-800 transition">
+                        <button type="button" onclick="viewOrderDetails('${String(order.id).replace(/[^a-zA-Z0-9_-]/g, '')}')" class="px-3 py-2 rounded-lg bg-slate-900 text-amber-400 text-xs font-bold hover:bg-slate-800 transition cursor-pointer pointer-events-auto relative z-10">
                             Ver detalhes
                         </button>
 
@@ -11078,7 +11103,9 @@ function openNavigationModal() {
                 paid: 'bg-blue-100 text-blue-800',
                 shipped: 'bg-purple-100 text-purple-800',
                 delivered: 'bg-emerald-100 text-emerald-800',
-                canceled: 'bg-red-100 text-red-800'
+                canceled: 'bg-red-100 text-red-800',
+                cancelled: 'bg-red-100 text-red-800',
+                refunded: 'bg-slate-200 text-slate-800'
             };
             return classes[status] || 'bg-slate-100 text-slate-800';
         }
@@ -11089,14 +11116,17 @@ function openNavigationModal() {
                 paid: 'Pago',
                 shipped: 'Enviado',
                 delivered: 'Entregue',
-                canceled: 'Cancelado'
+                canceled: 'Cancelado',
+                cancelled: 'Cancelado',
+                refunded: 'Reembolsado'
             };
             return statuses[status] || status;
         }
 
         function viewOrderDetails(orderId) {
-            const order = state.orders.find(o => o.id === orderId);
+            const order = state.orders.find(o => String(o.id) === String(orderId));
             if (!order) return;
+            const orderItems = Array.isArray(order.items) ? order.items : [];
 
             const modal = document.getElementById('orderDetailsModal');
             const container = document.getElementById('orderDetailsContent');
@@ -11139,7 +11169,7 @@ function openNavigationModal() {
                 <h4 class="font-bold text-slate-900 mb-3">Itens</h4>
 
                 <div class="space-y-3 mb-6">
-                    ${order.items.map(item => {
+                    ${orderItems.map(item => {
                         const imageUrl = String(item.image || '').trim();
 
                         return `
@@ -11703,10 +11733,18 @@ function openNavigationModal() {
         }
 
         function calculateAffiliateCommission(order) {
-            return order.items.reduce((sum, item) => {
-                const product = state.products.find(p => p.id === item.id);
+            const items = Array.isArray(order?.items) ? order.items : [];
+            return items.reduce((sum, item) => {
+                const savedCommission = Number(item.affiliate_commission ?? item.affiliateCommission ?? 0);
+                if (Number.isFinite(savedCommission) && savedCommission > 0) return sum + savedCommission;
+                const productId = item.productId || item.product_id || item.id;
+                const product = state.products.find(p => String(p.id) === String(productId));
                 if (!product) return sum;
-                return sum + (item.price * item.quantity * (product.commission / 100));
+                const quantity = Number(item.quantity || 1);
+                const unitPrice = Number(item.price ?? item.unit_price ?? item.gross_price ?? 0);
+                const rate = Number(product.commission || 0) / 100;
+                if (!Number.isFinite(quantity) || !Number.isFinite(unitPrice) || !Number.isFinite(rate)) return sum;
+                return sum + (unitPrice * quantity * rate);
             }, 0);
         }
 
@@ -12303,13 +12341,38 @@ function openNavigationModal() {
                 if (!res.error) {
                     paid = (res.data || []).reduce((s,p) => s + Number(p.amount || 0), 0);
                     countEl.textContent = String((res.data || []).length);
+                } else {
+                    console.warn('Pagamentos de comissão no ADM:', res.error.message);
                 }
             } catch (e) { console.warn(e); }
 
-            const paidOrders = (state.orders || []).filter(o => o.affiliateCode && ['paid','shipped','delivered'].includes(String(o.status || '').toLowerCase()));
-            const due = paidOrders.reduce((s,o) => s + getAffiliateCommissionForOrder(o), 0);
+            const affiliateCodeOf = order => String(order?.affiliateCode || order?.affiliate_code || '').trim().toUpperCase();
+            const referralOrders = (state.orders || []).filter(order => affiliateCodeOf(order))
+                .sort((a,b) => new Date(b.created_at || b.createdAt || 0) - new Date(a.created_at || a.createdAt || 0));
+            const paidOrders = referralOrders.filter(order =>
+                ['paid','shipped','delivered'].includes(String(order.status || '').toLowerCase()) ||
+                String(order.paymentStatus || order.payment_status || '').toLowerCase() === 'approved'
+            );
+            const due = paidOrders.reduce((sum,order) => sum + getAffiliateCommissionForOrder(order), 0);
             pendingEl.textContent = formatCurrency(Math.max(0, due - paid));
             paidEl.textContent = formatCurrency(paid);
+
+            const body = document.getElementById('adminAffiliateCommissionOrdersBody');
+            if (body) {
+                body.innerHTML = referralOrders.map(order => {
+                    const code = affiliateCodeOf(order);
+                    const affiliate = state.affiliates.find(item => String(item.code || '').trim().toUpperCase() === code);
+                    const commission = getAffiliateCommissionForOrder(order);
+                    const customer = order.customer_name || order.customerName || order.userId || order.user_id || 'Cliente';
+                    return '<tr class="hover:bg-amber-50/60 align-top">' +
+                        '<td class="p-3"><strong class="block">' + escapeHtml(order.code || order.id || 'Pedido') + '</strong><span class="text-xs text-slate-500">' + escapeHtml(customer) + '</span></td>' +
+                        '<td class="p-3">' + escapeHtml(affiliate?.name || affiliate?.email || 'Afiliado não localizado') + '</td>' +
+                        '<td class="p-3 font-mono text-xs break-all">' + escapeHtml(code) + '</td>' +
+                        '<td class="p-3 whitespace-nowrap"><span class="px-2 py-1 rounded text-[10px] font-bold ' + getStatusBadgeClass(order.status) + '">' + escapeHtml(translateOrderStatus(order.status)) + '</span></td>' +
+                        '<td class="p-3 font-bold text-amber-700 whitespace-nowrap">' + formatCurrency(commission) + '</td>' +
+                        '</tr>';
+                }).join('') || '<tr><td colspan="5" class="p-5 text-center text-slate-500">Nenhum pedido com código de afiliado foi encontrado.</td></tr>';
+            }
         }
 
         function loadAdminAffiliates() {
@@ -12573,6 +12636,12 @@ loadAdminProducts();
             document.getElementById('adminOrderCustomerAddress').textContent = formatAdminOrderAddress(address);
             document.getElementById('adminOrderPaymentStatus').textContent = order.payment_status || order.paymentStatus || 'pending';
             document.getElementById('adminOrderPaymentId').textContent = order.payment_id || order.paymentId || '-';
+            const orderAffiliateCode = String(order.affiliateCode || order.affiliate_code || '').trim().toUpperCase();
+            const affiliateForOrder = state.affiliates.find(a => String(a.code || '').toUpperCase() === orderAffiliateCode);
+            const affiliateCodeEl = document.getElementById('adminOrderAffiliateCode');
+            const affiliateCommissionEl = document.getElementById('adminOrderAffiliateCommission');
+            if (affiliateCodeEl) affiliateCodeEl.textContent = orderAffiliateCode ? (orderAffiliateCode + (affiliateForOrder?.name ? ' — ' + affiliateForOrder.name : '')) : 'Sem indicação';
+            if (affiliateCommissionEl) affiliateCommissionEl.textContent = orderAffiliateCode ? formatCurrency(getAffiliateCommissionForOrder(order)) : formatCurrency(0);
             document.getElementById('adminOrderItems').innerHTML = items.length
                 ? items.map(item => `<div class="flex justify-between gap-4"><span>${escapeHtml(item.quantity)}x ${escapeHtml(item.product_name || item.productName || '-')}</span><strong>${formatCurrency(item.subtotal || 0)}</strong></div>`).join('')
                 : '<span class="text-slate-500">Itens não carregados.</span>';
@@ -14415,5 +14484,75 @@ body.guest-mode #afiliados { display: block !important; }
 
 
 <script src="./affiliate-communication.js"></script>
+<style id="la-dashboard-mobile-refinement">
+/* Acabamento tecnológico usando a paleta azul-marinho, dourado e branco já existente. */
+#affiliateDashboardModal > .account-popover-shell,
+#adminDashboardModal > div {
+    border: 1px solid rgba(212,175,55,.55) !important;
+    border-radius: 1.25rem !important;
+    box-shadow: 0 24px 80px rgba(3,10,25,.38), inset 0 1px 0 rgba(255,255,255,.8) !important;
+    scrollbar-gutter: stable;
+}
+#affiliateDashboardModal .account-popover-shell h3,
+#adminDashboardModal h3,
+#adminDashboardModal h4 { letter-spacing: -.025em; }
+#affiliateDashboardModal .account-popover-shell [class*="bg-slate-50"],
+#adminDashboardModal .admin-section [class*="bg-slate-50"] { border-color: rgba(30,58,95,.16); }
+#adminDashboardModal .admin-section > h4 {
+    padding-bottom: .65rem;
+    border-bottom: 1px solid rgba(212,175,55,.35);
+}
+#adminAffiliateCommissionOrders th { white-space: nowrap; }
+#adminAffiliateCommissionOrders td { vertical-align: top; }
+#customerEditProfileButton { display: none !important; }
+#customerOrdersList button[onclick^="viewOrderDetails"] {
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    touch-action: manipulation;
+}
+#orderDetailsModal { z-index: 100100 !important; }
+#orderDetailsModal > div { position: relative; z-index: 1; }
+@media (max-width: 768px) {
+    html, body { max-width: 100%; overflow-x: clip; }
+    #affiliateDashboardModal, #adminDashboardModal, #orderDetailsModal, #adminOrderFormModal {
+        align-items: flex-start !important;
+        padding: .45rem !important;
+        padding-top: max(.45rem, env(safe-area-inset-top)) !important;
+        padding-bottom: max(.45rem, env(safe-area-inset-bottom)) !important;
+    }
+    #affiliateDashboardModal > .account-popover-shell,
+    #adminDashboardModal > div,
+    #orderDetailsModal > div,
+    #adminOrderFormModal > div {
+        width: 100% !important; max-width: 100% !important; max-height: 96dvh !important;
+        height: auto !important; margin: 0 !important; padding: 1rem !important;
+        border-radius: .95rem !important; overflow-y: auto !important; overscroll-behavior: contain;
+    }
+    #affiliateDashboardModal h3, #adminDashboardModal h3, #orderDetailsModal h3, #adminOrderFormModal h3 {
+        font-size: clamp(1.25rem, 5vw, 1.65rem) !important; line-height: 1.2 !important; overflow-wrap: anywhere;
+    }
+    #affiliateDashboardModal input, #affiliateDashboardModal select, #affiliateDashboardModal textarea,
+    #adminDashboardModal input, #adminDashboardModal select, #adminDashboardModal textarea,
+    #adminOrderFormModal input, #adminOrderFormModal select, #adminOrderFormModal textarea {
+        min-width: 0 !important; max-width: 100% !important; font-size: 16px !important;
+    }
+    #adminDashboardModal .overflow-x-auto, #affiliateDashboardModal .overflow-x-auto {
+        max-width: 100%; -webkit-overflow-scrolling: touch;
+    }
+    #adminDashboardModal table, #affiliateDashboardModal table { min-width: 620px; }
+    #catalogContainer .product-carousel-group .product-motion-card {
+        width: min(82vw, 340px) !important; min-width: min(82vw, 340px) !important;
+        max-width: min(82vw, 340px) !important; flex-basis: min(82vw, 340px) !important;
+    }
+    #catalogContainer .product-carousel-group .product-motion-card > div:first-child {
+        height: clamp(180px, 58vw, 230px) !important; flex-basis: clamp(180px, 58vw, 230px) !important;
+    }
+}
+@media (max-width: 380px) {
+    #affiliateDashboardModal > .account-popover-shell, #adminDashboardModal > div,
+    #orderDetailsModal > div, #adminOrderFormModal > div { padding: .8rem !important; }
+    #adminDashboardModal table, #affiliateDashboardModal table { min-width: 580px; }
+}
+</style>
 </body>
 </html>
