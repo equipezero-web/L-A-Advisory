@@ -24,6 +24,63 @@ const SERVICE =
   '';
 const MP_ACCESS_TOKEN = Deno.env.get('MP_ACCESS_TOKEN')!;
 const MP_WEBHOOK_SECRET = Deno.env.get('MP_WEBHOOK_SECRET') || '';
+// Registro de vendas em planilha (Google Apps Script publicado como web app).
+// Se as variáveis não estiverem configuradas, o registro é simplesmente ignorado.
+const SHEETS_WEBHOOK_URL = Deno.env.get('SHEETS_WEBHOOK_URL') || '';
+const SHEETS_WEBHOOK_SECRET = Deno.env.get('SHEETS_WEBHOOK_SECRET') || '';
+
+// Envia uma linha por item do pedido para a planilha. Nunca deve quebrar o webhook:
+// qualquer falha é apenas registrada no log.
+async function logSaleToSheet(
+  admin: ReturnType<typeof createClient>,
+  orderId: string,
+  paidAtIso: string,
+) {
+  if (!SHEETS_WEBHOOK_URL || !SHEETS_WEBHOOK_SECRET) return;
+  try {
+    const { data: order } = await admin
+      .from('orders')
+      .select('code,affiliate_code')
+      .eq('id', orderId)
+      .maybeSingle();
+    const { data: items } = await admin
+      .from('order_items')
+      .select('product_name,quantity,unit_price,subtotal')
+      .eq('order_id', orderId);
+    if (!order || !items?.length) return;
+
+    const paidAt = new Date(paidAtIso);
+    const tz = 'America/Sao_Paulo';
+    const date = new Intl.DateTimeFormat('pt-BR', {
+      timeZone: tz, day: '2-digit', month: '2-digit', year: 'numeric',
+    }).format(paidAt);
+    const time = new Intl.DateTimeFormat('pt-BR', {
+      timeZone: tz, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+    }).format(paidAt);
+
+    const rows = items.map((item: Record<string, unknown>) => [
+      order.code,
+      item.product_name,
+      Number(item.quantity),
+      Number(item.unit_price),
+      Number(item.subtotal),
+      order.affiliate_code || '',
+      date,
+      time,
+    ]);
+
+    const res = await fetch(SHEETS_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ secret: SHEETS_WEBHOOK_SECRET, rows }),
+      redirect: 'follow',
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) console.error('Falha ao registrar venda na planilha:', res.status);
+  } catch (error) {
+    console.error('Falha ao registrar venda na planilha:', error instanceof Error ? error.message : error);
+  }
+}
 
 async function validateMercadoPagoSignature(req: Request): Promise<boolean> {
   if (!MP_WEBHOOK_SECRET) {
@@ -344,6 +401,8 @@ Deno.serve(async (req) => {
                 .eq('id', affiliate.id);
             }
           }
+
+          await logSaleToSheet(admin, orderExternalReference, String(orderUpdate.paid_at));
         }
       }
     }
@@ -434,6 +493,8 @@ Deno.serve(async (req) => {
         }).eq('id', affiliate.id);
       }
     }
+
+    await logSaleToSheet(admin, orderId, String(orderUpdate.paid_at));
   }
 
   return json({ received: true });
