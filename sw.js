@@ -1,4 +1,4 @@
-const CACHE_NAME = "la-royal-advisory-v46";
+const CACHE_NAME = "la-royal-advisory-v47";
 
 const urlsToCache = [
     "./",
