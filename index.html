@@ -9825,6 +9825,15 @@ function openNavigationModal() {
 
             modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
+            const detailsPanel = modal.firstElementChild;
+            if (detailsPanel) {
+                detailsPanel.scrollTop = 0;
+                detailsPanel.style.overflowY = 'scroll';
+                detailsPanel.style.webkitOverflowScrolling = 'touch';
+            }
+            requestAnimationFrame(() => {
+                if (detailsPanel) detailsPanel.scrollTop = 0;
+            });
             lucide.createIcons();
         }
 
@@ -14412,38 +14421,43 @@ body.guest-mode #afiliados { display: block !important; }
 
 
 <style id="la-order-details-scroll-final-fix">
-/* Detalhes do pedido: a própria janela rola, evitando a disputa entre dois scroll containers. */
+/* Rolagem confiável: o painel de detalhes é o único contêiner vertical rolável. */
 #orderDetailsModal {
   position:fixed !important;
   inset:0 !important;
-  display:block !important;
+  z-index:100001 !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
   box-sizing:border-box !important;
   width:100% !important;
   height:100vh !important;
   height:100dvh !important;
-  padding:8px 10px calc(8px + env(safe-area-inset-bottom)) !important;
-  overflow-x:hidden !important;
-  overflow-y:auto !important;
-  overscroll-behavior-y:contain !important;
-  -webkit-overflow-scrolling:touch !important;
-  touch-action:pan-y !important;
-  align-items:initial !important;
-  justify-content:initial !important;
+  padding:8px 10px !important;
+  overflow:hidden !important;
+  overscroll-behavior:none !important;
 }
 #orderDetailsModal.hidden { display:none !important; }
 #orderDetailsModal > div {
   position:relative !important;
+  flex:0 1 auto !important;
   box-sizing:border-box !important;
   width:min(100%, 48rem) !important;
   max-width:48rem !important;
   min-width:0 !important;
   height:auto !important;
-  max-height:none !important;
+  max-height:calc(100vh - 16px) !important;
+  max-height:calc(100dvh - 16px) !important;
   min-height:0 !important;
-  margin:0 auto 8px !important;
+  margin:0 auto !important;
   padding:56px 16px 20px !important;
-  overflow:visible !important;
+  overflow-x:hidden !important;
+  overflow-y:scroll !important;
+  overscroll-behavior-y:contain !important;
+  -webkit-overflow-scrolling:touch !important;
   touch-action:pan-y !important;
+  scrollbar-gutter:stable;
 }
 #orderDetailsModal > div > button[aria-label="Fechar detalhes do pedido"] {
   position:absolute !important;
@@ -14465,16 +14479,18 @@ body.guest-mode #afiliados { display: block !important; }
   touch-action:manipulation !important;
 }
 #orderDetailsContent { min-width:0 !important; overflow-wrap:anywhere !important; }
-#orderDetailsContent .grid,
-#orderDetailsContent .flex { min-width:0; }
+#orderDetailsContent .grid, #orderDetailsContent .flex { min-width:0; }
 #orderDetailsContent img { max-width:100%; }
 @media (max-width:768px) {
-  #orderDetailsModal { padding:6px 8px calc(8px + env(safe-area-inset-bottom)) !important; }
+  #orderDetailsModal { padding:6px 8px !important; }
   #orderDetailsModal > div {
     width:100% !important;
     max-width:100% !important;
+    max-height:calc(100vh - 12px) !important;
+    max-height:calc(100dvh - 12px) !important;
     padding:54px 12px 16px !important;
     border-radius:14px !important;
+    overscroll-behavior-y:contain !important;
   }
   #orderDetailsContent h3 { font-size:1.45rem !important; line-height:1.2 !important; padding-right:22px; }
   #orderDetailsContent .grid { gap:.6rem !important; }
