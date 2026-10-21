@@ -14342,10 +14342,67 @@ body.guest-mode #afiliados { display: block !important; }
   main [style*="width:"], main [style*="min-width:"] {
     max-width:100%;
   }
-  /* Exceção necessária para carrosséis: preservar exatamente o tamanho atual dos produtos. */
+  /* Carrossel de produtos: forçar faixa horizontal no mobile, pois a classe base "grid" estava vencendo o estilo de rolagem. */
+  #catalogContainer .product-carousel-group .product-cards-layout {
+    display:flex !important;
+    flex-direction:row !important;
+    flex-wrap:nowrap !important;
+    align-items:stretch !important;
+    gap:.175rem !important;
+    column-gap:.175rem !important;
+    row-gap:.175rem !important;
+    overflow-x:auto !important;
+    overflow-y:hidden !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    padding:0 0 .35rem !important;
+    scroll-snap-type:x proximity !important;
+    -webkit-overflow-scrolling:touch !important;
+    touch-action:pan-x pan-y !important;
+  }
   #catalogContainer .product-carousel-group .product-motion-card {
-    width:38vw !important; min-width:38vw !important; max-width:38vw !important;
+    display:flex !important;
     flex:0 0 38vw !important;
+    width:38vw !important;
+    min-width:38vw !important;
+    max-width:38vw !important;
+    scroll-snap-align:start;
+  }
+  #catalogContainer .product-carousel-group .la-carousel-nav {
+    display:flex !important;
+    flex-direction:row !important;
+    flex-wrap:nowrap !important;
+    flex-shrink:0 !important;
+    align-items:center !important;
+    gap:.25rem !important;
+    position:relative !important;
+    z-index:2 !important;
+  }
+  #catalogContainer .product-carousel-group .la-carousel-arrow {
+    display:inline-flex !important;
+    visibility:visible !important;
+    opacity:1 !important;
+    pointer-events:auto !important;
+    align-items:center !important;
+    justify-content:center !important;
+    width:30px !important;
+    height:30px !important;
+    min-width:30px !important;
+    min-height:30px !important;
+    flex:0 0 30px !important;
+    background:#0c1933 !important;
+    color:#f4d03f !important;
+    border:1px solid rgba(212,175,55,.8) !important;
+    border-radius:9999px !important;
+    font-size:23px !important;
+    line-height:1 !important;
+    padding:0 !important;
+    cursor:pointer !important;
+    touch-action:manipulation !important;
+  }
+  #catalogContainer .product-carousel-group .product-cards-layout::-webkit-scrollbar {
+    display:none !important;
   }
 }
 </style>
