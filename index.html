@@ -14483,5 +14483,92 @@ body.guest-mode #afiliados { display: block !important; }
 }
 </style>
 
+
+<style id="la-customer-orders-visual-polish-v1">
+/* Ajustes isolados ao painel Meus Pedidos. */
+#customerOrdersModal {
+  align-items:flex-start !important; justify-content:center !important;
+  padding:16px !important; overflow-x:hidden !important; overflow-y:auto !important;
+  overscroll-behavior-y:contain !important; -webkit-overflow-scrolling:touch !important;
+  touch-action:pan-y !important;
+}
+#customerOrdersModal.hidden { display:none !important; }
+#customerOrdersModal > .account-popover-shell {
+  position:relative !important; width:min(100%,64rem) !important; max-width:64rem !important;
+  max-height:none !important; min-width:0 !important; height:auto !important;
+  margin:16px auto !important; padding:26px !important; overflow:visible !important;
+  background:#fff !important; color:#172033 !important;
+  border:1px solid rgba(212,175,55,.55) !important; border-radius:18px !important;
+  box-shadow:0 22px 60px rgba(2,6,23,.28) !important;
+}
+#customerOrdersModal > .account-popover-shell > button[aria-label="Fechar pedidos"] {
+  position:absolute !important; top:14px !important; right:14px !important; z-index:10 !important;
+  display:flex !important; align-items:center !important; justify-content:center !important;
+  width:42px !important; height:42px !important; min-width:42px !important; min-height:42px !important;
+  border:1px solid rgba(212,175,55,.65) !important; border-radius:9999px !important;
+  background:#0c1933 !important; color:#f4d03f !important; opacity:1 !important;
+  visibility:visible !important; pointer-events:auto !important; touch-action:manipulation !important;
+}
+#customerOrdersModal > .account-popover-shell > button[aria-label="Fechar pedidos"] svg,
+#customerOrdersModal > .account-popover-shell > button[aria-label="Fechar pedidos"] i {
+  color:#f4d03f !important; stroke:#f4d03f !important;
+}
+#customerOrdersModal > .account-popover-shell > .flex.flex-col.sm\:flex-row {
+  padding:0 54px 18px 0 !important; margin:0 0 18px !important;
+  border-bottom:1px solid #e2e8f0 !important; background:transparent !important;
+}
+#customerOrdersModal h3 { color:#0c1933 !important; }
+#customerOrdersModal #customerOrdersList {
+  display:flex !important; flex-direction:column !important; gap:12px !important;
+  margin:0 !important; padding:0 !important;
+}
+#customerOrdersModal #customerOrdersList > div {
+  min-width:0 !important; padding:16px !important; background:#f8fafc !important;
+  border:1px solid #dbe2ea !important; border-radius:13px !important;
+  box-shadow:0 2px 8px rgba(15,23,42,.035) !important; overflow-wrap:anywhere !important;
+}
+#customerOrdersModal #customerOrdersList > div > .flex:first-child { min-width:0 !important; }
+#customerOrdersModal #customerOrdersList button {
+  min-height:38px !important; line-height:1.25 !important; cursor:pointer !important;
+  touch-action:manipulation !important;
+}
+#customerOrdersModal #customerOrdersList button:first-child {
+  background:#0c1933 !important; color:#f4d03f !important; border:1px solid #0c1933 !important;
+}
+#customerOrdersModal #customerOrdersList button:not(:first-child) {
+  background:#fff !important; color:#172033 !important; border:1px solid #cbd5e1 !important;
+}
+#customerOrdersModal #customerOrdersList button:focus-visible,
+#customerOrdersModal > .account-popover-shell > button[aria-label="Fechar pedidos"]:focus-visible {
+  outline:3px solid #d4af37 !important; outline-offset:3px !important;
+}
+@media (max-width:768px) {
+  #customerOrdersModal { padding:8px !important; }
+  #customerOrdersModal > .account-popover-shell {
+    width:100% !important; max-width:100% !important; margin:4px auto !important;
+    padding:18px 12px 14px !important; border-radius:15px !important;
+  }
+  #customerOrdersModal > .account-popover-shell > button[aria-label="Fechar pedidos"] {
+    top:10px !important; right:10px !important; width:40px !important; height:40px !important;
+    min-width:40px !important; min-height:40px !important;
+  }
+  #customerOrdersModal > .account-popover-shell > .flex.flex-col.sm\:flex-row {
+    padding:0 48px 14px 0 !important; margin-bottom:14px !important; gap:8px !important;
+  }
+  #customerOrdersModal h3 { font-size:1.65rem !important; line-height:1.2 !important; }
+  #customerOrdersModal #customerOrdersList { gap:9px !important; }
+  #customerOrdersModal #customerOrdersList > div {
+    padding:12px !important; border-radius:11px !important;
+  }
+  #customerOrdersModal #customerOrdersList > div > .flex:first-child {
+    gap:10px !important; margin-bottom:12px !important;
+  }
+  #customerOrdersModal #customerOrdersList > div > .flex:first-child > .flex.items-center.gap-3 {
+    flex-wrap:wrap !important; gap:7px !important; justify-content:flex-start !important;
+  }
+  #customerOrdersModal #customerOrdersList button { min-height:40px !important; padding:9px 11px !important; }
+}
+</style>
+
 </body>
 </html>
