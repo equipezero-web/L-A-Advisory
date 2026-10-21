@@ -6750,7 +6750,7 @@
                                 Entregues
                             </option>
 
-                            <option value="canceled">
+                            <option value="cancelled">
                                 Cancelados
                             </option>
                         </select>
@@ -12249,7 +12249,11 @@ function openNavigationModal() {
 
             const filter = document.getElementById('adminOrdersFilter')?.value || 'all';
             let orders = [...state.orders];
-            if (filter !== 'all') orders = orders.filter(o => o.status === filter);
+            if (filter !== 'all') {
+                orders = orders.filter(o => filter === 'cancelled'
+                    ? ['cancelled', 'canceled'].includes(String(o.status || '').toLowerCase())
+                    : o.status === filter);
+            }
             orders.sort((a, b) => new Date(b.created_at || b.createdAt) - new Date(a.created_at || a.createdAt));
 
             tbody.innerHTML = orders.map(o => `
