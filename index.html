@@ -14222,5 +14222,133 @@ body.guest-mode #afiliados { display: block !important; }
 }
 </style>
 
+
+<style id="la-mobile-layout-polish-v1">
+/* Ajustes somente para celular: organização geral sem alterar os cards de produtos. */
+@media (max-width: 768px) {
+  html { width:100%; max-width:100%; overflow-x:clip; -webkit-text-size-adjust:100%; }
+  body { width:100%; max-width:100%; overflow-x:clip !important; }
+  body, body * { box-sizing:border-box; }
+  main, main section, footer { min-width:0; max-width:100%; }
+  main section:not(#inicio) { scroll-margin-top:76px; }
+  main section:not(#inicio) > .max-w-7xl,
+  main section:not(#inicio) > .max-w-6xl,
+  main section:not(#inicio) > .max-w-5xl,
+  main section:not(#inicio) > .max-w-4xl,
+  main section:not(#inicio) > .max-w-3xl,
+  footer > div {
+    width:100% !important; min-width:0 !important; max-width:100% !important;
+    padding-left:clamp(14px,4vw,20px) !important;
+    padding-right:clamp(14px,4vw,20px) !important;
+  }
+  main h1, main h2, main h3, main h4,
+  main p, main li, main label, main a, main button, main summary,
+  main span, footer p, footer a {
+    overflow-wrap:anywhere;
+    word-break:normal;
+  }
+  main h1 { line-height:1.12 !important; }
+  main h2 { line-height:1.18 !important; margin-bottom:.8rem; }
+  main h3 { line-height:1.25 !important; }
+  main p { line-height:1.55; }
+  main img, main video, main iframe { max-width:100%; }
+  main input, main select, main textarea,
+  .modal input, .modal select, .modal textarea,
+  [role="dialog"] input, [role="dialog"] select, [role="dialog"] textarea {
+    min-width:0 !important; max-width:100% !important; font-size:16px !important;
+  }
+  main input, main select, main textarea,
+  .modal input, .modal select, .modal textarea {
+    border-radius:.7rem;
+  }
+  main .grid, footer .grid,
+  .modal .grid, [role="dialog"] .grid {
+    min-width:0;
+  }
+  main .grid > *, footer .grid > *,
+  .modal .grid > *, [role="dialog"] .grid > * {
+    min-width:0;
+  }
+  main .flex, footer .flex {
+    min-width:0;
+  }
+  main button, main a[role="button"],
+  .modal button, .modal a[role="button"],
+  [role="dialog"] button, [role="dialog"] a[role="button"] {
+    min-height:40px;
+    max-width:100%;
+    line-height:1.25;
+    white-space:normal;
+    overflow-wrap:anywhere;
+    touch-action:manipulation;
+  }
+  main button svg, main a svg,
+  .modal button svg, [role="dialog"] button svg {
+    flex-shrink:0;
+  }
+  /* Botões sem fundo definido ganham contraste consistente; estilos de marca existentes são mantidos. */
+  main button:not([class*="bg-"]):not(.la-carousel-arrow),
+  .modal button:not([class*="bg-"]),
+  [role="dialog"] button:not([class*="bg-"]) {
+    background-color:#0c1933;
+    color:#f9e7a4;
+    border:1px solid rgba(212,175,55,.6);
+  }
+  /* Nenhuma camada decorativa deve bloquear o toque nos controles. */
+  .hero-layer, .hero-premium::before, .hero-premium::after,
+  .scroll-progress, .parallax-layer { pointer-events:none !important; }
+  #mobileMenuPanel, #mobileMenuPanel * ,
+  #mobileUtilityActions, #mobileUtilityActions * { pointer-events:auto; }
+  /* Grupos de ações não devem empurrar caixas para fora da tela. */
+  main .flex.items-center.justify-between,
+  main .flex.justify-between {
+    flex-wrap:wrap;
+    row-gap:.65rem;
+  }
+  /* Modais e painéis cabem na viewport e mantêm rolagem própria. */
+  #navModal, #cartModal, #checkoutModal, #customerProfileModal,
+  #customerOrdersModal, #trackingModal, #returnRequestModal,
+  #orderDetailsModal, #affiliateDashboardModal, #affiliateCatalogModal,
+  #affiliateProfileModal, #adminDashboardModal, #adminProductFormModal,
+  #adminOrderFormModal, #adminAffiliateFormModal, #adminUserFormModal,
+  #adminCommissionPaymentModal, #consultingModal, #catalogFiltersModal {
+    max-width:100vw !important;
+    overscroll-behavior:contain;
+  }
+  #navModal > div, #cartModal > div, #checkoutModal > div,
+  #customerProfileModal > div, #trackingModal > div,
+  #returnRequestModal > div, #orderDetailsModal > div,
+  #affiliateDashboardModal > div, #affiliateCatalogModal > div,
+  #affiliateProfileModal > div, #adminDashboardModal > div,
+  #adminProductFormModal > div, #adminOrderFormModal > div,
+  #adminAffiliateFormModal > div, #adminUserFormModal > div,
+  #adminCommissionPaymentModal > div, #catalogFiltersModal > div {
+    width:min(calc(100vw - 20px), 720px) !important;
+    max-width:calc(100vw - 20px) !important;
+    min-width:0 !important;
+    max-height:calc(100vh - 20px) !important;
+    max-height:calc(100dvh - 20px) !important;
+    overflow-x:hidden;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  /* Cartões informativos e áreas com bordas mantêm respiro uniforme. */
+  #consultoria article, #depoimentos article, #afiliados article,
+  #faq details {
+    min-width:0;
+    overflow-wrap:anywhere;
+  }
+  /* Evita que elementos de largura fixa causem deslocamento horizontal. */
+  main [style*="width:"], main [style*="min-width:"] {
+    max-width:100%;
+  }
+  /* Exceção necessária para carrosséis: preservar exatamente o tamanho atual dos produtos. */
+  #catalogContainer .product-carousel-group .product-motion-card {
+    width:38vw !important; min-width:38vw !important; max-width:38vw !important;
+    flex:0 0 38vw !important;
+  }
+}
+</style>
+
 </body>
 </html>
