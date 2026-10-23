@@ -12349,8 +12349,31 @@ function openNavigationModal() {
             modal.style.setProperty('opacity', '1', 'important');
             modal.style.setProperty('pointer-events', 'auto', 'important');
             modal.style.zIndex = '99999';
-            document.body.style.overflow = 'hidden';
-            lucide.createIcons();
+           // Bloqueia completamente a página principal enquanto o Admin estiver aberto.
+document.body.style.overflow = 'hidden';
+document.documentElement.style.overflow = 'hidden';
+
+document.body.classList.add('account-modal-open');
+document.documentElement.classList.add('account-modal-open');
+
+// O Lenis controla a página principal.
+// Ele precisa parar enquanto o painel administrativo estiver aberto.
+if (window.laLenis?.stop) {
+    window.laLenis.stop();
+}
+
+// Garante que a rolagem começa no topo do próprio painel.
+const adminScroller = modal.querySelector(':scope > div');
+
+if (adminScroller) {
+    adminScroller.scrollTop = 0;
+    adminScroller.style.setProperty('overflow-y', 'auto', 'important');
+    adminScroller.style.setProperty('overflow-x', 'hidden', 'important');
+    adminScroller.style.setProperty('overscroll-behavior', 'contain', 'important');
+    adminScroller.style.setProperty('touch-action', 'pan-y', 'important');
+}
+
+lucide.createIcons();
         }
 
         function closeAdminDashboard() {
