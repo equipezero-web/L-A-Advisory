@@ -109,6 +109,12 @@ function classifyProviderFailure(status: number) {
   return 'error';
 }
 
+const PROVIDER_TIMEOUT_MS = 8000;
+
+function providerTimeoutSignal() {
+  return AbortSignal.timeout(PROVIDER_TIMEOUT_MS);
+}
+
 const SYSTEM_PROMPT = `
 Você é a Royal AI da Store Royal.
 
@@ -158,7 +164,8 @@ async function callGemini(prompt: string) {
     `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent`,
     {
       method: 'POST',
-
+      signal: providerTimeoutSignal(),
+      
       headers: {
         'Content-Type': 'application/json',
         'X-goog-api-key': GEMINI_API_KEY,
@@ -248,6 +255,7 @@ async function callGroq(prompt: string) {
     'https://api.groq.com/openai/v1/chat/completions',
     {
       method: 'POST',
+      signal: providerTimeoutSignal(),
 
       headers: {
         'Content-Type': 'application/json',
@@ -327,6 +335,7 @@ async function callOpenRouter(prompt: string) {
     'https://openrouter.ai/api/v1/chat/completions',
     {
       method: 'POST',
+      signal: providerTimeoutSignal(),
 
       headers: {
         'Content-Type': 'application/json',
@@ -415,6 +424,7 @@ async function callCloudflare(prompt: string) {
     endpoint,
     {
       method: 'POST',
+      signal: providerTimeoutSignal(),
 
       headers: {
         'Content-Type': 'application/json',
@@ -495,6 +505,7 @@ async function callCohere(prompt: string) {
     'https://api.cohere.com/v2/chat',
     {
       method: 'POST',
+      signal: providerTimeoutSignal(),
 
       headers: {
         'Content-Type': 'application/json',
