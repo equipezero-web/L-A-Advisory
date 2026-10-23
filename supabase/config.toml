@@ -10,12 +10,14 @@ verify_jwt = false
 [functions.mercado-pago-webhook]
 verify_jwt = false
 
-
 [functions.create-order]
 verify_jwt = true
 
 [functions.affiliate-private-data]
 verify_jwt = false
-[functions.admin-affiliate-update]
 
+[functions.admin-affiliate-update]
 verify_jwt = false
+
+[functions.royal-ai-gateway]
+verify_jwt = true
