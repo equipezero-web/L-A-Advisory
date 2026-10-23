@@ -6051,7 +6051,10 @@
         id="affiliateCatalogModal"
         class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[85] hidden flex items-center justify-center p-4 overflow-y-auto"
     >
-        <div class="bg-white text-slate-900 rounded-2xl max-w-7xl w-full p-6 sm:p-8 shadow-2xl relative border-2 border-amber-400/30 my-8 max-h-[92vh] overflow-y-auto">
+        <div
+    class="bg-white text-slate-900 rounded-2xl max-w-7xl w-full p-6 sm:p-8 shadow-2xl relative border-2 border-amber-400/30 my-8"
+    style="height: calc(100dvh - 2rem); max-height: calc(100dvh - 2rem); overflow-y: auto !important; overflow-x: hidden !important; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y;"
+>
             <button
                 type="button"
                 onclick="closeAffiliateCatalog()"
