@@ -6477,19 +6477,31 @@
 
                     Relatórios
                 </button>
+<button
+    type="button"
+    onclick="switchAdminTab('admin-royal-ai', this)"
+    class="admin-tab px-4 py-2 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-50"
+>
+    <i
+        data-lucide="bot"
+        class="w-4 h-4 inline mr-1"
+    ></i>
 
-                <button
-                    type="button"
-                    onclick="switchAdminTab('admin-settings', this)"
-                    class="admin-tab px-4 py-2 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-50"
-                >
-                    <i
-                        data-lucide="settings"
-                        class="w-4 h-4 inline mr-1"
-                    ></i>
+    Royal AI
+</button>
 
-                    Configurações
-                </button>
+<button
+    type="button"
+    onclick="switchAdminTab('admin-settings', this)"
+    class="admin-tab px-4 py-2 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-50"
+>
+    <i
+        data-lucide="settings"
+        class="w-4 h-4 inline mr-1"
+    ></i>
+
+    Configurações
+</button>
             </div>
 
             <!-- CONTEÚDO DAS ABAS -->
@@ -6604,7 +6616,250 @@
                     </div>
                 </div>
             </section>
+<!-- ROYAL AI -->
+<section
+    id="admin-royal-ai"
+    class="admin-section hidden space-y-6"
+>
+    <!-- Cabeçalho -->
+    <div class="p-6 bg-gradient-to-br from-slate-950 to-blue-950 rounded-2xl text-white border border-amber-400/20">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 gradient-gold rounded-2xl flex items-center justify-center text-slate-950 shadow-gold">
+                    <i data-lucide="bot" class="w-7 h-7"></i>
+                </div>
 
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-widest text-amber-400">
+                        Inteligência Store Royal
+                    </span>
+
+                    <h4 class="font-serif text-2xl font-bold mt-1">
+                        Royal AI
+                    </h4>
+
+                    <p class="text-sm text-slate-300 mt-1">
+                        Inteligência comercial e operacional da Store Royal.
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-400/30">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                <span class="text-xs font-bold text-emerald-300">
+                    Sistema conectado
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumo -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+        <div class="p-5 bg-slate-50 border border-slate-200 rounded-xl">
+            <p class="text-xs text-slate-500 uppercase font-bold">
+                Provedores
+            </p>
+            <p class="text-2xl font-bold text-slate-900 mt-2">
+                5
+            </p>
+            <p class="text-xs text-emerald-600 mt-1">
+                Configurados
+            </p>
+        </div>
+
+        <div class="p-5 bg-slate-50 border border-slate-200 rounded-xl">
+            <p class="text-xs text-slate-500 uppercase font-bold">
+                Modo
+            </p>
+            <p class="text-2xl font-bold text-slate-900 mt-2">
+                Bootstrap
+            </p>
+            <p class="text-xs text-amber-600 mt-1">
+                Somente gratuito
+            </p>
+        </div>
+
+        <div class="p-5 bg-slate-50 border border-slate-200 rounded-xl">
+            <p class="text-xs text-slate-500 uppercase font-bold">
+                Automações
+            </p>
+            <p class="text-2xl font-bold text-slate-900 mt-2">
+                OFF
+            </p>
+            <p class="text-xs text-slate-500 mt-1">
+                Controle manual
+            </p>
+        </div>
+
+        <div class="p-5 bg-slate-50 border border-slate-200 rounded-xl">
+            <p class="text-xs text-slate-500 uppercase font-bold">
+                Custo IA
+            </p>
+            <p class="text-2xl font-bold text-emerald-600 mt-2">
+                R$ 0
+            </p>
+            <p class="text-xs text-slate-500 mt-1">
+                Bootstrap
+            </p>
+        </div>
+
+    </div>
+
+    <!-- Área principal -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+        <!-- Chat -->
+        <div class="lg:col-span-2 bg-white border border-slate-200 rounded-2xl overflow-hidden">
+
+            <div class="p-5 border-b border-slate-200">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-amber-400">
+                        <i data-lucide="message-square" class="w-5 h-5"></i>
+                    </div>
+
+                    <div>
+                        <h5 class="font-bold text-slate-900">
+                            Conversar com a Royal AI
+                        </h5>
+
+                        <p class="text-xs text-slate-500">
+                            Assistente administrativo da Store Royal
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div
+                id="royalAiChatMessages"
+                class="p-5 min-h-[300px] max-h-[420px] overflow-y-auto bg-slate-50"
+            >
+                <div class="flex gap-3">
+                    <div class="w-9 h-9 shrink-0 gradient-gold rounded-xl flex items-center justify-center text-slate-900">
+                        <i data-lucide="crown" class="w-4 h-4"></i>
+                    </div>
+
+                    <div class="max-w-[85%] bg-white border border-slate-200 rounded-2xl rounded-tl-md px-4 py-3 shadow-sm">
+                        <p class="text-sm text-slate-700 leading-relaxed">
+                            Olá. Eu sou a Royal AI, inteligência administrativa da Store Royal.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-slate-200 bg-white">
+                <div class="flex gap-2">
+                    <textarea
+                        id="royalAiPrompt"
+                        rows="2"
+                        placeholder="Pergunte algo à Royal AI..."
+                        class="flex-1 resize-none px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-amber-500 text-sm"
+                    ></textarea>
+
+                    <button
+                        type="button"
+                        id="royalAiSendButton"
+                        onclick="sendRoyalAiMessage()"
+                        class="self-end w-12 h-12 gradient-gold rounded-xl flex items-center justify-center text-slate-900 hover:shadow-gold transition"
+                        title="Enviar"
+                    >
+                        <i data-lucide="send" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Provedores -->
+        <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+
+            <div class="p-5 border-b border-slate-200">
+                <h5 class="font-bold text-slate-900">
+                    Provedores de IA
+                </h5>
+
+                <p class="text-xs text-slate-500 mt-1">
+                    Ordem automática de contingência
+                </p>
+            </div>
+
+            <div id="royalAiProviders" class="p-4 space-y-3">
+
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-bold">1. Gemini</span>
+                        <span class="text-xs text-slate-500">Verificando...</span>
+                    </div>
+                </div>
+
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-bold">2. Groq</span>
+                        <span class="text-xs text-slate-500">Verificando...</span>
+                    </div>
+                </div>
+
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-bold">3. OpenRouter</span>
+                        <span class="text-xs text-slate-500">Verificando...</span>
+                    </div>
+                </div>
+
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-bold">4. Cloudflare</span>
+                        <span class="text-xs text-slate-500">Verificando...</span>
+                    </div>
+                </div>
+
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-bold">5. Cohere</span>
+                        <span class="text-xs text-slate-500">Verificando...</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Futuras funções -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+        <div class="p-5 border border-slate-200 rounded-xl bg-white">
+            <i data-lucide="radar" class="w-6 h-6 text-amber-600"></i>
+            <h6 class="font-bold text-slate-900 mt-3">Radar Royal</h6>
+            <p class="text-xs text-slate-500 mt-1">
+                Pesquisa e análise de oportunidades.
+            </p>
+        </div>
+
+        <div class="p-5 border border-slate-200 rounded-xl bg-white">
+            <i data-lucide="shopping-bag" class="w-6 h-6 text-amber-600"></i>
+            <h6 class="font-bold text-slate-900 mt-3">Catálogo Inteligente</h6>
+            <p class="text-xs text-slate-500 mt-1">
+                Apoio na criação e otimização de produtos.
+            </p>
+        </div>
+
+        <div class="p-5 border border-slate-200 rounded-xl bg-white">
+            <i data-lucide="chart-no-axes-combined" class="w-6 h-6 text-amber-600"></i>
+            <h6 class="font-bold text-slate-900 mt-3">Inteligência de Vendas</h6>
+            <p class="text-xs text-slate-500 mt-1">
+                Análise de vendas, margens e desempenho.
+            </p>
+        </div>
+
+        <div class="p-5 border border-slate-200 rounded-xl bg-white">
+            <i data-lucide="megaphone" class="w-6 h-6 text-amber-600"></i>
+            <h6 class="font-bold text-slate-900 mt-3">Marketing</h6>
+            <p class="text-xs text-slate-500 mt-1">
+                Estratégias e conteúdo para a Store Royal.
+            </p>
+        </div>
+
+    </div>
+</section>
             <!-- USUÁRIOS -->
             <section
                 id="admin-users"
@@ -12158,6 +12413,7 @@ function openNavigationModal() {
     if (tabId === 'admin-products') loadAdminProducts();
     if (tabId === 'admin-orders') loadAdminOrders();
     if (tabId === 'admin-affiliates') loadAdminAffiliates();
+      if (tabId === 'admin-royal-ai') loadRoyalAiPanel();
             if (tabId === 'admin-settings') {
                 const savedCompany = JSON.parse(localStorage.getItem('laAdminCompanySettings') || '{}');
                 const savedCommission = localStorage.getItem('laAdminCommissionPercent');
@@ -12169,7 +12425,347 @@ function openNavigationModal() {
 
     prepareCheckoutAffiliateField();
 }
+async function loadRoyalAiPanel() {
+    const providersContainer = document.getElementById('royalAiProviders');
 
+    if (!providersContainer) return;
+
+    providersContainer.innerHTML = `
+        <div class="p-4 text-center text-sm text-slate-500">
+            Consultando Royal AI...
+        </div>
+    `;
+
+    try {
+        if (!supabaseClient) {
+            throw new Error('Supabase não está disponível.');
+        }
+
+        const { data: sessionData, error: sessionError } =
+            await supabaseClient.auth.getSession();
+
+        if (sessionError) throw sessionError;
+
+        const accessToken = sessionData?.session?.access_token;
+
+        if (!accessToken) {
+            throw new Error('Sessão administrativa expirada.');
+        }
+
+        const response = await fetch(
+            SUPABASE_FUNCTIONS_BASE + '/royal-ai-gateway',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': 'Bearer ' + accessToken
+                },
+                body: JSON.stringify({
+                    action: 'status'
+                })
+            }
+        );
+
+        const result = await response.json().catch(() => ({}));
+
+        if (!response.ok || !result.ok) {
+            throw new Error(
+                result.error ||
+                'Não foi possível consultar a Royal AI.'
+            );
+        }
+
+        const providers = Array.isArray(result.providers)
+            ? result.providers
+            : [];
+
+        if (!providers.length) {
+            providersContainer.innerHTML = `
+                <div class="p-4 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-800">
+                    Nenhum provedor foi retornado pela Royal AI.
+                </div>
+            `;
+            return;
+        }
+
+        providersContainer.innerHTML = providers
+            .filter(provider => provider.provider_key !== 'local')
+            .sort((a, b) =>
+                Number(a.priority || 999) -
+                Number(b.priority || 999)
+            )
+            .map((provider, index) => {
+                const status = String(
+                    provider.status || 'unknown'
+                ).toLowerCase();
+
+                let statusLabel = 'Desconhecido';
+                let statusClass =
+                    'bg-slate-100 text-slate-600';
+
+                if (status === 'available') {
+                    statusLabel = 'Disponível';
+                    statusClass =
+                        'bg-emerald-100 text-emerald-700';
+                } else if (status === 'error') {
+                    statusLabel = 'Indisponível';
+                    statusClass =
+                        'bg-red-100 text-red-700';
+                } else if (status === 'cooldown') {
+                    statusLabel = 'Aguardando';
+                    statusClass =
+                        'bg-amber-100 text-amber-700';
+                }
+
+                const name =
+                    provider.display_name ||
+                    provider.provider_key ||
+                    'Provedor';
+
+                return `
+                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="min-w-0">
+                                <p class="text-sm font-bold text-slate-900">
+                                    ${index + 1}. ${escapeHtml(name)}
+                                </p>
+
+                                <p class="text-[11px] text-slate-500 mt-1 truncate">
+                                    ${escapeHtml(provider.model || 'Modelo automático')}
+                                </p>
+                            </div>
+
+                            <span class="shrink-0 px-2 py-1 rounded-lg text-[10px] font-bold ${statusClass}">
+                                ${statusLabel}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            })
+            .join('');
+
+    } catch (error) {
+        console.error('Royal AI status:', error);
+
+        providersContainer.innerHTML = `
+            <div class="p-4 rounded-xl bg-red-50 border border-red-200">
+                <p class="text-sm font-bold text-red-800">
+                    Royal AI indisponível
+                </p>
+
+                <p class="text-xs text-red-600 mt-1">
+                    ${escapeHtml(
+                        error?.message ||
+                        'Não foi possível consultar os provedores.'
+                    )}
+                </p>
+            </div>
+        `;
+    }
+
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+}
+
+        async function sendRoyalAiMessage() {
+    const input = document.getElementById('royalAiPrompt');
+    const messages = document.getElementById('royalAiChatMessages');
+    const button = document.getElementById('royalAiSendButton');
+
+    if (!input || !messages || !button) return;
+
+    const prompt = input.value.trim();
+
+    if (!prompt) return;
+
+    // Mensagem do administrador
+    messages.insertAdjacentHTML('beforeend', `
+        <div class="flex justify-end gap-3 mt-4">
+            <div class="max-w-[85%] bg-slate-900 text-white rounded-2xl rounded-tr-md px-4 py-3">
+                <p class="text-sm leading-relaxed">
+                    ${escapeHtml(prompt)}
+                </p>
+            </div>
+        </div>
+    `);
+
+    input.value = '';
+    messages.scrollTop = messages.scrollHeight;
+
+    button.disabled = true;
+    button.classList.add('opacity-50', 'cursor-not-allowed');
+
+    // Indicador de processamento
+    const loadingId =
+        'royal-ai-loading-' +
+        Date.now();
+
+    messages.insertAdjacentHTML('beforeend', `
+        <div id="${loadingId}" class="flex gap-3 mt-4">
+            <div class="w-9 h-9 shrink-0 gradient-gold rounded-xl flex items-center justify-center text-slate-900">
+                <i data-lucide="crown" class="w-4 h-4"></i>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-md px-4 py-3 shadow-sm">
+                <div class="flex items-center gap-2 text-sm text-slate-500">
+                    <i data-lucide="loader-circle" class="w-4 h-4 animate-spin"></i>
+                    Royal AI está analisando...
+                </div>
+            </div>
+        </div>
+    `);
+
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+
+    messages.scrollTop = messages.scrollHeight;
+
+    try {
+        if (!supabaseClient) {
+            throw new Error('Supabase não está disponível.');
+        }
+
+        const { data: sessionData, error: sessionError } =
+            await supabaseClient.auth.getSession();
+
+        if (sessionError) throw sessionError;
+
+        const accessToken =
+            sessionData?.session?.access_token;
+
+        if (!accessToken) {
+            throw new Error(
+                'Sua sessão administrativa expirou. Entre novamente.'
+            );
+        }
+
+        const response = await fetch(
+            SUPABASE_FUNCTIONS_BASE + '/royal-ai-gateway',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': 'Bearer ' + accessToken
+                },
+                body: JSON.stringify({
+                    action: 'generate',
+                    prompt
+                })
+            }
+        );
+
+        const result =
+            await response.json().catch(() => ({}));
+
+        if (!response.ok || !result.ok) {
+            throw new Error(
+                result.error ||
+                result.message ||
+                'A Royal AI não conseguiu responder.'
+            );
+        }
+
+        document
+            .getElementById(loadingId)
+            ?.remove();
+
+        const answer =
+            String(result.text || '').trim() ||
+            'A Royal AI não retornou conteúdo.';
+
+        const provider =
+            result.provider
+                ? String(result.provider)
+                : '';
+
+        const model =
+            result.model
+                ? String(result.model)
+                : '';
+
+        messages.insertAdjacentHTML('beforeend', `
+            <div class="flex gap-3 mt-4">
+                <div class="w-9 h-9 shrink-0 gradient-gold rounded-xl flex items-center justify-center text-slate-900">
+                    <i data-lucide="crown" class="w-4 h-4"></i>
+                </div>
+
+                <div class="max-w-[85%]">
+                    <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-md px-4 py-3 shadow-sm">
+                        <p class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">${escapeHtml(answer)}</p>
+                    </div>
+
+                    ${
+                        provider
+                            ? `
+                                <p class="text-[10px] text-slate-400 mt-1 ml-2">
+                                    ${escapeHtml(provider)}
+                                    ${
+                                        model
+                                            ? ' • ' + escapeHtml(model)
+                                            : ''
+                                    }
+                                </p>
+                            `
+                            : ''
+                    }
+                </div>
+            </div>
+        `);
+
+        // Atualiza o monitor depois da geração.
+        loadRoyalAiPanel();
+
+    } catch (error) {
+        document
+            .getElementById(loadingId)
+            ?.remove();
+
+        console.error(
+            'Royal AI generate:',
+            error
+        );
+
+        messages.insertAdjacentHTML('beforeend', `
+            <div class="flex gap-3 mt-4">
+                <div class="w-9 h-9 shrink-0 bg-red-100 rounded-xl flex items-center justify-center text-red-600">
+                    <i data-lucide="triangle-alert" class="w-4 h-4"></i>
+                </div>
+
+                <div class="max-w-[85%] bg-red-50 border border-red-200 rounded-2xl rounded-tl-md px-4 py-3">
+                    <p class="text-sm font-bold text-red-800">
+                        Não foi possível obter resposta.
+                    </p>
+
+                    <p class="text-xs text-red-600 mt-1">
+                        ${escapeHtml(
+                            error?.message ||
+                            'Falha temporária na Royal AI.'
+                        )}
+                    </p>
+                </div>
+            </div>
+        `);
+
+    } finally {
+        button.disabled = false;
+        button.classList.remove(
+            'opacity-50',
+            'cursor-not-allowed'
+        );
+
+        messages.scrollTop =
+            messages.scrollHeight;
+
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    }
+}
+        
         function loadAdminDashboard() {
             document.getElementById('adminDashUsers').textContent = state.users.length;
             document.getElementById('adminDashProducts').textContent = state.products.length;
