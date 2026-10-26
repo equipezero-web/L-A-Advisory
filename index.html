@@ -15208,6 +15208,102 @@ body.guest-mode #afiliados { display: block !important; }
   }
   #customerOrdersModal #customerOrdersList button { min-height:40px !important; padding:9px 11px !important; }
 }
+
+    /* =====================================================
+   AJUSTE COMPACTO — SOMENTE DESKTOP
+   Mobile permanece inalterado
+   ===================================================== */
+@media (min-width: 1024px) {
+
+    /* Escala tipográfica geral */
+    html {
+        font-size: 14px;
+    }
+
+    /* Conteúdo geral mais compacto */
+    section {
+        padding-top: 3.5rem;
+        padding-bottom: 3.5rem;
+    }
+
+    /* Títulos */
+    h1 {
+        font-size: clamp(2.2rem, 4vw, 4rem);
+        line-height: 1.05;
+    }
+
+    h2 {
+        font-size: clamp(1.8rem, 3vw, 2.8rem);
+        line-height: 1.1;
+    }
+
+    h3 {
+        font-size: clamp(1.15rem, 2vw, 1.6rem);
+    }
+
+    /* Limita largura excessiva do conteúdo */
+    .max-w-7xl {
+        max-width: 72rem;
+    }
+
+    .max-w-6xl {
+        max-width: 66rem;
+    }
+
+    /* Botões gerais um pouco menores */
+    button,
+    a[class*="px-"] {
+        line-height: 1.25;
+    }
+
+    /* Modais e painéis administrativos */
+    #adminDashboardScroller {
+        width: min(94vw, 1180px) !important;
+        padding: 1.4rem !important;
+    }
+
+    /* Inputs e selects mais compactos */
+    input,
+    select,
+    textarea {
+        font-size: 0.9rem;
+    }
+
+    /* Mantém os cards de produtos no tamanho já configurado */
+    .product-card,
+    .product-motion-card {
+        font-size: inherit;
+    }
+
+    /* Reduz espaços muito grandes do Tailwind no desktop */
+    .gap-10 {
+        gap: 2rem !important;
+    }
+
+    .gap-12 {
+        gap: 2.25rem !important;
+    }
+
+    .gap-16 {
+        gap: 2.75rem !important;
+    }
+
+    .py-20 {
+        padding-top: 4rem !important;
+        padding-bottom: 4rem !important;
+    }
+
+    .py-24 {
+        padding-top: 4.5rem !important;
+        padding-bottom: 4.5rem !important;
+    }
+
+    .py-28,
+    .py-32 {
+        padding-top: 5rem !important;
+        padding-bottom: 5rem !important;
+    }
+}
 </style>
 
 </body>
