@@ -15209,102 +15209,76 @@ body.guest-mode #afiliados { display: block !important; }
   #customerOrdersModal #customerOrdersList button { min-height:40px !important; padding:9px 11px !important; }
 }
 
-    /* =====================================================
-   AJUSTE COMPACTO — SOMENTE DESKTOP
-   Mobile permanece inalterado
+/* =====================================================
+   DESKTOP COMPACTO — L&A ADVISORY
    ===================================================== */
-@media (min-width: 1024px) {
+@media screen and (min-width: 1024px) {
 
-    /* Escala tipográfica geral */
     html {
-        font-size: 14px;
+        font-size: 12px !important;
     }
 
-    /* Conteúdo geral mais compacto */
+    body {
+        font-size: 1rem !important;
+    }
+
+    /* Seções */
     section {
-        padding-top: 3.5rem;
-        padding-bottom: 3.5rem;
+        padding-top: 3rem !important;
+        padding-bottom: 3rem !important;
     }
 
-    /* Títulos */
-    h1 {
-        font-size: clamp(2.2rem, 4vw, 4rem);
-        line-height: 1.05;
-    }
+    /* Textos grandes do Tailwind */
+    .text-9xl { font-size: 5rem !important; }
+    .text-8xl { font-size: 4.5rem !important; }
+    .text-7xl { font-size: 4rem !important; }
+    .text-6xl { font-size: 3.5rem !important; }
+    .text-5xl { font-size: 3rem !important; }
+    .text-4xl { font-size: 2.4rem !important; }
+    .text-3xl { font-size: 2rem !important; }
+    .text-2xl { font-size: 1.55rem !important; }
+    .text-xl  { font-size: 1.25rem !important; }
+    .text-lg  { font-size: 1.05rem !important; }
 
-    h2 {
-        font-size: clamp(1.8rem, 3vw, 2.8rem);
-        line-height: 1.1;
-    }
-
-    h3 {
-        font-size: clamp(1.15rem, 2vw, 1.6rem);
-    }
-
-    /* Limita largura excessiva do conteúdo */
-    .max-w-7xl {
-        max-width: 72rem;
-    }
-
-    .max-w-6xl {
-        max-width: 66rem;
-    }
-
-    /* Botões gerais um pouco menores */
-    button,
-    a[class*="px-"] {
-        line-height: 1.25;
-    }
-
-    /* Modais e painéis administrativos */
-    #adminDashboardScroller {
-        width: min(94vw, 1180px) !important;
-        padding: 1.4rem !important;
-    }
-
-    /* Inputs e selects mais compactos */
-    input,
-    select,
-    textarea {
-        font-size: 0.9rem;
-    }
-
-    /* Mantém os cards de produtos no tamanho já configurado */
-    .product-card,
-    .product-motion-card {
-        font-size: inherit;
-    }
-
-    /* Reduz espaços muito grandes do Tailwind no desktop */
-    .gap-10 {
-        gap: 2rem !important;
-    }
-
-    .gap-12 {
-        gap: 2.25rem !important;
-    }
-
-    .gap-16 {
-        gap: 2.75rem !important;
-    }
-
-    .py-20 {
+    /* Espaçamentos verticais */
+    .py-32,
+    .py-28,
+    .py-24 {
         padding-top: 4rem !important;
         padding-bottom: 4rem !important;
     }
 
-    .py-24 {
-        padding-top: 4.5rem !important;
-        padding-bottom: 4.5rem !important;
+    .py-20,
+    .py-16 {
+        padding-top: 3.5rem !important;
+        padding-bottom: 3.5rem !important;
     }
 
-    .py-28,
-    .py-32 {
-        padding-top: 5rem !important;
-        padding-bottom: 5rem !important;
+    /* Espaçamentos internos */
+    .p-12 { padding: 2rem !important; }
+    .p-10 { padding: 1.8rem !important; }
+    .p-8  { padding: 1.5rem !important; }
+    .p-6  { padding: 1.25rem !important; }
+
+    /* Gaps */
+    .gap-16 { gap: 2.5rem !important; }
+    .gap-12 { gap: 2rem !important; }
+    .gap-10 { gap: 1.75rem !important; }
+    .gap-8  { gap: 1.5rem !important; }
+    .gap-6  { gap: 1.25rem !important; }
+
+    /* Painel administrativo */
+    #adminDashboardScroller {
+        width: min(92vw, 1100px) !important;
+        padding: 1.5rem !important;
+    }
+
+    /* NÃO redimensionar cards de produtos */
+    .product-card,
+    .product-motion-card {
+        font-size: initial;
     }
 }
-</style>
 
 </body>
 </html>
