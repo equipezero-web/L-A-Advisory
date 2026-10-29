@@ -1,0 +1,23 @@
+name: Financial and Royal AI Tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  regression-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Financial flow tests
+        run: deno test supabase/functions/tests/financial-flow-test.ts
+      - name: Royal AI product mutation tests
+        run: deno test supabase/functions/tests/product-management-test.ts
