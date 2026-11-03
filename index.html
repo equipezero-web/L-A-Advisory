@@ -12464,7 +12464,16 @@ async function getRoyalAiAccessToken(forceRefresh = false) {
         if (refreshed.error) throw new Error('Não foi possível renovar a sessão. Entre novamente.');
         session = refreshed.data?.session;
     }
-    if (!session?.access_token) throw new Error('Sua sessão administrativa expirou. Entre novamente.');
+    if (!session?.access_token) {
+        // A interface pode manter um perfil antigo, mas isso não equivale a uma sessão Auth.
+        localStorage.removeItem('laAdminPanelActive');
+        state.currentUser = null;
+        supabaseAuthUser = null;
+        updateAuthUI();
+        closeAdminDashboard();
+        openAuthModal('admin-login');
+        throw new Error('Sua sessão não está ativa. Faça login no portal administrativo aberto para reconectar a Royal AI.');
+    }
     return session.access_token;
 }
 async function fetchRoyalAi(body) {
