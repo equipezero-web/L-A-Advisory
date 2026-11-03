@@ -9551,10 +9551,13 @@ async function handleAffiliateLogin(event) {
             if (!email || !password) { showAuthMessage('Preencha e-mail e senha.', 'error'); return; }
             try {
                 if (email !== 'lucaalves17.20@gmail.com') throw new Error('Esta conta não é a conta administrativa autorizada.');
+                const captchaToken = await getAuthCaptchaToken();
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email,
-                    password
+                    password,
+                    options: { captchaToken }
                 });
+                resetAuthCaptcha();
                 if (error) throw error;
                 const { data: profile, error: profileError } = await supabaseClient.from('profiles').select('*').eq('id', data.user.id).single();
                 if (profileError) throw profileError;
