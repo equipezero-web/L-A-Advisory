@@ -9585,8 +9585,15 @@ async function handleAffiliateLogin(event) {
                 }, 80);
                 alert('Login administrativo realizado com sucesso.');
             } catch (error) {
-                console.error(error);
-                showAuthMessage('Credenciais administrativas inválidas.', 'error');
+                console.error('Falha no login administrativo:', error);
+                const authError = String(error?.message || '');
+                const isCredentialsError = /invalid login credentials|invalid credentials|email not confirmed/i.test(authError);
+                showAuthMessage(
+                    isCredentialsError
+                        ? 'E-mail ou senha incorretos, ou e-mail ainda não confirmado.'
+                        : 'Não foi possível concluir o login administrativo: ' + (authError || 'erro de sessão ou conexão.'),
+                    'error'
+                );
             }
         }
 
