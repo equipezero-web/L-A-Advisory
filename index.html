@@ -8336,7 +8336,10 @@ data-lenis-prevent-touch
             supabaseClient.auth.onAuthStateChange((event, session) => {
                 setTimeout(async () => {
                     try {
-                        await withTimeout(applySupabaseSession(session), 8000, 'A validação da sessão');
+                        const { data: currentAuth } = await supabaseClient.auth.getSession();
+                        // Eventos atrasados não podem sobrescrever uma sessão mais recente.
+                        if ((currentAuth?.session?.access_token || null) !== (session?.access_token || null)) return;
+                        await withTimeout(applySupabaseSession(currentAuth.session), 8000, 'A validação da sessão');
                         if (event === 'PASSWORD_RECOVERY') {
                             openAuthModal('password-recovery');
                         }
@@ -8582,6 +8585,10 @@ data-lenis-prevent-touch
                 ]);
                 if (allOrdersRes.error) console.warn('Supabase pedidos ADM:', allOrdersRes.error.message);
                 if (allAffiliatesRes.error) console.warn('Supabase afiliados ADM:', allAffiliatesRes.error.message);
+                if (allOrdersRes.error || allAffiliatesRes.error) {
+                    const reasons = [allOrdersRes.error?.message, allAffiliatesRes.error?.message].filter(Boolean).join('; ');
+                    throw new Error('Falha ao carregar dados administrativos do Supabase: ' + reasons);
+                }
                 if (allAffiliatePrivateRes.error) console.warn('Supabase dados privados dos afiliados ADM:', allAffiliatePrivateRes.error.message);
                 state.orders = (allOrdersRes.data || []).map(mapOrderFromSupabase);
                 const privateByAffiliateId = Object.fromEntries((allAffiliatePrivateRes.data || []).map(row => [row.affiliate_id, row]));
