@@ -8292,6 +8292,7 @@ data-lenis-prevent-touch
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
             auth: {
                 persistSession: true,
+                storageKey: 'la-advisory-auth-v1',
                 autoRefreshToken: true,
                 detectSessionInUrl: true
             }
@@ -9309,7 +9310,7 @@ if (error) throw error;
 
                 if (profileError) console.warn('Perfil:', profileError.message);
                 if (profile && profile.is_active === false) {
-                    await supabaseClient.auth.signOut();
+                    await supabaseClient.auth.signOut({ scope: 'local' });
                     throw new Error('Sua conta está inativa.');
                 }
 
@@ -9733,7 +9734,7 @@ if (error) throw error;
 
             if (!wasAffiliate) {
                 try {
-                    await supabaseClient.auth.signOut();
+                    await supabaseClient.auth.signOut({ scope: 'local' });
                 } catch (error) {
                     console.error('Erro ao sair:', error);
                 }
