@@ -8369,6 +8369,8 @@ data-lenis-prevent-touch
             } catch (error) {
                 console.error('Erro ao inicializar Supabase:', error);
                 supabaseReady = false;
+                // Mesmo se a autenticação falhar, o catálogo público deve carregar.
+                try { await withTimeout(loadPublicProducts(), 8000, 'O catálogo público'); } catch (catalogError) { console.warn(catalogError); }
                 initializeApp();
                 lucide.createIcons();
 
@@ -13720,7 +13722,7 @@ function renderCatalog() {
         if (sizeFilter !== 'all' && !sizes.some(value => value === String(sizeFilter).toLocaleLowerCase('pt-BR'))) return false;
         if (stockFilter === 'available' && stock <= 0) return false;
         if (stockFilter === 'out-of-stock' && stock > 0) return false;
-        if (stockFilter === 'all' && stock <= 0) return false;
+        // Produtos sem estoque continuam visíveis com indicação de indisponibilidade.
         return true;
     }).sort((a, b) => {
         const priceA = calculateFinalPrice(a);
@@ -14782,9 +14784,9 @@ body.affiliate-mode #mobileUtilityActions,
 body.affiliate-mode header [aria-label="Abrir carrinho"],
 body.affiliate-mode header [aria-label="Abrir navegação"] { display: none !important; }
 /* Visitantes não veem o carrinho na barra superior. */
-body.guest-mode #mobileUtilityActions button[aria-label="Abrir carrinho"] { display: none !important; }
-body.guest-mode #affiliateNavLink { display: inline-flex !important; }
-body.guest-mode #afiliados { display: block !important; }
+body.guest-mode #mobileUtilityActions button[aria-label="Abrir carrinho"] { display: inline-flex !important; }
+body.guest-mode #affiliateNavLink { display: none !important; }
+body.guest-mode #afiliados { display: none !important; }
 /* MOBILE: restaurar o tamanho original dos cards do catálogo.
    Mantém a largura e a altura natural definidas pelo layout anterior. */
 @media (max-width: 768px) {
