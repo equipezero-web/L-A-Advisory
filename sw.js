@@ -1,4 +1,4 @@
-const CACHE_NAME = "la-royal-advisory-v50";
+const CACHE_NAME = "la-royal-advisory-v51";
 
 const urlsToCache = [
     "./",
@@ -63,10 +63,19 @@ self.addEventListener("fetch", event => {
 });
 
 self.addEventListener("message", event => {
+    // Only a same-origin controlled page may request a worker lifecycle change.
+    const source = event.source;
+    if (!source || !source.url) return;
+    try {
+        const clientUrl = new URL(source.url);
+        if (clientUrl.origin !== self.location.origin) return;
+    } catch {
+        return;
+    }
     if (
         event.data === "SKIP_WAITING" ||
         event.data?.tipo === "ATUALIZAR_AGORA"
     ) {
-        self.skipWaiting();
+        event.waitUntil(self.skipWaiting());
     }
 });
