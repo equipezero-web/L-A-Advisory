@@ -66,7 +66,7 @@ function createPreview(p:ReturnType<typeof normalizeProduct>,m:string[]){const m
 
 const BULK_LIMIT = 100;
 function bulkInput(prompt:string):Record<string,unknown>[]|null {
-  const trimmed=prompt.trim().replace(/^\`\`\`(?:json)?\\s*/i,'').replace(/\`\`\`$/,'').trim();
+  const trimmed=prompt.trim().replace(/^\`\`\`(?:json)?\s*/i,'').replace(/\`\`\`$/,'').trim();
   const start=trimmed.indexOf('['), end=trimmed.lastIndexOf(']');
   if(start<0||end<=start)return null;
   try {
@@ -77,7 +77,7 @@ function bulkInput(prompt:string):Record<string,unknown>[]|null {
 }
 function bulkPreview(products:ReturnType<typeof normalizeProduct>[],issues:string[]) {
   const lines=products.map((p,i)=>`${i+1}. ${p.name||'(sem nome)'} — ${p.category||'(sem categoria)'} — R$ ${p.sale_price??'?'} — estoque ${p.stock??'?'}`);
-  return `Cadastro em massa: ${products.length} produto(s).\\n${lines.join('\\n')}${issues.length?'\\n\\nPendências (corrija antes de confirmar):\\n'+issues.join('\\n'):'\\n\\nResponda "confirmar" para cadastrar todos de uma vez ou "cancelar".'}`;
+  return `Cadastro em massa: ${products.length} produto(s).\n${lines.join('\n')}${issues.length?'\n\nPendências (corrija antes de confirmar):\n'+issues.join('\n'):'\n\nResponda "confirmar" para cadastrar todos de uma vez ou "cancelar".'}`;
 }
 
 Deno.serve(async(req)=>{try{
