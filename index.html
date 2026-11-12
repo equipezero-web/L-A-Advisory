@@ -1561,7 +1561,7 @@
                 type="button"
                 onclick="decreaseFontSize()"
                 class="px-3 py-1.5 border border-slate-700 rounded-lg text-slate-200 hover:border-amber-400 hover:text-amber-400 transition"
-                aria-label="Diminuir fonte"
+                aria-label="Diminuir tamanho do texto em 10 por cento"
             >
                 A-
             </button>
@@ -1570,7 +1570,7 @@
                 type="button"
                 onclick="increaseFontSize()"
                 class="px-3 py-1.5 border border-slate-700 rounded-lg text-slate-200 hover:border-amber-400 hover:text-amber-400 transition"
-                aria-label="Aumentar fonte"
+                aria-label="Aumentar tamanho do texto em 10 por cento"
             >
                 A+
             </button>
@@ -14098,6 +14098,103 @@ function escapeAttribute(value) {
     let accessibilityFontSize = 100;
     let highContrastEnabled = false;
 
+    // Tamanhos fixos (.text-xs, px e regras com !important) não respondem
+    // ao font-size de <html>. Guardamos os estilos originais para aumentar
+    // somente os textos, sem ampliar imagens, ícones ou o layout inteiro.
+    const accessibilityOriginalFonts = new WeakMap();
+    let accessibilityFontObserver = null;
+    let accessibilityFontUpdateQueued = false;
+    const accessibilityTextSelector = [
+        'h1','h2','h3','h4','h5','h6','p','span','a','button',
+        'label','small','strong','b','em','li','td','th','summary',
+        'input','textarea','select','legend','blockquote','figcaption',
+        'dt','dd','option','[role="button"]','[role="tab"]'
+    ].join(',');
+
+    function getAccessibleTextElements() {
+        const elements = Array.from(document.body.querySelectorAll(accessibilityTextSelector));
+        // Alguns rótulos são texto direto de <div>, não de <span>/<p>.
+        document.body.querySelectorAll('div').forEach(el => {
+            if (Array.from(el.childNodes).some(node =>
+                node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+            )) elements.push(el);
+        });
+        return elements.filter(el =>
+            !el.closest('svg, [aria-hidden="true"], script, style, noscript') &&
+            el instanceof HTMLElement
+        );
+    }
+
+    function restoreOriginalFontStyle(el) {
+        const original = accessibilityOriginalFonts.get(el);
+        if (!original) return;
+        if (original.value) {
+            el.style.setProperty('font-size', original.value, original.priority);
+        } else {
+            el.style.removeProperty('font-size');
+        }
+    }
+
+    function applyAccessibilityFontScale() {
+        if (!document.body) return;
+        const elements = getAccessibleTextElements();
+        // Restaurar todos antes de medir evita escala acumulativa após cada clique.
+        elements.forEach(el => {
+            if (!accessibilityOriginalFonts.has(el)) {
+                accessibilityOriginalFonts.set(el, {
+                    value: el.style.getPropertyValue('font-size'),
+                    priority: el.style.getPropertyPriority('font-size')
+                });
+            } else {
+                restoreOriginalFontStyle(el);
+            }
+        });
+        if (accessibilityFontSize !== 100) {
+            const factor = accessibilityFontSize / 100;
+            const sizes = elements.map(el => parseFloat(getComputedStyle(el).fontSize));
+            elements.forEach((el, index) => {
+                if (Number.isFinite(sizes[index]) && sizes[index] > 0) {
+                    el.style.setProperty('font-size', (sizes[index] * factor).toFixed(2) + 'px', 'important');
+                }
+            });
+        }
+        document.documentElement.style.fontSize = '100%';
+        document.documentElement.dataset.accessibilityFontScale = String(accessibilityFontSize);
+        for (const [selector, atLimit] of [
+            ['button[onclick="decreaseFontSize()"]', accessibilityFontSize <= 80],
+            ['button[onclick="increaseFontSize()"]', accessibilityFontSize >= 130]
+        ]) {
+            const button = document.querySelector(selector);
+            if (button) {
+                button.disabled = atLimit;
+                button.setAttribute('aria-disabled', String(atLimit));
+                button.title = 'Tamanho atual do texto: ' + accessibilityFontSize + '%';
+                button.style.opacity = atLimit ? '0.55' : '1';
+            }
+        }
+    }
+
+    function queueAccessibilityFontUpdate() {
+        if (accessibilityFontUpdateQueued) return;
+        accessibilityFontUpdateQueued = true;
+        requestAnimationFrame(() => {
+            accessibilityFontUpdateQueued = false;
+            applyAccessibilityFontScale();
+        });
+    }
+
+    function watchAccessibilityText() {
+        if (accessibilityFontObserver || !document.body) return;
+        // Os cards e modais são renderizados dinamicamente após o carregamento.
+        accessibilityFontObserver = new MutationObserver(mutations => {
+            if (mutations.some(m => m.addedNodes.length || m.removedNodes.length)) {
+                queueAccessibilityFontUpdate();
+            }
+        });
+        accessibilityFontObserver.observe(document.body, {childList: true, subtree: true});
+        window.addEventListener('resize', queueAccessibilityFontUpdate, {passive: true});
+    }
+
     function openCatalogFilters() {
         const filters = document.getElementById('catalogFilters');
         const modal = document.getElementById('catalogFiltersModal');
@@ -14171,46 +14268,19 @@ function escapeAttribute(value) {
         return false;
     }
 
+    function changeAccessibilityFontSize(delta) {
+        accessibilityFontSize = Math.max(80, Math.min(130, accessibilityFontSize + delta));
+        localStorage.setItem('laAccessibilityFontSize', String(accessibilityFontSize));
+        applyAccessibilityFontScale();
+        showAccessibilityFeedback('Tamanho do texto: ' + accessibilityFontSize + '%.');
+    }
+
     function increaseFontSize() {
-        if (accessibilityFontSize >= 130) {
-            alert('O tamanho máximo da fonte já foi atingido.');
-            return;
-        }
-
-        accessibilityFontSize += 10;
-
-        document.documentElement.style.fontSize =
-            accessibilityFontSize + '%';
-
-        localStorage.setItem(
-            'laAccessibilityFontSize',
-            accessibilityFontSize
-        );
-
-        showAccessibilityFeedback(
-            'Fonte aumentada para ' + accessibilityFontSize + '%.'
-        );
+        changeAccessibilityFontSize(10);
     }
 
     function decreaseFontSize() {
-        if (accessibilityFontSize <= 80) {
-            alert('O tamanho mínimo da fonte já foi atingido.');
-            return;
-        }
-
-        accessibilityFontSize -= 10;
-
-        document.documentElement.style.fontSize =
-            accessibilityFontSize + '%';
-
-        localStorage.setItem(
-            'laAccessibilityFontSize',
-            accessibilityFontSize
-        );
-
-        showAccessibilityFeedback(
-            'Fonte reduzida para ' + accessibilityFontSize + '%.'
-        );
+        changeAccessibilityFontSize(-10);
     }
 
     function toggleHighContrast() {
@@ -14237,7 +14307,7 @@ function escapeAttribute(value) {
         accessibilityFontSize = 100;
         highContrastEnabled = false;
 
-        document.documentElement.style.fontSize = '100%';
+        applyAccessibilityFontScale();
 
         document.documentElement.classList.remove(
             'high-contrast-mode'
@@ -14260,11 +14330,13 @@ function escapeAttribute(value) {
         const savedContrast =
             localStorage.getItem('laHighContrast') === 'true';
 
-        accessibilityFontSize = savedFontSize;
+        accessibilityFontSize = Number.isFinite(savedFontSize)
+            ? Math.max(80, Math.min(130, savedFontSize))
+            : 100;
         highContrastEnabled = savedContrast;
 
-        document.documentElement.style.fontSize =
-            accessibilityFontSize + '%';
+        applyAccessibilityFontScale();
+        watchAccessibilityText();
 
         if (highContrastEnabled) {
             document.documentElement.classList.add(
