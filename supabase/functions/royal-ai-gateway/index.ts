@@ -63,6 +63,23 @@ function normalizeProduct(raw:Record<string,unknown>){const num=(v:unknown,f:num
 function missingProduct(p:ReturnType<typeof normalizeProduct>){const m:string[]=[];if(!p.name)m.push('nome');if(!p.description)m.push('descrição');if(p.price===null||p.price<0)m.push('preço bruto/custo');if(p.sale_price===null||p.sale_price<0)m.push('preço de venda');if(p.stock===null||!Number.isInteger(p.stock)||p.stock<0)m.push('estoque');if(!p.image)m.push('imagem (URL)');if(!p.category)m.push('categoria');if(p.discount===null||p.discount<0||p.discount>100)m.push('desconto válido');if(p.commission===null||p.commission<0||p.commission>100)m.push('comissão válida');return m;}
 function createPreview(p:ReturnType<typeof normalizeProduct>,m:string[]){const money=(v:number|null)=>v===null?'não informado':`R$ ${v.toFixed(2).replace('.',',')}`;const x=['Prévia do produto:',`Nome: ${p.name||'não informado'}`,`Descrição: ${p.description||'não informada'}`,`Preço bruto/custo: ${money(p.price)}`,`Preço de venda: ${money(p.sale_price)}`,`Desconto: ${p.discount??0}%`,`Estoque: ${p.stock??'não informado'}`,`Comissão: ${p.commission??0}%`,`Categoria: ${p.category||'não informada'}`,`Imagem: ${p.image||'não informada'}`];if(m.length)x.push('',`Ainda faltam: ${m.join(', ')}.`,'Envie essas informações para completar o cadastro.');else x.push('','Responda “confirmar” para cadastrar ou “cancelar” para descartar.');return x.join('\n');}
 
+
+const BULK_LIMIT = 100;
+function bulkInput(prompt:string):Record<string,unknown>[]|null {
+  const trimmed=prompt.trim().replace(/^\`\`\`(?:json)?\\s*/i,'').replace(/\`\`\`$/,'').trim();
+  const start=trimmed.indexOf('['), end=trimmed.lastIndexOf(']');
+  if(start<0||end<=start)return null;
+  try {
+    const value=JSON.parse(trimmed.slice(start,end+1));
+    if(!Array.isArray(value)||!value.every(v=>v&&typeof v==='object'&&!Array.isArray(v)))return null;
+    return value as Record<string,unknown>[];
+  }catch{return null;}
+}
+function bulkPreview(products:ReturnType<typeof normalizeProduct>[],issues:string[]) {
+  const lines=products.map((p,i)=>`${i+1}. ${p.name||'(sem nome)'} — ${p.category||'(sem categoria)'} — R$ ${p.sale_price??'?'} — estoque ${p.stock??'?'}`);
+  return `Cadastro em massa: ${products.length} produto(s).\\n${lines.join('\\n')}${issues.length?'\\n\\nPendências (corrija antes de confirmar):\\n'+issues.join('\\n'):'\\n\\nResponda "confirmar" para cadastrar todos de uma vez ou "cancelar".'}`;
+}
+
 Deno.serve(async(req)=>{try{
   if(req.method==='OPTIONS')return new Response('ok',{headers:corsHeaders}); if(req.method!=='POST')return json({error:'Método não permitido.'},405); if(!SUPABASE_URL||!DB_SECRET)return json({error:'Servidor não configurado.'},503);
   const auth=req.headers.get('Authorization')||'';const token=auth.startsWith('Bearer ')?auth.slice(7).trim():'';if(!token)return json({error:'Autenticação obrigatória.'},401);
@@ -75,9 +92,35 @@ Deno.serve(async(req)=>{try{
   const {data:providerRows}=await admin.from('royal_ai_providers').select('provider_key,status,cooldown_until,priority').eq('enabled',true).eq('free_only',true).order('priority');const now=Date.now();const supported=['gemini','groq','openrouter','cloudflare','cohere'];const eligible=(providerRows||[]).filter((p:any)=>supported.includes(p.provider_key)&&p.status!=='disabled'&&p.status!=='quota_exhausted'&&(!p.cooldown_until||new Date(p.cooldown_until).getTime()<=now));
   const useAI=async(text:string)=>{const errors:any[]=[];for(const p of eligible){try{return await callProvider(p.provider_key,text)}catch(e:any){errors.push({provider:p.provider_key,status:Number(e?.status||500),message:safe(e?.message)})}}throw Object.assign(new Error('Nenhum provedor gratuito disponível.'),{errors});};
 
-  const {data:pendingRows}=await admin.from('royal_ai_tasks').select('id,task_type,payload,created_at').in('task_type',['product_create_pending','product_mutation_pending']).eq('status','waiting_provider').order('created_at',{ascending:false}).limit(30);
+  const {data:pendingRows}=await admin.from('royal_ai_tasks').select('id,task_type,payload,created_at').in('task_type',['product_create_pending','product_mutation_pending','product_bulk_pending']).eq('status','waiting_provider').order('created_at',{ascending:false}).limit(30);
   const pending=(pendingRows||[]).find((r:any)=>r?.payload?.admin_user_id===au.user.id)||null;
   if(pending&&cancel(prompt)){await admin.from('royal_ai_tasks').delete().eq('id',pending.id);return json({ok:true,provider:'royal-ai',model:'product-manager',text:'Operação cancelada. Nenhuma alteração foi aplicada.'});}
+  if(pending?.task_type==='product_bulk_pending'&&confirm(prompt)){
+    const products=(pending.payload?.products||[]).map((p:Record<string,unknown>)=>normalizeProduct(p));
+    const issues=products.flatMap((p:any,i:number)=>missingProduct(p).map(x=>`Produto ${i+1}: ${x}`));
+    if(!products.length||products.length>BULK_LIMIT||issues.length)return json({ok:false,error:'Lote inválido ou incompleto.',text:bulkPreview(products,issues)},400);
+    const {data:locked,error:lockError}=await admin.from('royal_ai_tasks').update({status:'processing'}).eq('id',pending.id).eq('status','waiting_provider').select('id').maybeSingle();
+    if(lockError||!locked)return json({ok:false,error:'Este lote já está sendo processado ou foi confirmado.'},409);
+    const names=products.map((p:any)=>p.name.trim().toLocaleLowerCase('pt-BR'));
+    if(new Set(names).size!==names.length){await admin.from('royal_ai_tasks').update({status:'waiting_provider'}).eq('id',pending.id);return json({ok:false,error:'Há nomes duplicados no lote.'},400);}
+    const rows=products.map((p:any,i:number)=>({id:`bulk_${pending.id.replace(/[^a-zA-Z0-9]/g,'').slice(0,20)}_${i}`,...p}));
+    const {data:created,error}=await admin.from('products').insert(rows).select('id,name');
+    if(error){await admin.from('royal_ai_tasks').update({status:'waiting_provider',last_error:safe(error.message)}).eq('id',pending.id);return json({ok:false,error:`Falha ao cadastrar lote: ${error.message}`},500);}
+    await admin.from('royal_ai_tasks').delete().eq('id',pending.id);
+    return json({ok:true,provider:'royal-ai',model:'bulk-product-manager',created_count:created?.length||rows.length,text:`${created?.length||rows.length} produtos cadastrados com sucesso em uma única operação.`});
+  }
+  const incomingBulk=bulkInput(prompt);
+  if(incomingBulk){
+    if(!incomingBulk.length||incomingBulk.length>BULK_LIMIT)return json({ok:false,error:`Envie de 1 a ${BULK_LIMIT} produtos por lote.`},400);
+    const products=incomingBulk.map(normalizeProduct);
+    const issues=products.flatMap((p,i)=>missingProduct(p).map(x=>`Produto ${i+1}: ${x}`));
+    if(new Set(products.map(p=>p.name.trim().toLocaleLowerCase('pt-BR'))).size!==products.length)issues.push('Existem nomes repetidos no lote.');
+    if(pending)await admin.from('royal_ai_tasks').delete().eq('id',pending.id);
+    if(issues.length)return json({ok:true,provider:'royal-ai',model:'bulk-product-manager',missing_fields:issues,awaiting_confirmation:false,text:bulkPreview(products,issues)});
+    const {error}=await admin.from('royal_ai_tasks').insert({task_type:'product_bulk_pending',priority:1,status:'waiting_provider',payload:{admin_user_id:au.user.id,products,updated_at:new Date().toISOString()},last_error:null});
+    if(error)return json({ok:false,error:`Não foi possível preparar o lote: ${error.message}`},500);
+    return json({ok:true,provider:'royal-ai',model:'bulk-product-manager',awaiting_confirmation:true,count:products.length,text:bulkPreview(products,[])});
+  }
   if(pending?.task_type==='product_mutation_pending'&&confirm(prompt)){
     const mutation=sanitizeProductMutation(pending.payload?.mutation||{});const errors=validateProductMutation(mutation);if(errors.length)return json({error:`Alteração inválida: ${errors.join(', ')}.`},400);
     const productId=String(pending.payload?.product_id||'');const {data:updated,error}=await admin.from('products').update(mutation.changes).eq('id',productId).select('*').single();if(error)return json({error:`Não foi possível alterar o produto: ${error.message}`},500);
