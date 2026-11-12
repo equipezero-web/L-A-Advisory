@@ -1101,72 +1101,77 @@
 
 </style>
 
-    <!-- Instalação progressiva do aplicativo L&A Royal -->
+    <!-- Instalação progressiva da L&A Royal (Android, desktop e iOS) -->
     <script>
         (() => {
-            let deferredRoyalInstallPrompt = null;
-            const isInstalled = () =>
+            let deferredInstallPrompt = null;
+            const isStandalone = () =>
                 window.matchMedia('(display-mode: standalone)').matches ||
                 window.navigator.standalone === true;
-            const syncRoyalInstallButtons = () => {
+            const isIOS = () =>
+                /iPad|iPhone|iPod/i.test(navigator.userAgent) ||
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            const updateInstallUI = () => {
+                const installed = isStandalone();
                 document.querySelectorAll('[data-royal-install]').forEach(button => {
-                    button.hidden = isInstalled();
-                    if (isInstalled()) button.style.display = 'none';
+                    button.hidden = installed;
+                    button.style.display = installed ? 'none' : '';
+                    button.setAttribute('aria-hidden', String(installed));
                 });
             };
+
             window.addEventListener('beforeinstallprompt', event => {
                 event.preventDefault();
-                deferredRoyalInstallPrompt = event;
-                syncRoyalInstallButtons();
+                deferredInstallPrompt = event;
+                updateInstallUI();
             });
+
             window.addEventListener('appinstalled', () => {
-                deferredRoyalInstallPrompt = null;
-                syncRoyalInstallButtons();
+                deferredInstallPrompt = null;
+                updateInstallUI();
             });
+
             window.installRoyalApp = async () => {
-                if (isInstalled()) return;
-                if (deferredRoyalInstallPrompt) {
-                    const promptEvent = deferredRoyalInstallPrompt;
-                    deferredRoyalInstallPrompt = null;
-                    await promptEvent.prompt();
-                    try { await promptEvent.userChoice; } catch (_) {}
+                if (isStandalone()) return;
+                if (deferredInstallPrompt) {
+                    const prompt = deferredInstallPrompt;
+                    deferredInstallPrompt = null;
+                    try {
+                        await prompt.prompt();
+                        await prompt.userChoice;
+                    } catch (error) {
+                        console.warn('Instalação do aplicativo não disponível:', error);
+                    }
+                    updateInstallUI();
                     return;
                 }
-                const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-                if (ios) {
-                    alert('Para instalar L&A Royal: abra esta página no Safari, toque em Compartilhar e escolha Adicionar à Tela de Início.');
+                if (isIOS()) {
+                    alert('Para instalar a L&A Royal: abra a loja no Safari, toque em Compartilhar e escolha Adicionar à Tela de Início. Depois abra o app pelo ícone criado.');
                 } else {
-                    alert('Para instalar L&A Royal, abra o menu do navegador e escolha Instalar aplicativo ou Adicionar à tela inicial. Se a opção não aparecer, confira se o navegador permite instalação e se o site está em HTTPS.');
+                    alert('Para instalar a L&A Royal: abra o menu do Chrome ou do navegador e selecione Instalar aplicativo ou Adicionar à tela inicial. Abra pelo ícone criado após instalar.');
                 }
             };
-            document.addEventListener('DOMContentLoaded', syncRoyalInstallButtons);
-        })();
-    </script>
 
-    <!-- Registro do Service Worker -->
-    <script>
-        if ("serviceWorker" in navigator) {
-            window.addEventListener("load", async () => {
-                try {
-                    const registration =
-                        await navigator.serviceWorker.register("./sw.js");
+            document.addEventListener('DOMContentLoaded', updateInstallUI);
+            window.addEventListener('pageshow', updateInstallUI);
 
-                    await registration.update();
-
-                    if (registration.waiting) {
-                        registration.waiting.postMessage({
-                            tipo: "ATUALIZAR_AGORA"
+            if ('serviceWorker' in navigator && window.isSecureContext) {
+                window.addEventListener('load', async () => {
+                    try {
+                        const registration = await navigator.serviceWorker.register('./sw.js', {
+                            scope: './',
+                            updateViaCache: 'none'
                         });
+                        await registration.update();
+                        if (registration.waiting) {
+                            registration.waiting.postMessage({ tipo: 'ATUALIZAR_AGORA' });
+                        }
+                    } catch (error) {
+                        console.error('Falha ao preparar o aplicativo L&A Royal:', error);
                     }
-                } catch (error) {
-                    console.error(
-                        "Não foi possível registrar o Service Worker:",
-                        error
-                    );
-                }
-            });
-        }
+                }, { once: true });
+            }
+        })();
     </script>
 
 <style id="la-mobile-store-image-fix">
@@ -14685,24 +14690,7 @@ document.addEventListener('DOMContentLoaded', initPremiumScrollMotion);
         }, 100);
     });
 
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker
-                .register('./sw.js')
-                .then(registration => {
-                    console.log(
-                        'Service Worker registrado com sucesso:',
-                        registration.scope
-                    );
-                })
-                .catch(error => {
-                    console.error(
-                        'Erro ao registrar o Service Worker:',
-                        error
-                    );
-                });
-        });
-    }
+    // O registro do Service Worker é feito uma única vez no cabeçalho.
 </script>
 
 <style id="la-royal-refinement-fixes">
