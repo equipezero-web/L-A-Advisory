@@ -8312,6 +8312,7 @@ data-lenis-prevent-touch
         };
 
         let supabaseReady = false;
+        let publicCatalogError = null;
         let supabaseAuthUser = null;
         let affiliateSessionToken = null; // token temporário em memória; nunca persistir no navegador
         let realtimeChannels = [];
@@ -8420,8 +8421,10 @@ data-lenis-prevent-touch
                 if (error) throw error;
 
                 state.products = (data || []).map(mapProductFromSupabase);
+                publicCatalogError = null;
                 return true;
             } catch (error) {
+                publicCatalogError = error?.message || 'Falha de conexão com os produtos.';
                 console.error('Erro ao carregar produtos públicos do Supabase:', error);
                 return false;
             }
@@ -8948,11 +8951,9 @@ function checkPendingPaymentConfirmation() {
 function initializeApp() {
     captureAffiliateReferral();
 
-    // O catálogo oficial vem do Supabase. Os produtos locais só são usados
-    // como fallback quando a consulta pública falhou.
-    if (!state.products || state.products.length === 0 && !supabaseReady) {
-        initializeDefaultProducts();
-    }
+    // Nunca inserir produtos demonstrativos quando o Supabase estiver indisponível.
+    // Isso impede que itens fictícios reapareçam após recarregar a loja.
+    if (!Array.isArray(state.products)) state.products = [];
 
     renderCatalog();
     focusAffiliateProductFromLink();
@@ -13244,17 +13245,47 @@ async function loadRoyalAiPanel() {
             if (msgEl) msgEl.classList.add('hidden');
         }
 
-        function deleteProduct(productId) {
-            if (!confirm('Tem certeza que deseja excluir este produto?')) return;
+        // A exclusão é persistida no banco. Desativar é mais seguro que apagar
+        // fisicamente: preserva a integridade de pedidos e registros antigos.
+        const deletingProductIds = new Set();
+        async function deleteProduct(productId) {
+            if (!supabaseAuthUser || state.currentUser?.role !== 'admin') {
+                alert('Entre novamente como administrador para excluir produtos.');
+                return;
+            }
+            const product = state.products.find(p => String(p.id) === String(productId));
+            if (!product || deletingProductIds.has(productId)) return;
+            if (!confirm('Remover “' + product.name + '” da loja? O produto deixará de aparecer para visitantes e clientes. O histórico de pedidos será preservado.')) return;
 
-           state.products = state.products.filter(p => p.id !== productId);
+            deletingProductIds.add(productId);
+            try {
+                const { data, error } = await supabaseClient
+                    .from('products')
+                    .update({ active: false })
+                    .eq('id', productId)
+                    .eq('active', true)
+                    .select('id,active')
+                    .maybeSingle();
+                if (error) throw error;
+                if (!data || data.active !== false) {
+                    throw new Error('Não foi possível confirmar a exclusão no banco de dados. Atualize a lista e tente novamente.');
+                }
 
-state.cart = state.cart.filter(item => item.id !== productId);
-
-saveStateToStorage();
-renderCatalog();
-updateCartIcon();
-loadAdminProducts();
+                // Atualiza a interface SOMENTE após confirmação do Supabase.
+                state.products = state.products.filter(p => String(p.id) !== String(productId));
+                state.cart = state.cart.filter(item => String(item.id) !== String(productId));
+                renderCatalog();
+                updateCartIcon();
+                renderCartItems();
+                updateCartTotal();
+                loadAdminProducts();
+                loadAdminDashboard();
+            } catch (error) {
+                console.error('Falha ao excluir produto do Supabase:', error);
+                alert('Não foi possível excluir o produto. Nenhum item foi removido da sua loja: ' + (error?.message || 'Erro desconhecido.'));
+            } finally {
+                deletingProductIds.delete(productId);
+            }
         }
 
         function formatAdminOrderAddress(address) {
@@ -13739,9 +13770,11 @@ function renderCatalog() {
 
     if (!availableProducts.length) {
         container.className = 'space-y-8 pb-6';
-        container.innerHTML = '<div class="p-8 bg-slate-50 border border-slate-200 rounded-2xl text-center"><i data-lucide="package-open" class="w-12 h-12 text-slate-400 mx-auto mb-3"></i><p class="font-bold text-slate-700">Nenhum produto disponível no momento.</p><p class="text-sm text-slate-500 mt-1">Em breve teremos novas soluções para você.</p></div>';
+        const catalogTitle = publicCatalogError ? 'Não foi possível carregar os produtos.' : 'Nenhum produto disponível no momento.';
+        const catalogHint = publicCatalogError ? 'Falha temporária de conexão com a loja. Atualize a página para tentar novamente.' : 'Em breve teremos novas soluções para você.';
+        container.innerHTML = '<div class="p-8 bg-slate-50 border border-slate-200 rounded-2xl text-center"><i data-lucide="package-open" class="w-12 h-12 text-slate-400 mx-auto mb-3"></i><p class="font-bold text-slate-700">' + catalogTitle + '</p><p class="text-sm text-slate-500 mt-1">' + catalogHint + '</p></div>';
         const info = document.getElementById('catalogResultInfo');
-        if (info) info.textContent = 'Nenhum produto disponível no momento.';
+        if (info) info.textContent = catalogTitle;
         lucide.createIcons();
         return;
     }
