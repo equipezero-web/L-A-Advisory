@@ -21,7 +21,7 @@
 <meta name="background-color" content="#020617">
 
 <!-- Ícones para Apple / iOS -->
-<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icons-192.png">
     <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1101,6 +1101,49 @@
 
 </style>
 
+    <!-- Instalação progressiva do aplicativo L&A Royal -->
+    <script>
+        (() => {
+            let deferredRoyalInstallPrompt = null;
+            const isInstalled = () =>
+                window.matchMedia('(display-mode: standalone)').matches ||
+                window.navigator.standalone === true;
+            const syncRoyalInstallButtons = () => {
+                document.querySelectorAll('[data-royal-install]').forEach(button => {
+                    button.hidden = isInstalled();
+                    if (isInstalled()) button.style.display = 'none';
+                });
+            };
+            window.addEventListener('beforeinstallprompt', event => {
+                event.preventDefault();
+                deferredRoyalInstallPrompt = event;
+                syncRoyalInstallButtons();
+            });
+            window.addEventListener('appinstalled', () => {
+                deferredRoyalInstallPrompt = null;
+                syncRoyalInstallButtons();
+            });
+            window.installRoyalApp = async () => {
+                if (isInstalled()) return;
+                if (deferredRoyalInstallPrompt) {
+                    const promptEvent = deferredRoyalInstallPrompt;
+                    deferredRoyalInstallPrompt = null;
+                    await promptEvent.prompt();
+                    try { await promptEvent.userChoice; } catch (_) {}
+                    return;
+                }
+                const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+                if (ios) {
+                    alert('Para instalar L&A Royal: abra esta página no Safari, toque em Compartilhar e escolha Adicionar à Tela de Início.');
+                } else {
+                    alert('Para instalar L&A Royal, abra o menu do navegador e escolha Instalar aplicativo ou Adicionar à tela inicial. Se a opção não aparecer, confira se o navegador permite instalação e se o site está em HTTPS.');
+                }
+            };
+            document.addEventListener('DOMContentLoaded', syncRoyalInstallButtons);
+        })();
+    </script>
+
     <!-- Registro do Service Worker -->
     <script>
         if ("serviceWorker" in navigator) {
@@ -1513,6 +1556,10 @@
                         <button type="button" onclick="openCustomerProfile(); closeMobileMenu()" class="mobile-user-menu-item">
                             <i data-lucide="user-round" class="w-5 h-5 text-amber-600"></i>
                             <span>Meu perfil</span>
+                        </button>
+                        <button type="button" data-royal-install onclick="closeMobileMenu(); installRoyalApp()" class="mobile-user-menu-item">
+                            <i data-lucide="download" class="w-5 h-5 text-amber-600"></i>
+                            <span>Instalar aplicativo</span>
                         </button>
                         <button type="button" onclick="openCustomerOrders(); closeMobileMenu()" class="mobile-user-menu-item">
                             <i data-lucide="package-check" class="w-5 h-5 text-amber-600"></i>
@@ -4907,6 +4954,16 @@
 
                 <button
                     type="button"
+                    data-royal-install
+                    onclick="installRoyalApp()"
+                    class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 text-left transition"
+                >
+                    <i data-lucide="download" class="w-5 h-5 text-amber-600"></i>
+                    <span class="font-bold text-sm text-slate-800">Instalar aplicativo</span>
+                </button>
+
+                <button
+                    type="button"
                     onclick="openCustomerOrders()"
                     class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 text-left transition"
                 >
@@ -5072,6 +5129,12 @@
 </p>
                 </div>
             </div>
+
+            <button type="button" data-royal-install onclick="installRoyalApp()"
+                class="mb-6 w-full flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-3 text-amber-300 font-bold border border-amber-400/40 hover:bg-slate-800 transition">
+                <i data-lucide="download" class="w-5 h-5"></i>
+                Instalar L&amp;A Royal no dispositivo
+            </button>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-7">
                 <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
