@@ -9308,17 +9308,9 @@ function initializeApp() {
         }
 
         async function persistPendingCustomerData() {
-            if (!supabaseAuthUser) return;
-            const raw = sessionStorage.getItem('laPendingCustomerPrivateData');
-            if (!raw) return;
-            try {
-                const data = JSON.parse(raw);
-                await savePrivateCustomerData(supabaseAuthUser.id, data);
-                sessionStorage.removeItem('laPendingCustomerPrivateData');
-                await applySupabaseSession(await supabaseClient.auth.getSession().then(r => r.data.session));
-            } catch (error) {
-                console.warn('Não foi possível salvar os dados complementares do cadastro:', error);
-            }
+            // Never retain CPF, contact details or address in browser session storage.
+            // After email confirmation, the user can securely save their details in Meu Perfil.
+            sessionStorage.removeItem('laPendingCustomerPrivateData');
         }
 
         function normalizeCpf(value) {
@@ -9496,8 +9488,8 @@ if (!data.user.identities || data.user.identities.length === 0) {
                 // o usuário mas não entrega uma sessão ainda. Guardamos apenas os
                 // dados complementares temporariamente até o primeiro login.
                 if (!data.session) {
-                    sessionStorage.setItem('laPendingCustomerPrivateData', JSON.stringify(privateCustomerData));
-                    showAuthMessage('Conta criada com sucesso! Confirme o e-mail enviado pelo Supabase e depois entre com sua senha.', 'success');
+                    sessionStorage.removeItem('laPendingCustomerPrivateData');
+                    showAuthMessage('Conta criada! Confirme o e-mail, entre com sua senha e complete seus dados em Meu Perfil. Por segurança, CPF e endereço não são armazenados antes do login.', 'success');
                     return;
                 }
 
