@@ -1,9 +1,12 @@
-const CACHE_NAME = "la-royal-advisory-v51";
+const CACHE_NAME = "la-royal-advisory-v52";
 
 const urlsToCache = [
     "./",
     "./index.html",
-    "./manifest.json"
+    "./manifest.json",
+    "./icons/icons-192.png",
+    "./icons/icons-512.png",
+    "./icons/maskable-512.png"
 ];
 
 self.addEventListener("install", event => {
@@ -30,35 +33,28 @@ self.addEventListener("activate", event => {
     self.clients.claim();
 });
 
+// Only cache the public application shell. Customer/API data must never be stored here.
 self.addEventListener("fetch", event => {
     const request = event.request;
+    if (request.method !== "GET") return;
+    const url = new URL(request.url);
+    if (url.origin !== self.location.origin) return;
 
-    if (request.method !== "GET") {
+    if (request.mode === "navigate") {
+        event.respondWith(
+            fetch(request).catch(async () => {
+                const cache = await caches.open(CACHE_NAME);
+                return await cache.match("./index.html") ||
+                    Response.error();
+            })
+        );
         return;
     }
 
+    const shellUrls = new Set(urlsToCache.map(item => new URL(item, self.registration.scope).pathname));
+    if (!shellUrls.has(url.pathname)) return;
     event.respondWith(
-        fetch(request)
-            .then(response => {
-                if (
-                    response &&
-                    response.status === 200 &&
-                    response.type === "basic"
-                ) {
-                    const responseClone = response.clone();
-
-                    caches.open(CACHE_NAME).then(cache => {
-                        cache.put(request, responseClone);
-                    });
-                }
-
-                return response;
-            })
-            .catch(() => {
-                return caches.match(request).then(cachedResponse => {
-                    return cachedResponse || caches.match("./index.html");
-                });
-            })
+        caches.match(request).then(cached => cached || fetch(request))
     );
 });
 

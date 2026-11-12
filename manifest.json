@@ -4,10 +4,10 @@
   "description": "Loja premium, consultoria empresarial, afiliados e soluções estratégicas.",
   "lang": "pt-BR",
   "dir": "ltr",
-  "start_url": "./index.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "theme_color": "#020617",
   "background_color": "#020617",
   "categories": [
@@ -33,5 +33,10 @@
       "type": "image/png",
       "purpose": "maskable"
     }
+  ],
+  "id": "./",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
   ]
 }
