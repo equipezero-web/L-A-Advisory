@@ -15,6 +15,10 @@ const MP_WEBHOOK_SECRET = Deno.env.get('MP_WEBHOOK_SECRET') || '';
 const SHEETS_WEBHOOK_URL = Deno.env.get('SHEETS_WEBHOOK_URL') || '';
 const SHEETS_WEBHOOK_SECRET = Deno.env.get('SHEETS_WEBHOOK_SECRET') || '';
 
+function createAdminClient() {
+  return createClient(SUPABASE_URL, SERVICE, { auth: { persistSession: false, autoRefreshToken: false } });
+}
+
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: corsHeaders });
 }
@@ -49,7 +53,7 @@ async function validateMercadoPagoSignature(req: Request): Promise<boolean> {
   return diff === 0;
 }
 
-async function logSaleToSheet(admin: ReturnType<typeof createClient>, orderId: string, paidAtIso: string) {
+async function logSaleToSheet(admin: ReturnType<typeof createAdminClient>, orderId: string, paidAtIso: string) {
   if (!SHEETS_WEBHOOK_URL || !SHEETS_WEBHOOK_SECRET) return;
   try {
     const { data: order } = await admin.from('orders').select('code,affiliate_code').eq('id', orderId).maybeSingle();
@@ -92,7 +96,7 @@ function normalizeStatus(value: unknown) {
   return map[String(value || '').toLowerCase()] || 'pending';
 }
 
-async function savePayment(admin: ReturnType<typeof createClient>, orderId: string, paymentId: string, status: string, amount: number, currency: string, method: string, providerStatus: unknown, detail: unknown) {
+async function savePayment(admin: ReturnType<typeof createAdminClient>, orderId: string, paymentId: string, status: string, amount: number, currency: string, method: string, providerStatus: unknown, detail: unknown) {
   if (!paymentId) return;
   const { data: existing } = await admin.from('payments').select('id').eq('provider_payment_id', paymentId).maybeSingle();
   const row = {
@@ -111,7 +115,7 @@ async function savePayment(admin: ReturnType<typeof createClient>, orderId: stri
   else await admin.from('payments').insert({ id: crypto.randomUUID(), ...row });
 }
 
-async function applyOrderStatus(admin: ReturnType<typeof createClient>, orderId: string, paymentStatus: string) {
+async function applyOrderStatus(admin: ReturnType<typeof createAdminClient>, orderId: string, paymentStatus: string) {
   if (paymentStatus === 'approved') {
     const paidAt = new Date().toISOString();
     const { data: applied, error } = await admin.rpc('fulfill_paid_order_atomic', { p_order_id: orderId, p_paid_at: paidAt });
@@ -133,7 +137,7 @@ Deno.serve(async (req) => {
     const payload = await req.json().catch(() => ({}));
     const type = String(payload?.type || payload?.topic || '').toLowerCase();
     if (type === 'mp-connect' || type === 'application.authorized') return json({ received: true });
-    const admin = createClient(SUPABASE_URL, SERVICE, { auth: { persistSession: false, autoRefreshToken: false } });
+    const admin = createAdminClient();
 
     if (type === 'order' || type === 'orders') {
       const mpOrderId = String(payload?.data?.id || payload?.id || '').trim();
