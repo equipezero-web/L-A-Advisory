@@ -24,6 +24,8 @@ BEGIN
       NEW.status := 'pending';
     ELSIF NEW.status IS DISTINCT FROM OLD.status THEN
       RAISE EXCEPTION 'Somente administradores podem alterar o status da avaliação';
+    ELSIF NEW.rating IS DISTINCT FROM OLD.rating OR NEW.comment IS DISTINCT FROM OLD.comment OR NEW.product_id IS DISTINCT FROM OLD.product_id THEN
+      NEW.status := 'pending';
     END IF;
   END IF;
   RETURN NEW;
