@@ -1331,6 +1331,7 @@
             visibility: visible !important;
         }
         #authModal:not(.hidden) {
+            display: block !important;
             position: fixed !important;
             inset: 0 !important;
             height: 100vh !important;
@@ -1338,9 +1339,10 @@
             max-height: 100dvh !important;
             overflow-y: auto !important;
             overflow-x: hidden !important;
-            overscroll-behavior: contain !important;
-            -webkit-overflow-scrolling: touch;
-            touch-action: pan-y;
+            overscroll-behavior-y: contain !important;
+            -webkit-overflow-scrolling: touch !important;
+            touch-action: pan-y !important;
+            isolation: isolate;
         }
         #authModal > div { min-height: 100%; }
         html.account-modal-open,
@@ -3817,6 +3819,8 @@
     <!-- MODAL DE AUTENTICAÇÃO EM TELA CHEIA -->
     <div
         id="authModal"
+        data-lenis-prevent="true"
+        role="dialog" aria-modal="true" aria-label="Entrar ou cadastrar"
         class="fixed inset-0 bg-slate-950 z-[100] hidden overflow-y-auto"
     >
         <div class="min-h-screen grid grid-cols-1 lg:grid-cols-2">
@@ -8455,6 +8459,8 @@ data-lenis-prevent-touch
             updateYear();
             lucide.createIcons();
             setupAccountModalScrollIsolation();
+            restoreRoyalScrollIfSafe();
+            window.addEventListener('pageshow', restoreRoyalScrollIfSafe);
             // The public store cannot depend on session validation to render.
             // Start the public catalog immediately, even for a guest or slow auth.
             loadPublicProducts().then(loaded => {
@@ -9238,8 +9244,26 @@ function initializeApp() {
             const modal = document.getElementById('authModal');
             if (!modal) return;
             modal.classList.add('hidden');
-            unlockAccountModalScroll();
             clearAuthForms();
+            // A common stale modal lock can keep the entire page frozen.
+            // Restore the page only if no other real blocking modal is open.
+            restoreRoyalScrollIfSafe();
+        }
+
+        function restoreRoyalScrollIfSafe() {
+            const hasVisibleBlocker = Array.from(document.querySelectorAll('[id$="Modal"]')).some(el => {
+                if (el.classList.contains('hidden')) return false;
+                if (el === document.getElementById('authModal') && el.classList.contains('hidden')) return false;
+                const style = getComputedStyle(el);
+                return style.display !== 'none' && style.visibility !== 'hidden' &&
+                    el.getClientRects().length > 0 && style.position === 'fixed';
+            });
+            if (hasVisibleBlocker) return;
+            document.documentElement.classList.remove('account-modal-open');
+            document.body.classList.remove('account-modal-open');
+            document.body.style.removeProperty('overflow');
+            document.documentElement.style.removeProperty('overflow');
+            if (window.laLenis && typeof window.laLenis.start === 'function') window.laLenis.start();
         }
 
         function switchAuthScreen(screen) {
