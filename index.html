@@ -1473,6 +1473,21 @@
  #royalProductUploadPreview img { width:100%; aspect-ratio:1; object-fit:cover; border-radius:12px; border:1px solid #cbd5e1; }
  @media(max-width:768px) { #catalogContainer .royal-image-only-card { width:42vw!important; min-width:42vw!important; max-width:42vw!important; border-radius:16px!important; } }
 </style>
+
+<style id="royal-gallery-and-review-admin">
+ .royal-p-gallery { min-width:0; }
+ .royal-p-thumbnails { display:flex; overflow-x:auto; gap:9px; padding:10px 2px; }
+ .royal-p-thumbnails button { flex:0 0 74px; height:74px; background:white; border:2px solid #cbd5e1; border-radius:12px; padding:2px; cursor:pointer; overflow:hidden; }
+ .royal-p-thumbnails button.royal-p-thumbnail-active { border-color:#c29421; box-shadow:0 0 0 2px #f2d995; }
+ .royal-p-thumbnails img { display:block; width:100%; height:100%; object-fit:cover; border-radius:8px; }
+ .royal-review-admin-modal { position:fixed; inset:0; z-index:100010; display:flex; align-items:center; justify-content:center; padding:12px; background:rgba(2,6,23,.9); }
+ .royal-review-admin-scroll { max-width:780px; width:100%; max-height:90dvh; overflow-y:auto; overscroll-behavior:contain; touch-action:pan-y; background:#fff; color:#0f172a; padding:20px; border-radius:16px; }
+ .royal-review-admin-scroll header { display:flex; justify-content:space-between; align-items:center; gap:12px; padding-bottom:12px; border-bottom:1px solid #cbd5e1; }
+ .royal-review-admin-scroll header h2 { font-size:20px; font-weight:800; }
+ .royal-review-admin-scroll button { background:#d4af37; color:#142032; border-radius:9px; padding:9px 15px; font-size:13px; font-weight:800; margin-right:6px; cursor:pointer; }
+ .royal-review-admin-item { padding:15px 0; border-bottom:1px solid #e2e8f0; }
+ .royal-review-admin-item p { margin:7px 0; white-space:pre-wrap; }
+</style>
 </head>
 
 <body class="bg-slate-900 text-white min-h-screen flex flex-col">
@@ -6672,6 +6687,8 @@ data-lenis-prevent-touch
                         Gestão de Produtos
                     </h4>
 
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" onclick="openRoyalReviewModeration()" class="px-4 py-2 rounded-lg border border-amber-400 text-slate-900 font-bold text-sm">Moderar avaliações</button>
                     <button
                         type="button"
                         onclick="openAdminProductForm()"
@@ -6684,6 +6701,7 @@ data-lenis-prevent-touch
 
                         Novo produto
                     </button>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -12828,6 +12846,8 @@ async function loadRoyalAiPanel() {
 
             const form = document.getElementById('adminProductForm');
             form.reset();
+            const preview = document.getElementById('royalProductUploadPreview');
+            if (preview) preview.replaceChildren();
 
             if (productId) {
                 const product = state.products.find(p => p.id === productId);
