@@ -76,11 +76,31 @@
       if (ratingSummary) ratingSummary.textContent = reviews.length
         ? avg + ' / 5 · ' + reviews.length + ' avaliação' + (reviews.length === 1 ? '' : 'ões')
         : 'Ainda sem avaliações';
-      box.innerHTML = reviews.length ? reviews.map(row => {
-        const date = row.created_at ? new Date(row.created_at).toLocaleDateString('pt-BR') : '';
-        return '<article class="royal-p-review"><div class="royal-p-review-head"><strong class="royal-p-stars" aria-label="' + attr(row.rating) + ' de 5 estrelas">' + starString(row.rating) + '</strong><span>' + safe(date) + '</span></div>' +
-          '<p>' + safe(row.comment || 'Avaliação sem comentário.') + '</p></article>';
-      }).join('') : '<p class="royal-p-muted">Este produto ainda não recebeu comentários aprovados. Seja o primeiro a avaliar!</p>';
+      // Reviews are user-controlled: never pass their text through innerHTML.
+      box.replaceChildren();
+      if (!reviews.length) {
+        const empty = document.createElement('p');
+        empty.className = 'royal-p-muted';
+        empty.textContent = 'Este produto ainda não recebeu comentários aprovados. Seja o primeiro a avaliar!';
+        box.appendChild(empty);
+      }
+      for (const review of reviews) {
+        const article = document.createElement('article');
+        article.className = 'royal-p-review';
+        const header = document.createElement('div');
+        header.className = 'royal-p-review-head';
+        const stars = document.createElement('strong');
+        stars.className = 'royal-p-stars';
+        stars.textContent = starString(review.rating);
+        stars.setAttribute('aria-label', String(review.rating) + ' de 5 estrelas');
+        const date = document.createElement('span');
+        date.textContent = review.created_at ? new Date(review.created_at).toLocaleDateString('pt-BR') : '';
+        header.append(stars,date);
+        const text = document.createElement('p');
+        text.textContent = review.comment || 'Avaliação sem comentário.';
+        article.append(header,text);
+        box.appendChild(article);
+      }
     } catch (error) {
       if (box.isConnected) box.textContent = 'Não foi possível consultar as avaliações agora.';
       console.warn('Store Royal reviews:', error);
@@ -316,14 +336,28 @@
       .order('created_at', { ascending: false }).limit(100);
     if (error) { list.textContent = 'Falha ao carregar avaliações: ' + error.message; return; }
     if (!modal.isConnected) return;
-    list.innerHTML = data?.length ? data.map(review => {
+    list.replaceChildren();
+    if (!data?.length) { list.textContent = 'Nenhuma avaliação registrada.'; return; }
+    for (const review of data) {
       const product = productById(review.product_id);
-      const name = product?.name || 'Produto';
-      return '<article class="royal-review-admin-item"><p><strong>' + safe(name) + '</strong> · ' + safe(review.status) + ' · ' + starString(review.rating) + '</p>' +
-        '<p>' + safe(review.comment || 'Sem comentário') + '</p>' +
-        '<div><button type="button" data-review-id="' + attr(review.id) + '" data-next-status="approved">Aprovar</button>' +
-        '<button type="button" data-review-id="' + attr(review.id) + '" data-next-status="rejected">Rejeitar</button></div></article>';
-    }).join('') : '<p>Nenhuma avaliação registrada.</p>';
+      const card = document.createElement('article');
+      card.className = 'royal-review-admin-item';
+      const title = document.createElement('p');
+      title.textContent = (product?.name || 'Produto') + ' · ' + String(review.status) + ' · ' + starString(review.rating);
+      const comment = document.createElement('p');
+      comment.textContent = review.comment || 'Sem comentário';
+      const actions = document.createElement('div');
+      for (const [status,label] of [['approved','Aprovar'],['rejected','Rejeitar']]) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = label;
+        button.dataset.reviewId = String(review.id);
+        button.dataset.nextStatus = status;
+        actions.appendChild(button);
+      }
+      card.append(title, comment, actions);
+      list.appendChild(card);
+    }
   };
 
   window.addEventListener('popstate', () => {
