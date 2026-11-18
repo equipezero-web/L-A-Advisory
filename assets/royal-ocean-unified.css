@@ -1,0 +1,113 @@
+/* L&A ROYAL ADVISORY / Unified Ocean Palette v2.
+   Preserve semantic error/success colors, functional visibility, access control.
+   Main catalog is pearl/light; PRODUCT DETAIL deliberately inverted dark petroleum. */
+:root{
+ --la-ocean-900:#003737;--la-ocean-700:#35675C;
+ --la-ocean-100:#C1D1DE;--la-sand:#B19981;
+ --la-pearl:#CECAC7;--la-paper:#F5F3F0;
+ --la-ink:#123D3B;--la-slate:#496763;
+ --la-hairline:rgba(53,103,92,.23);--la-focus:#B19981;
+}
+html{scroll-padding-top:clamp(76px,9vh,120px)}
+body{background:var(--la-ocean-900)}
+:where(#loja,.royal-product-page,.account-popover-shell,.royal-review-admin-scroll) :is(a,button,input,textarea,select):focus-visible,
+:where(#authModal,#checkoutModal,#cartModal) :is(a,button,input,textarea,select):focus-visible {
+ outline:2px solid var(--la-focus)!important;outline-offset:3px!important;
+}
+/* Public-facing storefront: cool pearl with petrol text. */
+#loja{background:linear-gradient(155deg,var(--la-paper),var(--la-pearl))!important}
+#loja :is(h1,h2,h3,h4,h5){color:var(--la-ink)}
+#loja .royal-image-only-card{border-color:var(--la-hairline)!important;box-shadow:0 12px 30px rgba(0,55,55,.12)!important}
+#catalogContainer .royal-image-only-card .royal-image-card-caption{background:linear-gradient(transparent,rgba(0,32,32,.96))!important}
+#catalogContainer .royal-image-card-caption span{color:var(--la-ocean-100)!important}
+#loja :is(input,select,textarea){border-color:var(--la-hairline)!important;color:var(--la-ink);background:var(--la-paper)}
+#loja input::placeholder{color:var(--la-slate)}
+/* Reverse theme on the product page: mineral dark canvas and pale text.
+   Photos remain neutral, with containment that shows the whole product. */
+.royal-product-page{background:var(--la-ocean-900)!important;color:var(--la-paper)!important}
+.royal-product-page .royal-product-scroll{background:linear-gradient(155deg,#002c2c,#003737 55%,#164944)!important;color:var(--la-paper)!important}
+.royal-product-header{background:#002d2d!important;color:var(--la-ocean-100)!important;border-color:var(--la-sand)!important}
+.royal-product-header button{background:var(--la-ocean-700)!important;color:#fff!important;border-color:var(--la-sand)!important}
+.royal-product-header button:hover{background:var(--la-ocean-900)!important}
+.royal-product-photo{background:var(--la-paper)!important;border-color:var(--la-sand)!important}
+.royal-product-info,.royal-product-details{background:#084746!important;color:var(--la-paper)!important;border:1px solid rgba(193,209,222,.26)!important;box-shadow:0 12px 34px rgba(0,26,26,.18)}
+.royal-product-info h1,.royal-product-details h2,.royal-p-review-form h3{color:#fff!important}
+.royal-p-kicker,.royal-p-rating,.royal-p-stars{color:var(--la-sand)!important}
+.royal-p-price,.royal-p-stock,.royal-p-attribute strong,.royal-p-qty-label{color:var(--la-ocean-100)!important}
+.royal-p-price s,.royal-p-muted,.royal-p-attribute span,.royal-p-review-head{color:#c6d7d5!important}
+.royal-p-attributes,.royal-p-review,.royal-p-review-form{border-color:rgba(193,209,222,.24)!important}
+.royal-product-details>p,.royal-p-review p{color:#e6eeee!important}
+.royal-p-qty{border-color:var(--la-sand)!important;background:var(--la-paper)!important}
+.royal-p-qty button{background:var(--la-pearl)!important;color:var(--la-ink)!important}
+.royal-p-qty input{background:var(--la-paper)!important;color:var(--la-ink)!important}
+.royal-p-primary{background:var(--la-ocean-100)!important;color:var(--la-ink)!important}
+.royal-p-secondary{background:var(--la-ocean-700)!important;color:#fff!important;border:1px solid var(--la-sand)!important}
+.royal-p-primary:hover{background:var(--la-paper)!important}
+.royal-p-secondary:hover{background:var(--la-ocean-900)!important}
+.royal-p-review-form label{color:var(--la-paper)!important}
+.royal-p-review-form :is(select,textarea){color:var(--la-ink)!important;background:var(--la-paper)!important;border-color:var(--la-sand)!important}
+.royal-p-thumbnails button{background:var(--la-paper)!important;border-color:var(--la-pearl)!important}
+.royal-p-thumbnails button.royal-p-thumbnail-active{border-color:var(--la-sand)!important;box-shadow:0 0 0 2px var(--la-ocean-100)!important}
+/* Application surfaces: consistent light palette for forms, profile, orders, checkout,
+   admin and affiliate panels. Avoid overriding colored status labels and alerts. */
+:is(#authModal,#checkoutModal,#cartModal,#customerProfileModal,#customerOrdersModal,#trackingModal,#returnRequestModal,#orderDetailsModal,#affiliateDashboardModal,#affiliateCatalogModal,#affiliateProfileModal,#adminDashboardModal,#adminProductFormModal,#adminOrderFormModal,#adminCommissionPaymentModal,#adminAffiliateFormModal,#adminUserFormModal,#cookieSettingsModal,#dataSecurityTermsModal,#stockAlertModal,#navModal) :is(.bg-white,.bg-slate-50,.bg-slate-100){
+ background-color:var(--la-paper)!important;
+}
+:is(#authModal,#checkoutModal,#cartModal,#customerProfileModal,#customerOrdersModal,#trackingModal,#returnRequestModal,#orderDetailsModal,#affiliateDashboardModal,#affiliateCatalogModal,#affiliateProfileModal,#adminDashboardModal,#adminProductFormModal,#adminOrderFormModal,#adminCommissionPaymentModal,#adminAffiliateFormModal,#adminUserFormModal,#cookieSettingsModal,#dataSecurityTermsModal,#stockAlertModal,#navModal) :is(.text-amber-300,.text-amber-400,.text-amber-500,.text-amber-600,.text-blue-600,.text-blue-700){
+ color:var(--la-ocean-700)!important;
+}
+:is(#authModal,#checkoutModal,#cartModal,#customerProfileModal,#customerOrdersModal,#trackingModal,#returnRequestModal,#orderDetailsModal,#affiliateDashboardModal,#affiliateCatalogModal,#affiliateProfileModal,#adminDashboardModal,#adminProductFormModal,#adminOrderFormModal,#adminCommissionPaymentModal,#adminAffiliateFormModal,#adminUserFormModal,#cookieSettingsModal,#dataSecurityTermsModal) :is(.border-amber-300,.border-amber-400,.border-amber-500,.border-blue-500){
+ border-color:var(--la-sand)!important;
+}
+.account-popover-shell{border-color:var(--la-hairline)!important}
+.account-popover-shell :is(h1,h2,h3,h4){color:var(--la-ink)}
+.account-popover-shell :is(input,select,textarea),#authModal :is(input,select,textarea),#checkoutModal :is(input,select,textarea){
+ accent-color:var(--la-ocean-700);border-color:var(--la-hairline);color:var(--la-ink);
+}
+.account-popover-shell :is(.gradient-gold,.bg-amber-400,.bg-amber-500),#authModal :is(.gradient-gold,.bg-amber-400,.bg-amber-500){
+ background:var(--la-ocean-700)!important;color:#fff!important;
+}
+.royal-review-admin-modal{background:rgba(0,30,30,.88)!important}
+.royal-review-admin-scroll{background:var(--la-paper)!important;color:var(--la-ink)!important}
+.royal-review-admin-scroll header{border-color:var(--la-sand)!important}
+.royal-review-admin-scroll :is(button,select,textarea){accent-color:var(--la-ocean-700)}
+/* Scrolling: give every open overlay one independent, bounded native scroller.
+   Lenis must ignore these elements (data-lenis-prevent assigned by JS below).
+   Never hide the scrollbars by disabling the ability to scroll. */
+.royal-product-page,.royal-review-admin-modal{overscroll-behavior:contain!important}
+.royal-product-page .royal-product-scroll{
+ height:100vh!important;height:100dvh!important;min-height:0!important;
+ overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior-y:contain!important;
+ -webkit-overflow-scrolling:touch!important;touch-action:pan-y!important;scrollbar-gutter:stable;
+}
+#authModal .royal-auth-scroll-region{
+ height:100%!important;min-height:0!important;overflow-y:auto!important;
+ overscroll-behavior-y:contain!important;touch-action:pan-y!important;
+}
+:is(#customerProfileModal,#customerOrdersModal,#affiliateDashboardModal,#affiliateProfileModal,#adminDashboardModal) .account-popover-shell.account-modal-scroll,
+:is(#trackingModal,#returnRequestModal,#orderDetailsModal,#adminProductFormModal,#adminOrderFormModal,#adminCommissionPaymentModal,#adminAffiliateFormModal,#adminUserFormModal) .account-modal-scroll{
+ max-height:calc(100dvh - 24px)!important;min-height:0!important;
+ overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior-y:contain!important;
+ touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;
+}
+:is(#checkoutModal,#cartModal,#stockAlertModal,#cookieSettingsModal,#dataSecurityTermsModal,#navModal) >div,
+:is(#affiliateCatalogModal,#adminProductFormModal,#adminOrderFormModal,#adminCommissionPaymentModal,#adminAffiliateFormModal,#adminUserFormModal) >div{
+ max-height:calc(100dvh - 24px)!important;min-height:0!important;
+ overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;
+ touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;
+}
+.royal-review-admin-scroll{max-height:calc(100dvh - 24px)!important;min-height:0!important;overflow-y:auto!important;touch-action:pan-y!important}
+.royal-p-thumbnails,#catalogContainer,.product-cards-layout{overscroll-behavior-inline:contain}
+.account-modal-scroll,.royal-review-admin-scroll,.royal-product-scroll{
+ scrollbar-color:var(--la-ocean-700) var(--la-paper)!important;scrollbar-width:thin;
+}
+@media(max-width:640px){
+ .royal-product-container{padding:12px!important}
+ .royal-product-info,.royal-product-details{padding:16px!important}
+ .royal-product-main{grid-template-columns:minmax(0,1fr)!important}
+ .royal-p-actions{grid-template-columns:1fr!important}
+ :is(#checkoutModal,#cartModal,#authModal,#customerProfileModal,#customerOrdersModal,#affiliateDashboardModal,#adminDashboardModal){overscroll-behavior:contain}
+}
+/* Modals need visible dismiss controls even with a long content body */
+:where(.royal-product-header,.royal-review-admin-scroll header){position:sticky;top:0;z-index:3}
+@media(prefers-reduced-motion:reduce){.royal-product-page *{scroll-behavior:auto!important}}
