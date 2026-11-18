@@ -17,8 +17,8 @@
 
     <!-- PWA -->
 <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#020617">
-<meta name="background-color" content="#020617">
+<meta name="theme-color" content="#003737">
+<meta name="background-color" content="#003737">
 
 <!-- Ícones para Apple / iOS -->
 <link rel="apple-touch-icon" href="./icons/icons-192.png">
@@ -1520,6 +1520,7 @@
       @media(prefers-reduced-motion:reduce){.royal-fashion-cta{transition:none!important}}
     </style>
     <link rel="stylesheet" href="./assets/royal-ocean-theme.css?v=20261118" />
+    <link rel="stylesheet" href="./assets/royal-ocean-unified.css?v=20261118" />
 </head>
 
 <body class="bg-slate-900 text-white min-h-screen flex flex-col">
@@ -15096,5 +15097,40 @@ body.guest-mode #afiliados { display: none !important; }
 <script src="./js/royal-product-image-upload.js"></script>
 <script src="./js/royal-product-page.js"></script>
 <script src="./js/royal-analytics.js?v=1" defer></script>
+
+<!-- Native scroll isolation for account, checkout, admin and dynamic product overlays.
+     Attribute instructs Lenis not to intercept interactions inside scrolling panels. -->
+<script id="royal-scroll-isolation-v2">
+(function () {
+  'use strict';
+  const SCROLLABLE = [
+    '.royal-product-scroll','.royal-review-admin-scroll',
+    '.royal-auth-scroll-region','.account-modal-scroll',
+    '#checkoutModal > div','#cartModal > div','#stockAlertModal > div',
+    '#cookieSettingsModal > div','#dataSecurityTermsModal > div',
+    '#navModal > div','#affiliateCatalogModal > div',
+    '#adminProductFormModal > div','#adminOrderFormModal > div',
+    '#adminCommissionPaymentModal > div','#adminAffiliateFormModal > div',
+    '#adminUserFormModal > div','#orderDetailsModal > div'
+  ].join(',');
+  function register(target) {
+    if (!(target instanceof Element)) return;
+    const scrollElement = target.closest(SCROLLABLE);
+    if (scrollElement && !scrollElement.hasAttribute('data-lenis-prevent')) {
+      scrollElement.setAttribute('data-lenis-prevent', '');
+    }
+  }
+  ['pointerover','focusin','wheel','touchstart'].forEach(function (name) {
+    document.addEventListener(name, function (event) { register(event.target); }, {capture:true,passive:true});
+  });
+  function initialize() {
+    document.querySelectorAll(SCROLLABLE).forEach(function (el) {
+      el.setAttribute('data-lenis-prevent','');
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',initialize,{once:true});
+  else initialize();
+})();
+</script>
 </body>
 </html>
