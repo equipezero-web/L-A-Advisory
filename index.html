@@ -10,7 +10,7 @@
 
     <meta
         name="description"
-        content="L&A Royal Advisory — Loja premium, consultoria empresarial, afiliados e soluções estratégicas."
+        content="L&A Royal Advisory — Loja virtual, produtos selecionados, ofertas e experiência de compras premium."
     >
 
     <title>L&A Royal Advisory</title>
@@ -1526,12 +1526,7 @@
                         Loja
                     </a>
 
-                    <a
-                        href="#consultoria"
-                        class="text-slate-300 hover:text-amber-300 transition text-sm font-medium px-3 py-1.5 rounded-full"
-                    >
-                        Mais · Consultoria
-                    </a>
+                    
 
                     <a
                         id="affiliateNavLink"
@@ -1680,10 +1675,7 @@
                             <i data-lucide="shopping-bag" class="w-5 h-5 text-amber-600"></i>
                             <span>Loja</span>
                         </a>
-                        <a href="#consultoria" class="mobile-user-menu-item" onclick="closeMobileMenu()">
-                            <i data-lucide="briefcase-business" class="w-5 h-5 text-amber-600"></i>
-                            <span>Consultoria</span>
-                        </a>
+                        
                         <a href="#afiliados" class="mobile-user-menu-item" onclick="closeMobileMenu()">
                             <i data-lucide="handshake" class="w-5 h-5 text-amber-600"></i>
                             <span>Afiliados</span>
@@ -2189,249 +2181,6 @@
             </div>
         </section>
 
-        <!-- CONSULTORIA PÚBLICA -->
-        <section
-            id="consultoria"
-            class="py-20 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white relative overflow-hidden"
-        >
-            <div class="absolute inset-0 opacity-10 pointer-events-none">
-                <div class="absolute top-20 left-10 w-72 h-72 bg-amber-400 rounded-full blur-3xl"></div>
-                <div class="absolute bottom-20 right-10 w-96 h-96 bg-blue-600 rounded-full blur-3xl"></div>
-            </div>
-            
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                <div class="text-center max-w-3xl mx-auto mb-16">
-                    <span class="text-amber-400 font-bold uppercase text-xs tracking-[0.2em]">
-                        Soluções Executive
-                    </span>
-
-                    <h2 class="font-serif text-4xl font-bold mt-3 text-white">
-                        Consultoria Empresarial
-                    </h2>
-
-                    <div class="w-24 h-1 gradient-gold mx-auto mt-5 rounded"></div>
-
-                    <p class="text-slate-400 mt-6 text-lg">
-                        Agende gratuitamente. Não é necessário criar uma conta
-                        para solicitar sua consultoria.
-                    </p>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <!-- Financeira -->
-                    <article class="bg-slate-800/70 backdrop-blur border border-slate-700/60 p-8 rounded-2xl flex flex-col justify-between card-hover">
-                        <div>
-                            <div class="w-14 h-14 gradient-gold rounded-xl flex items-center justify-center mb-6 shadow-gold">
-                                <i
-                                    data-lucide="trending-up"
-                                    class="w-7 h-7 text-slate-900"
-                                ></i>
-                            </div>
-
-                            <h3 class="font-serif text-2xl font-bold mb-4 text-white">
-                                Consultoria Financeira
-                            </h3>
-
-                            <p class="text-slate-400 text-sm mb-4 leading-relaxed">
-                                Gestão de capital, fluxo de caixa, metas,
-                                organização financeira e decisões estratégicas.
-                            </p>
-
-                            <p class="text-amber-400 font-bold text-xl mb-6">
-                                R$ 200,00
-                            </p>
-                        </div>
-
-                        <button
-                            type="button"
-                            onclick="openConsultingBooking('financeira')"
-                            class="w-full gradient-gold text-slate-900 font-bold rounded-xl py-4 hover:shadow-gold transition"
-                        >
-                            Agendar Consultoria
-                        </button>
-                    </article>
-
-                    <!-- Administrativa -->
-                    <article class="bg-slate-800/70 backdrop-blur border border-slate-700/60 p-8 rounded-2xl flex flex-col justify-between card-hover">
-                        <div>
-                            <div class="w-14 h-14 gradient-gold rounded-xl flex items-center justify-center mb-6 shadow-gold">
-                                <i
-                                    data-lucide="briefcase"
-                                    class="w-7 h-7 text-slate-900"
-                                ></i>
-                            </div>
-
-                            <h3 class="font-serif text-2xl font-bold mb-4 text-white">
-                                Consultoria Administrativa
-                            </h3>
-
-                            <p class="text-slate-400 text-sm mb-4 leading-relaxed">
-                                Organização de processos, produtividade, gestão
-                                operacional e estrutura interna da empresa.
-                            </p>
-
-                            <p class="text-amber-400 font-bold text-xl mb-6">
-                                R$ 300,00
-                            </p>
-                        </div>
-
-                        <button
-                            type="button"
-                            onclick="openConsultingBooking('administrativa')"
-                            class="w-full gradient-gold text-slate-900 font-bold rounded-xl py-4 hover:shadow-gold transition"
-                        >
-                            Agendar Consultoria
-                        </button>
-                    </article>
-
-                    <!-- Estratégica -->
-                    <article class="bg-slate-800/70 backdrop-blur border border-slate-700/60 p-8 rounded-2xl flex flex-col justify-between card-hover">
-                        <div>
-                            <div class="w-14 h-14 gradient-gold rounded-xl flex items-center justify-center mb-6 shadow-gold">
-                                <i
-                                    data-lucide="target"
-                                    class="w-7 h-7 text-slate-900"
-                                ></i>
-                            </div>
-
-                            <h3 class="font-serif text-2xl font-bold mb-4 text-white">
-                                Planejamento Estratégico
-                            </h3>
-
-                            <p class="text-slate-400 text-sm mb-4 leading-relaxed">
-                                Roadmap empresarial, metas, posicionamento,
-                                crescimento e decisões de longo prazo.
-                            </p>
-
-                            <p class="text-amber-400 font-bold text-xl mb-6">
-                                R$ 1.000,00
-                            </p>
-                        </div>
-
-                        <button
-                            type="button"
-                            onclick="openConsultingBooking('estrategica')"
-                            class="w-full gradient-gold text-slate-900 font-bold rounded-xl py-4 hover:shadow-gold transition"
-                        >
-                            Agendar Consultoria
-                        </button>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <!-- DEPOIMENTOS -->
-        <section id="depoimentos" class="py-16 bg-gradient-to-b from-slate-100 to-white">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-12">
-                    <span class="text-amber-600 font-bold uppercase text-xs tracking-[0.2em]">
-                        Depoimentos
-                    </span>
-
-                    <h2 class="font-serif text-3xl sm:text-4xl font-bold text-slate-900 mt-2">
-                        O Que Dizem Nossos Clientes
-                    </h2>
-
-                    <div class="w-20 h-1 gradient-gold rounded mt-3 mx-auto"></div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <article class="bg-white p-6 rounded-2xl shadow-lg border border-slate-200 card-hover">
-                        <div class="flex items-center gap-1 mb-4 text-amber-500">
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                        </div>
-
-                        <p class="text-slate-600 mb-6 italic leading-relaxed">
-                            “A consultoria financeira trouxe clareza para o nosso
-                            fluxo de caixa e melhorou nossas decisões.”
-                        </p>
-
-                        <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 gradient-gold rounded-full flex items-center justify-center text-slate-900 font-bold">
-                                CM
-                            </div>
-
-                            <div>
-                                <p class="font-bold text-sm text-slate-900">
-                                    Carlos Mendes
-                                </p>
-
-                                <p class="text-xs text-slate-500">
-                                    CEO, TechBrasil
-                                </p>
-                            </div>
-                        </div>
-                    </article>
-
-                    <article class="bg-white p-6 rounded-2xl shadow-lg border border-slate-200 card-hover">
-                        <div class="flex items-center gap-1 mb-4 text-amber-500">
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                        </div>
-
-                        <p class="text-slate-600 mb-6 italic leading-relaxed">
-                            “A L&A Royal Advisory entregou organização,
-                            profissionalismo e uma visão estratégica real.”
-                        </p>
-
-                        <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 gradient-gold rounded-full flex items-center justify-center text-slate-900 font-bold">
-                                RS
-                            </div>
-
-                            <div>
-                                <p class="font-bold text-sm text-slate-900">
-                                    Roberto Silva
-                                </p>
-
-                                <p class="text-xs text-slate-500">
-                                    Diretor, Silva & Associados
-                                </p>
-                            </div>
-                        </div>
-                    </article>
-
-                    <article class="bg-white p-6 rounded-2xl shadow-lg border border-slate-200 card-hover">
-                        <div class="flex items-center gap-1 mb-4 text-amber-500">
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                        </div>
-
-                        <p class="text-slate-600 mb-6 italic leading-relaxed">
-                            “A experiência de compra foi muito bem conduzida.
-                            Atendimento rápido, elegante e cuidadoso.”
-                        </p>
-
-                        <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 gradient-gold rounded-full flex items-center justify-center text-slate-900 font-bold">
-                                AL
-                            </div>
-
-                            <div>
-                                <p class="font-bold text-sm text-slate-900">
-                                    André Lima
-                                </p>
-
-                                <p class="text-xs text-slate-500">
-                                    Empresário
-                                </p>
-                            </div>
-                        </div>
-                    </article>
-                </div>
-            </div>
-        </section>
-
         <!-- FAQ -->
         <section id="faq" class="py-16 bg-white">
             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -2468,24 +2217,7 @@
                         </p>
                     </details>
 
-                    <details class="non-store-faq-item bg-slate-50 border border-slate-200 p-5 rounded-xl cursor-pointer group">
-                        <summary class="font-bold text-slate-800 flex justify-between items-center gap-5">
-                            <span>
-                                Preciso de conta para agendar uma consultoria?
-                            </span>
-
-                            <i
-                                data-lucide="chevron-down"
-                                class="w-5 h-5 text-slate-400 group-open:rotate-180 transition"
-                            ></i>
-                        </summary>
-
-                        <p class="text-slate-600 mt-3 text-sm leading-relaxed">
-                            Não. O agendamento de consultoria é aberto e pode ser
-                            feito diretamente pelo formulário, sem cadastro ou
-                            login obrigatório.
-                        </p>
-                    </details>
+                    
 
                     <details class="non-store-faq-item bg-slate-50 border border-slate-200 p-5 rounded-xl cursor-pointer group">
                         <summary class="font-bold text-slate-800 flex justify-between items-center gap-5">
@@ -2857,12 +2589,7 @@
                         Loja
                     </a>
 
-                    <a
-                        href="#consultoria"
-                        class="text-slate-400 hover:text-white transition"
-                    >
-                        Consultoria
-                    </a>
+                    
 
                     <a
                         href="#afiliados"
@@ -2956,28 +2683,7 @@
                     </div>
                 </a>
 
-                <a
-                    href="#consultoria"
-                    onclick="closeNavigationModal()"
-                    class="p-5 rounded-xl border-2 border-slate-200 hover:border-amber-500 bg-slate-50 flex items-center gap-5 transition"
-                >
-                    <div class="p-4 gradient-gold rounded-xl">
-                        <i
-                            data-lucide="briefcase"
-                            class="w-7 h-7 text-slate-900"
-                        ></i>
-                    </div>
-
-                    <div>
-                        <h4 class="font-bold text-lg">
-                            Consultoria
-                        </h4>
-
-                        <p class="text-xs text-slate-500">
-                            Agendamento sem login
-                        </p>
-                    </div>
-                </a>
+                
 
                 <a
                     href="#afiliados"
@@ -3002,221 +2708,6 @@
                     </div>
                 </a>
             </div>
-        </div>
-    </div>
-
-    <!-- MODAL DE AGENDAMENTO PÚBLICO -->
-    <div
-        id="consultingModal"
-        class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[70] flex items-center justify-center p-4 overflow-y-auto"
-    >
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative border border-slate-200 my-8 max-h-[92vh] overflow-y-auto">
-            <button
-                type="button"
-                onclick="closeConsultingBooking()"
-                aria-label="Fechar modal"
-                class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition"
-            >
-                <i data-lucide="x" class="w-6 h-6"></i>
-            </button>
-
-            <div class="flex items-start gap-4 mb-6">
-                <div class="w-12 h-12 gradient-gold rounded-xl flex items-center justify-center shadow-gold">
-                    <i
-                        data-lucide="calendar-days"
-                        class="w-6 h-6 text-slate-900"
-                    ></i>
-                </div>
-
-                <div>
-                    <h3 class="font-serif text-2xl font-bold text-slate-900">
-                        Agendar Consultoria
-                    </h3>
-
-                    <p
-                        id="consultingTypeDisplay"
-                        class="text-amber-600 font-bold text-sm mt-1"
-                    >
-                        Consultoria
-                    </p>
-
-                    <p
-                        id="consultingPriceDisplay"
-                        class="text-slate-500 text-xs mt-1"
-                    >
-                        Valor da consultoria
-                    </p>
-                </div>
-            </div>
-
-            <div class="mb-5 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-3">
-                <i
-                    data-lucide="circle-check"
-                    class="w-5 h-5 text-emerald-600 flex-none mt-0.5"
-                ></i>
-
-                <p class="text-xs text-emerald-800 leading-relaxed">
-                    O agendamento é gratuito e não exige cadastro. Após enviar,
-                    sua solicitação será registrada e você receberá atendimento
-                    da equipe L&A.
-                </p>
-            </div>
-
-            <form
-                id="consultingForm"
-                onsubmit="submitConsultingBooking(event)"
-                class="space-y-4"
-            >
-                <input
-                    id="consultingType"
-                    type="hidden"
-                >
-
-                <input
-                    id="consultingValue"
-                    type="hidden"
-                >
-
-                <div>
-                    <label
-                        for="consultingCompany"
-                        class="block text-xs font-bold text-slate-700 uppercase mb-2"
-                    >
-                        Empresa / Nome completo
-                    </label>
-
-                    <input
-                        type="text"
-                        id="consultingCompany"
-                        required
-                        minlength="3"
-                        maxlength="120"
-                        class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm"
-                    >
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label
-                            for="consultingPhone"
-                            class="block text-xs font-bold text-slate-700 uppercase mb-2"
-                        >
-                            WhatsApp
-                        </label>
-
-                        <input
-                            type="tel"
-                            id="consultingPhone"
-                            required
-                            maxlength="30"
-                            placeholder="(81) 99999-9999"
-                            class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm"
-                        >
-                    </div>
-
-                    <div>
-                        <label
-                            for="consultingEmail"
-                            class="block text-xs font-bold text-slate-700 uppercase mb-2"
-                        >
-                            E-mail
-                        </label>
-
-                        <input
-                            type="email"
-                            id="consultingEmail"
-                            required
-                            maxlength="160"
-                            class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm"
-                        >
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label
-                            for="consultingDate"
-                            class="block text-xs font-bold text-slate-700 uppercase mb-2"
-                        >
-                            Data desejada
-                        </label>
-
-                        <input
-                            type="date"
-                            id="consultingDate"
-                            required
-                            class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm"
-                        >
-                    </div>
-
-                    <div>
-                        <label
-                            for="consultingTime"
-                            class="block text-xs font-bold text-slate-700 uppercase mb-2"
-                        >
-                            Horário desejado
-                        </label>
-
-                        <input
-                            type="time"
-                            id="consultingTime"
-                            required
-                            class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm"
-                        >
-                    </div>
-                </div>
-
-                <div>
-                    <label
-                        for="consultingObs"
-                        class="block text-xs font-bold text-slate-700 uppercase mb-2"
-                    >
-                        Observações / Objetivos
-                    </label>
-
-                    <textarea
-                        id="consultingObs"
-                        rows="3"
-                        maxlength="1000"
-                        placeholder="Conte brevemente qual necessidade deseja tratar."
-                        class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm resize-none"
-                    ></textarea>
-                </div>
-
-                <div class="flex items-start gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
-                    <input
-                        type="checkbox"
-                        id="consultingTerms"
-                        required
-                        class="mt-1 w-4 h-4 accent-amber-500"
-                    >
-
-                    <label
-                        for="consultingTerms"
-                        class="text-xs text-slate-600 leading-relaxed cursor-pointer"
-                    >
-                        Concordo com o armazenamento dos dados deste
-                        agendamento para contato da L&A Royal Advisory.
-                    </label>
-                </div>
-
-                <div class="flex gap-3 pt-2">
-                    <button
-                        type="button"
-                        onclick="closeConsultingBooking()"
-                        class="flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition text-sm"
-                    >
-                        Cancelar
-                    </button>
-
-                    <button
-                        type="submit"
-                        class="flex-1 py-3 gradient-gold text-slate-900 font-bold rounded-xl shadow-gold hover:opacity-95 transition text-sm"
-                    >
-                        Confirmar agendamento
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
 
@@ -7791,10 +7282,17 @@ data-lenis-prevent-touch
                         <input
                             type="url"
                             id="adminProductImage"
-                            required
                             maxlength="500"
                             class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-amber-500"
                         >
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label for="adminProductImageFiles" class="block text-xs font-bold text-slate-700 uppercase mb-2">Upload das imagens do produto</label>
+                        <input id="adminProductImageFiles" type="file" accept="image/jpeg,image/png,image/webp" multiple onchange="previewRoyalProductUploads(this)"
+                         class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl">
+                        <p class="text-xs text-slate-500 mt-2">Envie até 6 fotos (JPG, PNG, WebP, até 5 MB cada). As fotos devem mostrar o produto claramente. A primeira imagem será a principal e ocupará todo o card de bordas arredondadas.</p>
+                        <div id="royalProductUploadPreview" class="grid grid-cols-3 gap-2 mt-3"></div>
                     </div>
 
                     <div class="sm:col-span-2">
@@ -8908,7 +8406,9 @@ data-lenis-prevent-touch
                 id: product.id, name: product.name, description: product.description || '',
                 price: Number(product.price || 0), salePrice: Number(product.sale_price ?? product.price ?? 0), discount: Number(product.discount || 0),
                 stock: Number(product.stock || 0), commission: Number(product.commission || 0),
-                image: product.image || '', category: product.category || '', active: product.active !== false,
+                image: product.image || '',
+                images: Array.isArray(product.images) && product.images.length ? product.images : (product.image ? [product.image] : []),
+                category: product.category || '', active: product.active !== false,
                 createdAt: product.created_at, updatedAt: product.updated_at
             };
         }
@@ -13390,13 +12890,17 @@ async function loadRoyalAiPanel() {
             const discount = parseFloat(document.getElementById('adminProductDiscount')?.value || '0');
             const stock = parseInt(document.getElementById('adminProductStock')?.value || '0');
             const commission = parseFloat(document.getElementById('adminProductCommission')?.value || '0');
-            const image = document.getElementById('adminProductImage')?.value.trim();
+            let image = document.getElementById('adminProductImage')?.value.trim();
+            const imageFiles = Array.from(document.getElementById('adminProductImageFiles')?.files || []);
+            const currentProduct = state.products.find(p => p.id === id);
+            let images = Array.isArray(currentProduct?.images) ? [...currentProduct.images] : (image ? [image] : []);
             const category = document.getElementById('adminProductCategory')?.value.trim();
 
             if (
                 !name ||
                 !description ||
-                !image ||
+                (!image && !imageFiles.length) ||
+                imageFiles.length > 6 ||
                 !category ||
                 !Number.isFinite(price) ||
                 price < 0 ||
@@ -13433,10 +12937,17 @@ async function loadRoyalAiPanel() {
             };
 
             try {
-                if (!supabaseAuthUser) {
-                    throw new Error('Sua sessão expirou. Faça login novamente como administrador.');
+                if (!supabaseAuthUser || state.currentUser?.role !== 'admin') {
+                    throw new Error('Entre novamente como administrador para alterar produtos.');
                 }
-
+                if (imageFiles.length) {
+                    const uploadedUrls = await uploadRoyalProductImages(imageFiles);
+                    images = [...uploadedUrls, ...images.filter(url => !uploadedUrls.includes(url))].slice(0,12);
+                    image = uploadedUrls[0];
+                }
+                if (!images.length && image) images = [image];
+                product.image = image;
+                product.images = images;
                 const { error } = await supabaseClient
                     .from('products')
                     .upsert({
@@ -13449,6 +12960,7 @@ async function loadRoyalAiPanel() {
                         stock: product.stock,
                         commission: product.commission,
                         image: product.image,
+                        images: product.images,
                         category: product.category,
                         active: true
                     }, { onConflict: 'id' });
@@ -13468,6 +12980,8 @@ async function loadRoyalAiPanel() {
                 saveStateToStorage();
                 renderCatalog();
                 loadAdminProducts();
+                document.getElementById('adminProductImageFiles').value = '';
+                document.getElementById('royalProductUploadPreview').innerHTML = '';
                 showAdminProductMessage('Produto salvo no Supabase com sucesso!', 'success');
             } catch (error) {
                 console.error('Erro ao salvar produto no Supabase:', error);
@@ -15574,40 +15088,7 @@ body.guest-mode #afiliados { display: none !important; }
 </style>
 
 <script src="./js/royal-ai-image-upload.js"></script>
-    <script id="royal-consulting-navigation">
-        window.focusRoyalCatalogSearch = () => {
-            const filters = document.getElementById('catalogFilters');
-            if (filters?.classList.contains('hidden')) {
-                openCatalogFilters();
-            }
-            const input = document.getElementById('searchProduct');
-            if (input) {
-                input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                window.setTimeout(() => input.focus({ preventScroll: true }), 150);
-            }
-        };
-        (() => {
-            const syncConsulting = () => {
-                const consultingRequested = window.location.hash === '#consultoria';
-                document.body.classList.toggle('royal-consulting-visible', consultingRequested);
-                if (consultingRequested) {
-                    document.body.classList.remove('store-open-mode');
-                }
-            };
-            // Reveal the preserved consulting section only after explicit navigation.
-            document.addEventListener('click', event => {
-                const target = event.target instanceof Element ? event.target.closest('a[href="#consultoria"]') : null;
-                if (target) {
-                    document.body.classList.remove('store-open-mode');
-                    document.body.classList.add('royal-consulting-visible');
-                }
-            }, true);
-            window.addEventListener('hashchange', syncConsulting);
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', syncConsulting, {once:true});
-            } else syncConsulting();
-        })();
-    </script>
+
 <script src="./js/royal-product-page.js"></script>
 </body>
 </html>
