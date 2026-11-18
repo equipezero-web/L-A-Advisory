@@ -30,7 +30,7 @@ body.bg-slate-900,body .bg-slate-900,body .bg-slate-950,body .bg-blue-950{backgr
 .royal-desktop-nav a{color:var(--royal-mist)!important}
 .royal-desktop-nav a:hover,.royal-desktop-nav a:focus-visible{color:var(--royal-taupe)!important}
 .royal-fashion-hero{background:var(--royal-deep)!important}
-.royal-hero-photo{background-color:var(--royal-deep)!important;background-image:url('./royal-diamond-hero.svg'),linear-gradient(110deg,#003737,#35675C)!important;background-position:center!important;background-size:cover!important}
+.royal-hero-photo{background-color:var(--royal-deep)!important;background-image:url('./hero/hero-ocean-desktop.webp'),url('./royal-diamond-hero.svg'),linear-gradient(110deg,#003737,#35675C)!important;background-position:center center!important;background-size:cover!important;background-repeat:no-repeat!important}
 .royal-hero-shade{background:linear-gradient(90deg,rgba(0,30,30,.56),rgba(0,55,55,.19) 53%,rgba(0,35,35,.16))!important}
 .royal-hero-crown,.royal-hero-crown svg{color:var(--royal-taupe)!important}
 .royal-hero-crown span{background:var(--royal-taupe)!important}
@@ -60,3 +60,15 @@ footer a:hover{color:var(--royal-taupe)!important}
  .royal-hero-shade{background:linear-gradient(90deg,rgba(0,35,35,.74),rgba(0,40,40,.28))!important}
 }
 @media(prefers-reduced-motion:reduce){.royal-hero-photo{transform:none!important}}
+
+/* Responsive photograph assets are optional until uploaded to assets/hero.
+   The original diamond vector remains underneath as a safe fallback. */
+@media(min-width:1800px){
+.royal-hero-photo{background-image:url('./hero/hero-ocean-4k.webp'),url('./royal-diamond-hero.svg'),linear-gradient(110deg,#003737,#35675C)!important}
+}
+@media(min-width:769px) and (max-width:1440px){
+.royal-hero-photo{background-image:url('./hero/hero-ocean-tablet.webp'),url('./royal-diamond-hero.svg'),linear-gradient(110deg,#003737,#35675C)!important}
+}
+@media(max-width:768px){
+.royal-hero-photo{background-image:url('./hero/hero-ocean-mobile.webp'),url('./royal-diamond-hero.svg'),linear-gradient(110deg,#003737,#35675C)!important;background-position:60% center!important}
+}
