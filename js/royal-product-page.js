@@ -152,6 +152,7 @@
     const stock = Math.max(0, Number(product.stock) || 0);
     const sale = calculateFinalPrice(product);
     const oldPrice = Number(product.price) || 0;
+    const gallery = Array.isArray(product.images) && product.images.length ? product.images : [product.image].filter(Boolean);
     const isAffiliate = document.body.classList.contains('affiliate-mode');
     const dialog = document.createElement('section');
     dialog.id = 'productDetailsModal';
@@ -163,7 +164,10 @@
       '<div class="royal-product-scroll" data-lenis-prevent data-lenis-prevent-wheel data-lenis-prevent-touch tabindex="-1">' +
         '<header class="royal-product-header"><button type="button" data-action="close" aria-label="Voltar à loja">← Voltar à loja</button><span>STORE ROYAL · L&A</span><button type="button" data-action="share" aria-label="Compartilhar produto">Compartilhar</button></header>' +
         '<div class="royal-product-container"><div class="royal-product-main">' +
-          '<div class="royal-product-photo"><img src="' + attr(product.image) + '" alt="' + attr(product.name) + '"></div>' +
+          '<div class="royal-p-gallery"><div class="royal-product-photo"><img id="royalSelectedProductImage" src="' + attr(gallery[0] || product.image) + '" alt="' + attr(product.name) + '"></div>' +
+          '<div class="royal-p-thumbnails">' + gallery.map((src,index) =>
+            '<button type="button" data-image-index="' + index + '" aria-label="Ver imagem ' + (index+1) + '" class="' + (index===0 ? 'royal-p-thumbnail-active' : '') + '"><img src="' + attr(src) + '" alt="Foto ' + (index+1) + ' de ' + attr(product.name) + '"></button>'
+          ).join('') + '</div></div>' +
           '<div class="royal-product-info"><span class="royal-p-kicker">' + safe(product.category || 'Store Royal') + '</span>' +
             '<h1>' + safe(product.name) + '</h1>' +
             '<p class="royal-p-rating" id="royalProductRatingSummary">Carregando avaliações…</p>' +
@@ -196,6 +200,15 @@
     const scroller = dialog.querySelector('.royal-product-scroll');
     if (scroller) scroller.scrollTop = 0;
     dialog.addEventListener('click', async event => {
+      const imageButton = event.target.closest('button[data-image-index]');
+      if (imageButton) {
+        const imageIndex = Number(imageButton.dataset.imageIndex);
+        if (!Number.isInteger(imageIndex) || !gallery[imageIndex]) return;
+        const image = dialog.querySelector('#royalSelectedProductImage');
+        if (image) image.src = gallery[imageIndex];
+        dialog.querySelectorAll('button[data-image-index]').forEach(button => button.classList.toggle('royal-p-thumbnail-active', button === imageButton));
+        return;
+      }
       const button = event.target.closest('button[data-action]');
       if (!button) return;
       const action = button.dataset.action;
