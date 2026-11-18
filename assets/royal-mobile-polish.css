@@ -1,0 +1,395 @@
+/* L&A Royal Advisory — mobile quality pass
+   2026-11-18 | Follow-up after PR #58
+   Scope: visual consistency, real contrast, mobile header, scrollable panels.
+   This stylesheet loads last and does not change cart/payment/auth logic. */
+:root {
+  --la-petrol:#003737;
+  --la-petrol-2:#0b4543;
+  --la-sage:#35675c;
+  --la-blue-mist:#c1d1de;
+  --la-taupe:#b19981;
+  --la-pearl:#cecac7;
+  --la-cream:#f5f3f0;
+  --la-text:#173d3b;
+  --la-muted:#4a6966;
+}
+html,body{max-width:100%;overflow-x:clip}
+:is(button,a,input,select,textarea,[role="button"]):focus-visible{
+  outline:2px solid var(--la-taupe)!important;
+  outline-offset:3px
+}
+
+/* 1 — Unified palette for headings, text and controls in the actual store. */
+#loja{color:var(--la-text)!important;background:linear-gradient(155deg,var(--la-cream),var(--la-pearl))!important}
+#loja :is(h1,h2,h3,h4,h5),#faq :is(h2,h3),footer :is(h2,h3){color:var(--la-text)}
+#loja :is(.text-slate-500,.text-slate-600,.text-slate-700),
+#faq :is(.text-slate-500,.text-slate-600){color:var(--la-muted)!important}
+#loja :is(.text-amber-600,.text-amber-500,.text-amber-400),
+#faq .text-amber-600{color:var(--la-sage)!important}
+#loja .gradient-gold,#loja button.gradient-gold{background:var(--la-sage)!important;color:#fff!important}
+#loja button:focus-visible,#catalogContainer [role="button"]:focus-visible{
+  outline:3px solid var(--la-sage)!important;outline-offset:3px!important
+}
+
+/* 2 — Product captions: white on genuinely dark overlay, never petrol on petrol. */
+#catalogContainer .royal-image-only-card{
+  border:1px solid rgba(53,103,92,.22)!important;
+  border-radius:17px!important;
+  box-shadow:0 8px 22px rgba(0,55,55,.09)!important;
+  contain:paint
+}
+#catalogContainer .royal-image-only-card .royal-image-card-caption{
+  background:linear-gradient(0deg,rgba(0,31,30,.98) 0%,rgba(0,38,37,.78) 55%,rgba(0,38,37,0) 100%)!important;
+  padding:36px 11px 12px!important;color:#fff!important;gap:5px!important
+}
+#catalogContainer .royal-image-only-card .royal-image-card-caption h3{
+  color:#fff!important;-webkit-text-fill-color:#fff!important;
+  font-size:clamp(12px,3.1vw,16px)!important;
+  line-height:1.27!important;font-weight:700!important;
+  display:-webkit-box!important;-webkit-box-orient:vertical!important;
+  -webkit-line-clamp:2!important;overflow:hidden!important;
+  text-shadow:0 1px 4px rgba(0,0,0,.35)
+}
+#catalogContainer .royal-image-only-card .royal-image-card-caption span{
+  color:#e4f0ee!important;-webkit-text-fill-color:#e4f0ee!important;
+  font-size:12px!important;font-weight:600!important
+}
+#catalogContainer .royal-image-only-card .royal-full-card-image{
+  width:100%!important;height:100%!important;object-fit:cover!important
+}
+#catalogContainer .product-carousel-group .la-carousel-arrow{
+  background:var(--la-petrol)!important;color:#fff!important;
+  border-color:var(--la-sage)!important
+}
+#catalogContainer .product-carousel-group :is(.text-amber-500,.text-amber-600),
+#catalogContainer .product-carousel-group h3:not(.royal-image-card-caption h3){
+  color:var(--la-sage)!important
+}
+
+/* 3 — Real glass navigation. Hide duplicate desktop controls on mobile.
+   Keep one cart, hamburger and readable brand without moving actions below the bar. */
+.royal-glass-header{border-color:rgba(193,209,222,.2)!important}
+.royal-glass-inner{box-sizing:border-box;min-width:0;max-width:100%;isolation:isolate}
+.royal-glass-inner .royal-brand-heading{min-width:0}
+.royal-utility-bar{min-width:0}
+.royal-a11y{min-width:0}
+#mobileMenuButton,#mobileUtilityActions{touch-action:manipulation}
+#mobileMenuPanel{scrollbar-width:thin;scrollbar-color:var(--la-sage) transparent}
+
+/* 4 — Login, registration and password actions. Links are links,
+   not navy rectangles and password controls remain separated from the input text. */
+#authModal .royal-auth-scroll-region{background:var(--la-cream)!important;color:var(--la-text)!important}
+#authModal :is(#authFormTitle,#authFormDescription){color:var(--la-text)!important}
+#authModal #authFormDescription{color:var(--la-muted)!important}
+#authModal #authFormBadge{
+  background:#e8f0eb!important;color:var(--la-sage)!important;border-color:var(--la-pearl)!important
+}
+#authModal #authModeTabs{background:var(--la-pearl)!important;gap:4px!important}
+#authModal #authModeTabs button{border-radius:9px!important;min-height:46px!important}
+#authModal #authModeTabs button.bg-white{
+  background:var(--la-cream)!important;color:var(--la-text)!important
+}
+#authModal #authModeTabs button:not(.bg-white){
+  background:transparent!important;color:var(--la-muted)!important
+}
+#authModal button[onclick*="sendPasswordReset"],
+#authModal button[onclick*="togglePasswordVisibility"],
+#authModal button[onclick*="switchAuthScreen"]:not(#authLoginTab):not(#authRegisterTab){
+  background:transparent!important;box-shadow:none!important;
+  border:0!important;border-radius:8px!important;color:var(--la-sage)!important;
+  -webkit-text-fill-color:var(--la-sage)!important;
+  min-height:36px!important;padding:5px 8px!important;
+}
+#authModal button[onclick*="togglePasswordVisibility"]{
+  right:8px!important;min-width:38px!important;min-height:38px!important;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  top:50%!important;transform:translateY(-50%)!important
+}
+#authModal :is(input,textarea,select){
+  background:#fff!important;color:var(--la-text)!important;
+  border-color:var(--la-pearl)!important;accent-color:var(--la-sage)!important
+}
+#authModal :is(input,textarea,select):focus{
+  border-color:var(--la-sage)!important;--tw-ring-color:rgba(53,103,92,.3)!important;
+  box-shadow:0 0 0 2px rgba(53,103,92,.2)!important
+}
+#authModal input[type="password"]{padding-right:54px!important}
+#authModal :is(.bg-slate-900,.bg-blue-950,.bg-amber-500):not(input){
+  /* Button colors only; do not recolor the form background. */
+  border-color:var(--la-pearl)
+}
+#authModal button.gradient-gold{
+  background:var(--la-sage)!important;color:#fff!important;-webkit-text-fill-color:#fff!important
+}
+
+/* 5 — Admin panel tabs and dashboard: selected item always has WHITE text.
+   Compact the user header and numbers without reducing touch targets. */
+#adminDashboardScroller{background:var(--la-cream)!important;color:var(--la-text)!important}
+#adminDashboardScroller :is(h1,h2,h3,h4){color:var(--la-text)!important}
+#adminDashboardScroller .admin-tab{color:var(--la-text)!important;min-height:44px!important}
+#adminDashboardScroller .admin-tab.bg-slate-900{
+  background:var(--la-petrol)!important;color:#fff!important;
+  -webkit-text-fill-color:#fff!important
+}
+#adminDashboardScroller .admin-tab.bg-slate-900 :is(svg,i,span){
+  color:#fff!important;stroke:#fff!important
+}
+#adminDashboardScroller .admin-tab:not(.bg-slate-900):hover{
+  background:#e2e9e3!important;color:var(--la-petrol)!important
+}
+#adminDashboardScroller .text-amber-600{color:var(--la-sage)!important}
+#adminDashboardScroller >div:first-of-type{margin-bottom:16px!important}
+#adminDashboardScroller .admin-section .bg-white{
+  background:#fff!important;border-color:rgba(53,103,92,.17)!important
+}
+
+/* 6 — Order history: readable descriptions, consistent prices and compact cards;
+   keep pending/paid/cancelled badge colors for status semantics. */
+#customerOrdersModal .account-popover-shell{
+  background:var(--la-cream)!important;color:var(--la-text)!important
+}
+#customerOrdersModal .account-popover-shell :is(h2,h3,h4){
+  color:var(--la-text)!important
+}
+#customerOrdersModal p.text-slate-500,
+#customerOrdersModal p.text-slate-600{
+  color:var(--la-muted)!important;-webkit-text-fill-color:var(--la-muted)!important
+}
+#customerOrdersList{display:grid!important;gap:12px!important}
+#customerOrdersList>div{
+  background:#fff!important;border:1px solid rgba(53,103,92,.2)!important;
+  box-shadow:0 3px 10px rgba(0,55,55,.05)!important;
+  padding:14px!important;border-radius:14px!important
+}
+#customerOrdersList>div>div:first-child{
+  gap:10px!important;margin-bottom:11px!important
+}
+#customerOrdersList .text-amber-600{
+  color:var(--la-sage)!important;-webkit-text-fill-color:var(--la-sage)!important
+}
+#customerOrdersList button.bg-slate-900{
+  color:#fff!important;background:var(--la-sage)!important;
+  -webkit-text-fill-color:#fff!important;min-height:42px!important
+}
+
+/* 7 — Product detail: photograph fully visible, not a screen-height wall.
+   Keep the inverted petroleum page, reduce mobile gallery height. */
+.royal-product-page .royal-product-scroll{scrollbar-gutter:auto!important}
+.royal-product-photo{overflow:hidden!important;min-height:0!important}
+.royal-product-photo img{
+  display:block!important;width:100%!important;height:auto!important;
+  max-height:min(46vh,460px)!important;object-fit:contain!important
+}
+.royal-product-info{min-width:0!important}
+.royal-product-header{
+  display:flex!important;align-items:center!important;gap:8px!important
+}
+.royal-product-header button{
+  min-height:40px!important;white-space:nowrap!important
+}
+.royal-product-header span{min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important}
+
+/* 8 — Dedicated portrait composition: headline in the upper part,
+   product photograph appears below without extreme 16:9 zoom/cropping. */
+@media(max-width:767px){
+  #inicio.royal-fashion-hero{
+    min-height:clamp(520px,75svh,740px)!important;
+    display:flex!important;align-items:flex-start!important;justify-content:center!important
+  }
+  #inicio .royal-hero-photo{
+    background-image:url('./hero/hero-ocean-mobile.webp'),linear-gradient(160deg,#002b2b,#35675c)!important;
+    background-repeat:no-repeat!important;
+    background-position:center bottom!important;
+    background-size:118% auto!important;
+    background-color:var(--la-petrol)!important
+  }
+  #inicio .royal-hero-shade{
+    background:linear-gradient(180deg,rgba(0,35,35,.92) 0%,rgba(0,35,35,.78) 36%,rgba(0,35,35,.16) 72%,rgba(0,35,35,.1))!important
+  }
+  #inicio .royal-fashion-content{
+    justify-content:flex-start!important;
+    padding:clamp(44px,9vh,85px) 18px 26px!important;
+    gap:17px!important
+  }
+  #inicio .royal-fashion-title{
+    font-size:clamp(2rem,9vw,3.2rem)!important;
+    line-height:1.12!important;max-width:350px!important;
+    text-wrap:balance!important
+  }
+  #inicio .royal-fashion-cta{min-height:48px!important}
+}
+
+/* 9 — Floating actions: separated in safe area; hide over full-screen dialogs. */
+#backToTop{
+  right:calc(16px + env(safe-area-inset-right,0px))!important;
+  bottom:calc(84px + env(safe-area-inset-bottom,0px))!important;
+  width:44px!important;height:44px!important;
+  background:var(--la-petrol)!important;color:var(--la-blue-mist)!important;
+  border:1px solid var(--la-taupe)!important;z-index:45!important
+}
+body>a[aria-label="Falar no WhatsApp"]{
+  right:calc(16px + env(safe-area-inset-right,0px))!important;
+  bottom:calc(16px + env(safe-area-inset-bottom,0px))!important;
+  width:49px!important;height:49px!important;z-index:45!important
+}
+body:has(#authModal:not(.hidden)) :is(#backToTop,a[aria-label="Falar no WhatsApp"]),
+body:has(#customerOrdersModal:not(.hidden)) :is(#backToTop,a[aria-label="Falar no WhatsApp"]),
+body:has(#adminDashboardModal:not(.hidden)) :is(#backToTop,a[aria-label="Falar no WhatsApp"]),
+body:has(.royal-product-page) :is(#backToTop,a[aria-label="Falar no WhatsApp"]){
+  display:none!important
+}
+
+/* 10 — Scrolling for all visible account/admin modals with independently
+   scrollable content; no missing wheel/touch scroll or fixed 100vh mistakes. */
+:is(#customerOrdersModal,#customerProfileModal,#affiliateDashboardModal,#affiliateCatalogModal,
+#adminDashboardModal,#checkoutModal,#cartModal,#trackingModal,#returnRequestModal,
+#orderDetailsModal,#adminProductFormModal,#adminOrderFormModal,#adminUserFormModal){
+  max-height:100dvh!important;overscroll-behavior:contain!important
+}
+.account-popover-shell.account-modal-scroll,
+#adminDashboardScroller,
+.royal-product-scroll,
+.royal-auth-scroll-region,
+#orderDetailsModal>div,
+#checkoutModal>div,
+#cartModal>div{
+  overflow-y:auto!important;overflow-x:hidden!important;
+  overscroll-behavior-y:contain!important;
+  touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important
+}
+#adminDashboardScroller{
+  height:calc(100dvh - 20px)!important;max-height:calc(100dvh - 20px)!important;
+  scrollbar-width:thin!important;scrollbar-color:var(--la-sage) transparent!important
+}
+:is(#trackingModal,#returnRequestModal,#orderDetailsModal,#checkoutModal,#cartModal)>div{
+  max-height:calc(100dvh - 28px)!important
+}
+#mobileMenuPanel.open{
+  max-height:calc(100dvh - 110px)!important;overflow-y:auto!important
+}
+@media(min-width:768px) and (max-width:1023px){
+ .royal-glass-inner{gap:10px!important}
+ .royal-brand-heading h1{font-size:clamp(15px,2vw,22px)!important}
+}
+/* Tablet/mobile: grid uses the CURRENT .royal-glass-inner (not stale .max-w-7xl).
+   The original mobile utility buttons are the only ones rendered. */
+@media(max-width:1023px){
+ .royal-glass-header{padding:6px!important}
+ .royal-glass-inner{
+   position:relative!important;display:grid!important;
+   grid-template-columns:40px minmax(0,1fr) 39px 39px!important;
+   align-items:center!important;min-height:65px!important;
+   height:auto!important;padding:8px 10px!important;
+   gap:7px!important;border-radius:24px!important
+ }
+ .royal-glass-inner>a[aria-label="Voltar ao início"]{
+   grid-column:1!important;grid-row:1!important;justify-self:start!important
+ }
+ .royal-glass-inner>a[aria-label="Voltar ao início"]>div{
+   width:39px!important;height:39px!important;
+   font-size:12px!important;min-width:39px!important
+ }
+ .royal-glass-inner>.royal-brand-heading{
+   grid-column:2!important;grid-row:1!important;min-width:0!important;
+   text-align:center!important;justify-self:stretch!important
+ }
+ .royal-glass-inner>.royal-brand-heading h1{
+   font-size:clamp(11px,2.75vw,18px)!important;
+   letter-spacing:.04em!important;overflow:hidden!important;
+   white-space:nowrap!important;text-overflow:ellipsis!important
+ }
+ .royal-glass-inner>.royal-brand-heading p{display:none!important}
+ .royal-glass-inner>div.flex.items-center.justify-end{
+   display:none!important
+ }
+ #mobileUtilityActions{
+   grid-column:3!important;grid-row:1!important;
+   position:static!important;inset:auto!important;
+   display:flex!important;align-items:center!important;
+   justify-content:center!important;z-index:2!important;
+   width:39px!important;min-width:39px!important
+ }
+ #mobileUtilityActions>button{
+   display:flex!important;width:39px!important;height:39px!important;
+   padding:8px!important;align-items:center!important;
+   justify-content:center!important;border-color:var(--la-taupe)!important;
+   background:var(--la-petrol-2)!important;color:var(--la-blue-mist)!important
+ }
+ #mobileUtilityActions>button[aria-label="Abrir navegação"]{display:none!important}
+ #mobileMenuButton{
+   grid-column:4!important;grid-row:1!important;
+   position:static!important;display:flex!important;
+   width:39px!important;height:39px!important;
+   justify-self:center!important;align-items:center!important;
+   justify-content:center!important;border:1px solid var(--la-taupe)!important;
+   border-radius:12px!important;background:var(--la-petrol-2)!important;
+   color:var(--la-blue-mist)!important
+ }
+ #mobileMenuPanel{
+   position:fixed!important;top:clamp(82px,12vh,110px)!important;
+   right:10px!important;left:auto!important;
+   width:min(86vw,320px)!important;z-index:100!important
+ }
+}
+/* Exactly two full cards per row on phones; no clipped third card. */
+@media(max-width:767px){
+ #catalogContainer .product-carousel-group .product-cards-layout{
+   display:grid!important;
+   grid-template-columns:repeat(2,minmax(0,1fr))!important;
+   gap:12px!important;width:100%!important;max-width:100%!important;
+   overflow-x:visible!important;overflow-y:visible!important;
+   scroll-snap-type:none!important
+ }
+ #catalogContainer .product-carousel-group .royal-image-only-card{
+   width:100%!important;min-width:0!important;max-width:none!important;
+   aspect-ratio:4/5!important;border-radius:16px!important
+ }
+ #catalogContainer .product-carousel-group .la-carousel-nav{display:none!important}
+ #catalogContainer .product-carousel-group .la-carousel-arrow{display:none!important}
+ #catalogContainer .product-carousel-group .royal-image-card-caption h3{
+   font-size:clamp(12px,3.4vw,15px)!important
+ }
+ #customerOrdersList>div{padding:12px!important}
+ #customerOrdersModal .account-popover-shell{
+   margin:7px auto!important;max-height:calc(100dvh - 14px)!important;
+   padding:18px 14px!important
+ }
+ #customerOrdersModal .account-popover-shell>div:first-of-type{
+   padding-right:40px!important;margin-bottom:13px!important
+ }
+ #adminDashboardModal{padding:7px!important}
+ #adminDashboardScroller{
+   max-height:calc(100dvh - 14px)!important;
+   height:calc(100dvh - 14px)!important;
+   padding:16px 14px!important
+ }
+ #adminDashboardScroller>div:first-of-type{padding-right:30px!important}
+ #adminDashboardScroller .admin-tab{
+   padding:8px 10px!important;font-size:12px!important
+ }
+ #adminDashboardScroller > div:first-of-type{gap:12px!important}
+ .royal-product-main{gap:12px!important}
+ .royal-product-photo img{
+   max-height:min(34vh,330px)!important;object-fit:contain!important
+ }
+ .royal-p-thumbnails{gap:7px!important;padding:7px 0!important}
+ .royal-p-thumbnails button{flex-basis:60px!important;height:60px!important}
+ .royal-product-header{min-height:54px!important;padding:8px 9px!important}
+ .royal-product-header button{font-size:12px!important;padding:6px 8px!important}
+ #authModal .royal-auth-scroll-region{
+   padding:14px 16px!important;justify-content:flex-start!important
+ }
+ #authModal .royal-auth-scroll-region>.max-w-xl{padding-top:20px!important}
+ #authModal #authFormTitle{font-size:clamp(25px,7vw,34px)!important}
+ #authModal .royal-auth-scroll-region>button[aria-label="Fechar autenticação"]{
+   top:9px!important;right:9px!important
+ }
+}
+@media(min-width:1800px){
+ .royal-glass-inner{max-width:2200px!important;margin:auto!important}
+ #catalogContainer .royal-image-only-card .royal-image-card-caption h3{font-size:18px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ #catalogContainer .royal-image-only-card *,
+ .royal-fashion-cta{transition:none!important;animation:none!important}
+}
