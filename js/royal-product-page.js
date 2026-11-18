@@ -201,7 +201,10 @@
       const action = button.dataset.action;
       if (action === 'close') return removePage(true);
       if (action === 'share') {
-        const url = new URL(location.href);
+        const affiliate = isAffiliate && state.affiliates.find(a => a.userId === state.currentUser?.id && a.code);
+        const url = new URL(affiliate && typeof buildAffiliateProductLink === 'function'
+          ? buildAffiliateProductLink(product.id, affiliate.code)
+          : location.href, location.href);
         url.searchParams.set('produto', String(product.id));
         url.searchParams.delete('prod');
         if (navigator.share) {
