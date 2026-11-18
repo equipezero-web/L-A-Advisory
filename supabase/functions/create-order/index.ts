@@ -377,10 +377,12 @@ Deno.serve(async (req) => {
       validAffiliateCode = affiliate.code;
 
       for (const item of orderItems) {
+        const product = products.find(p => p.id === item.product_id);
+        const commissionRate = Math.min(100, Math.max(0, Number(product?.commission || 0)));
         item.affiliate_commission = money(
           Number(item.gross_price || 0) *
           Number(item.quantity || 0) *
-          0.20
+          commissionRate / 100
         );
       }
     }

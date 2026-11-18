@@ -15,6 +15,10 @@ const MP_WEBHOOK_SECRET = Deno.env.get('MP_WEBHOOK_SECRET') || '';
 const SHEETS_WEBHOOK_URL = Deno.env.get('SHEETS_WEBHOOK_URL') || '';
 const SHEETS_WEBHOOK_SECRET = Deno.env.get('SHEETS_WEBHOOK_SECRET') || '';
 
+function createAdminClient() {
+  return createClient(SUPABASE_URL, SERVICE, { auth: { persistSession: false, autoRefreshToken: false } });
+}
+
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: corsHeaders });
 }
@@ -49,7 +53,7 @@ async function validateMercadoPagoSignature(req: Request): Promise<boolean> {
   return diff === 0;
 }
 
-async function logSaleToSheet(admin: ReturnType<typeof createClient>, orderId: string, paidAtIso: string) {
+async function logSaleToSheet(admin: ReturnType<typeof createAdminClient>, orderId: string, paidAtIso: string) {
   if (!SHEETS_WEBHOOK_URL || !SHEETS_WEBHOOK_SECRET) return;
   try {
     const { data: order } = await admin.from('orders').select('code,affiliate_code').eq('id', orderId).maybeSingle();
@@ -60,13 +64,25 @@ async function logSaleToSheet(admin: ReturnType<typeof createClient>, orderId: s
     const date = new Intl.DateTimeFormat('pt-BR', { timeZone: tz, day: '2-digit', month: '2-digit', year: 'numeric' }).format(paidAt);
     const time = new Intl.DateTimeFormat('pt-BR', { timeZone: tz, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(paidAt);
     const rows = items.map((item: any) => [order.code, item.product_name, Number(item.quantity), Number(item.unit_price), Number(item.subtotal), order.affiliate_code || '', date, time]);
-    await fetch(SHEETS_WEBHOOK_URL, {
+    // A payment notification must not duplicate spreadsheet rows. Do not retry
+    // automatically unless the receiving Google Apps Script supports idempotency.
+    const response = await fetch(SHEETS_WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ secret: SHEETS_WEBHOOK_SECRET, rows }),
       redirect: 'follow',
       signal: AbortSignal.timeout(8000),
     });
+    if (!response.ok) {
+      console.error('Sincronização Google Sheets não confirmada:', response.status, 'pedido:', orderId);
+      return;
+    }
+    const receipt = await response.json().catch(() => null);
+    if (!receipt || receipt.ok !== true) {
+      // The Apps Script may return HTTP 200 even when the secret is wrong or
+      // the spreadsheet write fails. Never report this as a successful sync.
+      console.error('Google Sheets não confirmou gravação do pedido:', orderId);
+    }
   } catch (error) {
     console.error('Falha ao registrar venda na planilha:', error instanceof Error ? error.message : error);
   }
@@ -80,7 +96,7 @@ function normalizeStatus(value: unknown) {
   return map[String(value || '').toLowerCase()] || 'pending';
 }
 
-async function savePayment(admin: ReturnType<typeof createClient>, orderId: string, paymentId: string, status: string, amount: number, currency: string, method: string, providerStatus: unknown, detail: unknown) {
+async function savePayment(admin: ReturnType<typeof createAdminClient>, orderId: string, paymentId: string, status: string, amount: number, currency: string, method: string, providerStatus: unknown, detail: unknown) {
   if (!paymentId) return;
   const { data: existing } = await admin.from('payments').select('id').eq('provider_payment_id', paymentId).maybeSingle();
   const row = {
@@ -99,7 +115,7 @@ async function savePayment(admin: ReturnType<typeof createClient>, orderId: stri
   else await admin.from('payments').insert({ id: crypto.randomUUID(), ...row });
 }
 
-async function applyOrderStatus(admin: ReturnType<typeof createClient>, orderId: string, paymentStatus: string) {
+async function applyOrderStatus(admin: ReturnType<typeof createAdminClient>, orderId: string, paymentStatus: string) {
   if (paymentStatus === 'approved') {
     const paidAt = new Date().toISOString();
     const { data: applied, error } = await admin.rpc('fulfill_paid_order_atomic', { p_order_id: orderId, p_paid_at: paidAt });
@@ -121,7 +137,7 @@ Deno.serve(async (req) => {
     const payload = await req.json().catch(() => ({}));
     const type = String(payload?.type || payload?.topic || '').toLowerCase();
     if (type === 'mp-connect' || type === 'application.authorized') return json({ received: true });
-    const admin = createClient(SUPABASE_URL, SERVICE, { auth: { persistSession: false, autoRefreshToken: false } });
+    const admin = createAdminClient();
 
     if (type === 'order' || type === 'orders') {
       const mpOrderId = String(payload?.data?.id || payload?.id || '').trim();

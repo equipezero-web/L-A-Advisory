@@ -1,0 +1,58 @@
+name: Frontend integrity checks
+on:
+  push:
+    branches: [main, fix/full-audit-20261118]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  html-and-js:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate HTML script/style boundaries and inline JavaScript syntax
+        run: |
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+          import subprocess
+          import tempfile
+          import sys
+          class Check(HTMLParser):
+              def __init__(self):
+                  super().__init__(convert_charrefs=False)
+                  self.styles=0
+                  self.scripts=[]
+                  self.current=None
+              def handle_starttag(self,tag,attrs):
+                  if tag=='style': self.styles+=1
+                  if tag=='script':
+                      attrs=dict(attrs)
+                      if 'src' not in attrs and attrs.get('type','text/javascript') in ('text/javascript','module',''):
+                          self.current=[]
+              def handle_data(self,data):
+                  if self.current is not None: self.current.append(data)
+              def handle_endtag(self,tag):
+                  if tag=='style': self.styles-=1
+                  if self.styles<0: raise ValueError('unmatched style closer')
+                  if tag=='script' and self.current is not None:
+                      self.scripts.append(''.join(self.current))
+                      self.current=None
+          doc=Path('index.html').read_text(encoding='utf-8')
+          parsed=Check()
+          parsed.feed(doc)
+          assert parsed.styles==0, 'Unclosed <style> block'
+          assert parsed.current is None, 'Unclosed <script> block'
+          assert 'id="royal-consulting-navigation"' in doc
+          assert len(parsed.scripts)>=4, 'Inline scripts unexpectedly missing'
+          for i, source in enumerate(parsed.scripts):
+              with tempfile.NamedTemporaryFile(mode='w',suffix='.mjs',encoding='utf8') as tmp:
+                  tmp.write(source)
+                  tmp.flush()
+                  result=subprocess.run(['node','--check',tmp.name],capture_output=True,text=True)
+                  if result.returncode:
+                      print('Inline script',i,'has syntax error',result.stderr,file=sys.stderr)
+                      sys.exit(1)
+          print('Passed HTML style and',len(parsed.scripts),'inline JavaScript checks')
+          PY

@@ -17,6 +17,8 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
+      - name: Type check checkout and payment webhook
+        run: deno check --node-modules-dir=auto supabase/functions/create-order/index.ts supabase/functions/mercado-pago-webhook/index.ts
       - name: Financial flow tests
         run: deno test supabase/functions/tests/financial-flow-test.ts
       - name: Royal AI product mutation tests
