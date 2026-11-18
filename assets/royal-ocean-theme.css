@@ -1,0 +1,62 @@
+/* L&A Royal Advisory — Ocean Mineral Palette
+   Paleta extraída da referência aprovada: petróleo #003737, sálvia #35675C,
+   azul névoa #C1D1DE, taupe #B19981 e pérola #CECAC7.
+   Integração visual sem modificar autenticação, checkout ou regras de negócio. */
+:root{
+  --royal-deep:#003737;
+  --royal-sage:#35675C;
+  --royal-mist:#C1D1DE;
+  --royal-taupe:#B19981;
+  --royal-pearl:#CECAC7;
+  --royal-cream:#F5F3F0;
+  --royal-ink:#163C3A;
+  --royal-shade:rgba(0,55,55,.26);
+  color-scheme:light;
+}
+html{scrollbar-color:var(--royal-sage) var(--royal-pearl)}
+body{background:var(--royal-deep)!important}
+body.bg-slate-900,body .bg-slate-900,body .bg-slate-950,body .bg-blue-950{background-color:var(--royal-deep)}
+.royal-utility-bar{background:#002e2e!important;border-color:rgba(193,209,222,.22)!important;color:var(--royal-mist)!important}
+.royal-security-note svg{color:var(--royal-taupe)!important}
+.royal-a11y button{border-color:rgba(193,209,222,.44)!important;color:var(--royal-mist)!important}
+.royal-a11y button:hover,.royal-a11y button:focus-visible{background:rgba(193,209,222,.14)!important;border-color:var(--royal-taupe)!important}
+.royal-a11y-label{color:var(--royal-mist)!important}
+.royal-glass-header{background:var(--royal-deep)!important;border-color:rgba(177,153,129,.25)!important}
+.royal-glass-inner{background:linear-gradient(110deg,rgba(193,209,222,.22),rgba(53,103,92,.17),rgba(193,209,222,.13))!important;border-color:rgba(193,209,222,.27)!important;box-shadow:0 10px 35px rgba(0,35,35,.25),inset 0 1px rgba(255,255,255,.14)!important}
+.royal-glass-header .text-amber-400,.royal-glass-header .text-amber-300{color:var(--royal-taupe)!important}
+.royal-glass-header .gradient-gold,.gradient-gold{background:linear-gradient(135deg,var(--royal-taupe),var(--royal-mist),var(--royal-taupe))!important;color:var(--royal-deep)!important}
+.text-gradient-gold{background:linear-gradient(125deg,var(--royal-mist),var(--royal-taupe))!important;background-clip:text!important;-webkit-background-clip:text!important;-webkit-text-fill-color:transparent}
+.shadow-gold{box-shadow:0 5px 23px rgba(53,103,92,.3)!important}
+.royal-desktop-nav a{color:var(--royal-mist)!important}
+.royal-desktop-nav a:hover,.royal-desktop-nav a:focus-visible{color:var(--royal-taupe)!important}
+.royal-fashion-hero{background:var(--royal-deep)!important}
+.royal-hero-photo{background-color:var(--royal-deep)!important;background-image:url('./royal-diamond-hero.svg'),linear-gradient(110deg,#003737,#35675C)!important;background-position:center!important;background-size:cover!important}
+.royal-hero-shade{background:linear-gradient(90deg,rgba(0,30,30,.56),rgba(0,55,55,.19) 53%,rgba(0,35,35,.16))!important}
+.royal-hero-crown,.royal-hero-crown svg{color:var(--royal-taupe)!important}
+.royal-hero-crown span{background:var(--royal-taupe)!important}
+.royal-fashion-title{color:#f5f3f0!important;text-shadow:0 3px 18px #002626!important}
+.royal-fashion-title span{color:var(--royal-mist)!important;-webkit-text-fill-color:var(--royal-mist)!important}
+.royal-fashion-cta{background:rgba(53,103,92,.86)!important;border-color:var(--royal-taupe)!important;color:#fff!important}
+.royal-fashion-cta:hover,.royal-fashion-cta:focus-visible{background:var(--royal-deep)!important;box-shadow:0 7px 26px rgba(0,35,35,.36)!important}
+.royal-store-shortcuts{background:#002d2d!important;border-color:rgba(177,153,129,.24)!important}
+.royal-store-shortcuts a,.royal-store-shortcuts button{color:var(--royal-mist)!important;border-color:rgba(193,209,222,.27)!important}
+.royal-store-shortcuts a:hover,.royal-store-shortcuts button:hover{background:var(--royal-sage)!important;color:#fff!important}
+#loja{background:linear-gradient(165deg,var(--royal-cream),var(--royal-pearl))!important;border-color:var(--royal-taupe)!important;color:var(--royal-ink)!important}
+#loja h2,#loja h3,#loja h4,#loja .text-slate-900{color:var(--royal-ink)!important}
+#loja .text-amber-600,#loja .text-amber-500,#loja .text-amber-400{color:var(--royal-sage)!important}
+#loja .border-amber-400,#loja .border-amber-500{border-color:var(--royal-taupe)!important}
+#loja .product-card{background:#fff!important;border-color:rgba(53,103,92,.15)!important;box-shadow:0 8px 28px rgba(0,55,55,.09)!important}
+#loja .product-card:hover{box-shadow:0 15px 38px rgba(0,55,55,.18)!important}
+#loja input:focus,#loja select:focus{outline-color:var(--royal-sage)!important;border-color:var(--royal-sage)!important}
+main section:not(#inicio):not(#loja) .text-amber-400,main section:not(#inicio):not(#loja) .text-amber-500,main section:not(#inicio):not(#loja) .text-amber-600{color:var(--royal-sage)}
+main section:not(#inicio):not(#loja) .border-amber-400,main section:not(#inicio):not(#loja) .border-amber-500{border-color:var(--royal-taupe)}
+footer{background:#002e2e!important;border-color:var(--royal-sage)!important;color:var(--royal-mist)!important}
+footer a:hover{color:var(--royal-taupe)!important}
+#siteAlertBox{border-color:var(--royal-taupe)!important}
+#siteAlertOk{background:var(--royal-sage)!important;color:#fff!important}
+:where(button,a,input,select,textarea):focus-visible{outline:2px solid var(--royal-taupe);outline-offset:3px}
+@media(max-width:640px){
+ .royal-hero-photo{background-position:63% center!important}
+ .royal-hero-shade{background:linear-gradient(90deg,rgba(0,35,35,.74),rgba(0,40,40,.28))!important}
+}
+@media(prefers-reduced-motion:reduce){.royal-hero-photo{transform:none!important}}
