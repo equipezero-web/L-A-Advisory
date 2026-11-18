@@ -60,13 +60,28 @@ async function logSaleToSheet(admin: ReturnType<typeof createClient>, orderId: s
     const date = new Intl.DateTimeFormat('pt-BR', { timeZone: tz, day: '2-digit', month: '2-digit', year: 'numeric' }).format(paidAt);
     const time = new Intl.DateTimeFormat('pt-BR', { timeZone: tz, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(paidAt);
     const rows = items.map((item: any) => [order.code, item.product_name, Number(item.quantity), Number(item.unit_price), Number(item.subtotal), order.affiliate_code || '', date, time]);
-    await fetch(SHEETS_WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ secret: SHEETS_WEBHOOK_SECRET, rows }),
-      redirect: 'follow',
-      signal: AbortSignal.timeout(8000),
-    });
+    // Only successful 2xx acknowledgements count as a synchronized sale.
+    // Retries are intentionally bounded to prevent delaying payment processing.
+    let delivered = false;
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        const response = await fetch(SHEETS_WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ secret: SHEETS_WEBHOOK_SECRET, rows }),
+          redirect: 'follow',
+          signal: AbortSignal.timeout(5000),
+        });
+        if (!response.ok) throw new Error('Google Sheets webhook HTTP ' + response.status);
+        delivered = true;
+        break;
+      } catch (error) {
+        console.error('Falha na sincronização da planilha, tentativa ' + attempt + ':', error instanceof Error ? error.message : error);
+      }
+    }
+    if (!delivered) {
+      console.error('Sincronização Google Sheets não confirmada; pedido:', orderId);
+    }
   } catch (error) {
     console.error('Falha ao registrar venda na planilha:', error instanceof Error ? error.message : error);
   }
