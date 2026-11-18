@@ -11764,6 +11764,7 @@ function openNavigationModal() {
         function enterAffiliateMode() {
             document.body.classList.remove('store-open-mode');
             document.body.classList.add('affiliate-mode');
+            document.body.classList.remove('royal-consulting-visible');
             const banner = document.getElementById('affiliateCatalogStatus');
             if (banner) banner.classList.remove('hidden');
             const openStoreWrap = document.getElementById('virtualStoreOpenWrap');
@@ -11794,6 +11795,7 @@ function openNavigationModal() {
         function openVirtualStore() {
             document.body.classList.remove('affiliate-mode');
             document.body.classList.add('store-open-mode');
+            document.body.classList.remove('royal-consulting-visible');
             const banner = document.getElementById('affiliateCatalogStatus');
             if (banner) banner.classList.add('hidden');
             const openStoreWrap = document.getElementById('virtualStoreOpenWrap');
@@ -13787,7 +13789,9 @@ async function loadRoyalAiPanel() {
 }
 
 function calculateProductAffiliateCommission(product, quantity = 1) {
-    return (Number(product?.price) || 0) * (Number(quantity) || 0) * 0.20;
+    const base = Math.max(0, Number(product?.price) || 0);
+    const rate = Math.min(100, Math.max(0, Number(product?.commission) || 0));
+    return Math.round(base * (Number(quantity) || 0) * rate) / 100;
 }
 
 let catalogShowingAll = false;
@@ -15472,19 +15476,25 @@ body.guest-mode #afiliados { display: none !important; }
         font-size: initial;
     }
 }
-    
+</style>
+
 <script src="./js/royal-ai-image-upload.js"></script>
     <script id="royal-consulting-navigation">
         (() => {
             const syncConsulting = () => {
-                if (window.location.hash === '#consultoria') {
-                    document.body.classList.add('royal-consulting-visible');
+                const consultingRequested = window.location.hash === '#consultoria';
+                document.body.classList.toggle('royal-consulting-visible', consultingRequested);
+                if (consultingRequested) {
+                    document.body.classList.remove('store-open-mode');
                 }
             };
             // Reveal the preserved consulting section only after explicit navigation.
             document.addEventListener('click', event => {
                 const target = event.target instanceof Element ? event.target.closest('a[href="#consultoria"]') : null;
-                if (target) document.body.classList.add('royal-consulting-visible');
+                if (target) {
+                    document.body.classList.remove('store-open-mode');
+                    document.body.classList.add('royal-consulting-visible');
+                }
             }, true);
             window.addEventListener('hashchange', syncConsulting);
             if (document.readyState === 'loading') {
