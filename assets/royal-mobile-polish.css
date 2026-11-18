@@ -367,7 +367,7 @@ body:has(.royal-product-page) :is(#backToTop,a[aria-label="Falar no WhatsApp"]){
  #adminDashboardScroller .admin-tab{
    padding:8px 10px!important;font-size:12px!important
  }
- #adminDashboardScroller>div.flex.flex-col.lg\\:flex-row{gap:12px!important}
+ #adminDashboardScroller > div:first-of-type{gap:12px!important}
  .royal-product-main{gap:12px!important}
  .royal-product-photo img{
    max-height:min(34vh,330px)!important;object-fit:contain!important
