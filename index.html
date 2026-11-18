@@ -1711,7 +1711,7 @@
                         <a href="#loja" class="gradient-gold text-[#172033] px-7 py-4 rounded-xl font-bold shadow-gold hover:shadow-[0_18px_55px_rgba(212,175,55,.30)] transition btn-premium">
                             Explorar produtos
                         </a>
-                        <a href="#loja" onclick="openCatalogFilters(); document.getElementById('searchProduct')?.focus({preventScroll:true});" class="px-7 py-4 rounded-xl font-bold border border-amber-400/40 text-amber-300 hover:bg-amber-400 hover:text-[#172033] transition backdrop-blur-sm">
+                        <a href="#loja" onclick="focusRoyalCatalogSearch();" class="px-7 py-4 rounded-xl font-bold border border-amber-400/40 text-amber-300 hover:bg-amber-400 hover:text-[#172033] transition backdrop-blur-sm">
                             Buscar e filtrar
                         </a>
                     </div>
@@ -1730,7 +1730,7 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 royal-store-shortcuts-inner">
                 <a href="#loja"><i data-lucide="shopping-bag" class="w-4 h-4"></i> Todos os produtos</a>
                 <button type="button" onclick="openCatalogFilters(); document.getElementById('loja')?.scrollIntoView({behavior:'smooth'});"><i data-lucide="sliders-horizontal" class="w-4 h-4"></i> Categorias e filtros</button>
-                <button type="button" onclick="openCatalogFilters(); document.getElementById('searchProduct')?.focus({preventScroll:true}); document.getElementById('loja')?.scrollIntoView({behavior:'smooth'});"><i data-lucide="search" class="w-4 h-4"></i> Buscar</button>
+                <button type="button" onclick="focusRoyalCatalogSearch();"><i data-lucide="search" class="w-4 h-4"></i> Buscar</button>
                 <button type="button" onclick="openCartModal()"><i data-lucide="shopping-cart" class="w-4 h-4"></i> Carrinho</button>
             </div>
         </nav>
@@ -15480,6 +15480,17 @@ body.guest-mode #afiliados { display: none !important; }
 
 <script src="./js/royal-ai-image-upload.js"></script>
     <script id="royal-consulting-navigation">
+        window.focusRoyalCatalogSearch = () => {
+            const filters = document.getElementById('catalogFilters');
+            if (filters?.classList.contains('hidden')) {
+                openCatalogFilters();
+            }
+            const input = document.getElementById('searchProduct');
+            if (input) {
+                input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                window.setTimeout(() => input.focus({ preventScroll: true }), 150);
+            }
+        };
         (() => {
             const syncConsulting = () => {
                 const consultingRequested = window.location.hash === '#consultoria';
