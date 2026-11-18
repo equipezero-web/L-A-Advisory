@@ -71,6 +71,13 @@ async function logSaleToSheet(admin: ReturnType<typeof createClient>, orderId: s
     });
     if (!response.ok) {
       console.error('Sincronização Google Sheets não confirmada:', response.status, 'pedido:', orderId);
+      return;
+    }
+    const receipt = await response.json().catch(() => null);
+    if (!receipt || receipt.ok !== true) {
+      // The Apps Script may return HTTP 200 even when the secret is wrong or
+      // the spreadsheet write fails. Never report this as a successful sync.
+      console.error('Google Sheets não confirmou gravação do pedido:', orderId);
     }
   } catch (error) {
     console.error('Falha ao registrar venda na planilha:', error instanceof Error ? error.message : error);
