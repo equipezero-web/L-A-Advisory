@@ -1344,7 +1344,38 @@
             touch-action: pan-y !important;
             isolation: isolate;
         }
-        #authModal > div { min-height: 100%; }
+        /* Fixed viewport grid + independent native form scroll. Avoid scroll chaining to home. */
+        #authModal { overflow: hidden !important; }
+        #authModal > .royal-auth-grid {
+            height: 100% !important;
+            min-height: 0 !important;
+            max-height: 100% !important;
+            overflow: hidden !important;
+        }
+        #authModal .royal-auth-scroll-region {
+            height: 100% !important;
+            min-height: 0 !important;
+            min-width: 0;
+            display: block !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            overscroll-behavior-y: contain !important;
+            -webkit-overflow-scrolling: touch !important;
+            touch-action: pan-y !important;
+            scrollbar-width: thin;
+            scrollbar-color: #d4af37 transparent;
+        }
+        #authModal .royal-auth-scroll-region > .max-w-xl {
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }
+        @media (min-width: 1024px) {
+            #authModal .royal-auth-grid > section:first-child {
+                height: 100% !important;
+                min-height: 0 !important;
+                overflow-y: auto !important;
+            }
+        }
         html.account-modal-open,
         body.account-modal-open { overflow: hidden !important; }
         @media (prefers-reduced-motion: reduce) {
@@ -3823,7 +3854,7 @@
         role="dialog" aria-modal="true" aria-label="Entrar ou cadastrar"
         class="fixed inset-0 bg-slate-950 z-[100] hidden overflow-y-auto"
     >
-        <div class="min-h-screen grid grid-cols-1 lg:grid-cols-2">
+        <div class="royal-auth-grid min-h-screen grid grid-cols-1 lg:grid-cols-2">
 
             <!-- LADO VISUAL -->
             <section class="hidden lg:flex relative overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 p-12 xl:p-16 flex-col justify-between">
@@ -3921,8 +3952,8 @@
                 </p>
             </section>
 
-            <!-- LADO DOS FORMULÁRIOS -->
-            <section class="relative bg-white text-slate-900 flex items-center justify-center p-5 sm:p-8 lg:p-12">
+            <!-- LADO DOS FORMULÁRIOS — área nativamente rolável, independente do Lenis -->
+            <section data-lenis-prevent data-lenis-prevent-wheel data-lenis-prevent-touch class="royal-auth-scroll-region relative bg-white text-slate-900 flex items-center justify-center p-5 sm:p-8 lg:p-12">
                 <button
                     type="button"
                     onclick="closeAuthModal()"
@@ -9234,10 +9265,15 @@ function initializeApp() {
             if (!modal) return;
             modal.classList.remove('hidden');
             modal.scrollTop = 0;
-            // Lock the page (including Lenis) while keeping the auth dialog
-            // itself as the only vertical scroll container.
-            lockAccountModalScroll();
+            // Lock only the background. Stopping Lenis here can swallow
+            // wheel/touch events before they reach a nested native scroller.
+            document.documentElement.classList.add('account-modal-open');
+            document.body.classList.add('account-modal-open');
+            document.body.style.overflow = 'hidden';
+            if (window.laLenis?.start) window.laLenis.start();
             switchAuthScreen(screen);
+            const formScroller = modal.querySelector('.royal-auth-scroll-region');
+            if (formScroller) formScroller.scrollTop = 0;
         }
 
         function closeAuthModal() {
@@ -14663,7 +14699,9 @@ function initPremiumScrollMotion() {
             smoothWheel: true,
             syncTouch: false,
             wheelMultiplier: 0.92,
-            touchMultiplier: 1.02
+            touchMultiplier: 1.02,
+            // Native scrolling is responsible for the login/register pane.
+            prevent: node => Boolean(node?.closest?.('#authModal'))
         });
         window.laLenis.on('scroll', ScrollTrigger.update);
         gsap.ticker.add((time) => window.laLenis.raf(time * 1000));
