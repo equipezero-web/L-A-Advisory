@@ -44,7 +44,8 @@ jobs:
           parsed.feed(doc)
           assert parsed.styles==0, 'Unclosed <style> block'
           assert parsed.current is None, 'Unclosed <script> block'
-          assert 'id="royal-consulting-navigation"' in doc
+          assert 'id="consultoria"' not in doc, 'Consulting page unexpectedly present'
+          assert 'royal-image-only-card' in doc, 'Image-only product card missing'
           assert len(parsed.scripts)>=4, 'Inline scripts unexpectedly missing'
           for i, source in enumerate(parsed.scripts):
               with tempfile.NamedTemporaryFile(mode='w',suffix='.mjs',encoding='utf8') as tmp:
@@ -56,3 +57,7 @@ jobs:
                       sys.exit(1)
           print('Passed HTML style and',len(parsed.scripts),'inline JavaScript checks')
           PY
+      - name: Check storefront JavaScript files
+        run: |
+          node --check js/royal-product-page.js
+          node --check js/royal-product-image-upload.js
