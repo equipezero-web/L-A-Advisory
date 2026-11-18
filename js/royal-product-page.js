@@ -260,6 +260,59 @@
     window.openRoyalProductPage(id, {updateHistory: false});
   };
 
+
+  window.openRoyalReviewModeration = async function () {
+    if (state.currentUser?.role !== 'admin' || !supabaseAuthUser) {
+      alert('Acesso exclusivo ao administrador.');
+      return;
+    }
+    let modal = document.getElementById('royalReviewAdminModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'royalReviewAdminModal';
+      modal.className = 'royal-review-admin-modal';
+      modal.innerHTML = '<div class="royal-review-admin-scroll" data-lenis-prevent><header><h2>Moderação de avaliações</h2><button type="button" data-admin-close>Fechar</button></header><div id="royalReviewAdminList">Carregando…</div></div>';
+      modal.addEventListener('click', async event => {
+        if (event.target === modal || event.target.closest('[data-admin-close]')) {
+          modal.remove();
+          return;
+        }
+        const button = event.target.closest('button[data-review-id]');
+        if (!button) return;
+        const nextStatus = button.dataset.nextStatus;
+        const reviewId = button.dataset.reviewId;
+        if (!['approved', 'rejected'].includes(nextStatus) || !reviewId) return;
+        button.disabled = true;
+        const { error } = await supabaseClient.from('reviews').update({ status: nextStatus }).eq('id', reviewId);
+        if (error) {
+          alert('Não foi possível atualizar a avaliação: ' + error.message);
+          button.disabled = false;
+          return;
+        }
+        const pageId = activeId;
+        await window.openRoyalReviewModeration();
+        if (pageId) loadReviews(pageId);
+      });
+      document.body.appendChild(modal);
+    }
+    const list = modal.querySelector('#royalReviewAdminList');
+    if (!list) return;
+    list.textContent = 'Carregando avaliações…';
+    const { data, error } = await supabaseClient.from('reviews')
+      .select('id,product_id,comment,rating,status,created_at')
+      .order('created_at', { ascending: false }).limit(100);
+    if (error) { list.textContent = 'Falha ao carregar avaliações: ' + error.message; return; }
+    if (!modal.isConnected) return;
+    list.innerHTML = data?.length ? data.map(review => {
+      const product = productById(review.product_id);
+      const name = product?.name || 'Produto';
+      return '<article class="royal-review-admin-item"><p><strong>' + safe(name) + '</strong> · ' + safe(review.status) + ' · ' + starString(review.rating) + '</p>' +
+        '<p>' + safe(review.comment || 'Sem comentário') + '</p>' +
+        '<div><button type="button" data-review-id="' + attr(review.id) + '" data-next-status="approved">Aprovar</button>' +
+        '<button type="button" data-review-id="' + attr(review.id) + '" data-next-status="rejected">Rejeitar</button></div></article>';
+    }).join('') : '<p>Nenhuma avaliação registrada.</p>';
+  };
+
   window.addEventListener('popstate', () => {
     const id = new URLSearchParams(location.search).get('produto');
     if (!id) {
