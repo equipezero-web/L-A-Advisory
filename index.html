@@ -1321,6 +1321,34 @@
 }
 </style>
 
+
+    <!-- Loja como prioridade: regras visuais isoladas, sem alterar fluxo do Supabase -->
+    <style id="royal-storefront-first">
+        html { scroll-padding-top: 104px; }
+        #inicio.hero-premium { padding-top: 3.5rem !important; padding-bottom: 3.5rem !important; }
+        #inicio .hero-title { max-width: 900px; }
+        #inicio .hero-copy { max-width: 670px; }
+        #loja { padding-top: 2.5rem !important; scroll-margin-top: 104px; }
+        .royal-store-shortcuts { background: #080d18; border-top: 1px solid rgba(212,175,55,.15); border-bottom: 1px solid rgba(212,175,55,.2); }
+        .royal-store-shortcuts-inner { display: flex; align-items: center; gap: .5rem; overflow-x: auto; scrollbar-width: none; padding-top: .75rem; padding-bottom: .75rem; }
+        .royal-store-shortcuts-inner::-webkit-scrollbar { display: none; }
+        .royal-store-shortcuts a, .royal-store-shortcuts button { color: #f1e4c7; background: transparent; border: 1px solid rgba(212,175,55,.26); border-radius: 999px; padding: .65rem .9rem; display: inline-flex; align-items: center; justify-content: center; gap: .5rem; font-size: .82rem; font-weight: 600; white-space: nowrap; flex: 0 0 auto; transition: background-color .2s, border-color .2s; cursor: pointer; }
+        .royal-store-shortcuts a:hover, .royal-store-shortcuts button:hover, .royal-store-shortcuts a:focus-visible, .royal-store-shortcuts button:focus-visible { border-color: #d4af37; background: rgba(212,175,55,.12); }
+        body:not(.affiliate-mode):not(.royal-consulting-visible) #consultoria { display: none !important; }
+        body.royal-consulting-visible:not(.affiliate-mode) #consultoria { display: block !important; scroll-margin-top: 100px; }
+        #virtualStoreOpenWrap { display: none !important; }
+        @media (max-width: 767px) {
+            #inicio.hero-premium { padding-top: 2.1rem !important; padding-bottom: 2.1rem !important; }
+            #inicio .hero-title { font-size: clamp(2rem, 8.5vw, 3.3rem) !important; line-height: 1.12 !important; }
+            #inicio .hero-copy { font-size: .92rem !important; margin-top: 1rem !important; }
+            #inicio .hero-line { margin-top: 1rem !important; margin-bottom: 1rem !important; }
+            #inicio .hero-actions { margin-top: 1.25rem !important; gap: .6rem !important; }
+            #inicio .hero-proof { margin-top: 1.2rem !important; font-size: .72rem !important; }
+            #loja { padding-top: 1.6rem !important; }
+            .royal-store-shortcuts a, .royal-store-shortcuts button { font-size: .76rem; padding: .6rem .8rem; }
+        }
+        @media (prefers-reduced-motion: reduce) { .royal-store-shortcuts * { transition: none !important; } }
+    </style>
 </head>
 
 <body class="bg-slate-900 text-white min-h-screen flex flex-col">
@@ -1386,9 +1414,9 @@
 
                     <a
                         href="#consultoria"
-                        class="text-amber-400 hover:text-amber-300 transition text-sm font-medium border border-amber-400/30 hover:border-amber-400/60 px-3 py-1.5 rounded-full"
+                        class="text-slate-300 hover:text-amber-300 transition text-sm font-medium px-3 py-1.5 rounded-full"
                     >
-                        Consultoria
+                        Mais · Consultoria
                     </a>
 
                     <a
@@ -1666,25 +1694,25 @@
                 <div class="max-w-4xl">
                     <div class="hero-eyebrow inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-[0.2em] text-amber-300 border border-amber-400/30 bg-[#0C1933]/60 backdrop-blur-md shadow-[0_0_35px_rgba(212,175,55,.10)]">
                         <i data-lucide="crown" class="w-4 h-4"></i>
-                        Royal Experience
+                        STORE ROYAL · L&amp;A ADVISORY
                     </div>
 
                     <div class="hero-line h-px bg-gradient-to-r from-[#D4AF37] via-[#F4D03F] to-transparent mt-7 mb-7"></div>
 
                     <h2 class="hero-title font-serif text-4xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold leading-[1.02] max-w-5xl">
-                        Estratégia, exclusividade e <span class="text-gradient-gold">excelência.</span>
+                        Descubra o <span class="text-gradient-gold">extraordinário.</span>
                     </h2>
 
                     <p class="hero-copy text-[#D7DCE5] text-lg sm:text-xl lg:text-2xl mt-7 leading-relaxed max-w-2xl">
-                        A L&A Royal Advisory conecta visão estratégica, soluções premium e oportunidades para transformar decisões em crescimento.
+                        Conheça a Store Royal: encontre novidades, explore ofertas e escolha seus favoritos em uma experiência de compra premium.
                     </p>
 
                     <div class="hero-actions flex flex-wrap gap-4 mt-9">
                         <a href="#loja" class="gradient-gold text-[#172033] px-7 py-4 rounded-xl font-bold shadow-gold hover:shadow-[0_18px_55px_rgba(212,175,55,.30)] transition btn-premium">
-                            Explorar Loja Premium
+                            Explorar produtos
                         </a>
-                        <a href="#consultoria" class="px-7 py-4 rounded-xl font-bold border border-amber-400/40 text-amber-300 hover:bg-amber-400 hover:text-[#172033] transition backdrop-blur-sm">
-                            Agendar Consultoria
+                        <a href="#loja" onclick="openCatalogFilters(); document.getElementById('searchProduct')?.focus({preventScroll:true});" class="px-7 py-4 rounded-xl font-bold border border-amber-400/40 text-amber-300 hover:bg-amber-400 hover:text-[#172033] transition backdrop-blur-sm">
+                            Buscar e filtrar
                         </a>
                     </div>
 
@@ -1697,6 +1725,16 @@
             </div>
         </section>
 
+        <!-- ATALHOS COMERCIAIS — navegação nativa do catálogo existente -->
+        <nav class="royal-store-shortcuts" aria-label="Navegar pela Store Royal">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 royal-store-shortcuts-inner">
+                <a href="#loja"><i data-lucide="shopping-bag" class="w-4 h-4"></i> Todos os produtos</a>
+                <button type="button" onclick="openCatalogFilters(); document.getElementById('loja')?.scrollIntoView({behavior:'smooth'});"><i data-lucide="sliders-horizontal" class="w-4 h-4"></i> Categorias e filtros</button>
+                <button type="button" onclick="openCatalogFilters(); document.getElementById('searchProduct')?.focus({preventScroll:true}); document.getElementById('loja')?.scrollIntoView({behavior:'smooth'});"><i data-lucide="search" class="w-4 h-4"></i> Buscar</button>
+                <button type="button" onclick="openCartModal()"><i data-lucide="shopping-cart" class="w-4 h-4"></i> Carrinho</button>
+            </div>
+        </nav>
+
         <!-- LOJA PÚBLICA -->
         <section
             id="loja"
@@ -1707,11 +1745,11 @@
                 <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-8 gap-5">
                     <div>
                         <span class="text-amber-600 font-bold uppercase text-xs tracking-[0.2em]">
-                            Coleção Exclusiva
+                            Store Royal · Sua vitrine
                         </span>
 
                         <h2 class="font-serif text-3xl sm:text-4xl font-bold text-slate-900 mt-2">
-                            Loja Premium
+                            Explore nossa loja
                         </h2>
 
                         <div class="w-20 h-1 gradient-gold rounded mt-3"></div>
@@ -15436,5 +15474,23 @@ body.guest-mode #afiliados { display: none !important; }
 }
     
 <script src="./js/royal-ai-image-upload.js"></script>
+    <script id="royal-consulting-navigation">
+        (() => {
+            const syncConsulting = () => {
+                if (window.location.hash === '#consultoria') {
+                    document.body.classList.add('royal-consulting-visible');
+                }
+            };
+            // Reveal the preserved consulting section only after explicit navigation.
+            document.addEventListener('click', event => {
+                const target = event.target instanceof Element ? event.target.closest('a[href="#consultoria"]') : null;
+                if (target) document.body.classList.add('royal-consulting-visible');
+            }, true);
+            window.addEventListener('hashchange', syncConsulting);
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', syncConsulting, {once:true});
+            } else syncConsulting();
+        })();
+    </script>
 </body>
 </html>
