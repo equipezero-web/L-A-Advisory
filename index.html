@@ -1410,6 +1410,59 @@
         }
         @media (prefers-reduced-motion: reduce) { .royal-store-shortcuts * { transition: none !important; } }
     </style>
+
+<style id="royal-individual-product-page-v1">
+  .royal-product-page { position:fixed; inset:0; z-index:1100; background:#070d19; color:#1e293b; }
+  .royal-product-page .royal-product-scroll { width:100%; height:100dvh; overflow-y:auto!important; overflow-x:hidden!important; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; touch-action:pan-y; background:#f8fafc; }
+  .royal-product-header { position:sticky; top:0; z-index:5; min-height:60px; padding:12px clamp(14px,4vw,42px); background:#080d19; color:#ead39b; display:flex; align-items:center; justify-content:space-between; gap:12px; font-weight:700; border-bottom:1px solid #645129; }
+  .royal-product-header button { padding:8px 10px; border:1px solid #80672c; border-radius:9px; background:#172033; color:#f5dfab; cursor:pointer; font-size:13px; }
+  .royal-product-header span { font-size:13px; letter-spacing:.1em; text-align:center; }
+  .royal-product-container { max-width:1150px; padding:clamp(16px,4vw,42px); margin:auto; }
+  .royal-product-main { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:clamp(16px,4vw,44px); align-items:start; }
+  .royal-product-photo { border:1px solid #e2e8f0; border-radius:20px; overflow:hidden; min-height:350px; background:white; display:flex; align-items:center; justify-content:center; }
+  .royal-product-photo img { display:block; width:100%; max-height:560px; object-fit:contain; }
+  .royal-product-info { min-width:0; background:#fff; border:1px solid #e2e8f0; border-radius:20px; padding:clamp(18px,3vw,32px); }
+  .royal-p-kicker { font-size:11px; letter-spacing:.16em; color:#996e12; font-weight:800; text-transform:uppercase; }
+  .royal-product-info h1 { font-size:clamp(24px,3.5vw,40px); line-height:1.16; margin:10px 0; color:#101827; font-weight:800; }
+  .royal-p-rating { color:#806319; font-size:13px; margin:6px 0 16px; }
+  .royal-p-price { font-weight:800; font-size:clamp(26px,3vw,38px); color:#0c1933; display:flex; flex-wrap:wrap; align-items:baseline; gap:12px; }
+  .royal-p-price s { font-size:15px; font-weight:400; color:#64748b; }
+  .royal-p-stock { margin:12px 0; font-size:13px; font-weight:700; color:#287b55; }
+  .royal-p-attributes { border-top:1px solid #e2e8f0; padding:12px 0; }
+  .royal-p-attribute { display:flex; flex-wrap:wrap; justify-content:space-between; gap:12px; padding:6px 0; font-size:14px; }
+  .royal-p-attribute span { color:#64748b; }
+  .royal-p-attribute strong { color:#0f172a; }
+  .royal-p-qty-label { display:block; font-size:13px; font-weight:800; margin:10px 0 7px; }
+  .royal-p-qty { display:flex; gap:2px; width:145px; height:44px; margin-bottom:16px; border:1px solid #cbd5e1; border-radius:9px; overflow:hidden; }
+  .royal-p-qty button { width:42px; background:#f1f5f9; color:#0f172a; font-size:20px; cursor:pointer; }
+  .royal-p-qty input { width:59px; min-width:0; border:0; background:white; text-align:center; font-size:15px; font-weight:700; appearance:textfield; }
+  .royal-p-qty input::-webkit-inner-spin-button { appearance:none; }
+  .royal-p-actions { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+  .royal-p-primary,.royal-p-secondary { min-height:46px; padding:12px; border-radius:11px; font-size:14px; font-weight:800; cursor:pointer; }
+  .royal-p-primary { background:#d4af37; color:#0c1933; }
+  .royal-p-secondary { background:#101827; color:#f3d57f; }
+  .royal-p-primary:disabled,.royal-p-secondary:disabled { opacity:.5; cursor:not-allowed; }
+  .royal-p-muted { color:#64748b; font-size:13px; line-height:1.6; margin:12px 0; }
+  .royal-product-details { margin-top:25px; padding:clamp(18px,3vw,32px); background:white; border:1px solid #e2e8f0; border-radius:18px; }
+  .royal-product-details h2 { color:#0f172a; font-size:22px; font-weight:800; margin-bottom:16px; }
+  .royal-product-details > p { color:#334155; line-height:1.75; white-space:pre-line; }
+  .royal-p-review { border-top:1px solid #e2e8f0; padding:16px 0; }
+  .royal-p-review-head { display:flex; justify-content:space-between; align-items:center; gap:12px; font-size:12px; color:#64748b; }
+  .royal-p-stars { font-size:19px; color:#c79618; letter-spacing:2px; }
+  .royal-p-review p { color:#334155; font-size:14px; white-space:pre-line; margin-top:7px; }
+  .royal-p-review-form { max-width:680px; margin-top:25px; padding-top:18px; border-top:1px solid #e2e8f0; }
+  .royal-p-review-form h3 { font-weight:800; font-size:18px; margin-bottom:12px; }
+  .royal-p-review-form label { display:block; font-size:13px; font-weight:700; margin-bottom:14px; }
+  .royal-p-review-form select,.royal-p-review-form textarea { display:block; width:100%; padding:12px; margin-top:7px; border:1px solid #cbd5e1; border-radius:10px; background:white; color:#0f172a; }
+  .royal-p-review-form .royal-p-primary { min-width:170px; }
+  #authModal:not(.hidden) { z-index:1300!important; }
+  @media(max-width:760px) {
+    .royal-product-main { grid-template-columns:1fr; }
+    .royal-product-photo { min-height:230px; }
+    .royal-product-photo img { max-height:360px; }
+    .royal-product-header span { font-size:10px; }
+  }
+</style>
 </head>
 
 <body class="bg-slate-900 text-white min-h-screen flex flex-col">
@@ -9133,6 +9186,8 @@ function initializeApp() {
 
     renderCatalog();
     focusAffiliateProductFromLink();
+    // Accept direct product links without requiring authentication.
+    if (window.openRoyalProductFromUrl) window.openRoyalProductFromUrl();
     updateCartIcon();
     updateAuthUI();
     handleCookieConsent();
@@ -14034,67 +14089,8 @@ function renderCatalog() {
 }
 
 function showProductDetails(productId) {
-    const product = state.products.find(item => String(item.id) === String(productId));
-    if (!product) return;
-    const finalPrice = calculateFinalPrice(product);
-    const discount = Number(product.discount) || 0;
-    const isAffiliate = document.body.classList.contains('affiliate-mode');
-    const oldModal = document.getElementById('productDetailsModal');
-    if (oldModal) oldModal.remove();
-
-    const modal = document.createElement('div');
-    modal.id = 'productDetailsModal';
-    modal.className = 'fixed inset-0 z-[1000] flex items-center justify-center p-3 sm:p-6';
-    modal.style.background = 'rgba(2, 6, 23, .78)';
-    modal.setAttribute('role', 'dialog');
-    modal.setAttribute('aria-modal', 'true');
-    modal.setAttribute('aria-label', 'Detalhes do produto');
-    modal.innerHTML = `
-        <div class="product-details-panel account-modal-scroll relative bg-white w-full max-w-2xl max-h-[92dvh] overflow-y-auto overscroll-contain rounded-2xl shadow-2xl">
-            <button type="button" onclick="document.getElementById('productDetailsModal')?.remove(); unlockAccountModalScroll()" aria-label="Fechar detalhes" class="sticky top-2 float-right mr-2 mt-2 z-10 w-10 h-10 rounded-full bg-slate-900 text-amber-400 text-2xl font-bold">&times;</button>
-            <div class="p-4 sm:p-6">
-                <div class="w-full h-52 sm:h-72 bg-white flex items-center justify-center rounded-xl overflow-hidden">
-                    <img src="${escapeAttribute(product.image)}" alt="${escapeAttribute(product.name)}" class="w-full h-full object-contain">
-                </div>
-                <p class="text-xs font-bold uppercase tracking-wide text-amber-700 mt-4">${escapeHtml(product.category || 'Produto')}</p>
-                <h2 class="font-serif text-xl sm:text-2xl font-bold text-slate-900 mt-1">${escapeHtml(product.name)}</h2>
-                <div class="mt-3">
-                    <p class="text-2xl sm:text-3xl font-bold text-slate-900">${formatCurrency(finalPrice)}</p>
-                    <p class="text-sm text-emerald-700 font-semibold mt-1">Frete incluso no valor</p>
-                    <p class="text-xs text-slate-500 mt-0.5">Prazo de entrega: 7 dias após a confirmação do pagamento.</p>
-                </div>
-                <p class="text-sm sm:text-base text-slate-600 leading-relaxed mt-4 whitespace-pre-line">${escapeHtml(product.description || 'Mais informações sobre este produto em breve.')}</p>
-                <div class="grid grid-cols-2 gap-3 mt-5">
-                    <div class="rounded-xl bg-slate-50 border border-slate-200 p-3"><p class="text-xs text-slate-500">Estoque</p><p class="font-bold text-slate-900 mt-1">${Math.max(0, Number(product.stock) || 0)} ${Number(product.stock) === 1 ? 'unidade disponível' : 'unidades disponíveis'}</p></div>
-                    ${product.brand ? `<div class="rounded-xl bg-slate-50 border border-slate-200 p-3"><p class="text-xs text-slate-500">Marca</p><p class="font-bold text-slate-900 mt-1">${escapeHtml(product.brand)}</p></div>` : ''}
-                    ${product.color || product.colors ? `<div class="rounded-xl bg-slate-50 border border-slate-200 p-3"><p class="text-xs text-slate-500">Cor</p><p class="font-bold text-slate-900 mt-1">${escapeHtml([product.color, product.colors].flat().filter(Boolean).join(', '))}</p></div>` : ''}
-                    ${product.size || product.sizes ? `<div class="rounded-xl bg-slate-50 border border-slate-200 p-3"><p class="text-xs text-slate-500">Tamanho</p><p class="font-bold text-slate-900 mt-1">${escapeHtml([product.size, product.sizes].flat().filter(Boolean).join(', '))}</p></div>` : ''}
-                </div>
-                <div class="mt-5">
-                    ${isAffiliate ? `
-                        <button type="button" onclick="shareProduct('${String(product.id).replace(/[^a-zA-Z0-9_-]/g, '')}')" class="w-full gradient-gold text-slate-900 py-3 rounded-xl font-bold"><i data-lucide="share-2" class="w-4 h-4 inline mr-1"></i> Compartilhar produto</button>
-                    ` : `
-                        <div class="grid grid-cols-2 gap-2">
-                            <button type="button" onclick="addToCart('${String(product.id).replace(/[^a-zA-Z0-9_-]/g, '')}')" class="w-full gradient-gold text-slate-900 py-3 rounded-xl font-bold text-sm"><i data-lucide="shopping-cart" class="w-4 h-4 inline mr-1"></i> Adicionar ao carrinho</button>
-                            <button type="button" onclick="buyNow('${String(product.id).replace(/[^a-zA-Z0-9_-]/g, '')}')" class="w-full bg-slate-900 text-amber-400 py-3 rounded-xl font-bold text-sm border border-slate-700"><i data-lucide="credit-card" class="w-4 h-4 inline mr-1"></i> Comprar agora</button>
-                        </div>
-                    `}
-                </div>
-            </div>
-        </div>`;
-    modal.addEventListener('click', event => {
-        if (event.target === modal) {
-            modal.remove();
-            unlockAccountModalScroll();
-        }
-    });
-    document.body.appendChild(modal);
-    document.documentElement.classList.add('account-modal-open');
-    document.body.classList.add('account-modal-open');
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
-    if (window.laLenis && typeof window.laLenis.stop === 'function') window.laLenis.stop();
-    if (window.lucide) lucide.createIcons();
+    // Individual shareable page; the global storefront cart/checkout stays intact.
+    if (window.openRoyalProductPage) return window.openRoyalProductPage(productId);
 }
 
 function formatPercentage(value) {
@@ -14701,7 +14697,7 @@ function initPremiumScrollMotion() {
             wheelMultiplier: 0.92,
             touchMultiplier: 1.02,
             // Native scrolling is responsible for the login/register pane.
-            prevent: node => Boolean(node?.closest?.('#authModal'))
+            prevent: node => Boolean(node?.closest?.('#authModal, #productDetailsModal'))
         });
         window.laLenis.on('scroll', ScrollTrigger.update);
         gsap.ticker.add((time) => window.laLenis.raf(time * 1000));
@@ -15612,5 +15608,6 @@ body.guest-mode #afiliados { display: none !important; }
             } else syncConsulting();
         })();
     </script>
+<script src="./js/royal-product-page.js"></script>
 </body>
 </html>
