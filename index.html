@@ -1322,6 +1322,34 @@
 </style>
 
 
+    <!-- Visitantes: catálogo visível independente da conclusão das animações;
+         autenticação com rolagem própria, sem arrastar a página inicial. -->
+    <style id="la-guest-catalog-and-auth-scroll">
+        #catalogContainer .product-motion-card,
+        #catalogContainer .product-carousel-group .product-motion-card {
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+        #authModal:not(.hidden) {
+            position: fixed !important;
+            inset: 0 !important;
+            height: 100vh !important;
+            height: 100dvh !important;
+            max-height: 100dvh !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            overscroll-behavior: contain !important;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
+        }
+        #authModal > div { min-height: 100%; }
+        html.account-modal-open,
+        body.account-modal-open { overflow: hidden !important; }
+        @media (prefers-reduced-motion: reduce) {
+            #catalogContainer .product-motion-card { transform: none !important; }
+        }
+    </style>
+
     <!-- Loja como prioridade: regras visuais isoladas, sem alterar fluxo do Supabase -->
     <style id="royal-storefront-first">
         html { scroll-padding-top: 104px; }
@@ -8427,6 +8455,11 @@ data-lenis-prevent-touch
             updateYear();
             lucide.createIcons();
             setupAccountModalScrollIsolation();
+            // The public store cannot depend on session validation to render.
+            // Start the public catalog immediately, even for a guest or slow auth.
+            loadPublicProducts().then(loaded => {
+                if (loaded) renderCatalog();
+            }).catch(error => console.warn('Catálogo público:', error));
             await initializeSupabase();
         });
 
@@ -9191,17 +9224,21 @@ function initializeApp() {
         }
         function resetAuthCaptcha() { if (window.turnstile && authTurnstileWidgetId !== null) { try { window.turnstile.reset(authTurnstileWidgetId); } catch (_) {} } }
         function openAuthModal(screen = 'customer-login') {
-            const modal = document.getElementById('authModal'); if (!modal) return;
-            modal.classList.remove('hidden'); document.body.style.overflow = 'hidden'; switchAuthScreen(screen);
+            const modal = document.getElementById('authModal');
+            if (!modal) return;
+            modal.classList.remove('hidden');
+            modal.scrollTop = 0;
+            // Lock the page (including Lenis) while keeping the auth dialog
+            // itself as the only vertical scroll container.
+            lockAccountModalScroll();
+            switchAuthScreen(screen);
         }
 
         function closeAuthModal() {
             const modal = document.getElementById('authModal');
             if (!modal) return;
-
             modal.classList.add('hidden');
-            document.body.style.overflow = '';
-
+            unlockAccountModalScroll();
             clearAuthForms();
         }
 
