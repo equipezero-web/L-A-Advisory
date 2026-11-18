@@ -1,0 +1,24 @@
+name: Inspect CodeQL high alert (temporary)
+on:
+  push:
+    branches: [feat/individual-product-pages-20261118]
+permissions:
+  contents: read
+  checks: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show precise security annotation for existing CodeQL run
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import os,json,urllib.request
+          url='https://api.github.com/repos/equipezero-web/L-A-Advisory/check-runs/135040796609/annotations'
+          req=urllib.request.Request(url, headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'], 'Accept':'application/vnd.github+json','User-Agent':'Royal-Security-Validation'})
+          with urllib.request.urlopen(req, timeout=20) as resp:
+            entries=json.load(resp)
+          for entry in entries:
+            print(json.dumps({key:entry.get(key) for key in ('path','start_line','end_line','annotation_level','title','message','raw_details')},ensure_ascii=False))
+          PY
