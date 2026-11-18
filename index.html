@@ -10,7 +10,7 @@
 
     <meta
         name="description"
-        content="L&A Royal Advisory — Loja premium, consultoria empresarial, afiliados e soluções estratégicas."
+        content="L&A Royal Advisory — Loja virtual, produtos selecionados, ofertas e experiência de compras premium."
     >
 
     <title>L&A Royal Advisory</title>
@@ -1410,6 +1410,84 @@
         }
         @media (prefers-reduced-motion: reduce) { .royal-store-shortcuts * { transition: none !important; } }
     </style>
+
+<style id="royal-individual-product-page-v1">
+  .royal-product-page { position:fixed; inset:0; z-index:1100; background:#070d19; color:#1e293b; }
+  .royal-product-page .royal-product-scroll { width:100%; height:100dvh; overflow-y:auto!important; overflow-x:hidden!important; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; touch-action:pan-y; background:#f8fafc; }
+  .royal-product-header { position:sticky; top:0; z-index:5; min-height:60px; padding:12px clamp(14px,4vw,42px); background:#080d19; color:#ead39b; display:flex; align-items:center; justify-content:space-between; gap:12px; font-weight:700; border-bottom:1px solid #645129; }
+  .royal-product-header button { padding:8px 10px; border:1px solid #80672c; border-radius:9px; background:#172033; color:#f5dfab; cursor:pointer; font-size:13px; }
+  .royal-product-header span { font-size:13px; letter-spacing:.1em; text-align:center; }
+  .royal-product-container { max-width:1150px; padding:clamp(16px,4vw,42px); margin:auto; }
+  .royal-product-main { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:clamp(16px,4vw,44px); align-items:start; }
+  .royal-product-photo { border:1px solid #e2e8f0; border-radius:20px; overflow:hidden; min-height:350px; background:white; display:flex; align-items:center; justify-content:center; }
+  .royal-product-photo img { display:block; width:100%; max-height:560px; object-fit:contain; }
+  .royal-product-info { min-width:0; background:#fff; border:1px solid #e2e8f0; border-radius:20px; padding:clamp(18px,3vw,32px); }
+  .royal-p-kicker { font-size:11px; letter-spacing:.16em; color:#996e12; font-weight:800; text-transform:uppercase; }
+  .royal-product-info h1 { font-size:clamp(24px,3.5vw,40px); line-height:1.16; margin:10px 0; color:#101827; font-weight:800; }
+  .royal-p-rating { color:#806319; font-size:13px; margin:6px 0 16px; }
+  .royal-p-price { font-weight:800; font-size:clamp(26px,3vw,38px); color:#0c1933; display:flex; flex-wrap:wrap; align-items:baseline; gap:12px; }
+  .royal-p-price s { font-size:15px; font-weight:400; color:#64748b; }
+  .royal-p-stock { margin:12px 0; font-size:13px; font-weight:700; color:#287b55; }
+  .royal-p-attributes { border-top:1px solid #e2e8f0; padding:12px 0; }
+  .royal-p-attribute { display:flex; flex-wrap:wrap; justify-content:space-between; gap:12px; padding:6px 0; font-size:14px; }
+  .royal-p-attribute span { color:#64748b; }
+  .royal-p-attribute strong { color:#0f172a; }
+  .royal-p-qty-label { display:block; font-size:13px; font-weight:800; margin:10px 0 7px; }
+  .royal-p-qty { display:flex; gap:2px; width:145px; height:44px; margin-bottom:16px; border:1px solid #cbd5e1; border-radius:9px; overflow:hidden; }
+  .royal-p-qty button { width:42px; background:#f1f5f9; color:#0f172a; font-size:20px; cursor:pointer; }
+  .royal-p-qty input { width:59px; min-width:0; border:0; background:white; text-align:center; font-size:15px; font-weight:700; appearance:textfield; }
+  .royal-p-qty input::-webkit-inner-spin-button { appearance:none; }
+  .royal-p-actions { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+  .royal-p-primary,.royal-p-secondary { min-height:46px; padding:12px; border-radius:11px; font-size:14px; font-weight:800; cursor:pointer; }
+  .royal-p-primary { background:#d4af37; color:#0c1933; }
+  .royal-p-secondary { background:#101827; color:#f3d57f; }
+  .royal-p-primary:disabled,.royal-p-secondary:disabled { opacity:.5; cursor:not-allowed; }
+  .royal-p-muted { color:#64748b; font-size:13px; line-height:1.6; margin:12px 0; }
+  .royal-product-details { margin-top:25px; padding:clamp(18px,3vw,32px); background:white; border:1px solid #e2e8f0; border-radius:18px; }
+  .royal-product-details h2 { color:#0f172a; font-size:22px; font-weight:800; margin-bottom:16px; }
+  .royal-product-details > p { color:#334155; line-height:1.75; white-space:pre-line; }
+  .royal-p-review { border-top:1px solid #e2e8f0; padding:16px 0; }
+  .royal-p-review-head { display:flex; justify-content:space-between; align-items:center; gap:12px; font-size:12px; color:#64748b; }
+  .royal-p-stars { font-size:19px; color:#c79618; letter-spacing:2px; }
+  .royal-p-review p { color:#334155; font-size:14px; white-space:pre-line; margin-top:7px; }
+  .royal-p-review-form { max-width:680px; margin-top:25px; padding-top:18px; border-top:1px solid #e2e8f0; }
+  .royal-p-review-form h3 { font-weight:800; font-size:18px; margin-bottom:12px; }
+  .royal-p-review-form label { display:block; font-size:13px; font-weight:700; margin-bottom:14px; }
+  .royal-p-review-form select,.royal-p-review-form textarea { display:block; width:100%; padding:12px; margin-top:7px; border:1px solid #cbd5e1; border-radius:10px; background:white; color:#0f172a; }
+  .royal-p-review-form .royal-p-primary { min-width:170px; }
+  #authModal:not(.hidden) { z-index:1300!important; }
+  @media(max-width:760px) {
+    .royal-product-main { grid-template-columns:1fr; }
+    .royal-product-photo { min-height:230px; }
+    .royal-product-photo img { max-height:360px; }
+    .royal-product-header span { font-size:10px; }
+  }
+</style>
+
+<style id="royal-image-only-cards">
+ #catalogContainer .royal-image-only-card { position:relative!important; aspect-ratio:4/5!important; height:auto!important; min-height:0!important; overflow:hidden!important; border-radius:20px!important; isolation:isolate; background:#fff!important; border:1px solid rgba(212,175,55,.32); box-shadow:0 9px 25px rgba(0,0,0,.18); display:block!important; opacity:1!important; }
+ #catalogContainer .royal-image-only-card .royal-full-card-image { display:block!important; position:absolute!important; inset:0!important; width:100%!important; height:100%!important; max-width:none!important; max-height:none!important; min-height:100%!important; object-fit:cover!important; object-position:center!important; border-radius:inherit!important; padding:0!important; }
+ #catalogContainer .royal-image-only-card .royal-image-card-caption { position:absolute; bottom:0; left:0; right:0; padding:36px 12px 13px; background:linear-gradient(transparent,rgba(4,9,20,.92)); color:#fff; display:flex; flex-direction:column; gap:4px; }
+ #catalogContainer .royal-image-card-caption h3 { font-size:clamp(12px,1.3vw,17px); font-weight:800; line-height:1.3; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; }
+ #catalogContainer .royal-image-card-caption span { color:#f5d886; font-size:11px; font-weight:700; }
+ #royalProductUploadPreview .royal-upload-preview-canvas { width:100%; aspect-ratio:1; object-fit:contain; border-radius:12px; border:1px solid #cbd5e1; background:#fff; }
+ @media(max-width:768px) { #catalogContainer .royal-image-only-card { width:42vw!important; min-width:42vw!important; max-width:42vw!important; border-radius:16px!important; } }
+</style>
+
+<style id="royal-gallery-and-review-admin">
+ .royal-p-gallery { min-width:0; }
+ .royal-p-thumbnails { display:flex; overflow-x:auto; gap:9px; padding:10px 2px; }
+ .royal-p-thumbnails button { flex:0 0 74px; height:74px; background:white; border:2px solid #cbd5e1; border-radius:12px; padding:2px; cursor:pointer; overflow:hidden; }
+ .royal-p-thumbnails button.royal-p-thumbnail-active { border-color:#c29421; box-shadow:0 0 0 2px #f2d995; }
+ .royal-p-thumbnails img { display:block; width:100%; height:100%; object-fit:cover; border-radius:8px; }
+ .royal-review-admin-modal { position:fixed; inset:0; z-index:100010; display:flex; align-items:center; justify-content:center; padding:12px; background:rgba(2,6,23,.9); }
+ .royal-review-admin-scroll { max-width:780px; width:100%; max-height:90dvh; overflow-y:auto; overscroll-behavior:contain; touch-action:pan-y; background:#fff; color:#0f172a; padding:20px; border-radius:16px; }
+ .royal-review-admin-scroll header { display:flex; justify-content:space-between; align-items:center; gap:12px; padding-bottom:12px; border-bottom:1px solid #cbd5e1; }
+ .royal-review-admin-scroll header h2 { font-size:20px; font-weight:800; }
+ .royal-review-admin-scroll button { background:#d4af37; color:#142032; border-radius:9px; padding:9px 15px; font-size:13px; font-weight:800; margin-right:6px; cursor:pointer; }
+ .royal-review-admin-item { padding:15px 0; border-bottom:1px solid #e2e8f0; }
+ .royal-review-admin-item p { margin:7px 0; white-space:pre-wrap; }
+</style>
 </head>
 
 <body class="bg-slate-900 text-white min-h-screen flex flex-col">
@@ -1473,12 +1551,7 @@
                         Loja
                     </a>
 
-                    <a
-                        href="#consultoria"
-                        class="text-slate-300 hover:text-amber-300 transition text-sm font-medium px-3 py-1.5 rounded-full"
-                    >
-                        Mais · Consultoria
-                    </a>
+                    
 
                     <a
                         id="affiliateNavLink"
@@ -1627,10 +1700,7 @@
                             <i data-lucide="shopping-bag" class="w-5 h-5 text-amber-600"></i>
                             <span>Loja</span>
                         </a>
-                        <a href="#consultoria" class="mobile-user-menu-item" onclick="closeMobileMenu()">
-                            <i data-lucide="briefcase-business" class="w-5 h-5 text-amber-600"></i>
-                            <span>Consultoria</span>
-                        </a>
+                        
                         <a href="#afiliados" class="mobile-user-menu-item" onclick="closeMobileMenu()">
                             <i data-lucide="handshake" class="w-5 h-5 text-amber-600"></i>
                             <span>Afiliados</span>
@@ -2136,249 +2206,6 @@
             </div>
         </section>
 
-        <!-- CONSULTORIA PÚBLICA -->
-        <section
-            id="consultoria"
-            class="py-20 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white relative overflow-hidden"
-        >
-            <div class="absolute inset-0 opacity-10 pointer-events-none">
-                <div class="absolute top-20 left-10 w-72 h-72 bg-amber-400 rounded-full blur-3xl"></div>
-                <div class="absolute bottom-20 right-10 w-96 h-96 bg-blue-600 rounded-full blur-3xl"></div>
-            </div>
-            
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                <div class="text-center max-w-3xl mx-auto mb-16">
-                    <span class="text-amber-400 font-bold uppercase text-xs tracking-[0.2em]">
-                        Soluções Executive
-                    </span>
-
-                    <h2 class="font-serif text-4xl font-bold mt-3 text-white">
-                        Consultoria Empresarial
-                    </h2>
-
-                    <div class="w-24 h-1 gradient-gold mx-auto mt-5 rounded"></div>
-
-                    <p class="text-slate-400 mt-6 text-lg">
-                        Agende gratuitamente. Não é necessário criar uma conta
-                        para solicitar sua consultoria.
-                    </p>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <!-- Financeira -->
-                    <article class="bg-slate-800/70 backdrop-blur border border-slate-700/60 p-8 rounded-2xl flex flex-col justify-between card-hover">
-                        <div>
-                            <div class="w-14 h-14 gradient-gold rounded-xl flex items-center justify-center mb-6 shadow-gold">
-                                <i
-                                    data-lucide="trending-up"
-                                    class="w-7 h-7 text-slate-900"
-                                ></i>
-                            </div>
-
-                            <h3 class="font-serif text-2xl font-bold mb-4 text-white">
-                                Consultoria Financeira
-                            </h3>
-
-                            <p class="text-slate-400 text-sm mb-4 leading-relaxed">
-                                Gestão de capital, fluxo de caixa, metas,
-                                organização financeira e decisões estratégicas.
-                            </p>
-
-                            <p class="text-amber-400 font-bold text-xl mb-6">
-                                R$ 200,00
-                            </p>
-                        </div>
-
-                        <button
-                            type="button"
-                            onclick="openConsultingBooking('financeira')"
-                            class="w-full gradient-gold text-slate-900 font-bold rounded-xl py-4 hover:shadow-gold transition"
-                        >
-                            Agendar Consultoria
-                        </button>
-                    </article>
-
-                    <!-- Administrativa -->
-                    <article class="bg-slate-800/70 backdrop-blur border border-slate-700/60 p-8 rounded-2xl flex flex-col justify-between card-hover">
-                        <div>
-                            <div class="w-14 h-14 gradient-gold rounded-xl flex items-center justify-center mb-6 shadow-gold">
-                                <i
-                                    data-lucide="briefcase"
-                                    class="w-7 h-7 text-slate-900"
-                                ></i>
-                            </div>
-
-                            <h3 class="font-serif text-2xl font-bold mb-4 text-white">
-                                Consultoria Administrativa
-                            </h3>
-
-                            <p class="text-slate-400 text-sm mb-4 leading-relaxed">
-                                Organização de processos, produtividade, gestão
-                                operacional e estrutura interna da empresa.
-                            </p>
-
-                            <p class="text-amber-400 font-bold text-xl mb-6">
-                                R$ 300,00
-                            </p>
-                        </div>
-
-                        <button
-                            type="button"
-                            onclick="openConsultingBooking('administrativa')"
-                            class="w-full gradient-gold text-slate-900 font-bold rounded-xl py-4 hover:shadow-gold transition"
-                        >
-                            Agendar Consultoria
-                        </button>
-                    </article>
-
-                    <!-- Estratégica -->
-                    <article class="bg-slate-800/70 backdrop-blur border border-slate-700/60 p-8 rounded-2xl flex flex-col justify-between card-hover">
-                        <div>
-                            <div class="w-14 h-14 gradient-gold rounded-xl flex items-center justify-center mb-6 shadow-gold">
-                                <i
-                                    data-lucide="target"
-                                    class="w-7 h-7 text-slate-900"
-                                ></i>
-                            </div>
-
-                            <h3 class="font-serif text-2xl font-bold mb-4 text-white">
-                                Planejamento Estratégico
-                            </h3>
-
-                            <p class="text-slate-400 text-sm mb-4 leading-relaxed">
-                                Roadmap empresarial, metas, posicionamento,
-                                crescimento e decisões de longo prazo.
-                            </p>
-
-                            <p class="text-amber-400 font-bold text-xl mb-6">
-                                R$ 1.000,00
-                            </p>
-                        </div>
-
-                        <button
-                            type="button"
-                            onclick="openConsultingBooking('estrategica')"
-                            class="w-full gradient-gold text-slate-900 font-bold rounded-xl py-4 hover:shadow-gold transition"
-                        >
-                            Agendar Consultoria
-                        </button>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <!-- DEPOIMENTOS -->
-        <section id="depoimentos" class="py-16 bg-gradient-to-b from-slate-100 to-white">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-12">
-                    <span class="text-amber-600 font-bold uppercase text-xs tracking-[0.2em]">
-                        Depoimentos
-                    </span>
-
-                    <h2 class="font-serif text-3xl sm:text-4xl font-bold text-slate-900 mt-2">
-                        O Que Dizem Nossos Clientes
-                    </h2>
-
-                    <div class="w-20 h-1 gradient-gold rounded mt-3 mx-auto"></div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <article class="bg-white p-6 rounded-2xl shadow-lg border border-slate-200 card-hover">
-                        <div class="flex items-center gap-1 mb-4 text-amber-500">
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                        </div>
-
-                        <p class="text-slate-600 mb-6 italic leading-relaxed">
-                            “A consultoria financeira trouxe clareza para o nosso
-                            fluxo de caixa e melhorou nossas decisões.”
-                        </p>
-
-                        <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 gradient-gold rounded-full flex items-center justify-center text-slate-900 font-bold">
-                                CM
-                            </div>
-
-                            <div>
-                                <p class="font-bold text-sm text-slate-900">
-                                    Carlos Mendes
-                                </p>
-
-                                <p class="text-xs text-slate-500">
-                                    CEO, TechBrasil
-                                </p>
-                            </div>
-                        </div>
-                    </article>
-
-                    <article class="bg-white p-6 rounded-2xl shadow-lg border border-slate-200 card-hover">
-                        <div class="flex items-center gap-1 mb-4 text-amber-500">
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                        </div>
-
-                        <p class="text-slate-600 mb-6 italic leading-relaxed">
-                            “A L&A Royal Advisory entregou organização,
-                            profissionalismo e uma visão estratégica real.”
-                        </p>
-
-                        <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 gradient-gold rounded-full flex items-center justify-center text-slate-900 font-bold">
-                                RS
-                            </div>
-
-                            <div>
-                                <p class="font-bold text-sm text-slate-900">
-                                    Roberto Silva
-                                </p>
-
-                                <p class="text-xs text-slate-500">
-                                    Diretor, Silva & Associados
-                                </p>
-                            </div>
-                        </div>
-                    </article>
-
-                    <article class="bg-white p-6 rounded-2xl shadow-lg border border-slate-200 card-hover">
-                        <div class="flex items-center gap-1 mb-4 text-amber-500">
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                            <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                        </div>
-
-                        <p class="text-slate-600 mb-6 italic leading-relaxed">
-                            “A experiência de compra foi muito bem conduzida.
-                            Atendimento rápido, elegante e cuidadoso.”
-                        </p>
-
-                        <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 gradient-gold rounded-full flex items-center justify-center text-slate-900 font-bold">
-                                AL
-                            </div>
-
-                            <div>
-                                <p class="font-bold text-sm text-slate-900">
-                                    André Lima
-                                </p>
-
-                                <p class="text-xs text-slate-500">
-                                    Empresário
-                                </p>
-                            </div>
-                        </div>
-                    </article>
-                </div>
-            </div>
-        </section>
-
         <!-- FAQ -->
         <section id="faq" class="py-16 bg-white">
             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -2415,24 +2242,7 @@
                         </p>
                     </details>
 
-                    <details class="non-store-faq-item bg-slate-50 border border-slate-200 p-5 rounded-xl cursor-pointer group">
-                        <summary class="font-bold text-slate-800 flex justify-between items-center gap-5">
-                            <span>
-                                Preciso de conta para agendar uma consultoria?
-                            </span>
-
-                            <i
-                                data-lucide="chevron-down"
-                                class="w-5 h-5 text-slate-400 group-open:rotate-180 transition"
-                            ></i>
-                        </summary>
-
-                        <p class="text-slate-600 mt-3 text-sm leading-relaxed">
-                            Não. O agendamento de consultoria é aberto e pode ser
-                            feito diretamente pelo formulário, sem cadastro ou
-                            login obrigatório.
-                        </p>
-                    </details>
+                    
 
                     <details class="non-store-faq-item bg-slate-50 border border-slate-200 p-5 rounded-xl cursor-pointer group">
                         <summary class="font-bold text-slate-800 flex justify-between items-center gap-5">
@@ -2804,12 +2614,7 @@
                         Loja
                     </a>
 
-                    <a
-                        href="#consultoria"
-                        class="text-slate-400 hover:text-white transition"
-                    >
-                        Consultoria
-                    </a>
+                    
 
                     <a
                         href="#afiliados"
@@ -2903,28 +2708,7 @@
                     </div>
                 </a>
 
-                <a
-                    href="#consultoria"
-                    onclick="closeNavigationModal()"
-                    class="p-5 rounded-xl border-2 border-slate-200 hover:border-amber-500 bg-slate-50 flex items-center gap-5 transition"
-                >
-                    <div class="p-4 gradient-gold rounded-xl">
-                        <i
-                            data-lucide="briefcase"
-                            class="w-7 h-7 text-slate-900"
-                        ></i>
-                    </div>
-
-                    <div>
-                        <h4 class="font-bold text-lg">
-                            Consultoria
-                        </h4>
-
-                        <p class="text-xs text-slate-500">
-                            Agendamento sem login
-                        </p>
-                    </div>
-                </a>
+                
 
                 <a
                     href="#afiliados"
@@ -2949,221 +2733,6 @@
                     </div>
                 </a>
             </div>
-        </div>
-    </div>
-
-    <!-- MODAL DE AGENDAMENTO PÚBLICO -->
-    <div
-        id="consultingModal"
-        class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[70] flex items-center justify-center p-4 overflow-y-auto"
-    >
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative border border-slate-200 my-8 max-h-[92vh] overflow-y-auto">
-            <button
-                type="button"
-                onclick="closeConsultingBooking()"
-                aria-label="Fechar modal"
-                class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition"
-            >
-                <i data-lucide="x" class="w-6 h-6"></i>
-            </button>
-
-            <div class="flex items-start gap-4 mb-6">
-                <div class="w-12 h-12 gradient-gold rounded-xl flex items-center justify-center shadow-gold">
-                    <i
-                        data-lucide="calendar-days"
-                        class="w-6 h-6 text-slate-900"
-                    ></i>
-                </div>
-
-                <div>
-                    <h3 class="font-serif text-2xl font-bold text-slate-900">
-                        Agendar Consultoria
-                    </h3>
-
-                    <p
-                        id="consultingTypeDisplay"
-                        class="text-amber-600 font-bold text-sm mt-1"
-                    >
-                        Consultoria
-                    </p>
-
-                    <p
-                        id="consultingPriceDisplay"
-                        class="text-slate-500 text-xs mt-1"
-                    >
-                        Valor da consultoria
-                    </p>
-                </div>
-            </div>
-
-            <div class="mb-5 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-3">
-                <i
-                    data-lucide="circle-check"
-                    class="w-5 h-5 text-emerald-600 flex-none mt-0.5"
-                ></i>
-
-                <p class="text-xs text-emerald-800 leading-relaxed">
-                    O agendamento é gratuito e não exige cadastro. Após enviar,
-                    sua solicitação será registrada e você receberá atendimento
-                    da equipe L&A.
-                </p>
-            </div>
-
-            <form
-                id="consultingForm"
-                onsubmit="submitConsultingBooking(event)"
-                class="space-y-4"
-            >
-                <input
-                    id="consultingType"
-                    type="hidden"
-                >
-
-                <input
-                    id="consultingValue"
-                    type="hidden"
-                >
-
-                <div>
-                    <label
-                        for="consultingCompany"
-                        class="block text-xs font-bold text-slate-700 uppercase mb-2"
-                    >
-                        Empresa / Nome completo
-                    </label>
-
-                    <input
-                        type="text"
-                        id="consultingCompany"
-                        required
-                        minlength="3"
-                        maxlength="120"
-                        class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm"
-                    >
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label
-                            for="consultingPhone"
-                            class="block text-xs font-bold text-slate-700 uppercase mb-2"
-                        >
-                            WhatsApp
-                        </label>
-
-                        <input
-                            type="tel"
-                            id="consultingPhone"
-                            required
-                            maxlength="30"
-                            placeholder="(81) 99999-9999"
-                            class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm"
-                        >
-                    </div>
-
-                    <div>
-                        <label
-                            for="consultingEmail"
-                            class="block text-xs font-bold text-slate-700 uppercase mb-2"
-                        >
-                            E-mail
-                        </label>
-
-                        <input
-                            type="email"
-                            id="consultingEmail"
-                            required
-                            maxlength="160"
-                            class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm"
-                        >
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label
-                            for="consultingDate"
-                            class="block text-xs font-bold text-slate-700 uppercase mb-2"
-                        >
-                            Data desejada
-                        </label>
-
-                        <input
-                            type="date"
-                            id="consultingDate"
-                            required
-                            class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm"
-                        >
-                    </div>
-
-                    <div>
-                        <label
-                            for="consultingTime"
-                            class="block text-xs font-bold text-slate-700 uppercase mb-2"
-                        >
-                            Horário desejado
-                        </label>
-
-                        <input
-                            type="time"
-                            id="consultingTime"
-                            required
-                            class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm"
-                        >
-                    </div>
-                </div>
-
-                <div>
-                    <label
-                        for="consultingObs"
-                        class="block text-xs font-bold text-slate-700 uppercase mb-2"
-                    >
-                        Observações / Objetivos
-                    </label>
-
-                    <textarea
-                        id="consultingObs"
-                        rows="3"
-                        maxlength="1000"
-                        placeholder="Conte brevemente qual necessidade deseja tratar."
-                        class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-slate-900 text-sm resize-none"
-                    ></textarea>
-                </div>
-
-                <div class="flex items-start gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
-                    <input
-                        type="checkbox"
-                        id="consultingTerms"
-                        required
-                        class="mt-1 w-4 h-4 accent-amber-500"
-                    >
-
-                    <label
-                        for="consultingTerms"
-                        class="text-xs text-slate-600 leading-relaxed cursor-pointer"
-                    >
-                        Concordo com o armazenamento dos dados deste
-                        agendamento para contato da L&A Royal Advisory.
-                    </label>
-                </div>
-
-                <div class="flex gap-3 pt-2">
-                    <button
-                        type="button"
-                        onclick="closeConsultingBooking()"
-                        class="flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition text-sm"
-                    >
-                        Cancelar
-                    </button>
-
-                    <button
-                        type="submit"
-                        class="flex-1 py-3 gradient-gold text-slate-900 font-bold rounded-xl shadow-gold hover:opacity-95 transition text-sm"
-                    >
-                        Confirmar agendamento
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
 
@@ -7118,6 +6687,8 @@ data-lenis-prevent-touch
                         Gestão de Produtos
                     </h4>
 
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" onclick="openRoyalReviewModeration()" class="px-4 py-2 rounded-lg border border-amber-400 text-slate-900 font-bold text-sm">Moderar avaliações</button>
                     <button
                         type="button"
                         onclick="openAdminProductForm()"
@@ -7130,6 +6701,7 @@ data-lenis-prevent-touch
 
                         Novo produto
                     </button>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -7738,10 +7310,17 @@ data-lenis-prevent-touch
                         <input
                             type="url"
                             id="adminProductImage"
-                            required
                             maxlength="500"
                             class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-amber-500"
                         >
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label for="adminProductImageFiles" class="block text-xs font-bold text-slate-700 uppercase mb-2">Upload das imagens do produto</label>
+                        <input id="adminProductImageFiles" type="file" accept="image/jpeg,image/png,image/webp" multiple onchange="previewRoyalProductUploads(this)"
+                         class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl">
+                        <p class="text-xs text-slate-500 mt-2">Envie até 6 fotos (JPG, PNG, WebP, até 5 MB cada). As fotos devem mostrar o produto claramente. A primeira imagem será a principal e ocupará todo o card de bordas arredondadas.</p>
+                        <div id="royalProductUploadPreview" class="grid grid-cols-3 gap-2 mt-3"></div>
                     </div>
 
                     <div class="sm:col-span-2">
@@ -8855,7 +8434,9 @@ data-lenis-prevent-touch
                 id: product.id, name: product.name, description: product.description || '',
                 price: Number(product.price || 0), salePrice: Number(product.sale_price ?? product.price ?? 0), discount: Number(product.discount || 0),
                 stock: Number(product.stock || 0), commission: Number(product.commission || 0),
-                image: product.image || '', category: product.category || '', active: product.active !== false,
+                image: product.image || '',
+                images: Array.isArray(product.images) && product.images.length ? product.images : (product.image ? [product.image] : []),
+                category: product.category || '', active: product.active !== false,
                 createdAt: product.created_at, updatedAt: product.updated_at
             };
         }
@@ -9133,6 +8714,8 @@ function initializeApp() {
 
     renderCatalog();
     focusAffiliateProductFromLink();
+    // Accept direct product links without requiring authentication.
+    if (window.openRoyalProductFromUrl) window.openRoyalProductFromUrl();
     updateCartIcon();
     updateAuthUI();
     handleCookieConsent();
@@ -13263,6 +12846,8 @@ async function loadRoyalAiPanel() {
 
             const form = document.getElementById('adminProductForm');
             form.reset();
+            const preview = document.getElementById('royalProductUploadPreview');
+            if (preview) preview.replaceChildren();
 
             if (productId) {
                 const product = state.products.find(p => p.id === productId);
@@ -13335,13 +12920,17 @@ async function loadRoyalAiPanel() {
             const discount = parseFloat(document.getElementById('adminProductDiscount')?.value || '0');
             const stock = parseInt(document.getElementById('adminProductStock')?.value || '0');
             const commission = parseFloat(document.getElementById('adminProductCommission')?.value || '0');
-            const image = document.getElementById('adminProductImage')?.value.trim();
+            let image = document.getElementById('adminProductImage')?.value.trim();
+            const imageFiles = Array.from(document.getElementById('adminProductImageFiles')?.files || []);
+            const currentProduct = state.products.find(p => p.id === id);
+            let images = Array.isArray(currentProduct?.images) ? [...currentProduct.images] : (image ? [image] : []);
             const category = document.getElementById('adminProductCategory')?.value.trim();
 
             if (
                 !name ||
                 !description ||
-                !image ||
+                (!image && !imageFiles.length) ||
+                imageFiles.length > 6 ||
                 !category ||
                 !Number.isFinite(price) ||
                 price < 0 ||
@@ -13378,10 +12967,17 @@ async function loadRoyalAiPanel() {
             };
 
             try {
-                if (!supabaseAuthUser) {
-                    throw new Error('Sua sessão expirou. Faça login novamente como administrador.');
+                if (!supabaseAuthUser || state.currentUser?.role !== 'admin') {
+                    throw new Error('Entre novamente como administrador para alterar produtos.');
                 }
-
+                if (imageFiles.length) {
+                    const uploadedUrls = await uploadRoyalProductImages(imageFiles);
+                    images = [...uploadedUrls, ...images.filter(url => !uploadedUrls.includes(url))].slice(0,12);
+                    image = uploadedUrls[0];
+                }
+                if (!images.length && image) images = [image];
+                product.image = image;
+                product.images = images;
                 const { error } = await supabaseClient
                     .from('products')
                     .upsert({
@@ -13394,6 +12990,7 @@ async function loadRoyalAiPanel() {
                         stock: product.stock,
                         commission: product.commission,
                         image: product.image,
+                        images: product.images,
                         category: product.category,
                         active: true
                     }, { onConflict: 'id' });
@@ -13413,6 +13010,8 @@ async function loadRoyalAiPanel() {
                 saveStateToStorage();
                 renderCatalog();
                 loadAdminProducts();
+                document.getElementById('adminProductImageFiles').value = '';
+                document.getElementById('royalProductUploadPreview').innerHTML = '';
                 showAdminProductMessage('Produto salvo no Supabase com sucesso!', 'success');
             } catch (error) {
                 console.error('Erro ao salvar produto no Supabase:', error);
@@ -14000,23 +13599,14 @@ function renderCatalog() {
             </div>
             <div class="product-cards-layout grid grid-cols-2 gap-3 md:flex md:gap-6 md:overflow-x-auto md:pb-4 md:scroll-smooth md:snap-x md:snap-mandatory no-scrollbar" tabindex="0" aria-label="Carrossel de produtos">
                 ${group.map(product => {
-                    const finalPrice = calculateFinalPrice(product);
-                    const discount = Number(product.discount) || 0;
                     return `
-                        <article role="button" tabindex="0" aria-label="Ver detalhes de ${escapeAttribute(product.name)}" onclick="showProductDetails('${String(product.id).replace(/[^a-zA-Z0-9_-]/g, '')}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showProductDetails('${String(product.id).replace(/[^a-zA-Z0-9_-]/g, '')}')}" data-product-id="${escapeAttribute(product.id)}" data-delay="${(group.indexOf(product)%10)+1}" class="product-motion-card product-summary-card w-full min-w-0 md:w-[285px] md:flex-shrink-0 md:snap-start bg-white rounded-xl md:rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col cursor-pointer">
-                            <div class="relative h-32 min-[400px]:h-36 sm:h-40 md:h-64 bg-white overflow-hidden flex items-center justify-center">
-                                <img src="${escapeAttribute(product.image)}" alt="${escapeAttribute(product.name)}" class="product-card-image w-full h-full object-contain" loading="lazy">
-                                ${discount > 0 ? `<span class="absolute top-2 right-2 px-2 py-1 rounded-full bg-amber-400 text-slate-900 text-[10px] md:text-xs font-extrabold">${formatPercentage(discount)}% OFF</span>` : ''}
+                        <article role="button" tabindex="0" aria-label="Ver detalhes de ${escapeAttribute(product.name)}" onclick="showProductDetails('${String(product.id).replace(/[^a-zA-Z0-9_-]/g, '')}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showProductDetails('${String(product.id).replace(/[^a-zA-Z0-9_-]/g, '')}')}" data-product-id="${escapeAttribute(product.id)}" class="product-motion-card royal-image-only-card w-full min-w-0 md:w-[285px] md:flex-shrink-0 md:snap-start cursor-pointer">
+                            <img src="${escapeAttribute(product.image)}" alt="${escapeAttribute(product.name)}" class="royal-full-card-image" loading="lazy">
+                            <div class="royal-image-card-caption">
+                                <h3>${escapeHtml(product.name)}</h3>
+                                <span>Ver produto ›</span>
                             </div>
-                            <div class="p-2.5 md:p-5 flex flex-col flex-1">
-                                <h3 class="font-serif text-sm md:text-xl font-bold text-slate-900 leading-snug line-clamp-2">${escapeHtml(product.name)}</h3>
-                                <div class="mt-2 md:mt-5">
-                                    <p class="text-base md:text-2xl font-bold text-slate-900">${formatCurrency(finalPrice)}</p>
-                                    <p class="text-[10px] md:text-xs text-emerald-700 font-semibold mt-1">Frete incluso</p>
-                                </div>
-                                <p class="text-[10px] md:text-xs text-amber-700 font-bold mt-2">Ver detalhes <span aria-hidden="true">›</span></p>
-                            </div>
-                        </article>
+                        </article>              </article>
                     `;
                 }).join('')}
             </div>
@@ -14034,67 +13624,8 @@ function renderCatalog() {
 }
 
 function showProductDetails(productId) {
-    const product = state.products.find(item => String(item.id) === String(productId));
-    if (!product) return;
-    const finalPrice = calculateFinalPrice(product);
-    const discount = Number(product.discount) || 0;
-    const isAffiliate = document.body.classList.contains('affiliate-mode');
-    const oldModal = document.getElementById('productDetailsModal');
-    if (oldModal) oldModal.remove();
-
-    const modal = document.createElement('div');
-    modal.id = 'productDetailsModal';
-    modal.className = 'fixed inset-0 z-[1000] flex items-center justify-center p-3 sm:p-6';
-    modal.style.background = 'rgba(2, 6, 23, .78)';
-    modal.setAttribute('role', 'dialog');
-    modal.setAttribute('aria-modal', 'true');
-    modal.setAttribute('aria-label', 'Detalhes do produto');
-    modal.innerHTML = `
-        <div class="product-details-panel account-modal-scroll relative bg-white w-full max-w-2xl max-h-[92dvh] overflow-y-auto overscroll-contain rounded-2xl shadow-2xl">
-            <button type="button" onclick="document.getElementById('productDetailsModal')?.remove(); unlockAccountModalScroll()" aria-label="Fechar detalhes" class="sticky top-2 float-right mr-2 mt-2 z-10 w-10 h-10 rounded-full bg-slate-900 text-amber-400 text-2xl font-bold">&times;</button>
-            <div class="p-4 sm:p-6">
-                <div class="w-full h-52 sm:h-72 bg-white flex items-center justify-center rounded-xl overflow-hidden">
-                    <img src="${escapeAttribute(product.image)}" alt="${escapeAttribute(product.name)}" class="w-full h-full object-contain">
-                </div>
-                <p class="text-xs font-bold uppercase tracking-wide text-amber-700 mt-4">${escapeHtml(product.category || 'Produto')}</p>
-                <h2 class="font-serif text-xl sm:text-2xl font-bold text-slate-900 mt-1">${escapeHtml(product.name)}</h2>
-                <div class="mt-3">
-                    <p class="text-2xl sm:text-3xl font-bold text-slate-900">${formatCurrency(finalPrice)}</p>
-                    <p class="text-sm text-emerald-700 font-semibold mt-1">Frete incluso no valor</p>
-                    <p class="text-xs text-slate-500 mt-0.5">Prazo de entrega: 7 dias após a confirmação do pagamento.</p>
-                </div>
-                <p class="text-sm sm:text-base text-slate-600 leading-relaxed mt-4 whitespace-pre-line">${escapeHtml(product.description || 'Mais informações sobre este produto em breve.')}</p>
-                <div class="grid grid-cols-2 gap-3 mt-5">
-                    <div class="rounded-xl bg-slate-50 border border-slate-200 p-3"><p class="text-xs text-slate-500">Estoque</p><p class="font-bold text-slate-900 mt-1">${Math.max(0, Number(product.stock) || 0)} ${Number(product.stock) === 1 ? 'unidade disponível' : 'unidades disponíveis'}</p></div>
-                    ${product.brand ? `<div class="rounded-xl bg-slate-50 border border-slate-200 p-3"><p class="text-xs text-slate-500">Marca</p><p class="font-bold text-slate-900 mt-1">${escapeHtml(product.brand)}</p></div>` : ''}
-                    ${product.color || product.colors ? `<div class="rounded-xl bg-slate-50 border border-slate-200 p-3"><p class="text-xs text-slate-500">Cor</p><p class="font-bold text-slate-900 mt-1">${escapeHtml([product.color, product.colors].flat().filter(Boolean).join(', '))}</p></div>` : ''}
-                    ${product.size || product.sizes ? `<div class="rounded-xl bg-slate-50 border border-slate-200 p-3"><p class="text-xs text-slate-500">Tamanho</p><p class="font-bold text-slate-900 mt-1">${escapeHtml([product.size, product.sizes].flat().filter(Boolean).join(', '))}</p></div>` : ''}
-                </div>
-                <div class="mt-5">
-                    ${isAffiliate ? `
-                        <button type="button" onclick="shareProduct('${String(product.id).replace(/[^a-zA-Z0-9_-]/g, '')}')" class="w-full gradient-gold text-slate-900 py-3 rounded-xl font-bold"><i data-lucide="share-2" class="w-4 h-4 inline mr-1"></i> Compartilhar produto</button>
-                    ` : `
-                        <div class="grid grid-cols-2 gap-2">
-                            <button type="button" onclick="addToCart('${String(product.id).replace(/[^a-zA-Z0-9_-]/g, '')}')" class="w-full gradient-gold text-slate-900 py-3 rounded-xl font-bold text-sm"><i data-lucide="shopping-cart" class="w-4 h-4 inline mr-1"></i> Adicionar ao carrinho</button>
-                            <button type="button" onclick="buyNow('${String(product.id).replace(/[^a-zA-Z0-9_-]/g, '')}')" class="w-full bg-slate-900 text-amber-400 py-3 rounded-xl font-bold text-sm border border-slate-700"><i data-lucide="credit-card" class="w-4 h-4 inline mr-1"></i> Comprar agora</button>
-                        </div>
-                    `}
-                </div>
-            </div>
-        </div>`;
-    modal.addEventListener('click', event => {
-        if (event.target === modal) {
-            modal.remove();
-            unlockAccountModalScroll();
-        }
-    });
-    document.body.appendChild(modal);
-    document.documentElement.classList.add('account-modal-open');
-    document.body.classList.add('account-modal-open');
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
-    if (window.laLenis && typeof window.laLenis.stop === 'function') window.laLenis.stop();
-    if (window.lucide) lucide.createIcons();
+    // Individual shareable page; the global storefront cart/checkout stays intact.
+    if (window.openRoyalProductPage) return window.openRoyalProductPage(productId);
 }
 
 function formatPercentage(value) {
@@ -14701,7 +14232,7 @@ function initPremiumScrollMotion() {
             wheelMultiplier: 0.92,
             touchMultiplier: 1.02,
             // Native scrolling is responsible for the login/register pane.
-            prevent: node => Boolean(node?.closest?.('#authModal'))
+            prevent: node => Boolean(node?.closest?.('#authModal, #productDetailsModal'))
         });
         window.laLenis.on('scroll', ScrollTrigger.update);
         gsap.ticker.add((time) => window.laLenis.raf(time * 1000));
@@ -15578,39 +15109,8 @@ body.guest-mode #afiliados { display: none !important; }
 </style>
 
 <script src="./js/royal-ai-image-upload.js"></script>
-    <script id="royal-consulting-navigation">
-        window.focusRoyalCatalogSearch = () => {
-            const filters = document.getElementById('catalogFilters');
-            if (filters?.classList.contains('hidden')) {
-                openCatalogFilters();
-            }
-            const input = document.getElementById('searchProduct');
-            if (input) {
-                input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                window.setTimeout(() => input.focus({ preventScroll: true }), 150);
-            }
-        };
-        (() => {
-            const syncConsulting = () => {
-                const consultingRequested = window.location.hash === '#consultoria';
-                document.body.classList.toggle('royal-consulting-visible', consultingRequested);
-                if (consultingRequested) {
-                    document.body.classList.remove('store-open-mode');
-                }
-            };
-            // Reveal the preserved consulting section only after explicit navigation.
-            document.addEventListener('click', event => {
-                const target = event.target instanceof Element ? event.target.closest('a[href="#consultoria"]') : null;
-                if (target) {
-                    document.body.classList.remove('store-open-mode');
-                    document.body.classList.add('royal-consulting-visible');
-                }
-            }, true);
-            window.addEventListener('hashchange', syncConsulting);
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', syncConsulting, {once:true});
-            } else syncConsulting();
-        })();
-    </script>
+
+<script src="./js/royal-product-image-upload.js"></script>
+<script src="./js/royal-product-page.js"></script>
 </body>
 </html>
