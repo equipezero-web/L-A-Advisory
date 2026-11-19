@@ -9,7 +9,7 @@ const css = fs.readFileSync('assets/royal-storefront-upgrade.css', 'utf8');
 assert.match(html, /id="catalogPagination"/, 'Bottom-of-page pagination container is required');
 assert.match(html, /id="catalogContainer"[^>]*royal-catalog-grid/, 'Catalog must be a continuous grid');
 assert.equal((html.match(/id="filterCategory"/g) || []).length, 1, 'Only one live category select');
-assert.equal(html.includes('royal-store-shortcuts-inner'), false, 'Remove the boxed shortcut strip');
+assert.equal(html.includes('<nav class="royal-store-shortcuts"'), false, 'Remove the boxed shortcut strip');
 assert.equal(html.includes('class="product-carousel-group "'), false, 'Remove product carousel groups');
 assert.equal(html.includes('aria-label="Carrossel de produtos"'), false, 'Remove horizontal product carousels');
 assert.match(css, /#customerProfileModal:not\(\.hidden\)[^\n]*z-index:30000!important/, 'Customer profile must layer above the header');
