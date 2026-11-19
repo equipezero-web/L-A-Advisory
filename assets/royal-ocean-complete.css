@@ -113,6 +113,30 @@ body :focus-visible { outline-color:var(--la-taupe)!important; }
  --tw-gradient-to:var(--la-pearl) var(--tw-gradient-to-position)!important;
 }
 
+
+/* Dark buttons require light letters even after their old amber utility changes. */
+.bg-slate-900.text-amber-400,
+.bg-slate-900.text-amber-300,
+.bg-slate-900.text-amber-200,
+.bg-slate-950.text-amber-400,
+.bg-slate-800.text-amber-400,
+.bg-slate-800.text-amber-300 {
+ color:var(--la-mist)!important;
+ -webkit-text-fill-color:var(--la-mist)!important;
+}
+#mobileMenuPanel .mobile-user-menu-header :is(.text-slate-900,.text-slate-500) {
+ color:var(--la-mist)!important;
+}
+#mobileMenuPanel .mobile-user-menu-body :is(.text-slate-900,.text-slate-800,.text-slate-700) {
+ color:var(--la-petroleum)!important;
+}
+#mobileMenuPanel .mobile-user-menu-body :is(.text-amber-400,.text-amber-500,.text-amber-600){
+ color:var(--la-sage)!important;
+}
+#mobileMenuPanel .mobile-user-menu-body {
+ background:var(--la-light)!important;
+}
+
 /* Replace old gold/navy design primitives, preserving legibility. */
 .gradient-gold {
  background:linear-gradient(135deg,var(--la-taupe),var(--la-mist),var(--la-taupe))!important;
@@ -139,7 +163,7 @@ body :focus-visible { outline-color:var(--la-taupe)!important; }
 /* Dark containers must keep their light typography when utilities are remapped.
    This is essential on 320–430px phones and inside mobile popups. */
 :where(.royal-glass-header,.royal-utility-bar,.royal-store-shortcuts,
-       #catalogFilters,#mobileMenuPanel,footer,#cookieBanner,#siteAlertBox,
+       #catalogFilters,.mobile-user-menu-header,.royal-auth-grid>section:first-child,footer,#cookieBanner,#siteAlertBox,
        .royal-product-page,.royal-fashion-hero,.royal-review-admin-modal)
  :is(.text-slate-500,.text-slate-400,.text-slate-300,.text-slate-200,
      .text-slate-600,.text-amber-200,.text-amber-300,.text-amber-400,
@@ -147,7 +171,7 @@ body :focus-visible { outline-color:var(--la-taupe)!important; }
  color:var(--la-mist)!important;
 }
 :where(.royal-glass-header,.royal-utility-bar,.royal-store-shortcuts,
-       #catalogFilters,#mobileMenuPanel,footer,#cookieBanner,#siteAlertBox)
+       #catalogFilters,.mobile-user-menu-header,.royal-auth-grid>section:first-child,footer,#cookieBanner,#siteAlertBox)
  :is(.text-slate-900,.text-slate-800,.text-slate-700) {
  color:var(--la-mist)!important;
 }
