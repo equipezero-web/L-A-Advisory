@@ -1,0 +1,367 @@
+/* L&A Royal Advisory / paleta única em TODAS as resoluções
+   Fonte visual: verde petróleo #003737, sálvia #35675C,
+   azul névoa #C1D1DE, areia taupe #B19981, cinza pérola #CECAC7.
+   Inclui equivalentes de luminosidade para texto, foco e superfícies.
+   Cores semânticas de erros e sucesso permanecem distinguíveis. */
+:root {
+ --la-petroleum:#003737;
+ --la-petroleum-deep:#002c2c;
+ --la-sage:#35675c;
+ --la-mist:#c1d1de;
+ --la-taupe:#b19981;
+ --la-pearl:#cecac7;
+ --la-light:#f5f3f0;
+ --la-text:#123d3b;
+ --la-muted:#496763;
+ --la-border:rgba(53,103,92,.25);
+ --navy-950:var(--la-petroleum-deep);
+ --navy-900:var(--la-petroleum);
+ --navy-800:#164944;
+ --navy-700:var(--la-sage);
+ --gold:var(--la-taupe);
+ --gold-light:var(--la-mist);
+ --gold-soft:var(--la-pearl);
+ --silver:var(--la-mist);
+ --text:var(--la-text);
+ --muted:var(--la-muted);
+}
+html { scrollbar-color:var(--la-sage) var(--la-light)!important; }
+*,*::before,*::after { scrollbar-color:var(--la-sage) var(--la-light); }
+*::-webkit-scrollbar-track { background:var(--la-light)!important; }
+*::-webkit-scrollbar-thumb { background:var(--la-sage)!important; }
+*::-webkit-scrollbar-thumb:hover { background:var(--la-petroleum)!important; }
+body { background-color:var(--la-petroleum)!important; }
+body :focus-visible { outline-color:var(--la-taupe)!important; }
+
+/* Tailwind utilities originally created with navy/gold:
+   remap globally so runtime-generated cards, panels and mobile views match. */
+:where(.bg-slate-950,.bg-slate-900,.bg-blue-950) {
+ background-color:var(--la-petroleum)!important;
+}
+:where(.bg-slate-800) { background-color:#164944!important; }
+:where(.bg-slate-700) { background-color:var(--la-sage)!important; }
+:where(.bg-white,.bg-slate-50) { background-color:var(--la-light)!important; }
+:where(.bg-slate-100,.bg-slate-200) { background-color:var(--la-pearl)!important; }
+:where(.bg-amber-50,.bg-amber-100) { background-color:#e9e3db!important; }
+:where(.bg-amber-400) { background-color:var(--la-taupe)!important; }
+:where(.bg-amber-500,.bg-amber-600,.bg-blue-600) { background-color:var(--la-sage)!important; }
+:where(.bg-blue-50,.bg-blue-100,.bg-purple-100) { background-color:var(--la-mist)!important; }
+
+/* Dark text on light surfaces (catalog, account, admin, checkout and forms). */
+:where(.text-slate-950,.text-slate-900,.text-slate-800,.text-slate-700,
+       .text-blue-800,.text-blue-700,.text-purple-800) {
+ color:var(--la-text)!important;
+}
+:where(.text-slate-600,.text-slate-500,.text-slate-400,.text-blue-600) {
+ color:var(--la-muted)!important;
+}
+:where(.text-amber-900,.text-amber-800,.text-amber-700,.text-amber-600,
+       .text-amber-500,.text-amber-400,.text-amber-300,.text-amber-200) {
+ color:var(--la-sage)!important;
+}
+:where(.text-blue-300,.text-slate-300,.text-slate-200) {
+ color:var(--la-mist)!important;
+}
+:where(.border-slate-100,.border-slate-200,.border-slate-300,.border-slate-400) {
+ border-color:var(--la-pearl)!important;
+}
+:where(.border-slate-600,.border-slate-700,.border-slate-800) {
+ border-color:rgba(193,209,222,.30)!important;
+}
+:where(.border-amber-200,.border-amber-300,.border-amber-400,.border-amber-500,
+       .border-blue-500) {
+ border-color:var(--la-taupe)!important;
+}
+:where(.ring-amber-400,.ring-amber-500,.ring-blue-500) {
+ --tw-ring-color:var(--la-sage)!important;
+}
+:where(.focus\:ring-amber-500:focus,.focus\:ring-blue-500:focus) {
+ --tw-ring-color:rgba(53,103,92,.38)!important;
+}
+:where(.focus\:border-amber-500:focus,.hover\:border-amber-500:hover,
+       .hover\:border-amber-400:hover,.hover\:border-amber-400\/60:hover,
+       .hover\:border-blue-500:hover) {
+ border-color:var(--la-taupe)!important;
+}
+:where(.hover\:text-amber-300:hover,.hover\:text-amber-400:hover,
+       .hover\:text-amber-600:hover,.hover\:text-amber-200:hover,
+       .hover\:text-amber-500:hover,.hover\:text-blue-600:hover) {
+ color:var(--la-sage)!important;
+}
+:where(.hover\:bg-slate-800:hover,.hover\:bg-slate-900:hover,.hover\:bg-blue-600:hover) {
+ background-color:var(--la-sage)!important;
+ color:#fff!important;
+}
+:where(.hover\:bg-slate-50:hover,.hover\:bg-slate-100:hover,
+       .hover\:bg-amber-50:hover) {background-color:#e8f0ed!important}
+:where(.hover\:bg-amber-400:hover,.hover\:bg-amber-500:hover) {
+ background-color:var(--la-sage)!important;
+}
+:where(.from-slate-950,.from-slate-900,.from-blue-950) {
+ --tw-gradient-from:var(--la-petroleum) var(--tw-gradient-from-position)!important;
+ --tw-gradient-to:transparent var(--tw-gradient-to-position)!important;
+ --tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)!important;
+}
+:where(.via-blue-950,.via-slate-900) {
+ --tw-gradient-to:transparent var(--tw-gradient-to-position)!important;
+ --tw-gradient-stops:var(--tw-gradient-from),var(--la-sage) var(--tw-gradient-via-position),var(--tw-gradient-to)!important;
+}
+:where(.to-blue-950,.to-slate-950,.to-slate-900) {
+ --tw-gradient-to:var(--la-petroleum-deep) var(--tw-gradient-to-position)!important;
+}
+:where(.to-slate-100) {
+ --tw-gradient-to:var(--la-pearl) var(--tw-gradient-to-position)!important;
+}
+
+
+/* Dark buttons require light letters even after their old amber utility changes. */
+.bg-slate-900.text-amber-400,
+.bg-slate-900.text-amber-300,
+.bg-slate-900.text-amber-200,
+.bg-slate-950.text-amber-400,
+.bg-slate-800.text-amber-400,
+.bg-slate-800.text-amber-300 {
+ color:var(--la-mist)!important;
+ -webkit-text-fill-color:var(--la-mist)!important;
+}
+#mobileMenuPanel .mobile-user-menu-header :is(.text-slate-900,.text-slate-500) {
+ color:var(--la-mist)!important;
+}
+#mobileMenuPanel .mobile-user-menu-body :is(.text-slate-900,.text-slate-800,.text-slate-700) {
+ color:var(--la-petroleum)!important;
+}
+#mobileMenuPanel .mobile-user-menu-body :is(.text-amber-400,.text-amber-500,.text-amber-600){
+ color:var(--la-sage)!important;
+}
+#mobileMenuPanel .mobile-user-menu-body {
+ background:var(--la-light)!important;
+}
+
+/* Replace old gold/navy design primitives, preserving legibility. */
+.gradient-gold {
+ background:linear-gradient(135deg,var(--la-taupe),var(--la-mist),var(--la-taupe))!important;
+ color:var(--la-petroleum)!important;
+}
+.text-gradient-gold {
+ background:linear-gradient(125deg,var(--la-mist),var(--la-taupe))!important;
+ background-clip:text!important;-webkit-background-clip:text!important;
+ -webkit-text-fill-color:transparent!important;
+}
+.shadow-gold,.premium-glow:hover {
+ box-shadow:0 6px 23px rgba(53,103,92,.25)!important;
+}
+:where(.bg-slate-950\/90,.bg-slate-950\/80,.bg-slate-950\/60) {
+ background-color:rgba(0,44,44,.90)!important;
+}
+:where(.bg-slate-900\/50,.bg-slate-900\/40,.bg-slate-800\/70) {
+ background-color:rgba(0,55,55,.60)!important;
+}
+:where(.bg-amber-400\/10,.bg-amber-500\/10) {
+ background-color:rgba(177,153,129,.14)!important;
+}
+
+/* Dark containers must keep their light typography when utilities are remapped.
+   This is essential on 320–430px phones and inside mobile popups. */
+:where(.royal-glass-header,.royal-utility-bar,.royal-store-shortcuts,
+       #catalogFilters,.mobile-user-menu-header,.royal-auth-grid>section:first-child,footer,#cookieBanner,#siteAlertBox,
+       .royal-product-page,.royal-fashion-hero,.royal-review-admin-modal)
+ :is(.text-slate-500,.text-slate-400,.text-slate-300,.text-slate-200,
+     .text-slate-600,.text-amber-200,.text-amber-300,.text-amber-400,
+     .text-amber-500,.text-amber-600,.text-amber-700,.text-blue-300) {
+ color:var(--la-mist)!important;
+}
+:where(.royal-glass-header,.royal-utility-bar,.royal-store-shortcuts,
+       #catalogFilters,.mobile-user-menu-header,.royal-auth-grid>section:first-child,footer,#cookieBanner,#siteAlertBox)
+ :is(.text-slate-900,.text-slate-800,.text-slate-700) {
+ color:var(--la-mist)!important;
+}
+.royal-glass-inner {
+ background:linear-gradient(110deg,rgba(193,209,222,.22),
+  rgba(53,103,92,.23),rgba(193,209,222,.13))!important;
+ border-color:rgba(193,209,222,.32)!important;
+}
+.royal-glass-inner .gradient-gold,
+#mobileMenuPanel .gradient-gold {
+ color:var(--la-petroleum)!important;
+}
+#mobileMenuPanel :is(.mobile-menu-link,.mobile-menu-auth button) {
+ background:var(--la-petroleum)!important;
+ color:var(--la-mist)!important;
+ border-color:rgba(177,153,129,.40)!important;
+}
+#mobileMenuPanel :is(.mobile-menu-link,.mobile-menu-auth button):hover {
+ background:var(--la-sage)!important;color:#fff!important;
+}
+.royal-utility-bar :is(button,.royal-a11y-label) {
+ color:var(--la-mist)!important;
+}
+#catalogFilters {
+ background:var(--la-petroleum)!important;
+ border-color:var(--la-taupe)!important;
+ color:var(--la-mist)!important;
+}
+#catalogFilters :is(input,select,textarea) {
+ background:#164944!important;
+ color:#fff!important;
+ border-color:rgba(193,209,222,.36)!important;
+}
+#catalogFilters :is(label,p) {
+ color:var(--la-mist)!important;
+}
+#catalogFilters option {background:var(--la-petroleum);color:#fff}
+#loja .royal-image-only-card .royal-image-card-caption h3,
+#catalogContainer .royal-image-card-caption h3 {
+ color:#fff!important;-webkit-text-fill-color:#fff!important;
+}
+#loja .royal-image-only-card .royal-image-card-caption span {
+ color:#edf1ed!important;-webkit-text-fill-color:#edf1ed!important;
+}
+
+/* All light forms/cards/modal panels; protected error/success semantics. */
+:where(#authModal,#customerOrdersModal,#customerProfileModal,#userMenuModal,
+       #checkoutModal,#cartModal,#trackingModal,#orderDetailsModal,
+       #adminDashboardModal,#adminProductFormModal,#adminOrderFormModal,
+       #affiliateDashboardModal,#affiliateCatalogModal,#affiliateProfileModal,
+       #stockAlertModal,#cookieSettingsModal,#dataSecurityTermsModal,
+       #adminUserFormModal,#adminAffiliateFormModal,#returnRequestModal)
+ :is(input,select,textarea) {
+ accent-color:var(--la-sage);
+ border-color:var(--la-pearl);
+}
+:where(#authModal,#customerOrdersModal,#customerProfileModal,#checkoutModal,
+       #adminDashboardModal,#adminProductFormModal,#adminOrderFormModal,
+       #affiliateDashboardModal,#affiliateProfileModal,#cartModal)
+ :is(input,select,textarea):focus {
+ --tw-ring-color:rgba(53,103,92,.38)!important;
+ border-color:var(--la-sage)!important;
+}
+:where(#authModal,#customerOrdersModal,#customerProfileModal,#checkoutModal,
+       #adminDashboardModal,#affiliateDashboardModal)
+ :is(h2,h3,h4) {
+ color:var(--la-text)!important;
+}
+#authModal .royal-auth-scroll-region {
+ background:var(--la-light)!important;color:var(--la-text)!important;
+}
+#authModal button.gradient-gold,
+#customerOrdersList button.bg-slate-900,
+#adminDashboardScroller .admin-tab.bg-slate-900 {
+ background:var(--la-sage)!important;color:#fff!important;
+ -webkit-text-fill-color:#fff!important;
+}
+#authModal button[onclick*="sendPasswordReset"],
+#authModal button[onclick*="togglePasswordVisibility"],
+#authModal button[onclick*="switchAuthScreen"]:not(#authLoginTab):not(#authRegisterTab){
+ color:var(--la-sage)!important;background:transparent!important;
+ -webkit-text-fill-color:var(--la-sage)!important;
+}
+#adminDashboardScroller .admin-tab.bg-slate-900 :is(svg,span,i) {
+ color:#fff!important;stroke:#fff!important;
+}
+#adminDashboardScroller .admin-tab:not(.bg-slate-900) {
+ color:var(--la-text)!important;
+}
+#customerOrdersModal p.text-slate-500 {
+ color:var(--la-muted)!important;
+ -webkit-text-fill-color:var(--la-muted)!important;
+}
+#customerOrdersList .text-amber-600 {
+ color:var(--la-sage)!important;-webkit-text-fill-color:var(--la-sage)!important;
+}
+.royal-product-page :is(.royal-product-info,.royal-product-details) {
+ background:#084746!important;color:#fff!important;
+}
+.royal-product-page :is(.royal-p-price,.royal-p-stock,.royal-p-qty-label,
+                         .royal-p-attribute strong) {
+ color:var(--la-mist)!important;
+}
+.royal-product-page .royal-p-kicker {color:var(--la-taupe)!important}
+.royal-product-page .royal-product-photo {
+ background:var(--la-light)!important;
+}
+
+/* Real mobile navigation and accessibility controls — no legacy blue/gold. */
+#mobileMenuButton,
+#mobileUtilityActions>button {
+ background:var(--la-petroleum)!important;
+ color:var(--la-mist)!important;
+ border-color:var(--la-taupe)!important;
+}
+#backToTop {
+ background:var(--la-petroleum)!important;
+ color:var(--la-mist)!important;
+ border-color:var(--la-taupe)!important;
+}
+#siteAlertOverlay #siteAlertBox {
+ background:linear-gradient(135deg,var(--la-petroleum-deep),var(--la-petroleum))!important;
+ border:1px solid var(--la-taupe)!important;
+ color:#fff!important;
+}
+#siteAlertOverlay #siteAlertOk {
+ background:var(--la-sage)!important;color:#fff!important;
+}
+
+/* Selected collection tabs remain deep petrol with white letters on every phone. */
+#loja #storeAudienceTabs .store-audience-tab {
+ color:var(--la-petroleum)!important;
+ background:var(--la-light)!important;
+ border-color:rgba(53,103,92,.25)!important;
+}
+#loja #storeAudienceTabs .store-audience-tab[aria-selected="true"] {
+ color:#fff!important;
+ background:var(--la-petroleum)!important;
+ border-color:var(--la-taupe)!important;
+}
+
+/* Status indicators remain perceptible without blue/gold branding. */
+#customerOrdersList .bg-blue-100,
+#adminDashboardScroller .bg-blue-100 {
+ background:var(--la-mist)!important;
+}
+#customerOrdersList .text-blue-800,
+#adminDashboardScroller .text-blue-800 {
+ color:var(--la-petroleum)!important;
+}
+#customerOrdersList .bg-amber-100,
+#adminDashboardScroller .bg-amber-100 {
+ background:#e9e3db!important;
+}
+#customerOrdersList .text-amber-800,
+#adminDashboardScroller .text-amber-800 {
+ color:var(--la-petroleum)!important;
+}
+/* Feedback for danger, confirmation and live availability retains a distinct
+   semantic color. Never override red/emerald status badges and validation. */
+@media(max-width:767px) {
+ .royal-glass-header,.royal-utility-bar,footer {
+  border-color:rgba(193,209,222,.30)!important;
+ }
+ #loja,.account-popover-shell,#adminDashboardScroller {
+  color:var(--la-text)!important;
+ }
+ #loja :is(.text-amber-600,.text-amber-500,.text-amber-400),
+ #loja :is(.text-slate-700,.text-slate-600,.text-slate-500) {
+  color:var(--la-sage)!important;
+ }
+ .royal-utility-bar .royal-a11y button {
+  color:var(--la-mist)!important;
+  border-color:rgba(193,209,222,.35)!important;
+ }
+ #authModal input:focus-visible,
+ #mobileMenuButton:focus-visible,
+ #storeAudienceTabs button:focus-visible {
+  outline:2px solid var(--la-taupe)!important;
+  outline-offset:2px!important;
+ }
+}
+@media(min-width:768px) and (max-width:1023px) {
+ .royal-glass-inner{border-color:rgba(193,209,222,.35)!important}
+}
+@media(prefers-contrast:more) {
+ :where(#loja,.account-popover-shell,#adminDashboardScroller) {
+  --la-muted:#003737;
+ }
+ #loja #storeAudienceTabs .store-audience-tab {
+  border-width:2px!important;
+ }
+}

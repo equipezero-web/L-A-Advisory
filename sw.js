@@ -1,9 +1,14 @@
-const CACHE_NAME = "la-royal-advisory-v52";
+const CACHE_NAME = "la-royal-advisory-v53";
 
 const urlsToCache = [
     "./",
     "./index.html",
     "./manifest.json",
+    "./assets/royal-ocean-theme.css",
+    "./assets/royal-ocean-unified.css",
+    "./assets/royal-mobile-polish.css",
+    "./assets/store-audience-tabs.css",
+    "./assets/royal-ocean-complete.css",
     "./icons/icons-192.png",
     "./icons/icons-512.png",
     "./icons/maskable-512.png"
@@ -54,7 +59,7 @@ self.addEventListener("fetch", event => {
     const shellUrls = new Set(urlsToCache.map(item => new URL(item, self.registration.scope).pathname));
     if (!shellUrls.has(url.pathname)) return;
     event.respondWith(
-        caches.match(request).then(cached => cached || fetch(request))
+        caches.match(request, { ignoreSearch: true }).then(cached => cached || fetch(request))
     );
 });
 
