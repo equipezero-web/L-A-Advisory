@@ -369,7 +369,7 @@
             '<h1>' + safe(product.name) + '</h1>' +
             '<p class="royal-p-rating" id="royalProductRatingSummary">Carregando avaliações…</p>' +
             '<div class="royal-p-price">' + money(sale) + (oldPrice > sale ? '<s>' + money(oldPrice) + '</s>' : '') + '</div>' +
-            '<p class="royal-p-stock">' + (stock ? stock + ' unidade' + (stock === 1 ? '' : 's') + ' disponível' + (stock === 1 ? '' : 'is') : 'Esgotado') + '</p>' +
+            '<p class="royal-p-stock">' + (stock ? stock + (stock === 1 ? ' unidade disponível' : ' unidades disponíveis') : 'Esgotado') + '</p>' +
             '<div class="royal-p-attributes">' + renderOptions(product) + '</div>' +
             (isAffiliate ? '<button class="royal-p-primary" data-action="share">Compartilhar produto</button>' :
             '<label class="royal-p-qty-label" for="royalProductQty">Quantidade</label>' +

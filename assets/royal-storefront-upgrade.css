@@ -498,3 +498,117 @@ html body #productDetailsModal.royal-product-page { color:var(--royal-luxe-ink)!
  #loja #catalogContainer .royal-image-only-card:hover{transform:none!important;}
  #loja #catalogContainer .royal-image-only-card:hover .royal-full-card-image{transform:none!important;}
 }
+
+
+/* Store Royal — readable text on white product pages.
+   Explicit, scoped colors override the site-wide white-on-dark theme.
+   Light backgrounds always use dark text; dark action controls retain white text. */
+html body #productDetailsModal.royal-product-page {
+ --royal-product-readable:#1b2f2b;
+ --royal-product-muted:#43534e;
+ --royal-product-accent:#0e4a3c;
+ color:var(--royal-product-readable)!important;
+ background:#fff!important;
+}
+html body #productDetailsModal.royal-product-page .royal-product-scroll,
+html body #productDetailsModal.royal-product-page .royal-product-container,
+html body #productDetailsModal.royal-product-page .royal-product-main,
+html body #productDetailsModal.royal-product-page .royal-product-info,
+html body #productDetailsModal.royal-product-page .royal-product-details,
+html body #productDetailsModal.royal-product-page .royal-p-gallery {
+ color:var(--royal-product-readable)!important;
+ background-color:#fff!important;
+}
+/* Global storefront rules can force white on headings and paragraphs: override only inside the product page. */
+html body #productDetailsModal.royal-product-page .royal-product-scroll :is(h1,h2,h3,h4,h5,h6,p,span,strong,b,small,em,dt,dd,label,li) {
+ color:var(--royal-product-readable)!important;
+ opacity:1!important;
+ text-shadow:none!important;
+}
+html body #productDetailsModal.royal-product-page .royal-product-info h1,
+html body #productDetailsModal.royal-product-page .royal-product-details h2,
+html body #productDetailsModal.royal-product-page .royal-p-review-form h3,
+html body #productDetailsModal.royal-product-page .royal-p-header-brand {
+ color:#123b31!important;
+ opacity:1!important;
+}
+html body #productDetailsModal.royal-product-page :is(
+ .royal-p-kicker,
+ .royal-p-service p,
+ .royal-p-original-price,
+ .royal-p-specs dt,
+ .royal-p-review-count,
+ .royal-p-review-head,
+ .royal-p-muted,
+ .royal-p-report
+),
+html body #productDetailsModal.royal-product-page :is(.royal-p-muted,.royal-p-original-price,.royal-p-review-head) :is(p,span,small) {
+ color:var(--royal-product-muted)!important;
+ opacity:1!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-service strong,
+html body #productDetailsModal.royal-product-page .royal-p-specs dd,
+html body #productDetailsModal.royal-product-page .royal-p-review p,
+html body #productDetailsModal.royal-product-page .royal-p-review-form label {
+ color:#1f3730!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-current-price,
+html body #productDetailsModal.royal-product-page .royal-p-price .royal-p-current-price,
+html body #productDetailsModal.royal-product-page .royal-p-price strong.royal-p-current-price {
+ color:#075344!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-stock {
+ color:#176245!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-rating-trigger,
+html body #productDetailsModal.royal-product-page #royalProductRatingSummary {
+ color:#294f43!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-discount-badge {
+ color:#145236!important;
+ background:#e7f2ea!important;
+}
+html body #productDetailsModal.royal-product-page :is(.royal-product-header button,.royal-p-qty button,.royal-p-gallery-arrow,.royal-p-primary,.royal-p-rating-trigger),
+html body #productDetailsModal.royal-product-page :is(.royal-product-header button,.royal-p-qty button,.royal-p-primary,.royal-p-rating-trigger) :is(span,strong) {
+ color:#123b31!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-secondary,
+html body #productDetailsModal.royal-product-page .royal-p-secondary :is(span,strong) {
+ color:#fff!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-image-count,
+html body #productDetailsModal.royal-product-page .royal-p-image-count :is(span,strong),
+html body #productDetailsModal.royal-product-page .royal-p-toast,
+html body #productDetailsModal.royal-product-page .royal-p-toast :is(span,strong) {
+ color:#fff!important;
+}
+html body #productDetailsModal.royal-product-page :is(input,textarea,select,option) {
+ color:#182e29!important;
+ -webkit-text-fill-color:#182e29!important;
+ background-color:#fff!important;
+ opacity:1!important;
+ caret-color:#123b31!important;
+}
+html body #productDetailsModal.royal-product-page :is(input,textarea)::placeholder {
+ color:#596d63!important;
+ -webkit-text-fill-color:#596d63!important;
+ opacity:1!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-qty input {
+ background:#fff!important;
+ color:#123b31!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-review-form :is(select,textarea) {
+ border:1px solid #acbab1!important;
+ box-shadow:none;
+}
+html body #productDetailsModal.royal-product-page .royal-p-review-form :is(select,textarea):focus-visible {
+ outline:2px solid #b5955f!important;
+ outline-offset:2px;
+}
+/* Keep links readable as well, without changing the dark green brand accents. */
+html body #productDetailsModal.royal-product-page .royal-p-report,
+html body #productDetailsModal.royal-product-page .royal-p-report:visited {
+ color:#284d40!important;
+ text-decoration-color:#a48a5c!important;
+}
