@@ -76,6 +76,8 @@
       if (ratingSummary) ratingSummary.textContent = reviews.length
         ? avg + ' / 5 · ' + reviews.length + ' avaliação' + (reviews.length === 1 ? '' : 'ões')
         : 'Ainda sem avaliações';
+      const reviewCount = document.getElementById('royalProductReviewCount');
+      if (reviewCount) reviewCount.textContent = reviews.length ? reviews.length + ' avaliação' + (reviews.length === 1 ? '' : 'ões') + ' aprovada' + (reviews.length === 1 ? '' : 's') : 'Nenhuma avaliação aprovada até o momento.';
       // Reviews are user-controlled: never pass their text through innerHTML.
       box.replaceChildren();
       if (!reviews.length) {
@@ -165,6 +167,169 @@
     return true;
   }
 
+
+  // White, product-first detail layout. Values come exclusively from the Store Royal catalog.
+  function enhanceProductPage(dialog, product, gallery, sale, oldPrice, stock) {
+    const header = dialog.querySelector('.royal-product-header');
+    header.innerHTML =
+      '<div class="royal-p-header-left"><button type="button" data-action="close" aria-label="Voltar à loja"><i data-lucide="arrow-left" aria-hidden="true"></i><span>Voltar à loja</span></button></div>' +
+      '<strong class="royal-p-header-brand">STORE ROYAL <small>por L&A Royal Advisory</small></strong>' +
+      '<div class="royal-p-header-tools">' +
+        '<button type="button" data-action="favorite" aria-pressed="false" aria-label="Favoritar produto" title="Favoritar"><i data-lucide="heart" aria-hidden="true"></i><span data-favorite-label>Favoritar</span></button>' +
+        '<button type="button" data-action="share" aria-label="Compartilhar produto" title="Compartilhar"><i data-lucide="share-2" aria-hidden="true"></i><span>Compartilhar</span></button>' +
+      '</div>';
+
+    const photo = dialog.querySelector('.royal-product-photo');
+    if (gallery.length > 1) {
+      photo.insertAdjacentHTML('beforeend',
+        '<button type="button" class="royal-p-gallery-arrow royal-p-gallery-prev" data-gallery-step="-1" aria-label="Imagem anterior"><i data-lucide="chevron-left" aria-hidden="true"></i></button>' +
+        '<button type="button" class="royal-p-gallery-arrow royal-p-gallery-next" data-gallery-step="1" aria-label="Próxima imagem"><i data-lucide="chevron-right" aria-hidden="true"></i></button>' +
+        '<span class="royal-p-image-count" aria-live="polite">1 / ' + gallery.length + '</span>'
+      );
+    }
+
+    const kicker = dialog.querySelector('.royal-p-kicker');
+    kicker.textContent = 'Store Royal  /  ' + (product.category || 'Produtos');
+
+    const rating = dialog.getElementById ? dialog.getElementById('royalProductRatingSummary') : dialog.querySelector('#royalProductRatingSummary');
+    if (rating) {
+      rating.outerHTML =
+        '<button type="button" class="royal-p-rating-trigger" data-action="reviews" aria-label="Ir para avaliações do produto">' +
+          '<i data-lucide="star" aria-hidden="true"></i><span id="royalProductRatingSummary">Carregando avaliações…</span>' +
+          '<i data-lucide="chevron-right" aria-hidden="true"></i>' +
+        '</button>';
+    }
+
+    const price = dialog.querySelector('.royal-p-price');
+    if (price) {
+      const percentage = oldPrice > sale && oldPrice > 0 ? Math.round((1 - sale / oldPrice) * 100) : 0;
+      price.innerHTML =
+        '<strong class="royal-p-current-price">' + money(sale) + '</strong>' +
+        (oldPrice > sale ? '<span class="royal-p-original-price">De <s>' + money(oldPrice) + '</s></span>' : '') +
+        (percentage > 0 ? '<span class="royal-p-discount-badge">-' + percentage + '%</span>' : '');
+    }
+
+    price.insertAdjacentHTML('afterend',
+      '<div class="royal-p-service-list">' +
+        '<div class="royal-p-service"><i data-lucide="credit-card" aria-hidden="true"></i><div><strong>Cartão de crédito</strong><p>Consulte parcelas, taxas e opções de pagamento no checkout.</p></div></div>' +
+        '<div class="royal-p-service"><i data-lucide="truck" aria-hidden="true"></i><div><strong>Envio e frete</strong><p>Frete incluso no valor, conforme a política atual da Store Royal. Prazo informado no checkout.</p></div></div>' +
+      '</div>'
+    );
+
+    const attributes = dialog.querySelector('.royal-p-attributes');
+    if (attributes) attributes.remove();
+
+    const container = dialog.querySelector('.royal-product-container');
+    const main = dialog.querySelector('.royal-product-main');
+    const phone = typeof APP_CONFIG !== 'undefined' ? String(APP_CONFIG.supportPhone || '').replace(/\D/g, '') : '';
+    const productLink = new URL(location.href);
+    productLink.searchParams.set('produto', String(product.id));
+    productLink.searchParams.delete('prod');
+    const contactUrl = phone ? 'https://wa.me/' + phone + '?text=' +
+      encodeURIComponent('Olá! Gostaria de informações sobre o produto ' + product.name + ': ' + productLink.href) : '';
+    const reportUrl = phone ? 'https://wa.me/' + phone + '?text=' +
+      encodeURIComponent('Olá! Gostaria de relatar um problema com o anúncio do produto ' + product.name + ': ' + productLink.href) : '';
+
+    main.insertAdjacentHTML('afterend',
+      '<section class="royal-p-seller" aria-label="Informações da loja">' +
+        '<div class="royal-p-seller-mark" aria-hidden="true">L&A</div>' +
+        '<div class="royal-p-seller-info"><span>Vendido por</span><h2>Store Royal</h2><p>Loja virtual da L&A Royal Advisory</p></div>' +
+        '<div class="royal-p-seller-actions">' +
+          (contactUrl ? '<a href="' + attr(contactUrl) + '" target="_blank" rel="noopener noreferrer"><i data-lucide="message-circle" aria-hidden="true"></i>Conversar com a loja</a>' : '') +
+          '<button type="button" data-action="close"><i data-lucide="store" aria-hidden="true"></i>Ver vitrine</button>' +
+        '</div>' +
+      '</section>'
+    );
+
+    const sections = container.querySelectorAll('.royal-product-details');
+    if (sections[0]) {
+      const specs = [
+        ['Categoria', product.category || 'Não informada'],
+        ['Estoque', stock > 0 ? stock + (stock === 1 ? ' unidade disponível' : ' unidades disponíveis') : 'Esgotado']
+      ];
+      for (const [name, value] of [['Marca', product.brand], ['Cor', product.color], ['Tamanho', product.size], ['País de origem', product.originCountry], ['Conteúdo da embalagem', product.packageContents]]) {
+        if (value != null && String(value).trim()) specs.push([name, String(value)]);
+      }
+      sections[0].insertAdjacentHTML('beforebegin',
+        '<section class="royal-product-details royal-p-specs"><h2>Detalhes do produto</h2><dl>' +
+          specs.map(pair => '<div><dt>' + safe(pair[0]) + '</dt><dd>' + safe(pair[1]) + '</dd></div>').join('') +
+        '</dl></section>'
+      );
+      sections[0].querySelector('h2').textContent = 'Descrição do produto';
+    }
+    if (sections[1]) {
+      sections[1].id = 'royalProductReviewsSection';
+      sections[1].querySelector('h2').textContent = 'Avaliações do produto';
+      sections[1].querySelector('h2').insertAdjacentHTML('afterend',
+        '<p class="royal-p-review-count" id="royalProductReviewCount">Carregando avaliações aprovadas…</p>'
+      );
+      if (reportUrl) {
+        sections[1].insertAdjacentHTML('beforeend',
+          '<a class="royal-p-report" target="_blank" rel="noopener noreferrer" href="' + attr(reportUrl) +
+          '"><i data-lucide="flag" aria-hidden="true"></i>Denunciar problema com este anúncio</a>'
+        );
+      }
+    }
+    const note = dialog.querySelector('.royal-product-info > .royal-p-muted');
+    if (note) note.textContent = 'Finalização segura pelo checkout da Store Royal.';
+    if (window.lucide?.createIcons) window.lucide.createIcons();
+  }
+
+  function setFavoriteButton(button, saved) {
+    if (!button) return;
+    button.classList.toggle('is-favorited', Boolean(saved));
+    button.setAttribute('aria-pressed', String(Boolean(saved)));
+    button.setAttribute('aria-label', saved ? 'Remover dos favoritos' : 'Favoritar produto');
+    const label = button.querySelector('[data-favorite-label]');
+    if (label) label.textContent = saved ? 'Favoritado' : 'Favoritar';
+  }
+
+  async function readFavorite(productId) {
+    const button = document.querySelector('#productDetailsModal button[data-action="favorite"]');
+    const userId = typeof supabaseAuthUser !== 'undefined' && supabaseAuthUser?.id;
+    if (!button || !userId) return;
+    try {
+      const { data, error } = await supabaseClient.from('favorites').select('id')
+        .eq('user_id', userId).eq('product_id', productId).limit(1);
+      if (error) throw error;
+      if (activeId === String(productId)) setFavoriteButton(button, Boolean(data?.length));
+    } catch (error) {
+      console.warn('Não foi possível consultar favoritos:', error);
+    }
+  }
+
+  async function toggleFavorite(product, button) {
+    const userId = typeof supabaseAuthUser !== 'undefined' && supabaseAuthUser?.id;
+    if (!userId) {
+      alert('Entre na sua conta para salvar este produto nos favoritos.');
+      if (typeof openAuthModal === 'function') openAuthModal('customer-login');
+      return;
+    }
+    if (button.disabled) return;
+    button.disabled = true;
+    try {
+      const { data, error: selectError } = await supabaseClient.from('favorites').select('id')
+        .eq('user_id', userId).eq('product_id', product.id).limit(1);
+      if (selectError) throw selectError;
+      if (data?.length) {
+        const { error } = await supabaseClient.from('favorites').delete()
+          .eq('id', data[0].id).eq('user_id', userId);
+        if (error) throw error;
+        setFavoriteButton(button, false);
+      } else {
+        const { error } = await supabaseClient.from('favorites')
+          .insert({user_id: userId, product_id: product.id});
+        if (error) throw error;
+        setFavoriteButton(button, true);
+      }
+    } catch (error) {
+      console.error('Não foi possível atualizar favoritos:', error);
+      alert('Não foi possível atualizar seus favoritos. Tente novamente.');
+    } finally {
+      button.disabled = false;
+    }
+  }
+
   function createPage(product, updateHistory) {
     if (!product) return false;
     if (isOpen()) removePage(false);
@@ -210,6 +375,7 @@
             '</select></label><label>Comentário<textarea name="comment" required minlength="5" maxlength="1000" rows="4" placeholder="Conte sua experiência com este produto"></textarea></label>' +
             '<button type="submit" class="royal-p-primary">Enviar avaliação</button><p class="royal-p-muted" data-review-feedback aria-live="polite">Avaliações passam por moderação antes da publicação. É necessário estar conectado.</p></form>' +
           '</section></div></div>';
+    enhanceProductPage(dialog, product, gallery, sale, oldPrice, stock);
     document.body.appendChild(dialog);
     document.body.classList.add('account-modal-open');
     document.documentElement.classList.add('account-modal-open');
@@ -227,12 +393,24 @@
         const image = dialog.querySelector('#royalSelectedProductImage');
         if (image) image.src = gallery[imageIndex];
         dialog.querySelectorAll('button[data-image-index]').forEach(button => button.classList.toggle('royal-p-thumbnail-active', button === imageButton));
+        const count = dialog.querySelector('.royal-p-image-count');
+        if (count) count.textContent = (imageIndex + 1) + ' / ' + gallery.length;
+        return;
+      }
+      const galleryStep = event.target.closest('button[data-gallery-step]');
+      if (galleryStep) {
+        const current = Array.from(dialog.querySelectorAll('button[data-image-index]')).findIndex(el => el.classList.contains('royal-p-thumbnail-active'));
+        const nextIndex = (Math.max(current, 0) + Number(galleryStep.dataset.galleryStep) + gallery.length) % gallery.length;
+        const nextButton = dialog.querySelector('button[data-image-index="' + nextIndex + '"]');
+        if (nextButton) nextButton.click();
         return;
       }
       const button = event.target.closest('button[data-action]');
       if (!button) return;
       const action = button.dataset.action;
       if (action === 'close') return removePage(true);
+      if (action === 'favorite') return toggleFavorite(product, button);
+      if (action === 'reviews') { dialog.querySelector('#royalProductReviewsSection')?.scrollIntoView({behavior:'smooth',block:'start'}); return; }
       if (action === 'share') {
         const affiliate = isAffiliate && state.affiliates.find(a => a.userId === state.currentUser?.id && a.code);
         const url = new URL(affiliate && typeof buildAffiliateProductLink === 'function'
@@ -274,6 +452,7 @@
     if (form) form.addEventListener('submit', event => submitReview(event, String(product.id)));
     if (updateHistory) updateLocation(product.id);
     loadReviews(String(product.id));
+    readFavorite(String(product.id));
     return true;
   }
 
