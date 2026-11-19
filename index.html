@@ -13518,19 +13518,38 @@ function renderCatalog() {
         return;
     }
 
+    // Vitrines comerciais dinâmicas — categoria cadastrada é a única fonte.
+    const makeGroup = (title, items) => {
+        const group = items.slice(0, CATALOG_CAROUSEL_LIMIT);
+        group.title = title;
+        return group;
+    };
     const groups = [];
-    for (let i = 0; i < availableProducts.length; i += CATALOG_CAROUSEL_LIMIT) {
-        groups.push(availableProducts.slice(i, i + CATALOG_CAROUSEL_LIMIT));
+    const featured = availableProducts.filter(product => product.featured === true);
+    groups.push(makeGroup('Produtos em destaque', featured.length ? featured : availableProducts));
+    const departments = [
+        ['Roupas', /\b(roupas?|vestuario|vestidos?|blusas?|camisas?|calcas?|saias?|jaquetas?|moda)\b/],
+        ['Sapatos', /\b(sapatos?|calcados?|tenis|botas?|sandalias?|sapatilhas?|chinelos?)\b/],
+        ['Acessórios', /\b(acessorios?|relogios?|bolsas?|carteiras?|oculos|joias?|bijuterias?|cintos?)\b/],
+        ['Dispositivos', /\b(dispositivos?|eletronicos?|celulares?|smartphones?|tablets?|notebooks?|computadores?|fones?|gadgets?|tecnologia)\b/]
+    ];
+    const assigned = new Set();
+    for (const [title, matcher] of departments) {
+        const matching = availableProducts.filter(product => matcher.test(normalizeAudienceText(product.category)));
+        matching.forEach(product => assigned.add(product.id));
+        if (matching.length) groups.push(makeGroup(title, matching));
     }
+    const uncategorized = availableProducts.filter(product => !assigned.has(product.id));
+    if (uncategorized.length) groups.push(makeGroup('Outros produtos', uncategorized));
 
     container.className = 'space-y-8 pb-6';
     const showFullCatalog = catalogShowingAll ||
         document.body.classList.contains('store-open-mode') ||
         document.body.classList.contains('affiliate-mode');
     container.innerHTML = groups.map((group, groupIndex) => `
-        <div class="product-carousel-group ${groupIndex >= 3 && !showFullCatalog ? 'hidden' : ''}">
+        <div class="product-carousel-group ">
             <div class="flex items-center justify-between gap-3 mb-3">
-                <h3 class="font-serif text-xl font-bold text-white">${groupIndex === 0 ? 'Produtos em destaque' : 'Mais produtos'}</h3>
+                <h3 class="font-serif text-xl font-bold text-white">${escapeHtml(group.title || 'Mais produtos')}</h3>
                 <div class="flex items-center gap-2 shrink-0">
                     <span class="text-xs text-slate-400">${group.length} produto${group.length === 1 ? '' : 's'}</span>
                     <div class="la-carousel-nav flex items-center gap-1">
