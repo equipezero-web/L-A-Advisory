@@ -410,10 +410,11 @@
       if(translation)node.textContent=raw.replace(value,translation);
     }
     const select=document.getElementById('royalLanguage');if(select)select.value=selected;
+    if(typeof window.royalApplyCatalogTranslations === 'function') window.royalApplyCatalogTranslations();
   };
   window.royalApplyCatalogTranslations=function(){
     const language=fromStore('laRoyalLanguage');const idx=language==='en'?0:language==='es'?1:null;
-    for(const heading of document.querySelectorAll('#catalogContainer .product-carousel-group h3')){
+    for(const heading of document.querySelectorAll('#catalogContainer .product-carousel-group > div:first-child h3')){
       const entry=Object.entries(COMMON).find(([portuguese,variants])=>
         portuguese===heading.textContent.trim() || variants.includes(heading.textContent.trim()));
       if(entry)heading.textContent=idx===null?entry[0]:entry[1][idx];
