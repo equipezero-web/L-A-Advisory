@@ -8160,6 +8160,7 @@ data-lenis-prevent-touch
                 state.affiliateLinks = [];
             }
             updateAuthUI();
+            if (typeof window.royalCartOnAuthChanged === 'function') void window.royalCartOnAuthChanged();
         }
 
         async function loadPublicProducts() {
@@ -8173,6 +8174,7 @@ data-lenis-prevent-touch
                 if (error) throw error;
 
                 state.products = (data || []).map(mapProductFromSupabase);
+                if (typeof window.royalRefreshCartPrices === 'function') window.royalRefreshCartPrices();
                 publicCatalogError = null;
                 return true;
             } catch (error) {
@@ -8252,6 +8254,7 @@ data-lenis-prevent-touch
             const affiliate = affiliatesRes.data;
 
             state.products = (productsRes.data || []).map(mapProductFromSupabase);
+            if (typeof window.royalRefreshCartPrices === 'function') window.royalRefreshCartPrices();
             state.orders = (ordersRes.data || []).map(mapOrderFromSupabase);
 
             // Recupera o horário real de pagamento salvo na tabela de pagamentos.
@@ -8487,6 +8490,10 @@ data-lenis-prevent-touch
         }
 
         async function saveStateToStorage() {
+            // Persiste o carrinho antes de qualquer outra tarefa assíncrona.
+            if (typeof window.royalPersistCart === 'function') {
+                try { await window.royalPersistCart(); } catch (error) { console.warn('Carrinho:', error); }
+            }
             // Compatibilidade para funções antigas. Dados críticos de pedido/pagamento
             // não são gravados pelo navegador; o checkout usa Edge Function.
             if (!supabaseAuthUser) return;
@@ -9519,6 +9526,8 @@ if (error) throw error;
                 updateMobileMenu(null);
             }
             void syncAffiliateLandingSection(user);
+            if (typeof window.royalSyncTopAuth === 'function') window.royalSyncTopAuth();
+            if (typeof window.royalCartOnAuthChanged === 'function') void window.royalCartOnAuthChanged();
         }
 
         async function syncAffiliateLandingSection(user) {
@@ -9829,6 +9838,7 @@ function openNavigationModal() {
                 document.body.style.overflow = 'hidden';
                 lucide.createIcons();
                 prepareCheckoutAffiliateField();
+                if (typeof window.royalCheckoutOpen === 'function') window.royalCheckoutOpen();
 
                 const button = document.getElementById('goToMercadoPagoButton');
                 if (button) {
@@ -11020,6 +11030,7 @@ function openNavigationModal() {
         }
 
         function translateOrderStatus(status) {
+            if (typeof window.royalOrderLabel === 'function') return window.royalOrderLabel(status);
             const statuses = {
                 pending: 'Pendente',
                 paid: 'Pago',
