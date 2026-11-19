@@ -13534,7 +13534,7 @@ function renderCatalog() {
 
     // Vitrines comerciais dinâmicas — categoria cadastrada é a única fonte.
     const makeGroup = (title, items) => {
-        const group = items.slice(0, CATALOG_CAROUSEL_LIMIT);
+        const group = items.slice(); // O carrossel preserva todos os produtos da categoria.
         group.title = title;
         return group;
     };
