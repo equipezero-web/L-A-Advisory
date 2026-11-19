@@ -14,6 +14,12 @@ assert.equal(html.includes('class="product-carousel-group "'), false, 'Remove pr
 assert.equal(html.includes('aria-label="Carrossel de produtos"'), false, 'Remove horizontal product carousels');
 assert.match(css, /#customerProfileModal:not\(\.hidden\)[^\n]*z-index:30000!important/, 'Customer profile must layer above the header');
 assert.match(css, /#catalogContainer\.royal-catalog-grid > \.royal-image-only-card/, 'Mobile cards must fill their own grid cells');
+assert.match(css, /min-width:1024px[^\n]*grid-template-columns:repeat\(6,minmax\(0,1fr\)\)/, 'Six product cards must appear on each desktop row');
+assert.match(css, /max-width:639px[^\n]*border-radius:16px!important/, 'Keep original rounded mobile cards');
+assert.match(css, /royal-image-only-card[^\n]*border-radius:15px!important/, 'Keep original desktop image-card corners');
+assert.match(css, /grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/, 'Responsive phone layout keeps two images per row');
+assert.equal((html.match(/class="product-motion-card royal-image-only-card cursor-pointer"/g) || []).length, 1, 'Reuse the same image-only product card template');
+
 
 const from = html.indexOf('const CATALOG_PAGE_SIZE = 60;');
 const to = html.indexOf('function clearCatalogFilters()', from);
