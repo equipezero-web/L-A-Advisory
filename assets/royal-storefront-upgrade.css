@@ -172,3 +172,38 @@ body #customerProfileModal:not(.hidden) {position:fixed!important;inset:0!import
 body #customerProfileModal > .account-modal-scroll {position:relative;z-index:1;max-height:calc(100dvh - 24px)!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain;touch-action:pan-y;margin:0!important}
 body #royalPwaProfile:not([hidden]) {z-index:29990!important}
 @media (max-width:639px) {body #customerProfileModal:not(.hidden) {align-items:stretch!important}body #customerProfileModal > .account-modal-scroll {max-height:calc(100dvh - 24px)!important;width:100%!important}}
+
+
+/* Cabeçalho compacto: identidade completa visível, sem links Loja/Afiliados e sem bússola. */
+header.royal-glass-header .royal-brand-heading {flex:0 1 212px!important;min-width:0;max-width:212px}
+header.royal-glass-header .royal-brand-heading h1 {font-size:clamp(11px,1.25vw,18px)!important;line-height:1.12!important;letter-spacing:.055em!important;white-space:nowrap}
+header.royal-glass-header .royal-brand-heading p {display:block!important;font-size:clamp(7px,.65vw,9px)!important;letter-spacing:.03em!important;line-height:1.25!important;white-space:nowrap}
+header.royal-glass-header .royal-glass-inner {gap:clamp(6px,.8vw,14px)!important}
+@media (min-width:768px) and (max-width:1199px) {
+ header.royal-glass-header .royal-brand-heading {flex-basis:175px!important;max-width:175px}
+ header.royal-glass-header .royal-brand-heading h1 {font-size:clamp(11px,1.35vw,15px)!important;letter-spacing:.035em!important}
+ header.royal-glass-header .royal-brand-heading p {font-size:7px!important}
+}
+@media (max-width:767px) {
+ header.royal-glass-header .royal-brand-heading {display:flex!important;flex:0 1 113px!important;max-width:113px!important;min-width:0!important;flex-direction:column;align-items:flex-start;justify-content:center;text-align:left}
+ header.royal-glass-header .royal-brand-heading h1 {font-size:clamp(9px,2.6vw,12px)!important;letter-spacing:0!important;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+ header.royal-glass-header .royal-brand-heading p {display:block!important;font-size:clamp(6px,1.55vw,7px)!important;letter-spacing:0!important;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+ header.royal-glass-header .royal-glass-inner {gap:5px!important}
+ header.royal-glass-header .royal-header-search {flex:1 1 90px!important;min-width:0!important}
+ header.royal-glass-header .royal-header-search input {min-width:0;font-size:11px!important}
+ header.royal-glass-header #mobileUtilityActions {flex:0 0 40px!important}
+ header.royal-glass-header #mobileUtilityActions>button:first-child {width:40px!important}
+}
+@media (max-width:375px) {
+ header.royal-glass-header .royal-brand-heading {flex:0 1 100px!important;max-width:100px!important}
+ header.royal-glass-header .royal-brand-heading h1 {font-size:9px!important}
+ header.royal-glass-header .royal-brand-heading p {font-size:6px!important}
+ header.royal-glass-header .royal-header-search {flex-basis:76px!important}
+}
+
+/* Os dois passos da conta (menu rápido e perfil completo) são camadas reais acima do cabeçalho.
+   O painel aparece imediatamente, sem aguardar o Supabase. */
+body #userMenuModal:not(.hidden) {position:fixed!important;inset:0!important;z-index:30030!important;isolation:isolate;overflow-y:auto!important;overscroll-behavior:contain}
+body #userMenuModal:not(.hidden)>div {z-index:1;max-height:calc(100dvh - 100px);overflow-y:auto;overscroll-behavior:contain}
+body #customerProfileModal:not(.hidden) {z-index:30040!important}
+body #customerProfileModal:not(.hidden)>div {max-height:calc(100dvh - 24px)!important}
