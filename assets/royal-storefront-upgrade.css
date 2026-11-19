@@ -152,20 +152,58 @@ body:has(.royal-product-page) #royalPwaDock{display:none!important}
 #loja .royal-category-label {font-size:13px;font-weight:750;color:#003737;margin:0}
 #loja #filterCategory.royal-category-select {display:block;width:min(100%,370px);max-width:100%;min-height:43px;padding:10px 14px;border:1px solid #a9c5be;border-radius:12px;background:#e7efed;color:#003737;font-size:14px;font-weight:650;cursor:pointer}
 #loja #filterCategory.royal-category-select:focus-visible {outline:3px solid #789b91;outline-offset:2px}
-#loja #catalogContainer.royal-catalog-grid {display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(10px,1.6vw,23px)!important;overflow:visible!important;scroll-snap-type:none!important;padding:0 0 16px!important;max-width:100%;min-width:0}
-#loja #catalogContainer.royal-catalog-grid > .royal-image-only-card {display:block!important;position:relative!important;width:100%!important;min-width:0!important;max-width:100%!important;flex:none!important;scroll-snap-align:unset!important;aspect-ratio:4/5!important;margin:0!important;box-sizing:border-box}
+#loja #catalogContainer.royal-catalog-grid {display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(10px,1.4vw,20px)!important;overflow:visible!important;scroll-snap-type:none!important;padding:0 0 16px!important;max-width:100%;min-width:0}
+#loja #catalogContainer.royal-catalog-grid > .royal-image-only-card {display:block!important;position:relative!important;width:100%!important;min-width:0!important;max-width:100%!important;flex:none!important;scroll-snap-align:unset!important;aspect-ratio:4/5!important;margin:0!important;box-sizing:border-box;border-radius:15px!important}
 #loja .royal-catalog-pagination {margin:16px auto 30px;text-align:center}
 #loja .royal-catalog-pagination:empty {display:none!important}
 #loja .royal-page-list {display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
 #loja .royal-page-button {display:inline-flex;align-items:center;justify-content:center;min-width:36px;min-height:36px;height:36px;padding:0 10px;background:#e7efed;color:#003737;border:1px solid #b1c9c2;border-radius:9px;box-shadow:none;font-size:13px;font-weight:750;cursor:pointer}
 #loja .royal-page-button:hover,#loja .royal-page-button:focus-visible {border-color:#35675c;background:#d0e1dc;outline-offset:2px}
 #loja .royal-page-button.is-active {background:#003737!important;color:#fff!important;border-color:#003737!important}
+/* Mesma aparência dos cards antigos: 6 por fileira no desktop, sem carrossel.
+   Em telas menores, o número de colunas diminui para não esmagar as fotos. */
+@media (max-width:639px) {#loja #catalogContainer.royal-catalog-grid > .royal-image-only-card {border-radius:16px!important}}
 @media (min-width:640px) {#loja #catalogContainer.royal-catalog-grid {grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media (min-width:1024px) {#loja #catalogContainer.royal-catalog-grid {grid-template-columns:repeat(4,minmax(0,1fr))}}
-@media (min-width:1440px) {#loja #catalogContainer.royal-catalog-grid {grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media (min-width:800px) {#loja #catalogContainer.royal-catalog-grid {grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (min-width:1024px) {#loja #catalogContainer.royal-catalog-grid {grid-template-columns:repeat(6,minmax(0,1fr))}}
 
 /* O perfil não pode ficar por baixo do cabeçalho sobreposto, em web ou PWA. */
 body #customerProfileModal:not(.hidden) {position:fixed!important;inset:0!important;z-index:30000!important;isolation:isolate;overflow:hidden!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:12px!important}
 body #customerProfileModal > .account-modal-scroll {position:relative;z-index:1;max-height:calc(100dvh - 24px)!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain;touch-action:pan-y;margin:0!important}
 body #royalPwaProfile:not([hidden]) {z-index:29990!important}
 @media (max-width:639px) {body #customerProfileModal:not(.hidden) {align-items:stretch!important}body #customerProfileModal > .account-modal-scroll {max-height:calc(100dvh - 24px)!important;width:100%!important}}
+
+
+/* Cabeçalho compacto: identidade completa visível, sem links Loja/Afiliados e sem bússola. */
+header.royal-glass-header .royal-brand-heading {flex:0 1 212px!important;min-width:0;max-width:212px}
+header.royal-glass-header .royal-brand-heading h1 {font-size:clamp(11px,1.25vw,18px)!important;line-height:1.12!important;letter-spacing:.055em!important;white-space:nowrap}
+header.royal-glass-header .royal-brand-heading p {display:block!important;font-size:clamp(7px,.65vw,9px)!important;letter-spacing:.03em!important;line-height:1.25!important;white-space:nowrap}
+header.royal-glass-header .royal-glass-inner {gap:clamp(6px,.8vw,14px)!important}
+@media (min-width:768px) and (max-width:1199px) {
+ header.royal-glass-header .royal-brand-heading {flex-basis:175px!important;max-width:175px}
+ header.royal-glass-header .royal-brand-heading h1 {font-size:clamp(11px,1.35vw,15px)!important;letter-spacing:.035em!important}
+ header.royal-glass-header .royal-brand-heading p {font-size:7px!important}
+}
+@media (max-width:767px) {
+ header.royal-glass-header .royal-brand-heading {display:flex!important;flex:0 1 113px!important;max-width:113px!important;min-width:0!important;flex-direction:column;align-items:flex-start;justify-content:center;text-align:left}
+ header.royal-glass-header .royal-brand-heading h1 {font-size:clamp(9px,2.6vw,12px)!important;letter-spacing:0!important;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+ header.royal-glass-header .royal-brand-heading p {display:block!important;font-size:clamp(6px,1.55vw,7px)!important;letter-spacing:0!important;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+ header.royal-glass-header .royal-glass-inner {gap:5px!important}
+ header.royal-glass-header .royal-header-search {flex:1 1 90px!important;min-width:0!important}
+ header.royal-glass-header .royal-header-search input {min-width:0;font-size:11px!important}
+ header.royal-glass-header #mobileUtilityActions {flex:0 0 40px!important}
+ header.royal-glass-header #mobileUtilityActions>button:first-child {width:40px!important}
+}
+@media (max-width:375px) {
+ header.royal-glass-header .royal-brand-heading {flex:0 1 100px!important;max-width:100px!important}
+ header.royal-glass-header .royal-brand-heading h1 {font-size:9px!important}
+ header.royal-glass-header .royal-brand-heading p {font-size:6px!important}
+ header.royal-glass-header .royal-header-search {flex-basis:76px!important}
+}
+
+/* Os dois passos da conta (menu rápido e perfil completo) são camadas reais acima do cabeçalho.
+   O painel aparece imediatamente, sem aguardar o Supabase. */
+body #userMenuModal:not(.hidden) {position:fixed!important;inset:0!important;z-index:30030!important;isolation:isolate;overflow-y:auto!important;overscroll-behavior:contain}
+body #userMenuModal:not(.hidden)>div {z-index:1;max-height:calc(100dvh - 100px);overflow-y:auto;overscroll-behavior:contain}
+body #customerProfileModal:not(.hidden) {z-index:30040!important}
+body #customerProfileModal:not(.hidden)>div {max-height:calc(100dvh - 24px)!important}
