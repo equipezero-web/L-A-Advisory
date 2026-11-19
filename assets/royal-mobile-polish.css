@@ -393,3 +393,128 @@ body:has(.royal-product-page) :is(#backToTop,a[aria-label="Falar no WhatsApp"]){
  #catalogContainer .royal-image-only-card *,
  .royal-fashion-cta{transition:none!important;animation:none!important}
 }
+
+/* L&A mobile hero 3:4 | imagem a ser enviada pelo proprietário.
+   Arquivo público obrigatório após upload: assets/hero/hero-mobile-3x4.png
+   Como esta folha CSS está em assets/, o caminho correto é ./hero/.
+   Enquanto o PNG não for enviado, a imagem oceânica mobile atual continua ativa
+   na segunda camada. O título e o CTA continuam HTML, nunca texto gravado na foto. */
+@media (max-width:767px) {
+  #inicio.royal-fashion-hero {
+    width:100%!important;
+    min-height:clamp(520px,76svh,840px)!important;
+    position:relative!important;
+    display:flex!important;
+    align-items:flex-start!important;
+    justify-content:center!important;
+    overflow:hidden!important;
+    isolation:isolate!important;
+  }
+  #inicio .royal-hero-photo {
+    position:absolute!important;
+    inset:0!important;
+    background-color:#003737!important;
+    background-image:
+      url('./hero/hero-mobile-3x4.png'),
+      url('./hero/hero-ocean-mobile.webp'),
+      linear-gradient(180deg,#003737,#35675c)!important;
+    background-size:cover,cover,cover!important;
+    background-repeat:no-repeat,no-repeat,no-repeat!important;
+    background-position:55% center,center center,center center!important;
+  }
+  #inicio .royal-hero-shade {
+    background:linear-gradient(
+      180deg,
+      rgba(0,43,43,.85) 0%,
+      rgba(0,43,43,.65) 28%,
+      rgba(0,43,43,.18) 62%,
+      rgba(0,43,43,.22) 100%
+    )!important;
+  }
+  #inicio .royal-fashion-content {
+    position:relative!important;
+    z-index:2!important;
+    width:100%!important;
+    box-sizing:border-box!important;
+    padding:clamp(38px,8svh,86px) clamp(15px,4vw,24px) 28px!important;
+    gap:18px!important;
+    justify-content:flex-start!important;
+    align-items:flex-start!important;
+    text-align:left!important;
+  }
+  #inicio .royal-hero-crown {
+    justify-content:flex-start!important;
+  }
+  #inicio .royal-fashion-title {
+    color:#f5f3f0!important;
+    font-size:clamp(1.95rem,8.4vw,3.25rem)!important;
+    line-height:1.08!important;
+    max-width:min(90vw,390px)!important;
+    text-align:left!important;
+    overflow-wrap:break-word!important;
+    text-shadow:0 2px 12px rgba(0,35,35,.7)!important;
+  }
+  #inicio .royal-fashion-title span {
+    color:#c1d1de!important;
+    -webkit-text-fill-color:#c1d1de!important;
+  }
+  #inicio .royal-fashion-actions {
+    justify-content:flex-start!important;
+  }
+  #inicio .royal-fashion-cta {
+    min-height:48px!important;
+    padding:10px 20px!important;
+    font-size:clamp(.9rem,3.5vw,1.1rem)!important;
+  }
+}
+@media (max-width:360px) {
+  #inicio.royal-fashion-hero {
+    min-height:clamp(490px,78svh,650px)!important;
+  }
+  #inicio .royal-hero-photo {
+    background-position:52% center,center center,center center!important;
+  }
+  #inicio .royal-fashion-title {
+    font-size:clamp(1.8rem,8vw,2.5rem)!important;
+    max-width:95%!important;
+  }
+}
+@media (min-width:431px) and (max-width:767px) {
+  #inicio .royal-hero-photo {
+    background-position:57% center,center center,center center!important;
+  }
+}
+/* Smartphones usados em orientação horizontal podem superar 767px de largura.
+   Aplica a mesma imagem com layout baixo, sem interferir em tablets e TVs. */
+@media (orientation:landscape) and (pointer:coarse) and (max-height:550px) and (max-width:1023px) {
+  #inicio.royal-fashion-hero {
+    min-height:clamp(300px,90svh,510px)!important;
+    display:flex!important;
+    align-items:center!important;
+  }
+  #inicio .royal-hero-photo {
+    background-color:#003737!important;
+    background-image:
+      url('./hero/hero-mobile-3x4.png'),
+      url('./hero/hero-ocean-mobile.webp'),
+      linear-gradient(90deg,#003737,#35675c)!important;
+    background-size:cover,cover,cover!important;
+    background-repeat:no-repeat!important;
+    background-position:70% 55%,center,center!important;
+  }
+  #inicio .royal-fashion-content {
+    width:100%!important;
+    padding:24px clamp(15px,5vw,42px)!important;
+    gap:10px!important;
+    align-items:flex-start!important;
+    text-align:left!important;
+  }
+  #inicio .royal-fashion-title {
+    font-size:clamp(1.55rem,4.5vw,2.5rem)!important;
+    max-width:55%!important;
+    text-align:left!important;
+  }
+  #inicio .royal-hero-shade {
+    background:linear-gradient(90deg,rgba(0,43,43,.93),rgba(0,43,43,.60) 55%,rgba(0,43,43,.05))!important;
+  }
+}
