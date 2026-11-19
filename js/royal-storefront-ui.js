@@ -23,6 +23,7 @@
       '<button type="button" data-royal-install onclick="installRoyalApp()"><i data-lucide="download"></i><span data-i18n="downloadApp">Baixar o app</span></button>' +
       '<a href="https://www.instagram.com/advisory.ofc/" target="_blank" rel="noopener noreferrer"><i data-lucide="instagram"></i><span data-i18n="followUs">Siga-nos</span></a>' +
       '<button type="button" onclick="royalOpenPanel(\'faq\')"><i data-lucide="circle-help"></i><span data-i18n="help">Ajuda (FAQ)</span></button>' +
+      '<button type="button" onclick="royalOpenPanel(\'afiliados\')"><i data-lucide="handshake"></i><span data-i18n="beAffiliate">Ser afiliado</span></button>' +
       '<label class="royal-language-label" for="royalLanguage"><i data-lucide="languages"></i><select id="royalLanguage" aria-label="Idioma" onchange="royalSetLanguage(this.value)"><option value="pt-BR">Português (BR)</option><option value="en">English</option><option value="es">Español</option></select></label>' +
       '<div id="royalWebGuestActions"><button type="button" onclick="openAuthModal(\'customer-register\')" data-i18n="register">Cadastrar</button><button type="button" onclick="openAuthModal(\'customer-login\')" data-i18n="login">Entrar</button></div>' +
       '<button type="button" id="royalWebAccount" hidden onclick="openUserMenu()"><i data-lucide="user-round"></i><span data-i18n="myAccount">Minha conta</span></button></div>';
@@ -70,6 +71,12 @@
   };
   window.royalSearchGo=function(){
     const field=byId('searchProduct'),header=byId('royalHeaderSearch'),query=String(header?.value||'').trim();
+    // Uma pesquisa pode encontrar itens de qualquer departamento.
+    const found=allSearchMatches(query);
+    if(found.length && typeof getProductAudience==='function' && typeof setStoreAudience==='function'){
+      const wanted=getProductAudience(found[0]);
+      if(typeof selectedStoreAudience!=='undefined' && wanted!==selectedStoreAudience)setStoreAudience(wanted);
+    }
     if(field)field.value=query;
     byId('royalSearchSuggestions').hidden=true;
     if(typeof renderCatalog==='function')renderCatalog();
@@ -81,6 +88,17 @@
   function moveFilters(){
     const shortcuts=document.querySelector('.royal-store-shortcuts'),helper=byId('storeAudienceHelper');
     if(shortcuts&&helper){helper.after(shortcuts);shortcuts.querySelector('[onclick="openCartModal()"]')?.remove();}
+  }
+  function prepareAffiliateEntryPoints(){
+    const nav=document.getElementById('affiliateNavLink');
+    if(nav){
+      nav.textContent='Ser afiliado';
+      nav.href='#afiliados';
+      nav.onclick=(event)=>{event.preventDefault();window.royalOpenPanel('afiliados');};
+    }
+    document.querySelectorAll('a[href="#afiliados"]').forEach(link=>{
+      link.addEventListener('click',event=>{event.preventDefault();window.royalOpenPanel('afiliados');});
+    });
   }
   function preparePanels(){
     [['faq','Ajuda'],['afiliados','Afiliados']].forEach(([id,alt])=>{
@@ -264,7 +282,7 @@
     if(guest)guest.hidden=logged;if(account)account.hidden=!logged;
   };
   function initialize(){
-    addSecondaryBar();addHeaderSearch();moveFilters();preparePanels();prepareHero();buildAdminHero();buildPwaDock();removeInstallFromProfile();
+    addSecondaryBar();addHeaderSearch();moveFilters();preparePanels();prepareAffiliateEntryPoints();prepareHero();buildAdminHero();buildPwaDock();removeInstallFromProfile();
     window.royalSyncTopAuth();
     void loadBanners();repaintIcons();
     document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.royal-content-panel.royal-panel-open').forEach(p=>window.royalClosePanel(p.id));});
