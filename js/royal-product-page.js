@@ -168,6 +168,27 @@
   }
 
 
+
+  function showProductToast(dialog, message) {
+    if (!dialog?.isConnected) return;
+    let toast = dialog.querySelector('.royal-p-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.className = 'royal-p-toast';
+      toast.setAttribute('role', 'status');
+      toast.setAttribute('aria-live', 'polite');
+      dialog.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.hidden = false;
+    toast.classList.remove('is-leaving');
+    if (dialog.royalToastTimer) clearTimeout(dialog.royalToastTimer);
+    dialog.royalToastTimer = setTimeout(() => {
+      if (toast.isConnected) toast.classList.add('is-leaving');
+      dialog.royalToastTimer = setTimeout(() => { if (toast.isConnected) toast.hidden = true; }, 250);
+    }, 2700);
+  }
+
   // White, product-first detail layout. Values come exclusively from the Store Royal catalog.
   function enhanceProductPage(dialog, product, gallery, sale, oldPrice, stock) {
     const header = dialog.querySelector('.royal-product-header');
@@ -180,6 +201,9 @@
       '</div>';
 
     const photo = dialog.querySelector('.royal-product-photo');
+    photo.setAttribute('tabindex','0');
+    photo.setAttribute('role','group');
+    photo.setAttribute('aria-label','Galeria de imagens de ' + product.name);
     if (gallery.length > 1) {
       photo.insertAdjacentHTML('beforeend',
         '<button type="button" class="royal-p-gallery-arrow royal-p-gallery-prev" data-gallery-step="-1" aria-label="Imagem anterior"><i data-lucide="chevron-left" aria-hidden="true"></i></button>' +
@@ -302,11 +326,13 @@
           .eq('id', data[0].id).eq('user_id', userId);
         if (error) throw error;
         setFavoriteButton(button, false);
+        showProductToast(button.closest('#productDetailsModal'), 'Removido dos favoritos.');
       } else {
         const { error } = await supabaseClient.from('favorites')
           .insert({user_id: userId, product_id: product.id});
         if (error) throw error;
         setFavoriteButton(button, true);
+        showProductToast(button.closest('#productDetailsModal'), 'Produto salvo nos favoritos!');
       }
     } catch (error) {
       console.error('Não foi possível atualizar favoritos:', error);
@@ -333,7 +359,7 @@
     dialog.setAttribute('aria-label', 'Página do produto ' + product.name);
     dialog.innerHTML =
       '<div class="royal-product-scroll" data-lenis-prevent data-lenis-prevent-wheel data-lenis-prevent-touch tabindex="-1">' +
-        '<header class="royal-product-header"><button type="button" data-action="close" aria-label="Voltar à loja">← Voltar à loja</button><span>STORE ROYAL · L&A</span><button type="button" data-action="share" aria-label="Compartilhar produto">Compartilhar</button></header>' +
+        '<header class="royal-product-header"><button type="button" data-action="close" aria-label="Voltar à loja">← Voltar à loja</button><span>STORE ROYAL</span><button type="button" data-action="share" aria-label="Compartilhar produto">Compartilhar</button></header>' +
         '<div class="royal-product-container"><div class="royal-product-main">' +
           '<div class="royal-p-gallery"><div class="royal-product-photo"><img id="royalSelectedProductImage" src="' + attr(gallery[0] || product.image) + '" alt="' + attr(product.name) + '"></div>' +
           '<div class="royal-p-thumbnails">' + gallery.map((src,index) =>
@@ -371,13 +397,42 @@
     if (window.laLenis?.start) window.laLenis.start();
     const scroller = dialog.querySelector('.royal-product-scroll');
     if (scroller) scroller.scrollTop = 0;
+    // Horizontal swipes change photos; vertical scrolling remains completely native.
+    const photoSurface = dialog.querySelector('.royal-product-photo');
+    if (photoSurface && gallery.length > 1) {
+      let touchPoint = null;
+      photoSurface.addEventListener('touchstart', event => {
+        const point = event.changedTouches?.[0];
+        touchPoint = point ? {x:point.clientX,y:point.clientY} : null;
+      }, {passive:true});
+      photoSurface.addEventListener('touchend', event => {
+        const point = event.changedTouches?.[0];
+        if (!touchPoint || !point) return;
+        const dx = point.clientX - touchPoint.x;
+        const dy = point.clientY - touchPoint.y;
+        touchPoint = null;
+        if (Math.abs(dx) >= 46 && Math.abs(dx) > Math.abs(dy) * 1.3) {
+          photoSurface.querySelector('[data-gallery-step="' + (dx < 0 ? 1 : -1) + '"]')?.click();
+        }
+      }, {passive:true});
+      photoSurface.addEventListener('keydown', event => {
+        if (!['ArrowLeft','ArrowRight'].includes(event.key)) return;
+        event.preventDefault();
+        photoSurface.querySelector('[data-gallery-step="' + (event.key === 'ArrowRight' ? 1 : -1) + '"]')?.click();
+      });
+    }
     dialog.addEventListener('click', async event => {
       const imageButton = event.target.closest('button[data-image-index]');
       if (imageButton) {
         const imageIndex = Number(imageButton.dataset.imageIndex);
         if (!Number.isInteger(imageIndex) || !gallery[imageIndex]) return;
         const image = dialog.querySelector('#royalSelectedProductImage');
-        if (image) image.src = gallery[imageIndex];
+        if (image && image.src !== gallery[imageIndex]) {
+          image.classList.remove('royal-p-photo-enter');
+          void image.offsetWidth;
+          image.src = gallery[imageIndex];
+          image.classList.add('royal-p-photo-enter');
+        }
         dialog.querySelectorAll('button[data-image-index]').forEach(button => button.classList.toggle('royal-p-thumbnail-active', button === imageButton));
         const count = dialog.querySelector('.royal-p-image-count');
         if (count) count.textContent = (imageIndex + 1) + ' / ' + gallery.length;
@@ -407,8 +462,14 @@
         if (navigator.share) {
           try { await navigator.share({ title: product.name, url: url.href }); } catch (_) {}
         } else if (navigator.clipboard) {
-          await navigator.clipboard.writeText(url.href);
-          button.textContent = 'Link copiado!';
+          try {
+            await navigator.clipboard.writeText(url.href);
+            showProductToast(dialog, 'Link do produto copiado!');
+          } catch (_) {
+            window.prompt('Copie o link do produto:', url.href);
+          }
+        } else {
+          window.prompt('Copie o link do produto:', url.href);
         }
         return;
       }
@@ -430,7 +491,7 @@
           removePage(false);
           if (typeof startCheckout === 'function') startCheckout();
         } else {
-          button.textContent = 'Adicionado ✓';
+          showProductToast(dialog, 'Produto adicionado ao carrinho!');
         }
       }
     });
