@@ -130,4 +130,17 @@ body.royal-panel-lock{overflow:hidden!important}
  #royalPwaDock button svg{width:21px;height:21px}
 }
 @media(display-mode:standalone){#royalWebStrip{display:none!important}}
+/* Painéis de pagamento, perfil e produto sempre têm prioridade sobre a navegação do PWA. */
+body:has(#checkoutModal:not(.hidden)) #royalPwaDock,
+body:has(#cartModal:not(.hidden)) #royalPwaDock,
+body:has(#authModal:not(.hidden)) #royalPwaDock,
+body:has(#customerOrdersModal:not(.hidden)) #royalPwaDock,
+body:has(#customerProfileModal:not(.hidden)) #royalPwaDock,
+body:has(.royal-content-panel.royal-panel-open) #royalPwaDock,
+body:has(.royal-product-page) #royalPwaDock{display:none!important}
+.royal-order-confirm,.royal-order-review{min-height:37px;padding:8px 12px;border-radius:8px;font-weight:700;font-size:12px}
+.royal-order-confirm{background:#35675c;color:white}
+.royal-order-review{background:#c1d1de;color:#003737}
+.royal-featured-checkbox{display:flex;gap:10px;align-items:center}
+.royal-featured-checkbox input{width:18px;height:18px;accent-color:#35675c}
 @media(prefers-reduced-motion:reduce){#inicio .royal-hero-slide{transition:none!important}}
