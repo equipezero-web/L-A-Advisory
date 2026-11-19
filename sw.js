@@ -1,4 +1,4 @@
-const CACHE_NAME = "la-royal-advisory-v53";
+const CACHE_NAME = "la-royal-advisory-v54";
 
 const urlsToCache = [
     "./",
@@ -9,6 +9,9 @@ const urlsToCache = [
     "./assets/royal-mobile-polish.css",
     "./assets/store-audience-tabs.css",
     "./assets/royal-ocean-complete.css",
+    "./assets/royal-storefront-upgrade.css",
+    "./js/royal-storefront-ui.js",
+    "./js/royal-storefront-state.js",
     "./icons/icons-192.png",
     "./icons/icons-512.png",
     "./icons/maskable-512.png"
