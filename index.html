@@ -8686,6 +8686,7 @@ function handlePaymentReturn() {
     if (status === 'success' && order?.status === 'paid') {
         alert('Pagamento confirmado! Seu pedido ' + order.code + ' foi confirmado dentro do site.');
         sessionStorage.removeItem('laPendingPaymentOrder');
+        if (typeof window.royalCartOrderPaid === 'function') window.royalCartOrderPaid(order.id);
     } else if (status === 'failure' || status === 'rejected') {
         alert('O pagamento não foi aprovado. Você pode tentar novamente.');
         sessionStorage.removeItem('laPendingPaymentOrder');
@@ -8703,6 +8704,7 @@ function checkPendingPaymentConfirmation() {
     if (!order) return;
     if (order.status === 'paid') {
         sessionStorage.removeItem('laPendingPaymentOrder');
+        if (typeof window.royalCartOrderPaid === 'function') window.royalCartOrderPaid(orderId);
         alert('Pagamento confirmado! Seu pedido ' + order.code + ' está confirmado dentro do site.');
     } else if (['rejected','canceled','refunded'].includes(order.status)) {
         sessionStorage.removeItem('laPendingPaymentOrder');
@@ -10985,7 +10987,7 @@ function openNavigationModal() {
 
                         <div class="flex items-center gap-3">
                             <span class="px-3 py-1 rounded-full text-xs font-bold ${getStatusBadgeClass(order.status)}">
-                                ${translateOrderStatus(order.status)}
+                                ${window.royalOrderLabel ? window.royalOrderLabel(order.status,order.deliveredConfirmedAt) : translateOrderStatus(order.status)}
                             </span>
 
                             <p class="font-bold text-amber-600">${formatCurrency(order.total)}</p>
@@ -10997,6 +10999,7 @@ function openNavigationModal() {
                             Ver detalhes
                         </button>
 
+                        ${window.royalOrderActions ? window.royalOrderActions(order) : ''}
                         ${order.trackingCode ? `
                             <button type="button" onclick="openTrackingModal('${String(order.id).replace(/[^a-zA-Z0-9_-]/g, '')}')" class="px-3 py-2 rounded-lg border border-slate-300 text-slate-700 text-xs font-bold hover:border-amber-500 transition">
                                 Rastrear
