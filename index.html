@@ -10175,11 +10175,10 @@ function openNavigationModal() {
                     );
                 }
 
-                if (data.order_id) {
-                    sessionStorage.setItem(
-                        'laPendingPaymentOrder',
-                        data.order_id
-                    );
+                // O ID interno vincula o pedido no Supabase; data.order_id é o ID do provedor.
+                const internalOrderId = data.internal_order_id || data.order_id;
+                if (internalOrderId) {
+                    sessionStorage.setItem('laPendingPaymentOrder', String(internalOrderId));
                 }
 
                 window.location.assign(data.checkout_url);
