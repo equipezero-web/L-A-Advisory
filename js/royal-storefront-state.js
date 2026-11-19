@@ -182,6 +182,26 @@
       window.alert('Recebimento confirmado. Você já pode avaliar os produtos na página de cada item.');
     }catch(error){window.alert('Não foi possível confirmar o recebimento: '+error.message);}
   };
+  window.royalOrderActions=function(order){
+    if(!order||typeof state==='undefined'||String(order.userId)!==String(getId()))return '';
+    const orderId=String(order.id||'').replace(/[^a-zA-Z0-9_-]/g,'');
+    let html='';
+    if(['shipped','delivered'].includes(String(order.status)) && !order.deliveredConfirmedAt &&
+       ['approved','paid'].includes(String(order.paymentStatus||order.payment_status))) {
+      html+='<button type="button" class="royal-order-confirm" onclick="royalConfirmDelivery(\''+orderId+'\')">Confirmar recebimento</button>';
+    }
+    if(order.deliveredConfirmedAt){
+      const ids=new Set();
+      for(const item of Array.isArray(order.items)?order.items:[]){
+        const id=String(item.productId||item.product_id||'').replace(/[^a-zA-Z0-9_-]/g,'');
+        if(!id||ids.has(id))continue;
+        ids.add(id);
+        const name=typeof escapeHtml==='function'?escapeHtml(String(item.name||item.product_name||'produto')):'produto';
+        html+='<button type="button" class="royal-order-review" onclick="royalReviewOrderProduct(\''+id+'\')">Avaliar '+name+'</button>';
+      }
+    }
+    return html;
+  };
   window.royalReviewOrderProduct=function(productId){
     if(!productId)return;
     if(typeof closeCustomerOrders==='function')closeCustomerOrders();
@@ -247,7 +267,7 @@
       const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(node){
         const parent=node.parentElement;
         if(!parent||parent.closest('script,style,textarea,option,#adminDashboardModal,#catalogContainer,#customerOrdersList,#customerProfileModal,#orderDetailsContent,#royalSearchSuggestions'))return NodeFilter.FILTER_REJECT;
-        return COMMON[node.textContent.trim()]?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_SKIP;
+        return (COMMON[node.textContent.trim()] || Object.values(COMMON).some(v=>v.includes(node.textContent.trim()))) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
       }});
       while(walker.nextNode())result.push(walker.currentNode);
     }
