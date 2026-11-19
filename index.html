@@ -9783,6 +9783,10 @@ function openNavigationModal() {
                 alert('Seu carrinho está vazio.');
                 return;
             }
+            if (wholesaleCheckoutPending()) {
+                alert(wholesaleCheckoutPendingMessage());
+                return;
+            }
 
             closeCartModal();
 
@@ -10011,6 +10015,7 @@ function openNavigationModal() {
             const paymentMessage = document.getElementById('checkoutPaymentMessage');
 
             try {
+                if (wholesaleCheckoutPending()) throw new Error(wholesaleCheckoutPendingMessage());
                 if (button) {
                     button.disabled = true;
                     button.textContent = 'Abrindo Mercado Pago...';
@@ -10124,6 +10129,7 @@ function openNavigationModal() {
             if (event?.preventDefault) event.preventDefault();
 
             try {
+                if (wholesaleCheckoutPending()) throw new Error(wholesaleCheckoutPendingMessage());
                 const customer = await collectCheckoutCustomer();
                 alert('Confira os dados e finalize o pagamento pelo formulário seguro do Mercado Pago abaixo.');
                 return customer;
@@ -10147,6 +10153,10 @@ function openNavigationModal() {
 
             container.innerHTML = '';
 
+            if (wholesaleCheckoutPending()) {
+                container.innerHTML = '<p class="text-sm rounded-lg p-3 bg-amber-50 border border-amber-300 text-amber-900">Pagamento com desconto de atacado em ativação no servidor. Não será iniciada nenhuma cobrança com valor divergente.</p>';
+                return;
+            }
             const total = getStoreCartTotals().total;
 
             if (!total || total <= 0) {
@@ -10536,6 +10546,15 @@ function openNavigationModal() {
             }
             saving.textContent = totals.saving ? 'Economia no atacado: ' + formatCurrency(totals.saving) : '';
             saving.hidden = !totals.saving;
+            let pending = document.getElementById('royalWholesalePaymentPending');
+            if (!pending) {
+                pending = document.createElement('p');
+                pending.id = 'royalWholesalePaymentPending';
+                pending.className = 'mt-2 text-xs font-bold text-amber-900';
+                saving.insertAdjacentElement('afterend', pending);
+            }
+            pending.textContent = wholesaleCheckoutPending() ? 'Atacado: pagamento aguardando ativação do servidor.' : '';
+            pending.hidden = !wholesaleCheckoutPending();
         }
 
         function updateCartIcon() {
@@ -13279,6 +13298,16 @@ function calculateFinalPrice(product) {
     return roundStoreMoney(Math.max(0, Number.isFinite(salePrice) && salePrice > 0
         ? salePrice
         : price * (1 - discount / 100)));
+}
+// A Edge Function em produção ainda não possui as faixas; só ativar após deploy e validação.
+// Proteção para impedir que clientes sejam cobrados por valores diferentes dos exibidos.
+window.royalWholesalePaymentReady = false;
+function wholesaleCheckoutPending() {
+    return !window.royalWholesalePaymentReady &&
+        state.cart.some(item => getStoreWholesaleRate(Number(item.quantity)) > 0);
+}
+function wholesaleCheckoutPendingMessage() {
+    return 'O pagamento com desconto de atacado está temporariamente indisponível enquanto a atualização do servidor é concluída. Nenhuma cobrança foi iniciada. Compras de 1 a 9 unidades por produto continuam disponíveis.';
 }
 // Faixas aplicadas à quantidade de unidades do MESMO produto.
 function getStoreWholesaleRate(quantity) {
