@@ -32,6 +32,33 @@ assert.ok(typeof context.window.royalCartOnAuthChanged==='function');
 assert.ok(typeof context.window.royalCheckoutOpen==='function');
 assert.ok(typeof context.window.royalConfirmDelivery==='function');
 assert.ok(typeof context.window.royalReviewOrderProduct==='function');
+// Checkout is recoverable for exactly 10 minutes and never carries over to a different account.
+context.document.getElementById=()=>null;
+context.state.currentUser={id:'customer-a'};
+context.supabaseAuthUser={id:'customer-a'};
+context.window.royalCheckoutOpen();
+const firstCheckout=JSON.parse(store.get('laRoyalCheckout:v1'));
+assert.equal(firstCheckout.uid,'customer-a');
+assert.equal(firstCheckout.expiresAt-firstCheckout.startedAt,600000);
+context.window.royalCheckoutOpen();
+assert.equal(JSON.parse(store.get('laRoyalCheckout:v1')).startedAt,firstCheckout.startedAt,'Reopening must not extend checkout');
+context.state.currentUser={id:'customer-b'};
+context.supabaseAuthUser={id:'customer-b'};
+context.window.royalCheckoutOpen();
+const nextCheckout=JSON.parse(store.get('laRoyalCheckout:v1'));
+assert.equal(nextCheckout.uid,'customer-b','Checkout must be scoped by account');
+
+const order={id:'order-1',status:'processing',paymentStatus:'pending'};
+context.state.orders=[order];
+context.state.cart=[{id:'product-1',name:'Item',quantity:1,price:10}];
+context.window.royalCartOrderPaid(order.id);
+assert.equal(context.state.cart.length,1,'A pending payment must never clear the cart');
+order.paymentStatus='approved';
+context.window.royalCartOrderPaid(order.id);
+assert.equal(context.state.cart.length,0,'Verified paid order clears the cart');
+assert.equal(store.has('laRoyalCheckout:v1'),false,'Verified paid order clears the checkout marker');
+console.log('Store Royal: checkout lifetime, account isolation and payment guarding passed');
+
 console.log('Store Royal: BRL parsing, status mapping and APIs passed');
 
 
