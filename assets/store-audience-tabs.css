@@ -1,0 +1,85 @@
+/* Store Royal — departamentos independentes: Masculino, Feminino e Unissex/Outros. */
+#storeAudienceTabs {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  margin:0 0 14px;
+  border:1px solid rgba(53,103,92,.24);
+  border-radius:20px;
+  background:linear-gradient(125deg,rgba(193,209,222,.43),rgba(206,202,199,.32));
+  padding:10px;
+}
+#storeAudienceTabs .store-audience-tab {
+  appearance:none;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:3px;
+  min-height:66px;
+  min-width:0;
+  padding:9px 7px;
+  border:1px solid transparent;
+  border-radius:14px;
+  color:#003737;
+  background:rgba(245,243,240,.88);
+  cursor:pointer;
+  transition:background-color .2s,border-color .2s,box-shadow .2s;
+  font-size:clamp(.82rem,1.6vw,1rem);
+  font-weight:750;
+  line-height:1.2;
+  text-align:center;
+  overflow-wrap:anywhere;
+}
+#storeAudienceTabs .store-audience-tab[aria-selected="true"] {
+  color:#fff;
+  background:#003737;
+  border-color:#B19981;
+  box-shadow:0 4px 18px rgba(0,55,55,.18);
+}
+#storeAudienceTabs .store-audience-tab:not([aria-selected="true"]):hover {
+  border-color:#35675C;
+  background:#e6efec;
+}
+#storeAudienceTabs .store-audience-tab:focus-visible {
+  outline:3px solid #B19981!important;
+  outline-offset:2px!important;
+}
+#storeAudienceTabs .store-audience-count{
+  font-size:clamp(.67rem,1.25vw,.76rem);
+  font-weight:600;
+  opacity:.82;
+}
+#storeAudienceHelper{
+  margin-bottom:20px;
+  font-size:.86rem;
+  line-height:1.45;
+  color:#35675C;
+}
+#catalogContainer[role="tabpanel"]{min-width:0}
+#catalogContainer .store-empty-collection{
+  padding:28px clamp(14px,5vw,30px);
+  border:1px solid rgba(53,103,92,.26);
+  border-radius:16px;
+  background:rgba(245,243,240,.9);
+  text-align:center;
+  color:#003737;
+}
+#catalogContainer .store-empty-collection strong{display:block;font-size:1.1rem;margin-bottom:5px}
+#catalogContainer .store-empty-collection p{color:#35675C;font-size:.92rem}
+#loja .store-audience-tab{color:#003737}
+#loja .store-audience-tab[aria-selected="true"]{color:#fff}
+@media(max-width:450px){
+  #storeAudienceTabs{gap:5px;padding:6px;border-radius:15px}
+  #storeAudienceTabs .store-audience-tab{
+    min-height:64px;
+    padding:7px 4px;
+    border-radius:11px;
+    font-size:clamp(.71rem,3.45vw,.92rem);
+  }
+  #storeAudienceTabs .store-audience-count{font-size:.67rem}
+  #storeAudienceHelper{font-size:.78rem}
+}
+@media(prefers-reduced-motion:reduce){
+  #storeAudienceTabs .store-audience-tab{transition:none}
+}
