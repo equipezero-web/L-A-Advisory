@@ -144,3 +144,28 @@ body:has(.royal-product-page) #royalPwaDock{display:none!important}
 .royal-featured-checkbox{display:flex;gap:10px;align-items:center}
 .royal-featured-checkbox input{width:18px;height:18px;accent-color:#35675c}
 @media(prefers-reduced-motion:reduce){#inicio .royal-hero-slide{transition:none!important}}
+
+
+/* Vitrine contínua: a seleção de categoria é o único controle visível sobre a grade. */
+#loja .royal-category-picker {display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0 24px;background:transparent;border:0;padding:0}
+#loja .royal-category-field {display:flex;align-items:center;flex-wrap:wrap;gap:10px;min-width:0}
+#loja .royal-category-label {font-size:13px;font-weight:750;color:#003737;margin:0}
+#loja #filterCategory.royal-category-select {display:block;width:min(100%,370px);max-width:100%;min-height:43px;padding:10px 14px;border:1px solid #a9c5be;border-radius:12px;background:#e7efed;color:#003737;font-size:14px;font-weight:650;cursor:pointer}
+#loja #filterCategory.royal-category-select:focus-visible {outline:3px solid #789b91;outline-offset:2px}
+#loja #catalogContainer.royal-catalog-grid {display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(10px,1.6vw,23px)!important;overflow:visible!important;scroll-snap-type:none!important;padding:0 0 16px!important;max-width:100%;min-width:0}
+#loja #catalogContainer.royal-catalog-grid > .royal-image-only-card {display:block!important;position:relative!important;width:100%!important;min-width:0!important;max-width:100%!important;flex:none!important;scroll-snap-align:unset!important;aspect-ratio:4/5!important;margin:0!important;box-sizing:border-box}
+#loja .royal-catalog-pagination {margin:16px auto 30px;text-align:center}
+#loja .royal-catalog-pagination:empty {display:none!important}
+#loja .royal-page-list {display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+#loja .royal-page-button {display:inline-flex;align-items:center;justify-content:center;min-width:36px;min-height:36px;height:36px;padding:0 10px;background:#e7efed;color:#003737;border:1px solid #b1c9c2;border-radius:9px;box-shadow:none;font-size:13px;font-weight:750;cursor:pointer}
+#loja .royal-page-button:hover,#loja .royal-page-button:focus-visible {border-color:#35675c;background:#d0e1dc;outline-offset:2px}
+#loja .royal-page-button.is-active {background:#003737!important;color:#fff!important;border-color:#003737!important}
+@media (min-width:640px) {#loja #catalogContainer.royal-catalog-grid {grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (min-width:1024px) {#loja #catalogContainer.royal-catalog-grid {grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (min-width:1440px) {#loja #catalogContainer.royal-catalog-grid {grid-template-columns:repeat(5,minmax(0,1fr))}}
+
+/* O perfil não pode ficar por baixo do cabeçalho sobreposto, em web ou PWA. */
+body #customerProfileModal:not(.hidden) {position:fixed!important;inset:0!important;z-index:30000!important;isolation:isolate;overflow:hidden!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:12px!important}
+body #customerProfileModal > .account-modal-scroll {position:relative;z-index:1;max-height:calc(100dvh - 24px)!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain;touch-action:pan-y;margin:0!important}
+body #royalPwaProfile:not([hidden]) {z-index:29990!important}
+@media (max-width:639px) {body #customerProfileModal:not(.hidden) {align-items:stretch!important}body #customerProfileModal > .account-modal-scroll {max-height:calc(100dvh - 24px)!important;width:100%!important}}
