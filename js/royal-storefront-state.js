@@ -237,6 +237,62 @@
     }
   };
   const COMMON={
+    'Plataforma segura':['Secure platform','Plataforma segura'],
+    'Sua experiência começa com uma conta.':['Your experience starts with an account.','Tu experiencia comienza con una cuenta.'],
+    'Perfil seguro':['Secure profile','Perfil seguro'],
+    'Checkout ágil':['Fast checkout','Pago rápido'],
+    'Área afiliado':['Affiliate area','Área de afiliados'],
+    'Área do cliente':['Customer area','Área del cliente'],
+    'Bem-vindo de volta':['Welcome back','Bienvenido de nuevo'],
+    'Entre para acessar seu perfil, carrinho, pedidos e dados preenchidos automaticamente.':['Sign in to access your profile, cart, orders and saved details.','Inicia sesión para acceder a tu perfil, carrito, pedidos y datos guardados.'],
+    'Seu Carrinho':['Your cart','Tu carrito'],
+    'Revise seus produtos antes de continuar.':['Review your items before continuing.','Revisa tus artículos antes de continuar.'],
+    'Frete incluso no valor. Prazo de entrega: 7 dias.':['Shipping is included. Estimated delivery: 7 days.','Envío incluido. Plazo de entrega: 7 días.'],
+    'Checkout Inteligente':['Smart checkout','Pago inteligente'],
+    'Seus dados foram recuperados automaticamente do seu perfil.':['Your details were filled in from your profile.','Tus datos se completaron automáticamente desde tu perfil.'],
+    'Nome completo / Empresa':['Full name / Company','Nombre completo / Empresa'],
+    'WhatsApp / Telefone':['WhatsApp / Phone','WhatsApp / Teléfono'],
+    'E-mail':['Email','Correo electrónico'],
+    'Endereço de entrega':['Shipping address','Dirección de entrega'],
+    'Informe o endereço completo. O CEP será conferido automaticamente.':['Enter your full address. Your postal code will be checked automatically.','Introduce tu dirección completa. El código postal se comprobará automáticamente.'],
+    'Rua / Logradouro':['Street / Address','Calle / Dirección'],
+    'Número':['Number','Número'],
+    'Complemento':['Additional address details','Complemento'],
+    'Bairro':['Neighborhood','Barrio'],
+    'Cidade':['City','Ciudad'],
+    'Estado':['State','Estado'],
+    'Total':['Total','Total'],
+    'Frete incluso no valor. Prazo de entrega: 7 dias após a confirmação do pagamento.':['Shipping is included. Estimated delivery: 7 days after payment confirmation.','El envío está incluido. Entrega estimada: 7 días después de confirmar el pago.'],
+    'Código de afiliado':['Affiliate code','Código de afiliado'],
+    '(opcional)':['(optional)','(opcional)'],
+    'Pagamento seguro':['Secure payment','Pago seguro'],
+    'Pagar diretamente no Mercado Pago':['Pay with Mercado Pago','Pagar con Mercado Pago'],
+    'Você será direcionado ao ambiente seguro do Mercado Pago para escolher Pix ou cartão.':['You will be redirected to Mercado Pago to choose Pix or card securely.','Serás redirigido a Mercado Pago para elegir Pix o tarjeta de forma segura.'],
+    'Acompanhe pedidos, pagamentos, entrega e solicitações.':['Track your orders, payments, deliveries and requests.','Sigue tus pedidos, pagos, entregas y solicitudes.'],
+    'Rastrear Pedido':['Track order','Rastrear pedido'],
+    'Troca ou Devolução':['Exchange or return','Cambio o devolución'],
+    'Preencha sua solicitação para análise da equipe.':['Fill in your request for our team to review.','Completa tu solicitud para que nuestro equipo la revise.'],
+    'Produto':['Product','Producto'],
+    'Selecione o produto':['Select product','Selecciona el producto'],
+    'Motivo':['Reason','Motivo'],
+    'Selecione o motivo':['Select reason','Selecciona el motivo'],
+    'Arrependimento da compra':['Changed my mind','Desistimiento de la compra'],
+    'Produto com defeito':['Defective product','Producto defectuoso'],
+    'Produto diferente do solicitado':['Incorrect product','Producto diferente al solicitado'],
+    'Tamanho ou cor incorretos':['Wrong size or color','Talla o color incorrectos'],
+    'Alterar foto':['Change photo','Cambiar foto'],
+    'Remover':['Remove','Eliminar'],
+    'Meu Perfil':['My profile','Mi perfil'],
+    'Cliente':['Customer','Cliente'],
+    'Cadastro':['Registration','Registro'],
+    'Último acesso':['Last login','Último acceso'],
+    'Programa de afiliados':['Affiliate program','Programa de afiliados'],
+    'Quer se tornar um afiliado?':['Want to become an affiliate?','¿Quieres ser afiliado?'],
+    'Solicite sua afiliação e aguarde a análise da equipe L&A.':['Apply to become an affiliate and await review by the L&A team.','Solicita tu afiliación y espera la revisión del equipo L&A.'],
+    'Solicitar afiliação':['Apply to join','Solicitar afiliación'],
+    'Dados pessoais':['Personal information','Datos personales'],
+    'O e-mail é gerenciado pelo sistema de autenticação.':['Your email is managed by the authentication system.','El correo se gestiona mediante el sistema de autenticación.'],
+
     'Coleção':['Collection','Colección'],
     'Filtros avançados':['Advanced filters','Filtros avanzados'],
     'Pesquise por categoria, preço, tamanho, cor, disponibilidade e relevância.':['Search by category, price, size, color, availability and relevance.','Busca por categoría, precio, talla, color, disponibilidad y relevancia.'],
@@ -319,12 +375,12 @@
   const originals=new WeakMap();
   function translationNodes(){
     const scopes=[document.querySelector('main'),document.querySelector('footer'),document.querySelector('.royal-web-strip'),
-      document.querySelector('.royal-glass-header'),document.getElementById('royalPwaDock'),document.getElementById('royalPwaProfile')];
+      document.querySelector('.royal-glass-header'),document.getElementById('royalPwaDock'),document.getElementById('royalPwaProfile'), document.getElementById('authModal'), document.getElementById('cartModal'), document.getElementById('checkoutModal'), document.getElementById('customerOrdersModal'), document.getElementById('customerProfileModal')];
     const result=[];
     for(const root of scopes.filter(Boolean)){
       const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(node){
         const parent=node.parentElement;
-        if(!parent||parent.closest('script,style,textarea,option,#adminDashboardModal,#catalogContainer,#customerOrdersList,#customerProfileModal,#orderDetailsContent,#royalSearchSuggestions'))return NodeFilter.FILTER_REJECT;
+        if(!parent||parent.closest('script,style,textarea,option,#adminDashboardModal,#catalogContainer,#customerOrdersList,#orderDetailsContent,#royalSearchSuggestions'))return NodeFilter.FILTER_REJECT;
         const normalized=node.textContent.trim().replace(/\s+/g,' ');
         return (COMMON[normalized] || Object.values(COMMON).some(v=>v.includes(normalized))) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
       }});
