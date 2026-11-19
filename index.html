@@ -1522,6 +1522,7 @@
     <link rel="stylesheet" href="./assets/royal-ocean-theme.css?v=20261118" />
     <link rel="stylesheet" href="./assets/royal-ocean-unified.css?v=20261118" />
     <link rel="stylesheet" href="./assets/royal-mobile-polish.css?v=20261118-2" />
+    <link rel="stylesheet" href="./assets/store-audience-tabs.css?v=20261119" />
 </head>
 
 <body class="bg-slate-900 text-white min-h-screen flex flex-col">
@@ -1920,6 +1921,30 @@
                     </div>
                 </div>
 
+                <!-- DEPARTAMENTOS INDEPENDENTES DA STORE ROYAL -->
+                <div id="storeAudienceTabs" role="tablist" aria-label="Escolha a coleção da loja"
+                     onkeydown="handleStoreAudienceKey(event)">
+                    <button type="button" id="storeAudienceMasculino" class="store-audience-tab"
+                            role="tab" data-store-audience="masculino" tabindex="0"
+                            aria-selected="true" aria-controls="catalogContainer"
+                            onclick="setStoreAudience('masculino')">
+                        <span>Masculino</span><span class="store-audience-count" aria-hidden="true">Coleção</span>
+                    </button>
+                    <button type="button" id="storeAudienceFeminino" class="store-audience-tab"
+                            role="tab" data-store-audience="feminino" tabindex="-1"
+                            aria-selected="false" aria-controls="catalogContainer"
+                            onclick="setStoreAudience('feminino')">
+                        <span>Feminino</span><span class="store-audience-count" aria-hidden="true">Coleção</span>
+                    </button>
+                    <button type="button" id="storeAudienceOutros" class="store-audience-tab"
+                            role="tab" data-store-audience="outros" tabindex="-1"
+                            aria-selected="false" aria-controls="catalogContainer"
+                            onclick="setStoreAudience('outros')">
+                        <span>Unissex / Outros</span><span class="store-audience-count" aria-hidden="true">Coleção</span>
+                    </button>
+                </div>
+                <p id="storeAudienceHelper">Os produtos são exibidos somente na coleção selecionada. Itens sem público definido ficam em Unissex / Outros.</p>
+
                 <!-- FILTROS -->
                 <div
                     id="catalogFilters"
@@ -1977,42 +2002,9 @@
                                 Categoria
                             </label>
 
-                            <select
-                                id="filterCategory"
-                                onchange="renderCatalog()"
-                                class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm outline-none focus:border-amber-500"
-                            >
-                                <option value="all">
-                                    Todas as categorias
-                                </option>
-
-                                <option value="roupas-masculinas">
-                                    Roupas Masculinas
-                                </option>
-
-                                <option value="roupas-femininas">
-                                    Roupas Femininas
-                                </option>
-
-                                <option value="acessorios-masculinos">
-                                    Acessórios Masculinos
-                                </option>
-
-                                <option value="acessorios-femininos">
-                                    Acessórios Femininos
-                                </option>
-
-                                <option value="sapatos-masculinos">
-                                    Sapatos Masculinos
-                                </option>
-
-                                <option value="sapatos-femininos">
-                                    Sapatos Femininos
-                                </option>
-
-                                <option value="aparelhos">
-                                    Aparelhos
-                                </option>
+                            <select id="filterCategory" onchange="renderCatalog()"
+                                class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm outline-none focus:border-amber-500">
+                                <option value="all">Todas as categorias desta coleção</option>
                             </select>
                         </div>
 
@@ -2164,6 +2156,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
                     <p
                         id="catalogResultInfo"
+                        aria-live="polite" aria-atomic="true"
                         class="text-sm text-slate-500"
                     >
                         Carregando produtos...
@@ -2178,7 +2171,7 @@
                 </div>
 
                 <!-- CATÁLOGO -->
-                <div id="catalogContainer" class="space-y-8 pb-6">
+                <div id="catalogContainer" role="tabpanel" aria-labelledby="storeAudienceMasculino" tabindex="0" class="space-y-8 pb-6">
                     <!-- Os carrosséis de produtos serão carregados pelo Supabase -->
                 </div>
 
@@ -7320,9 +7313,26 @@ data-lenis-prevent-touch
                             type="text"
                             id="adminProductCategory"
                             required
+                            list="royalCategoryExamples"
                             maxlength="100"
                             class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-amber-500"
                         >
+                        <datalist id="royalCategoryExamples">
+                            <option value="Roupa Masculina"></option>
+                            <option value="Roupa Feminina"></option>
+                            <option value="Sapatos Masculinos"></option>
+                            <option value="Sapatos Femininos"></option>
+                            <option value="Acessório Masculino"></option>
+                            <option value="Acessório Feminino"></option>
+                            <option value="Relógios Masculinos"></option>
+                            <option value="Relógios Femininos"></option>
+                            <option value="Unissex"></option>
+                            <option value="Relógios Unissex"></option>
+                        </datalist>
+                        <p class="mt-2 text-xs text-slate-600">
+                            Para manter a loja separada, informe Masculino, Feminino ou Unissex na categoria.
+                            Itens sem identificação vão para Unissex / Outros.
+                        </p>
                     </div>
                 </div>
 
@@ -8595,11 +8605,10 @@ function focusAffiliateProductFromLink() {
     document.body.classList.remove('affiliate-mode');
     document.getElementById('affiliateCatalogStatus')?.classList.add('hidden');
 
-    // Mostra o catálogo completo para garantir que o produto compartilhado apareça.
-    if (!catalogShowingAll && !state.products.slice(0, CATALOG_CAROUSEL_LIMIT).some(item => item.id === productId)) {
-        catalogShowingAll = true;
-        renderCatalog();
-    }
+    // Links de afiliados levam ao departamento correto e exibem o item desejado.
+    selectedStoreAudience = getProductAudience(product);
+    catalogShowingAll = true;
+    clearCatalogFilters();
 
     const catalogSection = document.getElementById('loja');
 
@@ -13475,6 +13484,92 @@ function calculateProductAffiliateCommission(product, quantity = 1) {
     return Math.round(base * (Number(quantity) || 0) * rate) / 100;
 }
 
+/* Cada produto aparece em somente uma coleção. */
+let selectedStoreAudience = 'masculino';
+const STORE_AUDIENCES = ['masculino','feminino','outros'];
+
+function normalizeAudienceText(value) {
+    return String(value ?? '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLocaleLowerCase('pt-BR')
+      .replace(/[_-]+/g,' ')
+      .trim();
+}
+function recognizeStoreAudience(value) {
+    const v = normalizeAudienceText(value);
+    if (!v) return null;
+    const unisex = /\b(unissex|unisex|ambos|ambas|sem genero)\b/.test(v);
+    const male = /\b(masculino|masculina|masculinos|masculinas|homem|homens|male|men)\b/.test(v);
+    const female = /\b(feminino|feminina|femininos|femininas|mulher|mulheres|female|women)\b/.test(v);
+    if (unisex || (male && female)) return 'outros';
+    if (male) return 'masculino';
+    if (female) return 'feminino';
+    return null;
+}
+function getProductAudience(product) {
+    const explicit = recognizeStoreAudience(product?.audience || product?.gender);
+    if (explicit) return explicit;
+    const categoryAudience = recognizeStoreAudience(product?.category);
+    const nameAudience = recognizeStoreAudience(product?.name);
+    if (categoryAudience && nameAudience && categoryAudience !== nameAudience) return 'outros';
+    return categoryAudience || nameAudience || 'outros';
+}
+function syncStoreAudienceTabs(products) {
+    const counts = {masculino:0, feminino:0, outros:0};
+    products.filter(p=>p.active !== false).forEach(p=>{counts[getProductAudience(p)]++;});
+    const labels = {masculino:'Masculino',feminino:'Feminino',outros:'Unissex / Outros'};
+    document.querySelectorAll('#storeAudienceTabs .store-audience-tab').forEach(tab => {
+        const audience = tab.dataset.storeAudience;
+        const active = audience === selectedStoreAudience;
+        tab.setAttribute('aria-selected',String(active));
+        tab.tabIndex = active ? 0 : -1;
+        const count = counts[audience] || 0;
+        tab.setAttribute('aria-label',labels[audience]+' — '+count+' produto'+(count===1?'':'s'));
+        const badge=tab.querySelector('.store-audience-count');
+        if (badge) badge.textContent=count+' produto'+(count===1?'':'s');
+        if (active) {
+            const catalog=document.getElementById('catalogContainer');
+            if (catalog) catalog.setAttribute('aria-labelledby',tab.id);
+        }
+    });
+}
+function syncStoreCategoryOptions(products) {
+    const select=document.getElementById('filterCategory');
+    if(!select)return;
+    const selected=select.value;
+    const categories=[...new Set(products
+      .filter(p=>p.active!==false && getProductAudience(p)===selectedStoreAudience)
+      .map(p=>String(p.category||'').trim()).filter(Boolean))]
+      .sort((a,b)=>a.localeCompare(b,'pt-BR'));
+    const signature=JSON.stringify(categories);
+    if(select.dataset.categorySignature===signature &&
+       select.dataset.categoryAudience===selectedStoreAudience)return;
+    select.replaceChildren(new Option('Todas as categorias desta coleção','all'),
+      ...categories.map(category=>new Option(category,category)));
+    select.value=categories.includes(selected)?selected:'all';
+    select.dataset.categorySignature=signature;
+    select.dataset.categoryAudience=selectedStoreAudience;
+}
+function setStoreAudience(audience) {
+    if(!STORE_AUDIENCES.includes(audience))return;
+    selectedStoreAudience=audience;
+    // Ao mudar de departamento, os filtros antigos não deixam a vitrine vazia.
+    clearCatalogFilters();
+}
+function handleStoreAudienceKey(event) {
+    if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+    const tabs=Array.from(document.querySelectorAll('#storeAudienceTabs .store-audience-tab'));
+    const current=tabs.findIndex(tab=>tab.dataset.storeAudience===selectedStoreAudience);
+    const next=event.key==='Home'?0:event.key==='End'?tabs.length-1:
+      (current+(event.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;
+    event.preventDefault();
+    const tab=tabs[next];
+    if(!tab)return;
+    setStoreAudience(tab.dataset.storeAudience);
+    tab.focus();
+}
+
 let catalogShowingAll = false;
 const CATALOG_CAROUSEL_LIMIT = 10;
 
@@ -13505,6 +13600,9 @@ function toggleFullCatalog() {
 function renderCatalog() {
     const container = document.getElementById('catalogContainer') || document.getElementById('productsGrid');
     if (!container) return;
+    const products = Array.isArray(state.products) ? state.products : [];
+    syncStoreAudienceTabs(products);
+    syncStoreCategoryOptions(products);
 
     const searchTerm = (document.getElementById('searchProduct')?.value || '').trim().toLocaleLowerCase('pt-BR');
     const categoryFilter = document.getElementById('filterCategory')?.value || 'all';
@@ -13517,7 +13615,8 @@ function renderCatalog() {
     const stockFilter = document.getElementById('filterStock')?.value || 'all';
     const sortMode = document.getElementById('sortProducts')?.value || 'relevance';
 
-    const availableProducts = state.products.filter(product => {
+    const availableProducts = products.filter(product => {
+        if (product.active === false || getProductAudience(product) !== selectedStoreAudience) return false;
         const stock = Number(product.stock) || 0;
         const price = calculateFinalPrice(product);
         const searchText = [product.name, product.description, product.category, product.brand]
@@ -13553,9 +13652,15 @@ function renderCatalog() {
 
     if (!availableProducts.length) {
         container.className = 'space-y-8 pb-6';
-        const catalogTitle = publicCatalogError ? 'Não foi possível carregar os produtos.' : 'Nenhum produto disponível no momento.';
-        const catalogHint = publicCatalogError ? 'Falha temporária de conexão com a loja. Atualize a página para tentar novamente.' : 'Em breve teremos novas soluções para você.';
-        container.innerHTML = '<div class="p-8 bg-slate-50 border border-slate-200 rounded-2xl text-center"><i data-lucide="package-open" class="w-12 h-12 text-slate-400 mx-auto mb-3"></i><p class="font-bold text-slate-700">' + catalogTitle + '</p><p class="text-sm text-slate-500 mt-1">' + catalogHint + '</p></div>';
+        const audienceCount = products.filter(p =>
+            p.active !== false && getProductAudience(p) === selectedStoreAudience
+        ).length;
+        const catalogTitle = publicCatalogError ? 'Não foi possível carregar os produtos.' :
+            audienceCount ? 'Nenhum produto corresponde aos filtros desta coleção.' : 'Esta coleção ainda não possui produtos.';
+        const catalogHint = publicCatalogError ? 'Falha temporária de conexão com a loja. Atualize a página para tentar novamente.' :
+            audienceCount ? 'Limpe os filtros para voltar a ver os produtos desta coleção.' :
+            'Novos produtos aparecerão aqui quando forem cadastrados com a categoria correspondente.';
+        container.innerHTML = '<div class="store-empty-collection"><strong>' + catalogTitle + '</strong><p>' + catalogHint + '</p></div>';
         const info = document.getElementById('catalogResultInfo');
         if (info) info.textContent = catalogTitle;
         lucide.createIcons();
@@ -13568,7 +13673,8 @@ function renderCatalog() {
     }
 
     container.className = 'space-y-8 pb-6';
-    const showFullCatalog = document.body.classList.contains('store-open-mode') ||
+    const showFullCatalog = catalogShowingAll ||
+        document.body.classList.contains('store-open-mode') ||
         document.body.classList.contains('affiliate-mode');
     container.innerHTML = groups.map((group, groupIndex) => `
         <div class="product-carousel-group ${groupIndex >= 3 && !showFullCatalog ? 'hidden' : ''}">
@@ -13599,7 +13705,8 @@ function renderCatalog() {
     `).join('');
 
     const info = document.getElementById('catalogResultInfo');
-    if (info) info.textContent = availableProducts.length + ' produto' + (availableProducts.length === 1 ? '' : 's') + ' disponível' + (availableProducts.length === 1 ? '' : 'eis') + '.';
+    if (info) info.textContent = availableProducts.length + ' produto' + (availableProducts.length === 1 ? '' : 's') +
+       ' na coleção ' + ({masculino:'masculina',feminino:'feminina',outros:'unissex / outros'}[selectedStoreAudience]) + '.';
 
     const oldCatalogButton = document.getElementById('btn-ver-catalogo');
     if (oldCatalogButton) oldCatalogButton.classList.add('hidden');
