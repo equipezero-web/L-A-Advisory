@@ -218,7 +218,7 @@ body #customerProfileModal:not(.hidden)>div {max-height:calc(100dvh - 24px)!impo
 #productDetailsModal .royal-product-header button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:39px;padding:8px 11px;border:1px solid #e2e7e5;background:#fff;color:#123d3b;border-radius:10px;font-size:12px;font-weight:800;white-space:nowrap}
 #productDetailsModal .royal-product-header button:hover,#productDetailsModal .royal-product-header button:focus-visible{background:#edf3f0;border-color:#9cb6ab}
 #productDetailsModal .royal-product-header button svg{height:18px;width:18px;flex:none}
-// STORE ROYAL: marca única
+/* STORE ROYAL: marca única */
 #productDetailsModal .royal-p-header-brand{display:flex;align-items:center;justify-content:center;gap:2px;font-size:clamp(12px,1.6vw,17px);letter-spacing:.15em;line-height:1.1;color:#003737;text-align:center}
 #productDetailsModal .royal-product-header .is-favorited{color:#b74b4b;background:#fff2f2;border-color:#f3d1d1}
 #productDetailsModal .royal-product-header .is-favorited svg{fill:#b74b4b;stroke:#b74b4b}
@@ -907,5 +907,109 @@ html body #productDetailsModal.royal-product-page .royal-product-scroll :is(
  }
  html body #productDetailsModal.royal-product-page .royal-product-details{
    border-radius:14px!important;
+ }
+}
+
+
+/* STORE ROYAL · Imagem completa e card proporcional — 2026-11-19.
+   The storefront continues to use uniform 4:5 cards, but the single-product
+   photo uses a balanced 1:1 presentation so wide shoes and apparel are not cropped. */
+html body #productDetailsModal.royal-product-page .royal-product-main {
+ align-items:start!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-gallery {
+ min-width:0!important;
+ max-width:100%!important;
+}
+html body #productDetailsModal.royal-product-page .royal-product-photo {
+ position:relative!important;
+ display:block!important;
+ box-sizing:border-box!important;
+ width:100%!important;
+ height:auto!important;
+ aspect-ratio:1 / 1!important;
+ max-width:100%!important;
+ max-height:none!important;
+ min-height:0!important;
+ overflow:hidden!important;
+ border-radius:18px!important;
+ background:#fffdf9!important;
+ isolation:isolate;
+}
+html body #productDetailsModal.royal-product-page .royal-product-photo > img#royalSelectedProductImage {
+ position:absolute!important;
+ inset:0!important;
+ display:block!important;
+ width:100%!important;
+ height:100%!important;
+ min-width:0!important;
+ min-height:0!important;
+ max-width:100%!important;
+ max-height:100%!important;
+ box-sizing:border-box!important;
+ margin:0!important;
+ padding:clamp(9px,1.5vw,20px)!important;
+ object-fit:contain!important;
+ object-position:center!important;
+ background:#fffdf9!important;
+ border-radius:inherit!important;
+ transform:none!important;
+}
+html body #productDetailsModal.royal-product-page .royal-product-photo:hover > img#royalSelectedProductImage:not(.royal-p-photo-enter) {
+ transform:none!important;
+}
+/* Thumbnails are square and show the complete product, never cropping it. */
+html body #productDetailsModal.royal-product-page .royal-p-thumbnails {
+ display:flex!important;
+ flex-wrap:nowrap!important;
+ max-width:100%!important;
+ overflow-x:auto!important;
+ gap:10px!important;
+ padding:12px 2px 16px!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-thumbnails button {
+ flex:0 0 70px!important;
+ width:70px!important;
+ height:70px!important;
+ border-radius:11px!important;
+ background:#fffdf9!important;
+ padding:3px!important;
+ box-sizing:border-box!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-thumbnails button img {
+ width:100%!important;
+ height:100%!important;
+ max-width:100%!important;
+ max-height:100%!important;
+ padding:0!important;
+ object-fit:contain!important;
+ object-position:center!important;
+ background:#fffdf9!important;
+ border-radius:8px!important;
+}
+/* A narrower gallery keeps both the photo card and purchase card balanced. */
+@media(min-width:801px) {
+ html body #productDetailsModal.royal-product-page .royal-product-main {
+   grid-template-columns:minmax(0, .95fr) minmax(0, 1.05fr)!important;
+   gap:clamp(18px,3vw,38px)!important;
+ }
+}
+@media(max-width:800px) {
+ html body #productDetailsModal.royal-product-page .royal-product-main {
+   grid-template-columns:minmax(0,1fr)!important;
+   gap:16px!important;
+ }
+ html body #productDetailsModal.royal-product-page .royal-product-photo {
+   border-radius:14px!important;
+ }
+}
+@media(max-width:520px) {
+ html body #productDetailsModal.royal-product-page .royal-p-thumbnails button {
+   flex-basis:61px!important;
+   width:61px!important;
+   height:61px!important;
+ }
+ html body #productDetailsModal.royal-product-page .royal-product-photo > img#royalSelectedProductImage {
+   padding:8px!important;
  }
 }
