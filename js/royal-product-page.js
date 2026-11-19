@@ -173,7 +173,7 @@
     const header = dialog.querySelector('.royal-product-header');
     header.innerHTML =
       '<div class="royal-p-header-left"><button type="button" data-action="close" aria-label="Voltar à loja"><i data-lucide="arrow-left" aria-hidden="true"></i><span>Voltar à loja</span></button></div>' +
-      '<strong class="royal-p-header-brand">STORE ROYAL <small>por L&A Royal Advisory</small></strong>' +
+      '<strong class="royal-p-header-brand">STORE ROYAL</strong>' +
       '<div class="royal-p-header-tools">' +
         '<button type="button" data-action="favorite" aria-pressed="false" aria-label="Favoritar produto" title="Favoritar"><i data-lucide="heart" aria-hidden="true"></i><span data-favorite-label>Favoritar</span></button>' +
         '<button type="button" data-action="share" aria-label="Compartilhar produto" title="Compartilhar"><i data-lucide="share-2" aria-hidden="true"></i><span>Compartilhar</span></button>' +
@@ -220,26 +220,12 @@
     if (attributes) attributes.remove();
 
     const container = dialog.querySelector('.royal-product-container');
-    const main = dialog.querySelector('.royal-product-main');
     const phone = typeof APP_CONFIG !== 'undefined' ? String(APP_CONFIG.supportPhone || '').replace(/\D/g, '') : '';
     const productLink = new URL(location.href);
     productLink.searchParams.set('produto', String(product.id));
     productLink.searchParams.delete('prod');
-    const contactUrl = phone ? 'https://wa.me/' + phone + '?text=' +
-      encodeURIComponent('Olá! Gostaria de informações sobre o produto ' + product.name + ': ' + productLink.href) : '';
     const reportUrl = phone ? 'https://wa.me/' + phone + '?text=' +
       encodeURIComponent('Olá! Gostaria de relatar um problema com o anúncio do produto ' + product.name + ': ' + productLink.href) : '';
-
-    main.insertAdjacentHTML('afterend',
-      '<section class="royal-p-seller" aria-label="Informações da loja">' +
-        '<div class="royal-p-seller-mark" aria-hidden="true">L&A</div>' +
-        '<div class="royal-p-seller-info"><span>Vendido por</span><h2>Store Royal</h2><p>Loja virtual da L&A Royal Advisory</p></div>' +
-        '<div class="royal-p-seller-actions">' +
-          (contactUrl ? '<a href="' + attr(contactUrl) + '" target="_blank" rel="noopener noreferrer"><i data-lucide="message-circle" aria-hidden="true"></i>Conversar com a loja</a>' : '') +
-          '<button type="button" data-action="close"><i data-lucide="store" aria-hidden="true"></i>Ver vitrine</button>' +
-        '</div>' +
-      '</section>'
-    );
 
     const sections = container.querySelectorAll('.royal-product-details');
     if (sections[0]) {
