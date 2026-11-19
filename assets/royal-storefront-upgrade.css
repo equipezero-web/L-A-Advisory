@@ -210,7 +210,7 @@ body #customerProfileModal:not(.hidden)>div {max-height:calc(100dvh - 24px)!impo
 
 
 /* Store Royal — individual product page, clean white marketplace presentation. */
-#productDetailsModal.royal-product-page{z-index:2000;background:#fff;color:#182b2a;font-family:Lato,system-ui,sans-serif}
+#productDetailsModal.royal-product-page{z-index:1100;background:#fff;color:#182b2a;font-family:Lato,system-ui,sans-serif}
 #productDetailsModal .royal-product-scroll{background:#fff!important;color:#182b2a!important;scrollbar-gutter:stable}
 #productDetailsModal .royal-product-header{position:sticky;top:0;z-index:20;min-height:68px;padding:12px clamp(14px,3vw,38px);background:#fff;color:#172d2c;border-bottom:1px solid #e5e9e7;box-shadow:0 3px 13px rgba(18,55,49,.045)}
 #productDetailsModal .royal-p-header-left,#productDetailsModal .royal-p-header-tools{display:flex;align-items:center;gap:8px;min-width:0}
