@@ -229,6 +229,56 @@
     }
   };
   const COMMON={
+    'Coleção':['Collection','Colección'],
+    'Filtros avançados':['Advanced filters','Filtros avanzados'],
+    'Pesquise por categoria, preço, tamanho, cor, disponibilidade e relevância.':['Search by category, price, size, color, availability and relevance.','Busca por categoría, precio, talla, color, disponibilidad y relevancia.'],
+    'Categoria':['Category','Categoría'],
+    'Preço mínimo':['Minimum price','Precio mínimo'],
+    'Preço máximo':['Maximum price','Precio máximo'],
+    'Todas as cores':['All colors','Todos los colores'],
+    'Tamanho':['Size','Talla'],
+    'Todos os tamanhos':['All sizes','Todas las tallas'],
+    'Disponibilidade':['Availability','Disponibilidad'],
+    'Todos':['All','Todos'],
+    'Em estoque':['In stock','Disponible'],
+    'Sem estoque':['Out of stock','Agotado'],
+    'Ordenar por':['Sort by','Ordenar por'],
+    'Nome: A–Z':['Name: A–Z','Nombre: A–Z'],
+    'Nome: Z–A':['Name: Z–A','Nombre: Z–A'],
+    'Carregando produtos...':['Loading products...','Cargando productos...'],
+    'Modo afiliado ativo':['Affiliate mode active','Modo afiliado activo'],
+    'Preciso criar uma conta para navegar pela loja?':['Do I need an account to browse the store?','¿Necesito una cuenta para explorar la tienda?'],
+    'Como funciona o cadastro de afiliado?':['How do I join the affiliate program?','¿Cómo funciona el registro de afiliados?'],
+    'Como funciona a comissão do afiliado?':['How do affiliate commissions work?','¿Cómo funcionan las comisiones de afiliado?'],
+    'Quais formas de pagamento estarão disponíveis?':['Which payment methods will be available?','¿Qué métodos de pago estarán disponibles?'],
+    'Programa Exclusivo':['Exclusive program','Programa exclusivo'],
+    'Cresça como Afiliado L&A':['Grow with L&A Affiliates','Crece como afiliado de L&A'],
+    'Crie sua conta':['Create your account','Crea tu cuenta'],
+    'Cadastre seus dados pessoais, dados de contato, chave Pix e redes sociais.':['Provide your personal details, contact details, Pix key and social profiles.','Registra tus datos personales, de contacto, clave Pix y redes sociales.'],
+    'Aguarde aprovação':['Await approval','Espera la aprobación'],
+    'O administrador revisa sua solicitação e libera recursos de divulgação após a validação.':['The administrator reviews your application and unlocks promotion tools once approved.','El administrador revisa tu solicitud y habilita herramientas de promoción al aprobarla.'],
+    'Compartilhe e acompanhe':['Share and track','Comparte y sigue'],
+    'Compartilhe links parametrizados e acompanhe indicações, pedidos e comissões.':['Share referral links and track referrals, orders and commissions.','Comparte enlaces de referencia y sigue referencias, pedidos y comisiones.'],
+    'Área exclusiva':['Exclusive area','Área exclusiva'],
+    'Venda com mais clareza e controle.':['Sell with greater clarity and control.','Vende con más claridad y control.'],
+    'Quero ser afiliado':['I want to become an affiliate','Quiero ser afiliado'],
+    'Entrar como afiliado':['Affiliate login','Acceso de afiliados'],
+    'Sua solicitação de afiliação está em análise. Aguarde a aceitação do administrador.':['Your affiliate application is under review. Please wait for approval.','Tu solicitud de afiliación está en revisión. Espera la aprobación.'],
+    'Sessão de afiliado ativa':['Affiliate session active','Sesión de afiliado activa'],
+    'Bem-vindo(a)':['Welcome','Bienvenido/a'],
+    'Carregando status...':['Loading status...','Cargando estado...'],
+    'Abrir painel executivo':['Open affiliate dashboard','Abrir panel de afiliado'],
+    'Dados protegidos':['Protected data','Datos protegidos'],
+    'Seu perfil, pedidos e dados de acesso serão protegidos por autenticação e permissões.':['Your account, orders and access details are protected by authentication and access controls.','Tu perfil, pedidos y datos de acceso están protegidos por autenticación y permisos.'],
+    'Checkout inteligente':['Smart checkout','Pago inteligente'],
+    'Dados do perfil preenchidos automaticamente no checkout após autenticação.':['Your account details are added to checkout automatically after signing in.','Los datos de tu perfil se completan automáticamente al pagar después de iniciar sesión.'],
+    'Comissão rastreável':['Trackable commissions','Comisiones rastreables'],
+    'Cada compra indicada mantém o vínculo com o afiliado e a comissão correspondente.':['Each referred purchase remains linked to its affiliate and commission.','Cada compra referida permanece vinculada al afiliado y su comisión.'],
+    'Não. Você pode navegar livremente, ver produtos, comparar preços e usar os filtros sem login. A conta será necessária apenas ao adicionar itens ao carrinho, comprar ou solicitar afiliação.':['No. You may browse products, compare prices and use filters without signing in. You need an account to add items to the cart, purchase or apply as an affiliate.','No. Puedes explorar productos, comparar precios y usar filtros sin iniciar sesión. Necesitas una cuenta para añadir artículos al carrito, comprar o solicitar una afiliación.'],
+    'Você cria uma conta ou faz login, completa sua ficha de afiliado e aguarda a validação do administrador. Após aprovação, o painel libera links, produtos, comissão e informações de vendas.':['Create an account or sign in, complete your affiliate profile and wait for administrative approval. The dashboard will then display links, products, commissions and sales information.','Crea una cuenta o inicia sesión, completa tu perfil de afiliado y espera la aprobación del administrador. Después tendrás acceso a enlaces, productos, comisiones y ventas.'],
+    'Cada produto afiliável possui valor bruto, percentual e comissão cadastrados pelo ADM. Após o pagamento ser confirmado, a comissão fica vinculada à conta do afiliado responsável pela indicação.':['Eligible products have commission rates set by the administrator. Once payment is confirmed, the commission is linked to the referring affiliate.','Los productos elegibles tienen comisiones definidas por el administrador. Una vez confirmado el pago, la comisión queda vinculada al afiliado que hizo la referencia.'],
+    'O sistema será preparado para checkout transparente com Pix, cartão de crédito e boleto. O pagamento será vinculado ao pedido e a comissão somente será criada após a confirmação segura da transação.':['The checkout supports secure payment flows for Pix, credit cards and invoices. Affiliate commissions are only registered after confirmed payment.','El pago admite métodos seguros como Pix, tarjeta de crédito y boleto. Las comisiones de afiliados se registran únicamente tras la confirmación del pago.'],
+
     'Produtos em destaque':['Featured products','Productos destacados'],
     'Roupas':['Clothing','Ropa'],'Sapatos':['Shoes','Zapatos'],'Acessórios':['Accessories','Accesorios'],
     'Dispositivos':['Devices','Dispositivos'],'Outros produtos':['Other products','Otros productos'],
@@ -267,7 +317,8 @@
       const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(node){
         const parent=node.parentElement;
         if(!parent||parent.closest('script,style,textarea,option,#adminDashboardModal,#catalogContainer,#customerOrdersList,#customerProfileModal,#orderDetailsContent,#royalSearchSuggestions'))return NodeFilter.FILTER_REJECT;
-        return (COMMON[node.textContent.trim()] || Object.values(COMMON).some(v=>v.includes(node.textContent.trim()))) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+        const normalized=node.textContent.trim().replace(/\\s+/g,' ');
+        return (COMMON[normalized] || Object.values(COMMON).some(v=>v.includes(normalized))) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
       }});
       while(walker.nextNode())result.push(walker.currentNode);
     }
@@ -285,7 +336,7 @@
     });
     for(const node of translationNodes()){
       if(!originals.has(node))originals.set(node,node.textContent);
-      const raw=originals.get(node),value=raw.trim(),translation=idx===null?value:COMMON[value]?.[idx];
+      const raw=originals.get(node),value=raw.trim(),translation=idx===null?value:COMMON[value.replace(/\\s+/g,' ')]?.[idx];
       if(translation)node.textContent=raw.replace(value,translation);
     }
     const select=document.getElementById('royalLanguage');if(select)select.value=selected;
