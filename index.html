@@ -10531,8 +10531,8 @@ function openNavigationModal() {
             if (!saving) {
                 saving = document.createElement('p');
                 saving.id = 'royalCartWholesaleSaving';
-                saving.className = 'text-xs font-bold text-emerald-800';
-                totalEl.insertAdjacentElement('afterend', saving);
+                saving.className = 'mt-2 text-xs font-bold text-emerald-800';
+                totalEl.closest('div')?.insertAdjacentElement('afterend', saving);
             }
             saving.textContent = totals.saving ? 'Economia no atacado: ' + formatCurrency(totals.saving) : '';
             saving.hidden = !totals.saving;
