@@ -379,6 +379,14 @@
     'Entre':['Sign in','Entrar'],'Criar conta':['Create account','Crear cuenta']
   };
   const originals=new WeakMap();
+  // Newly inserted UI nodes may already contain text in the previously selected language.
+  // Keep a canonical Portuguese source so switching back never leaves translated fragments behind.
+  const canonicalByTranslation=new Map();
+  for(const [portuguese,variants] of Object.entries(COMMON)){
+    for(const variant of variants){
+      if(!canonicalByTranslation.has(variant))canonicalByTranslation.set(variant,portuguese);
+    }
+  }
   function translationNodes(){
     const scopes=[document.querySelector('main'),document.querySelector('footer'),document.querySelector('.royal-web-strip'),
       document.querySelector('.royal-glass-header'),document.getElementById('royalPwaDock'),document.getElementById('royalPwaProfile'), document.getElementById('authModal'), document.getElementById('cartModal'), document.getElementById('checkoutModal'), document.getElementById('customerOrdersModal'), document.getElementById('customerProfileModal')];
@@ -405,9 +413,16 @@
       const key=e.getAttribute('data-i18n-placeholder');if(UI_TEXT[selected][key])e.setAttribute('placeholder',UI_TEXT[selected][key]);
     });
     for(const node of translationNodes()){
-      if(!originals.has(node))originals.set(node,node.textContent);
-      const raw=originals.get(node),value=raw.trim(),translation=idx===null?value:COMMON[value.replace(/\s+/g,' ')]?.[idx];
-      if(translation)node.textContent=raw.replace(value,translation);
+      const observed=node.textContent.trim().replace(/\s+/g,' ');
+      const previous=originals.get(node);
+      const known=previous&&[previous.canonical,...(COMMON[previous.canonical]||[])];
+      if(!previous||!known.includes(observed)){
+        const canonical=Object.hasOwn(COMMON,observed)?observed:(canonicalByTranslation.get(observed)||observed);
+        originals.set(node,{raw:node.textContent,canonical});
+      }
+      const {raw,canonical}=originals.get(node);
+      const translated=idx===null?canonical:(COMMON[canonical]?.[idx]||canonical);
+      node.textContent=raw.replace(raw.trim(),translated);
     }
     const select=document.getElementById('royalLanguage');if(select)select.value=selected;
     if(typeof window.royalApplyCatalogTranslations === 'function') window.royalApplyCatalogTranslations();

@@ -32,4 +32,130 @@ assert.ok(typeof context.window.royalCartOnAuthChanged==='function');
 assert.ok(typeof context.window.royalCheckoutOpen==='function');
 assert.ok(typeof context.window.royalConfirmDelivery==='function');
 assert.ok(typeof context.window.royalReviewOrderProduct==='function');
+// Checkout is recoverable for exactly 10 minutes and never carries over to a different account.
+context.document.getElementById=()=>null;
+context.state.currentUser={id:'customer-a'};
+context.supabaseAuthUser={id:'customer-a'};
+context.window.royalCheckoutOpen();
+const firstCheckout=JSON.parse(store.get('laRoyalCheckout:v1'));
+assert.equal(firstCheckout.uid,'customer-a');
+assert.equal(firstCheckout.expiresAt-firstCheckout.startedAt,600000);
+context.window.royalCheckoutOpen();
+assert.equal(JSON.parse(store.get('laRoyalCheckout:v1')).startedAt,firstCheckout.startedAt,'Reopening must not extend checkout');
+context.state.currentUser={id:'customer-b'};
+context.supabaseAuthUser={id:'customer-b'};
+context.window.royalCheckoutOpen();
+const nextCheckout=JSON.parse(store.get('laRoyalCheckout:v1'));
+assert.equal(nextCheckout.uid,'customer-b','Checkout must be scoped by account');
+
+const order={id:'order-1',status:'processing',paymentStatus:'pending'};
+context.state.orders=[order];
+context.state.cart=[{id:'product-1',name:'Item',quantity:1,price:10}];
+context.window.royalCartOrderPaid(order.id);
+assert.equal(context.state.cart.length,1,'A pending payment must never clear the cart');
+order.paymentStatus='approved';
+context.window.royalCartOrderPaid(order.id);
+assert.equal(context.state.cart.length,0,'Verified paid order clears the cart');
+assert.equal(store.has('laRoyalCheckout:v1'),false,'Verified paid order clears the checkout marker');
+console.log('Store Royal: checkout lifetime, account isolation and payment guarding passed');
+
 console.log('Store Royal: BRL parsing, status mapping and APIs passed');
+
+
+// The language selector must reverse translations on both existing and newly rendered nodes.
+{
+  const textNodes=[];
+  const mainRoot={};
+  const filterConstants={SHOW_TEXT:4,FILTER_ACCEPT:1,FILTER_SKIP:3,FILTER_REJECT:2};
+  const saved=new Map();
+  const testDocument={
+    readyState:'loading',
+    documentElement:{lang:'pt-BR'},
+    addEventListener(){},
+    querySelector(selector){return selector==='main'?mainRoot:null;},
+    querySelectorAll(){return [];},
+    getElementById(){return null;},
+    createTreeWalker(_root,_what,filter){
+      const candidates=textNodes.filter(node=>filter.acceptNode(node)===filterConstants.FILTER_ACCEPT);
+      let index=-1;
+      return {nextNode(){return ++index<candidates.length;},get currentNode(){return candidates[index];}};
+    }
+  };
+  const l10n={
+    document:testDocument,
+    NodeFilter:filterConstants,
+    window:{},
+    localStorage:{
+      getItem:key=>saved.get(key)||null,
+      setItem:(key,val)=>saved.set(key,String(val)),
+      removeItem:key=>saved.delete(key)
+    },
+    state:{currentUser:null,cart:[],products:[],orders:[]},
+    supabaseAuthUser:null,console,Date,Math,Number,String,JSON,Intl,URLSearchParams,
+    setInterval(){},setTimeout(){}
+  };
+  vm.createContext(l10n);
+  vm.runInContext(src,l10n);
+  const node=text=>({textContent:text,parentElement:{closest(){return false;}}});
+  const old=node('Bem-vindo de volta');
+  textNodes.push(old);
+  l10n.window.royalSetLanguage('en');
+  assert.equal(old.textContent,'Welcome back','Initial translation to English');
+  l10n.window.royalSetLanguage('es');
+  assert.equal(old.textContent,'Bienvenido de nuevo','Existing node changes to Spanish');
+  const dynamic=node('Secure payment'); // Injected after English was already selected.
+  textNodes.push(dynamic);
+  l10n.window.royalSetLanguage('es');
+  assert.equal(dynamic.textContent,'Pago seguro','New English node changes to Spanish');
+  l10n.window.royalSetLanguage('pt-BR');
+  assert.equal(old.textContent,'Bem-vindo de volta');
+  assert.equal(dynamic.textContent,'Pagamento seguro','Return to PT-BR must restore dynamic node');
+  dynamic.textContent='A caminho'; // Reused text node with new content.
+  l10n.window.royalSetLanguage('en');
+  assert.equal(dynamic.textContent,'On the way','Updated node source must be re-evaluated');
+  assert.equal(testDocument.documentElement.lang,'en');
+}
+console.log('Store Royal: reversible language switching passed');
+
+
+// An expired checkout from a previous visit must return to the home page.
+{
+  const cache=new Map([['laRoyalCheckout:v1',JSON.stringify({
+    uid:'returning-customer',startedAt:Date.now()-601000,expiresAt:Date.now()-1000
+  })]]);
+  const events={},navigation=[],query={};
+  query.select=()=>query;
+  query.eq=()=>query;
+  query.maybeSingle=async()=>({data:null,error:null});
+  query.upsert=async()=>({error:null});
+  const returning={
+    document:{
+      readyState:'loading',documentElement:{lang:'pt-BR'},visibilityState:'visible',
+      addEventListener(type,cb){events[type]=cb;},getElementById(){return null;},
+      querySelector(){return null;},querySelectorAll(){return [];}
+    },
+    window:{
+      addEventListener(type,cb){events['window:'+type]=cb;},
+      scrollTo(options){navigation.push(options);}
+    },
+    location:{search:'',hash:'',pathname:'/L-A-Advisory/'},
+    history:{replaceState(_state,_title,url){navigation.push(url);}},
+    localStorage:{
+      getItem:key=>cache.get(key)||null,
+      setItem:(key,val)=>cache.set(key,String(val)),
+      removeItem:key=>cache.delete(key)
+    },
+    sessionStorage:{getItem(){return null;}},
+    state:{currentUser:{id:'returning-customer'},cart:[],products:[],orders:[]},
+    supabaseAuthUser:{id:'returning-customer'},
+    supabaseClient:{from(){return query;}},
+    console,Date,Math,Number,String,JSON,Intl,URLSearchParams,
+    setInterval(){},setTimeout(){}
+  };
+  vm.createContext(returning);
+  vm.runInContext(src,returning);
+  events.DOMContentLoaded();
+  assert.equal(cache.has('laRoyalCheckout:v1'),false,'Expired checkout must be removed on page load');
+  assert.ok(navigation.includes('/L-A-Advisory/#inicio'),'Expired checkout must navigate to home');
+}
+console.log('Store Royal: expired checkout recovery passed');
