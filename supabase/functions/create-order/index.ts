@@ -19,7 +19,16 @@ function json(data: unknown, status = 200) {
 }
 
 function money(value: number): number {
-  return Math.round(value * 100) / 100;
+  return Math.round((value + Number.EPSILON) * 100) / 100;
+}
+
+// A taxa do atacado depende somente da quantidade de cada produto no pedido.
+// Não confiar no preço ou percentual enviados pelo navegador.
+function wholesaleRate(quantity: number): number {
+  if (!Number.isInteger(quantity) || quantity < 10 || quantity > 100) return 0;
+  if (quantity >= 70) return 5;
+  if (quantity >= 40) return 4;
+  return 3;
 }
 
 function generateCode(prefix: string): string {
@@ -229,7 +238,7 @@ Deno.serve(async (req) => {
       !productId ||
       !Number.isInteger(quantity) ||
       quantity < 1 ||
-      quantity > 99
+      quantity > 100
     ) {
       return json({ error: 'Item ou quantidade inválida.' }, 400);
     }
@@ -237,7 +246,7 @@ Deno.serve(async (req) => {
     const totalQuantity =
       (quantities.get(productId) || 0) + quantity;
 
-    if (totalQuantity > 99) {
+    if (totalQuantity > 100) {
       return json(
         { error: 'Quantidade máxima por produto excedida.' },
         400
@@ -313,13 +322,17 @@ Deno.serve(async (req) => {
       ? Number(product.sale_price)
       : NaN;
 
-    const unitPrice =
+    // Varejo = preço de venda vigente, já incluindo as promoções de catálogo.
+    const retailUnitPrice =
       Number.isFinite(salePriceRaw) && salePriceRaw > 0
         ? money(salePriceRaw)
         : money(price * (1 - discount / 100));
 
-    const itemSubtotal =
-      money(unitPrice * quantity);
+    // Atacado é um desconto ADICIONAL sobre o varejo, não sobre o preço bruto.
+    const wholesalePercent = wholesaleRate(quantity);
+    const unitPrice = money(retailUnitPrice * (1 - wholesalePercent / 100));
+
+    const itemSubtotal = money(unitPrice * quantity);
 
     if (
       !Number.isFinite(unitPrice) ||
