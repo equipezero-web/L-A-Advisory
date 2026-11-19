@@ -109,6 +109,14 @@
     }else return NaN;
     return Number.isFinite(amount)&&amount>=0?Math.round(amount*100)/100:NaN;
   };
+  window.formatBRLInput=function(value){
+    const number=Number(value);
+    return Number.isFinite(number)?new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(number):'';
+  };
+  window.royalMoneyInputBlur=function(input){
+    const number=window.royalParseBRL(input?.value);
+    if(input&&Number.isFinite(number))input.value=window.formatBRLInput(number);
+  };
   function checkoutState(){return fromStore(CHECKOUT_KEY);}
   window.royalCheckoutOpen=function(){
     if(typeof state==='undefined'||!state.currentUser)return;
