@@ -116,3 +116,46 @@ console.log('Store Royal: BRL parsing, status mapping and APIs passed');
   assert.equal(testDocument.documentElement.lang,'en');
 }
 console.log('Store Royal: reversible language switching passed');
+
+
+// An expired checkout from a previous visit must return to the home page.
+{
+  const cache=new Map([['laRoyalCheckout:v1',JSON.stringify({
+    uid:'returning-customer',startedAt:Date.now()-601000,expiresAt:Date.now()-1000
+  })]]);
+  const events={},navigation=[],query={};
+  query.select=()=>query;
+  query.eq=()=>query;
+  query.maybeSingle=async()=>({data:null,error:null});
+  query.upsert=async()=>({error:null});
+  const returning={
+    document:{
+      readyState:'loading',documentElement:{lang:'pt-BR'},visibilityState:'visible',
+      addEventListener(type,cb){events[type]=cb;},getElementById(){return null;},
+      querySelector(){return null;},querySelectorAll(){return [];}
+    },
+    window:{
+      addEventListener(type,cb){events['window:'+type]=cb;},
+      scrollTo(options){navigation.push(options);}
+    },
+    location:{search:'',hash:'',pathname:'/L-A-Advisory/'},
+    history:{replaceState(_state,_title,url){navigation.push(url);}},
+    localStorage:{
+      getItem:key=>cache.get(key)||null,
+      setItem:(key,val)=>cache.set(key,String(val)),
+      removeItem:key=>cache.delete(key)
+    },
+    sessionStorage:{getItem(){return null;}},
+    state:{currentUser:{id:'returning-customer'},cart:[],products:[],orders:[]},
+    supabaseAuthUser:{id:'returning-customer'},
+    supabaseClient:{from(){return query;}},
+    console,Date,Math,Number,String,JSON,Intl,URLSearchParams,
+    setInterval(){},setTimeout(){}
+  };
+  vm.createContext(returning);
+  vm.runInContext(src,returning);
+  events.DOMContentLoaded();
+  assert.equal(cache.has('laRoyalCheckout:v1'),false,'Expired checkout must be removed on page load');
+  assert.ok(navigation.includes('/L-A-Advisory/#inicio'),'Expired checkout must navigate to home');
+}
+console.log('Store Royal: expired checkout recovery passed');
