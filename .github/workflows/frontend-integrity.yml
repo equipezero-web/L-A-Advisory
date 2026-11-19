@@ -61,3 +61,6 @@ jobs:
         run: |
           node --check js/royal-product-page.js
           node --check js/royal-product-image-upload.js
+          node --check js/royal-storefront-ui.js
+          node --check js/royal-storefront-state.js
+          node tests/royal-storefront-regression.cjs
