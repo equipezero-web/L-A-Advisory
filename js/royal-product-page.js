@@ -274,6 +274,9 @@
         '</div>' +
         '<p class="royal-wholesale-summary" id="royalWholesaleSummary" role="status" aria-live="polite"></p>' +
         '<p class="royal-wholesale-retail">Desconto por quantidade do mesmo produto, sujeito ao estoque disponível.</p>' +
+        (!window.royalWholesalePaymentReady ?
+          '<p class="royal-wholesale-retail" role="note"><strong>Atacado em ativação:</strong> a finalização de compras com 10 ou mais unidades ficará indisponível até a atualização do servidor de pagamento.</p>'
+          : '') +
       '</section>';
     price.insertAdjacentHTML('afterend',
       wholesaleMarkup +
