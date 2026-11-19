@@ -1839,7 +1839,7 @@
             <div class="royal-fashion-content hero-content">
                 <div class="royal-hero-crown hero-eyebrow" aria-hidden="true"><span></span><i data-lucide="crown"></i><span></span></div>
                 <h2 class="royal-fashion-title hero-title">Descubra o <span>extraordinário.</span></h2>
-                <div class="hero-actions royal-fashion-actions"><a href="#loja" class="royal-fashion-cta">Explorar produtos <i data-lucide="arrow-right" aria-hidden="true"></i></a></div>
+
             </div>
         </section>
 
@@ -7209,18 +7209,18 @@ data-lenis-prevent-touch
                         </label>
 
                         <input
-                            type="number"
+                            type="text"
                             id="adminProductPrice"
                             required
-                            min="0"
-                            step="0.01"
+                            
+                            inputmode="decimal"
                             class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-amber-500"
                         >
                     </div>
 
                     <div>
                         <label for="adminProductSalePrice" class="block text-xs font-bold text-slate-700 uppercase mb-2">Preço de venda / total (R$)</label>
-                        <input type="number" id="adminProductSalePrice" required min="0" step="0.01" placeholder="Ex.: 100,00" class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-amber-500">
+                        <input type="text" id="adminProductSalePrice" required  inputmode="decimal" placeholder="Ex.: 100,00" class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-amber-500">
                     </div>
 
                     <div>
@@ -7278,6 +7278,7 @@ data-lenis-prevent-touch
 >
                     </div>
 
+                    <div class="sm:col-span-2"><label class="royal-featured-checkbox text-sm font-bold text-slate-900"><input id="adminProductFeatured" type="checkbox"> Destacar produto na vitrine principal</label></div>
                     <div class="sm:col-span-2">
                         <label
                             for="adminProductImage"
@@ -8226,6 +8227,7 @@ data-lenis-prevent-touch
                 discount: Number(order.discount ?? 0),
                 trackingCode: order.trackingCode || order.tracking_code || '',
                 paidAt: order.paidAt || order.paid_at || null,
+                deliveredConfirmedAt: order.delivered_confirmed_at || null,
                 commissionAmount: Number(order.commissionAmount ?? order.commission_amount ?? 0),
                 address: order.address?.text || order.address_text || order.address || ''
             };
@@ -8432,7 +8434,7 @@ data-lenis-prevent-touch
                 stock: Number(product.stock || 0), commission: Number(product.commission || 0),
                 image: product.image || '',
                 images: Array.isArray(product.images) && product.images.length ? product.images : (product.image ? [product.image] : []),
-                category: product.category || '', active: product.active !== false,
+                category: product.category || '', featured: product.featured === true, active: product.active !== false,
                 createdAt: product.created_at, updatedAt: product.updated_at
             };
         }
@@ -8718,79 +8720,6 @@ function initializeApp() {
     setupOrderRealtimeSync();
     handlePaymentReturn();
 }
-        function initializeDefaultProducts() {
-            state.products = [
-                {
-                    id: 'prod_001',
-                    name: 'Consultoria Premium Individual',
-                    description: 'Sessão exclusiva de 60 minutos com especialista sênior.',
-                    price: 497.00,
-                    discount: 0,
-                    stock: 50,
-                    commission: 15,
-                    image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&q=80',
-                    category: 'Consultoria'
-                },
-                {
-                    id: 'prod_002',
-                    name: 'Mentoria Executiva Mensal',
-                    description: 'Acompanhamento contínuo com 4 encontros mensais.',
-                    price: 1497.00,
-                    discount: 10,
-                    stock: 20,
-                    commission: 20,
-                    image: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&q=80',
-                    category: 'Mentoria'
-                },
-                {
-                    id: 'prod_003',
-                    name: 'Workshop de Liderança',
-                    description: 'Imersão prática de 8 horas sobre liderança de alta performance.',
-                    price: 897.00,
-                    discount: 5,
-                    stock: 100,
-                    commission: 12,
-                    image: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=800&q=80',
-                    category: 'Workshop'
-                },
-                {
-                    id: 'prod_004',
-                    name: 'Diagnóstico Empresarial',
-                    description: 'Análise completa da saúde do seu negócio com plano de ação.',
-                    price: 2497.00,
-                    discount: 0,
-                    stock: 15,
-                    commission: 18,
-                    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80',
-                    category: 'Consultoria'
-                },
-                {
-                    id: 'prod_005',
-                    name: 'Programa de Desenvolvimento de Equipes',
-                    description: 'Treinamento customizado para sua equipe de líderes.',
-                    price: 4997.00,
-                    discount: 15,
-                    stock: 10,
-                    commission: 25,
-                    image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80',
-                    category: 'Treinamento'
-                },
-                {
-                    id: 'prod_006',
-                    name: 'Plano de Sucessão Familiar',
-                    description: 'Estruturação completa para transição geracional.',
-                    price: 7997.00,
-                    discount: 0,
-                    stock: 5,
-                    commission: 22,
-                    image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80',
-                    category: 'Consultoria'
-                }
-            ];
-
-            saveStateToStorage();
-        }
-
         function updateYear() {
             const yearEl = document.getElementById('currentYear');
             if (yearEl) {
@@ -9867,85 +9796,6 @@ function openNavigationModal() {
                 modal.style.zIndex = '';
                 document.body.style.overflow = '';
             }
-        }
-
-        function openConsultingBooking(type = 'Consultoria', value = 0) {
-            const modal = document.getElementById('consultingModal');
-            const typeDisplay = document.getElementById('consultingTypeDisplay');
-            const priceDisplay = document.getElementById('consultingPriceDisplay');
-            const typeInput = document.getElementById('consultingType');
-            const valueInput = document.getElementById('consultingValue');
-
-            if (!modal) return;
-
-            if (typeDisplay) typeDisplay.textContent = type;
-            if (priceDisplay) priceDisplay.textContent = formatCurrency(value);
-            if (typeInput) typeInput.value = type;
-            if (valueInput) valueInput.value = value;
-
-            modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-            const detailsPanel = modal.firstElementChild;
-            if (detailsPanel) {
-                detailsPanel.scrollTop = 0;
-                detailsPanel.style.overflowY = 'scroll';
-                detailsPanel.style.webkitOverflowScrolling = 'touch';
-            }
-            requestAnimationFrame(() => {
-                if (detailsPanel) detailsPanel.scrollTop = 0;
-            });
-            lucide.createIcons();
-        }
-
-        function closeConsultingBooking() {
-            const modal = document.getElementById('consultingModal');
-            if (modal) {
-                modal.classList.add('hidden');
-                document.body.style.overflow = '';
-            }
-
-            const form = document.getElementById('consultingForm');
-            if (form) form.reset();
-        }
-
-        function submitConsultingBooking(event) {
-            event.preventDefault();
-
-            const company = document.getElementById('consultingCompany')?.value.trim();
-            const phone = document.getElementById('consultingPhone')?.value.trim();
-            const email = document.getElementById('consultingEmail')?.value.trim();
-            const date = document.getElementById('consultingDate')?.value;
-            const time = document.getElementById('consultingTime')?.value;
-            const obs = document.getElementById('consultingObs')?.value.trim();
-            const type = document.getElementById('consultingType')?.value;
-            const value = parseFloat(document.getElementById('consultingValue')?.value || '0');
-            const terms = document.getElementById('consultingTerms')?.checked;
-
-            if (!company || !phone || !email || !date || !time || !terms) {
-                alert('Preencha todos os campos obrigatórios e aceite os termos.');
-                return;
-            }
-
-            const booking = {
-                id: 'book_' + Date.now(),
-                company,
-                phone,
-                email,
-                date,
-                time,
-                obs,
-                type,
-                value,
-                status: 'pending',
-                createdAt: new Date().toISOString()
-            };
-
-            if (!state.consultingBookings) state.consultingBookings = [];
-            state.consultingBookings.push(booking);
-            saveStateToStorage();
-
-            closeConsultingBooking();
-            alert('Solicitação de agendamento enviada! Entraremos em contato em breve.');
         }
 
         function openCartModal() {
@@ -12857,6 +12707,7 @@ async function loadRoyalAiPanel() {
                     document.getElementById('adminProductCommission').value = product.commission;
                     document.getElementById('adminProductImage').value = product.image;
                     document.getElementById('adminProductCategory').value = product.category;
+                    document.getElementById('adminProductFeatured').checked = product.featured === true;
                 }
             } else {
                 document.getElementById('adminProductId').value = '';
@@ -12910,8 +12761,8 @@ async function loadRoyalAiPanel() {
             const id = document.getElementById('adminProductId')?.value;
             const name = document.getElementById('adminProductName')?.value.trim();
             const description = document.getElementById('adminProductDescription')?.value.trim();
-            const price = parseFloat(document.getElementById('adminProductPrice')?.value || '0');
-            const salePrice = parseFloat(document.getElementById('adminProductSalePrice')?.value || '0');
+            const price = royalParseBRL(document.getElementById('adminProductPrice')?.value);
+            const salePrice = royalParseBRL(document.getElementById('adminProductSalePrice')?.value);
             const discount = parseFloat(document.getElementById('adminProductDiscount')?.value || '0');
             const stock = parseInt(document.getElementById('adminProductStock')?.value || '0');
             const commission = parseFloat(document.getElementById('adminProductCommission')?.value || '0');
@@ -12958,7 +12809,8 @@ async function loadRoyalAiPanel() {
                 stock,
                 commission,
                 image,
-                category
+                category,
+                featured: document.getElementById('adminProductFeatured')?.checked === true
             };
 
             try {
@@ -12987,6 +12839,7 @@ async function loadRoyalAiPanel() {
                         image: product.image,
                         images: product.images,
                         category: product.category,
+                        featured: product.featured,
                         active: true
                     }, { onConflict: 'id' });
 
@@ -15203,6 +15056,10 @@ body.guest-mode #afiliados { display: none !important; }
 <script src="./js/royal-product-image-upload.js"></script>
 <script src="./js/royal-product-page.js"></script>
 <script src="./js/royal-analytics.js?v=1" defer></script>
+
+<link rel="stylesheet" href="./assets/royal-storefront-upgrade.css?v=20261119-3">
+<script src="./js/royal-storefront-ui.js?v=20261119-3"></script>
+<script src="./js/royal-storefront-state.js?v=20261119-3"></script>
 
 <!-- Native scroll isolation for account, checkout, admin and dynamic product overlays.
      Attribute instructs Lenis not to intercept interactions inside scrolling panels. -->
