@@ -174,8 +174,14 @@
   const ORDER_LABELS={pending:'A pagar',paid:'Preparando',processing:'Preparando',shipped:'A caminho',delivered:'Entregue',
     completed:'A avaliar',cancelled:'Cancelado',canceled:'Cancelado',refunded:'Reembolsado'};
   window.royalOrderLabel=function(status,deliveredConfirmedAt){
-    if(status==='delivered'&&deliveredConfirmedAt)return 'A avaliar';
-    return ORDER_LABELS[String(status)]||String(status||'Pendente');
+    const text=status==='delivered'&&deliveredConfirmedAt?'A avaliar':(ORDER_LABELS[String(status)]||String(status||'Pendente'));
+    const language=fromStore('laRoyalLanguage');
+    const translations={pending:['Awaiting payment','Por pagar'],paid:['Preparing','Preparando'],processing:['Preparing','Preparando'],
+      shipped:['On the way','En camino'],delivered:['Delivered','Entregado'],completed:['Review products','Por evaluar']};
+    const idx=language==='en'?0:language==='es'?1:null;
+    if(idx===null)return text;
+    if(text==='A avaliar')return ['Review products','Por evaluar'][idx];
+    return (translations[String(status)]||[text,text])[idx];
   };
   window.royalConfirmDelivery=async function(orderId){
     if(!getId()){if(typeof openAuthModal==='function')openAuthModal('customer-login');return;}
@@ -404,6 +410,17 @@
       if(translation)node.textContent=raw.replace(value,translation);
     }
     const select=document.getElementById('royalLanguage');if(select)select.value=selected;
+  };
+  window.royalApplyCatalogTranslations=function(){
+    const language=fromStore('laRoyalLanguage');const idx=language==='en'?0:language==='es'?1:null;
+    for(const heading of document.querySelectorAll('#catalogContainer .product-carousel-group h3')){
+      const entry=Object.entries(COMMON).find(([portuguese,variants])=>
+        portuguese===heading.textContent.trim() || variants.includes(heading.textContent.trim()));
+      if(entry)heading.textContent=idx===null?entry[0]:entry[1][idx];
+    }
+    for(const label of document.querySelectorAll('#catalogContainer .royal-image-card-caption span')){
+      label.textContent=idx===null?'Ver produto ›':idx===0?'View product ›':'Ver producto ›';
+    }
   };
   function init(){
     if(initialized)return;initialized=true;
