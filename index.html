@@ -1843,16 +1843,6 @@
             </div>
         </section>
 
-        <!-- ATALHOS COMERCIAIS — navegação nativa do catálogo existente -->
-        <nav class="royal-store-shortcuts" aria-label="Navegar pela Store Royal">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 royal-store-shortcuts-inner">
-                <a href="#loja"><i data-lucide="shopping-bag" class="w-4 h-4"></i> Todos os produtos</a>
-                <button type="button" onclick="openCatalogFilters(); document.getElementById('loja')?.scrollIntoView({behavior:'smooth'});"><i data-lucide="sliders-horizontal" class="w-4 h-4"></i> Categorias e filtros</button>
-                <button type="button" onclick="focusRoyalCatalogSearch();"><i data-lucide="search" class="w-4 h-4"></i> Buscar</button>
-                <button type="button" onclick="openCartModal()"><i data-lucide="shopping-cart" class="w-4 h-4"></i> Carrinho</button>
-            </div>
-        </nav>
-
         <!-- LOJA PÚBLICA -->
         <section
             id="loja"
@@ -1879,47 +1869,6 @@
                         </p>
                     </div>
 
-                    <div class="flex flex-wrap gap-3">
-                        <button
-                            id="btn-ver-catalogo"
-                            type="button"
-                            onclick="openCatalogFilters()"
-                            class="gradient-gold text-slate-900 px-6 py-3 rounded-lg font-bold text-sm shadow-md hover:shadow-gold transition flex items-center gap-2 cursor-pointer"
-                        >
-                            <i
-                                data-lucide="sliders-horizontal"
-                                class="w-4 h-4"
-                            ></i>
-
-                            Filtros avançados
-                        </button>
-
-                        <div class="flex gap-2">
-                            <button
-                                type="button"
-                                onclick="scrollCarousel('left')"
-                                class="p-3 rounded-full border-2 border-slate-300 hover:border-amber-500 text-slate-600 hover:text-amber-600 transition bg-white shadow-md hover:shadow-lg cursor-pointer"
-                                aria-label="Produtos anteriores"
-                            >
-                                <i
-                                    data-lucide="chevron-left"
-                                    class="w-5 h-5"
-                                ></i>
-                            </button>
-
-                            <button
-                                type="button"
-                                onclick="scrollCarousel('right')"
-                                class="p-3 rounded-full border-2 border-slate-300 hover:border-amber-500 text-slate-600 hover:text-amber-600 transition bg-white shadow-md hover:shadow-lg cursor-pointer"
-                                aria-label="Próximos produtos"
-                            >
-                                <i
-                                    data-lucide="chevron-right"
-                                    class="w-5 h-5"
-                                ></i>
-                            </button>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- DEPARTAMENTOS INDEPENDENTES DA STORE ROYAL -->
@@ -1945,6 +1894,21 @@
                     </button>
                 </div>
                 <p id="storeAudienceHelper">Os produtos são exibidos somente na coleção selecionada. A divisão é feita exclusivamente pela categoria cadastrada. Itens sem classificação ficam em Unissex / Outros.</p>
+                <div class="royal-category-picker" aria-label="Selecionar categoria">
+                    <div class="royal-category-field">
+                            <label
+                                for="filterCategory"
+                                class="royal-category-label"
+                            >
+                                Categoria
+                            </label>
+
+                            <select id="filterCategory" onchange="renderCatalog()"
+                                class="royal-category-select">
+                                <option value="all">Todas as categorias desta coleção</option>
+                            </select>
+                        </div>
+                </div>
 
                 <!-- FILTROS -->
                 <div
@@ -1993,20 +1957,6 @@
                                 oninput="renderCatalog()"
                                 class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm outline-none focus:border-amber-500"
                             >
-                        </div>
-
-                        <div>
-                            <label
-                                for="filterCategory"
-                                class="block text-xs text-slate-300 font-bold mb-2"
-                            >
-                                Categoria
-                            </label>
-
-                            <select id="filterCategory" onchange="renderCatalog()"
-                                class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm outline-none focus:border-amber-500">
-                                <option value="all">Todas as categorias desta coleção</option>
-                            </select>
                         </div>
 
                         <div>
@@ -2172,9 +2122,10 @@
                 </div>
 
                 <!-- CATÁLOGO -->
-                <div id="catalogContainer" role="tabpanel" aria-labelledby="storeAudienceMasculino" tabindex="0" class="space-y-8 pb-6">
-                    <!-- Os carrosséis de produtos serão carregados pelo Supabase -->
+                <div id="catalogContainer" role="tabpanel" aria-labelledby="storeAudienceMasculino" tabindex="0" class="royal-catalog-grid">
+                    <!-- Grade contínua: até 60 produtos por página -->
                 </div>
+                <div id="catalogPagination" class="royal-catalog-pagination" aria-live="polite"></div>
 
                 <div id="virtualStoreOpenWrap" class="mt-4 flex justify-center">
                     <button type="button" id="openVirtualStoreButton" onclick="openVirtualStore()" class="gradient-gold text-slate-900 px-7 py-4 rounded-xl font-bold hover:shadow-gold transition inline-flex items-center gap-2">
@@ -13434,8 +13385,38 @@ function handleStoreAudienceKey(event) {
     tab.focus();
 }
 
-let catalogShowingAll = false;
-const CATALOG_CAROUSEL_LIMIT = 10;
+const CATALOG_PAGE_SIZE = 60;
+let currentCatalogPage = 1;
+let lastCatalogFilterSignature = '';
+
+function paginateStoreProducts(items, requestedPage) {
+    const totalCount = items.length;
+    const totalPages = Math.ceil(totalCount / CATALOG_PAGE_SIZE);
+    const parsed = Number(requestedPage);
+    const desired = Number.isSafeInteger(parsed) && parsed > 0 ? parsed : 1;
+    const page = Math.min(desired, Math.max(1, totalPages));
+    const start = (page - 1) * CATALOG_PAGE_SIZE;
+    return {page, totalPages, totalCount, start, items: items.slice(start, start + CATALOG_PAGE_SIZE)};
+}
+
+function renderCatalogPagination(result) {
+    if (result.totalPages <= 1) return '';
+    const buttons = Array.from({length: result.totalPages}, (_, index) => {
+        const number = index + 1;
+        const active = number === result.page;
+        return '<button type="button" class="royal-page-button' + (active ? ' is-active' : '') +
+            '" onclick="changeCatalogPage(' + number + ')" aria-label="Ir para a página ' + number + '"' +
+            (active ? ' aria-current="page"' : '') + '>' + number + '</button>';
+    });
+    return '<nav class="royal-page-list" aria-label="Páginas de produtos">' + buttons.join('') + '</nav>';
+}
+
+function changeCatalogPage(page) {
+    if (!Number.isSafeInteger(page) || page < 1) return;
+    currentCatalogPage = page;
+    renderCatalog();
+    document.getElementById('loja')?.scrollIntoView({behavior:'smooth',block:'start'});
+}
 
 function clearCatalogFilters() {
     const defaults = {
@@ -13478,6 +13459,11 @@ function renderCatalog() {
     const sizeFilter = document.getElementById('filterSize')?.value || 'all';
     const stockFilter = document.getElementById('filterStock')?.value || 'all';
     const sortMode = document.getElementById('sortProducts')?.value || 'relevance';
+    const filterSignature = JSON.stringify([selectedStoreAudience,searchTerm,categoryFilter,minPriceValue,maxPriceValue,colorFilter,sizeFilter,stockFilter,sortMode]);
+    if (filterSignature !== lastCatalogFilterSignature) {
+        currentCatalogPage = 1;
+        lastCatalogFilterSignature = filterSignature;
+    }
 
     const availableProducts = products.filter(product => {
         if (product.active === false || getProductAudience(product) !== selectedStoreAudience) return false;
@@ -13515,7 +13501,10 @@ function renderCatalog() {
     });
 
     if (!availableProducts.length) {
-        container.className = 'space-y-8 pb-6';
+        currentCatalogPage = 1;
+        container.className = 'royal-catalog-grid';
+        const pagination = document.getElementById('catalogPagination');
+        if (pagination) pagination.innerHTML = '';
         const audienceCount = products.filter(p =>
             p.active !== false && getProductAudience(p) === selectedStoreAudience
         ).length;
@@ -13531,68 +13520,24 @@ function renderCatalog() {
         return;
     }
 
-    // Vitrines comerciais dinâmicas — categoria cadastrada é a única fonte.
-    const makeGroup = (title, items) => {
-        const group = items.slice(); // O carrossel preserva todos os produtos da categoria.
-        group.title = title;
-        return group;
-    };
-    const groups = [];
-    const featured = availableProducts.filter(product => product.featured === true);
-    groups.push(makeGroup('Produtos em destaque', featured.length ? featured : availableProducts));
-    const departments = [
-        ['Roupas', /\b(roupas?|vestuario|vestidos?|blusas?|camisas?|calcas?|saias?|jaquetas?|moda)\b/],
-        ['Sapatos', /\b(sapatos?|calcados?|tenis|botas?|sandalias?|sapatilhas?|chinelos?)\b/],
-        ['Acessórios', /\b(acessorios?|relogios?|bolsas?|carteiras?|oculos|joias?|bijuterias?|cintos?)\b/],
-        ['Dispositivos', /\b(dispositivos?|eletronicos?|celulares?|smartphones?|tablets?|notebooks?|computadores?|fones?|gadgets?|tecnologia)\b/]
-    ];
-    const assigned = new Set();
-    for (const [title, matcher] of departments) {
-        const matching = availableProducts.filter(product => matcher.test(normalizeAudienceText(product.category)));
-        matching.forEach(product => assigned.add(product.id));
-        if (matching.length) groups.push(makeGroup(title, matching));
-    }
-    const uncategorized = availableProducts.filter(product => !assigned.has(product.id));
-    if (uncategorized.length) groups.push(makeGroup('Outros produtos', uncategorized));
-
-    container.className = 'space-y-8 pb-6';
-    const showFullCatalog = catalogShowingAll ||
-        document.body.classList.contains('store-open-mode') ||
-        document.body.classList.contains('affiliate-mode');
-    container.innerHTML = groups.map((group, groupIndex) => `
-        <div class="product-carousel-group ">
-            <div class="flex items-center justify-between gap-3 mb-3">
-                <h3 class="font-serif text-xl font-bold text-white">${escapeHtml(group.title || 'Mais produtos')}</h3>
-                <div class="flex items-center gap-2 shrink-0">
-                    <span class="text-xs text-slate-400">${group.length} produto${group.length === 1 ? '' : 's'}</span>
-                    <div class="la-carousel-nav flex items-center gap-1">
-                        <button type="button" aria-label="Ver produtos anteriores" title="Produtos anteriores" class="la-carousel-arrow" onclick="event.stopPropagation(); const c=this.closest('.product-carousel-group').querySelector('.product-cards-layout'); c.scrollBy({left:-Math.max(180,c.clientWidth*0.8),behavior:'smooth'});">‹</button>
-                        <button type="button" aria-label="Ver próximos produtos" title="Próximos produtos" class="la-carousel-arrow" onclick="event.stopPropagation(); const c=this.closest('.product-carousel-group').querySelector('.product-cards-layout'); c.scrollBy({left:Math.max(180,c.clientWidth*0.8),behavior:'smooth'});">›</button>
-                    </div>
-                </div>
-            </div>
-            <div class="product-cards-layout grid grid-cols-2 gap-3 md:flex md:gap-6 md:overflow-x-auto md:pb-4 md:scroll-smooth md:snap-x md:snap-mandatory no-scrollbar" tabindex="0" aria-label="Carrossel de produtos">
-                ${group.map(product => {
-                    return `
-                        <article role="button" tabindex="0" aria-label="Ver detalhes de ${escapeAttribute(product.name)}" onclick="showProductDetails('${String(product.id).replace(/[^a-zA-Z0-9_-]/g, '')}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showProductDetails('${String(product.id).replace(/[^a-zA-Z0-9_-]/g, '')}')}" data-product-id="${escapeAttribute(product.id)}" class="product-motion-card royal-image-only-card w-full min-w-0 md:w-[285px] md:flex-shrink-0 md:snap-start cursor-pointer">
+    // Um produto aparece somente uma vez na grade, respeitando coleção, pesquisa e filtros.
+    const pageResult = paginateStoreProducts(availableProducts, currentCatalogPage);
+    currentCatalogPage = pageResult.page;
+    container.className = 'royal-catalog-grid';
+    container.innerHTML = pageResult.items.map(product => `
+        <article role="button" tabindex="0" aria-label="Ver detalhes de ${escapeAttribute(product.name)}" onclick="showProductDetails('${String(product.id).replace(/[^a-zA-Z0-9_-]/g, '')}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showProductDetails('${String(product.id).replace(/[^a-zA-Z0-9_-]/g, '')}')}" data-product-id="${escapeAttribute(product.id)}" class="product-motion-card royal-image-only-card cursor-pointer">
                             <img src="${escapeAttribute(product.image)}" alt="${escapeAttribute(product.name)}" class="royal-full-card-image" loading="lazy">
                             <div class="royal-image-card-caption">
                                 <h3>${escapeHtml(product.name)}</h3>
                                 <span>Ver produto ›</span>
                             </div>
                         </article>
-                    `;
-                }).join('')}
-            </div>
-        </div>
     `).join('');
-
+    const pagination = document.getElementById('catalogPagination');
+    if (pagination) pagination.innerHTML = renderCatalogPagination(pageResult);
     const info = document.getElementById('catalogResultInfo');
-    if (info) info.textContent = availableProducts.length + ' produto' + (availableProducts.length === 1 ? '' : 's') +
-       ' na coleção ' + ({masculino:'masculina',feminino:'feminina',outros:'unissex / outros'}[selectedStoreAudience]) + '.';
-
-    const oldCatalogButton = document.getElementById('btn-ver-catalogo');
-    if (oldCatalogButton) oldCatalogButton.classList.add('hidden');
+    if (info) info.textContent = 'Exibindo ' + (pageResult.start + 1) + '–' + (pageResult.start + pageResult.items.length) +
+       ' de ' + pageResult.totalCount + ' produtos na coleção ' + ({masculino:'masculina',feminino:'feminina',outros:'unissex / outros'}[selectedStoreAudience]) + '.';
 
     lucide.createIcons();
     if (typeof window.laRefreshMotion === 'function') window.laRefreshMotion();
