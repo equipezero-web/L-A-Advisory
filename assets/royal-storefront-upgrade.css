@@ -1013,3 +1013,127 @@ html body #productDetailsModal.royal-product-page .royal-p-thumbnails button img
    padding:8px!important;
  }
 }
+
+
+/* Store Royal · Pedidos sempre acima da barra e da navegação.
+   Evita que o painel fique preso numa camada inferior à do cabeçalho. */
+html body #customerOrdersModal:not(.hidden){
+ position:fixed!important;
+ inset:0!important;
+ z-index:30070!important;
+ isolation:isolate!important;
+ display:flex!important;
+ align-items:flex-start!important;
+ justify-content:center!important;
+ max-height:100dvh!important;
+ overflow:hidden!important;
+ overscroll-behavior:contain!important;
+}
+html body #customerOrdersModal:not(.hidden) > .account-popover-shell{
+ position:relative!important;
+ z-index:1!important;
+ box-sizing:border-box!important;
+ min-height:0!important;
+ max-height:calc(100dvh - 16px)!important;
+ overflow-y:auto!important;
+ overflow-x:hidden!important;
+ overscroll-behavior:contain!important;
+ -webkit-overflow-scrolling:touch!important;
+ touch-action:pan-y!important;
+}
+html body #customerOrdersModal:not(.hidden) > .account-popover-shell > button[onclick*="closeCustomerOrders"]{
+ position:sticky!important;
+ top:0!important;
+ float:right!important;
+ z-index:3!important;
+ background:#fffaf2!important;
+ border:1px solid #cdbb97!important;
+ color:#123b31!important;
+ border-radius:8px!important;
+ padding:6px!important;
+}
+html body #customerOrdersModal.hidden{display:none!important;}
+/* Separate layers for nested order detail and tracking dialogs. */
+html body #orderDetailsModal:not(.hidden),
+html body #trackingModal:not(.hidden){
+ position:fixed!important;
+ z-index:30090!important;
+ isolation:isolate!important;
+}
+/* Preços claros de varejo e atacado na ficha do produto. */
+html body #productDetailsModal.royal-product-page .royal-wholesale-box{
+ margin:0 0 18px;
+ padding:clamp(14px,2vw,20px);
+ background:linear-gradient(135deg,#fffdf8,#f4e8d2)!important;
+ border:1px solid #d6c197!important;
+ border-radius:14px;
+ box-shadow:0 8px 22px rgba(60,43,18,.06);
+ color:#123b31!important;
+}
+html body #productDetailsModal.royal-product-page .royal-wholesale-box h2{
+ font-family:"Playfair Display",Georgia,serif;
+ font-size:18px;
+ font-weight:750;
+ color:#123b31!important;
+ margin:0 0 4px;
+}
+html body #productDetailsModal.royal-product-page .royal-wholesale-box .royal-wholesale-retail{
+ font-size:13px;
+ margin:3px 0 13px;
+ color:#425a50!important;
+}
+html body #productDetailsModal.royal-product-page .royal-wholesale-tiers{
+ display:grid;
+ grid-template-columns:repeat(3,minmax(0,1fr));
+ gap:7px;
+}
+html body #productDetailsModal.royal-product-page .royal-wholesale-tier{
+ min-width:0;
+ padding:12px 8px;
+ border:1px solid #dccba9;
+ border-radius:11px;
+ background:#fffaf0!important;
+ color:#173b30!important;
+ text-align:center;
+ transition:border-color .2s,background .2s,box-shadow .2s;
+}
+html body #productDetailsModal.royal-product-page .royal-wholesale-tier span,
+html body #productDetailsModal.royal-product-page .royal-wholesale-tier strong,
+html body #productDetailsModal.royal-product-page .royal-wholesale-tier small{
+ display:block;
+ color:#173b30!important;
+ opacity:1!important;
+}
+html body #productDetailsModal.royal-product-page .royal-wholesale-tier span{
+ font-size:12px;
+ font-weight:800;
+}
+html body #productDetailsModal.royal-product-page .royal-wholesale-tier strong{
+ font-size:clamp(13px,1.25vw,17px);
+ font-weight:900;
+ margin:6px 0 3px;
+}
+html body #productDetailsModal.royal-product-page .royal-wholesale-tier small{
+ font-size:11px;
+}
+html body #productDetailsModal.royal-product-page .royal-wholesale-tier.is-active{
+ border:2px solid #a88749;
+ background:linear-gradient(140deg,#e9d6b1,#fff1d3)!important;
+ box-shadow:0 3px 12px rgba(117,91,47,.14);
+}
+html body #productDetailsModal.royal-product-page .royal-wholesale-summary{
+ margin:12px 0 0;
+ padding:9px 10px;
+ border-radius:10px;
+ background:#eaf0e6;
+ color:#1b4e39!important;
+ font-size:13px;
+ font-weight:750;
+}
+@media(max-width:480px){
+ html body #productDetailsModal.royal-product-page .royal-wholesale-tiers{gap:5px;}
+ html body #productDetailsModal.royal-product-page .royal-wholesale-tier{padding:10px 5px;}
+ html body #productDetailsModal.royal-product-page .royal-wholesale-tier span{font-size:11px;}
+ html body #productDetailsModal.royal-product-page .royal-wholesale-tier strong{font-size:13px;}
+ html body #productDetailsModal.royal-product-page .royal-wholesale-tier small{font-size:10px;}
+}

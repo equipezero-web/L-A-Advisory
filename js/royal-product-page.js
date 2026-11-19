@@ -149,7 +149,7 @@
   }
 
   function addQuantity(product, quantity) {
-    const stock = Math.max(0, Number(product.stock) || 0);
+    const stock = Math.min(100, Math.max(0, Number(product.stock) || 0));
     if (!stock) return alert('Produto indisponível no momento.');
     const qty = Math.max(1, Math.min(stock, Math.floor(Number(quantity) || 1)));
     const existing = state.cart.find(item => String(item.id) === String(product.id));
@@ -164,6 +164,7 @@
     });
     if (typeof saveStateToStorage === 'function') saveStateToStorage();
     updateCartIcon();
+    if (typeof updateCartTotal === 'function') updateCartTotal();
     return true;
   }
 
@@ -187,6 +188,28 @@
       if (toast.isConnected) toast.classList.add('is-leaving');
       dialog.royalToastTimer = setTimeout(() => { if (toast.isConnected) toast.hidden = true; }, 250);
     }, 2700);
+  }
+
+
+  function updateWholesalePreview(dialog, retail, quantity) {
+    const qty = Number(quantity);
+    const valid = Number.isInteger(qty) && qty >= 1 && qty <= 100;
+    const rate = valid ? getStoreWholesaleRate(qty) : 0;
+    dialog.querySelectorAll('.royal-wholesale-tier').forEach(card => {
+      const min = Number(card.dataset.min);
+      const max = Number(card.dataset.max);
+      card.classList.toggle('is-active',valid && qty >= min && qty <= max);
+    });
+    const summary = dialog.querySelector('#royalWholesaleSummary');
+    if (!summary) return;
+    if (!valid) {
+      summary.textContent = 'Informe uma quantidade de 1 a 100 unidades.';
+      return;
+    }
+    const unit = calculateStoreWholesaleUnitPrice(retail, qty);
+    const total = Math.round(unit * qty * 100) / 100;
+    summary.textContent = (rate ? 'Atacado · ' + rate + '% OFF' : 'Varejo') +
+      ' · ' + money(unit) + ' por unidade · Total: ' + money(total);
   }
 
   // White, product-first detail layout. Values come exclusively from the Store Royal catalog.
@@ -233,7 +256,27 @@
         (percentage > 0 ? '<span class="royal-p-discount-badge">-' + percentage + '%</span>' : '');
     }
 
+    const tierList = [
+      {min:10,max:39,rate:3},{min:40,max:69,rate:4},{min:70,max:100,rate:5}
+    ];
+    const wholesaleMarkup =
+      '<section class="royal-wholesale-box" aria-labelledby="royalWholesaleTitle">' +
+        '<h2 id="royalWholesaleTitle">Preço de varejo e atacado</h2>' +
+        '<p class="royal-wholesale-retail">Varejo (1 a 9 unidades): <strong>' + money(sale) + ' por unidade</strong></p>' +
+        '<div class="royal-wholesale-tiers">' +
+          tierList.map(tier =>
+            '<div class="royal-wholesale-tier" data-min="' + tier.min + '" data-max="' + tier.max + '">' +
+              '<span>' + tier.min + '–' + tier.max + ' un.</span>' +
+              '<strong>' + money(calculateStoreWholesaleUnitPrice(sale,tier.min)) + '</strong>' +
+              '<small>-' + tier.rate + '% por unidade</small>' +
+            '</div>'
+          ).join('') +
+        '</div>' +
+        '<p class="royal-wholesale-summary" id="royalWholesaleSummary" role="status" aria-live="polite"></p>' +
+        '<p class="royal-wholesale-retail">Desconto por quantidade do mesmo produto, sujeito ao estoque disponível.</p>' +
+      '</section>';
     price.insertAdjacentHTML('afterend',
+      wholesaleMarkup +
       '<div class="royal-p-service-list">' +
         '<div class="royal-p-service"><i data-lucide="credit-card" aria-hidden="true"></i><div><strong>Cartão de crédito</strong><p>Consulte parcelas, taxas e opções de pagamento no checkout.</p></div></div>' +
         '<div class="royal-p-service"><i data-lucide="truck" aria-hidden="true"></i><div><strong>Envio e frete</strong><p>Frete incluso no valor, conforme a política atual da Store Royal. Prazo informado no checkout.</p></div></div>' +
@@ -347,6 +390,7 @@
     if (isOpen()) removePage(false);
     activeId = String(product.id);
     const stock = Math.max(0, Number(product.stock) || 0);
+    const maxQty = Math.min(stock,100);
     const sale = calculateFinalPrice(product);
     const oldPrice = Number(product.price) || 0;
     const gallery = Array.isArray(product.images) && product.images.length ? product.images : [product.image].filter(Boolean);
@@ -374,7 +418,7 @@
             (isAffiliate ? '<button class="royal-p-primary" data-action="share">Compartilhar produto</button>' :
             '<label class="royal-p-qty-label" for="royalProductQty">Quantidade</label>' +
             '<div class="royal-p-qty"><button type="button" data-action="decrease" aria-label="Diminuir quantidade">−</button>' +
-            '<input id="royalProductQty" type="number" inputmode="numeric" min="1" max="' + stock + '" value="1" ' + (stock ? '' : 'disabled') + ' aria-label="Quantidade">' +
+            '<input id="royalProductQty" type="number" inputmode="numeric" min="1" max="' + maxQty + '" value="1" ' + (stock ? '' : 'disabled') + ' aria-label="Quantidade">' +
             '<button type="button" data-action="increase" aria-label="Aumentar quantidade">+</button></div>' +
             '<div class="royal-p-actions"><button type="button" data-action="cart" class="royal-p-primary" ' + (stock ? '' : 'disabled') + '>Adicionar ao carrinho</button>' +
             '<button type="button" data-action="buy" class="royal-p-secondary" ' + (stock ? '' : 'disabled') + '>Comprar agora</button></div>') +
@@ -388,6 +432,7 @@
             '<button type="submit" class="royal-p-primary">Enviar avaliação</button><p class="royal-p-muted" data-review-feedback aria-live="polite">Avaliações passam por moderação antes da publicação. É necessário estar conectado.</p></form>' +
           '</section></div></div>';
     enhanceProductPage(dialog, product, gallery, sale, oldPrice, stock);
+    updateWholesalePreview(dialog, sale, 1);
     document.body.appendChild(dialog);
     document.body.classList.add('account-modal-open');
     document.documentElement.classList.add('account-modal-open');
@@ -397,6 +442,11 @@
     if (window.laLenis?.start) window.laLenis.start();
     const scroller = dialog.querySelector('.royal-product-scroll');
     if (scroller) scroller.scrollTop = 0;
+    const qtyInput = dialog.querySelector('#royalProductQty');
+    if (qtyInput) {
+      qtyInput.addEventListener('input', () => updateWholesalePreview(dialog,sale,qtyInput.value));
+      qtyInput.addEventListener('change', () => updateWholesalePreview(dialog,sale,qtyInput.value));
+    }
     // Horizontal swipes change photos; vertical scrolling remains completely native.
     const photoSurface = dialog.querySelector('.royal-product-photo');
     if (photoSurface && gallery.length > 1) {
@@ -476,12 +526,13 @@
       const input = dialog.querySelector('#royalProductQty');
       if (!input) return;
       if (action === 'increase' || action === 'decrease') {
-        input.value = String(Math.max(1, Math.min(stock, Number(input.value || 1) + (action === 'increase' ? 1 : -1))));
+        input.value = String(Math.max(1, Math.min(maxQty, Number(input.value || 1) + (action === 'increase' ? 1 : -1))));
+        updateWholesalePreview(dialog, sale, input.value);
         return;
       }
       if (action === 'cart' || action === 'buy') {
         const qty = Number(input.value);
-        if (!Number.isInteger(qty) || qty < 1 || qty > stock) {
+        if (!Number.isInteger(qty) || qty < 1 || qty > maxQty) {
           alert('Informe uma quantidade válida dentro do estoque.');
           input.focus();
           return;

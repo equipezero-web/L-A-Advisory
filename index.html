@@ -9836,15 +9836,26 @@ function openNavigationModal() {
                 div.className = 'flex justify-between text-sm';
                 div.innerHTML = `
                     <span>${escapeHtml(item.quantity)}x ${escapeHtml(item.name)}</span>
-                    <span class="font-bold">${formatCurrency(item.price * item.quantity)}</span>
+                    <span class="font-bold">${formatCurrency(getStoreCartLine(item).total)}${getStoreCartLine(item).rate ? ' · Atacado -' + getStoreCartLine(item).rate + '%' : ''}</span>
                 `;
                 container.appendChild(div);
             });
 
             if (countEl) countEl.textContent = `${state.cart.length} item(s)`;
 
-            const total = state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            if (totalEl) totalEl.textContent = formatCurrency(total);
+            const totals = getStoreCartTotals();
+            if (totalEl) totalEl.textContent = formatCurrency(totals.total);
+            let saving = document.getElementById('royalCheckoutWholesaleSaving');
+            if (totalEl && !saving) {
+                saving = document.createElement('p');
+                saving.id = 'royalCheckoutWholesaleSaving';
+                saving.className = 'mt-2 text-xs font-bold text-emerald-800';
+                totalEl.closest('div')?.insertAdjacentElement('afterend', saving);
+            }
+            if (saving) {
+                saving.textContent = totals.saving ? 'Economia no atacado: ' + formatCurrency(totals.saving) : '';
+                saving.hidden = !totals.saving;
+            }
         }
 
         async function validateCheckoutAddressWithViaCep(zipCode, street, neighborhood, city, state) {
@@ -10019,11 +10030,7 @@ function openNavigationModal() {
                     throw new Error('Sessão expirada. Entre novamente.');
                 }
 
-                const total = state.cart.reduce(
-                    (sum, item) =>
-                        sum + (Number(item.price) * Number(item.quantity)),
-                    0
-                );
+                const total = getStoreCartTotals().total;
 
                 if (!Number.isFinite(total) || total <= 0) {
                     throw new Error('O valor do pedido é inválido.');
@@ -10140,10 +10147,7 @@ function openNavigationModal() {
 
             container.innerHTML = '';
 
-            const total = state.cart.reduce(
-                (sum, item) => sum + (Number(item.price) * Number(item.quantity)),
-                0
-            );
+            const total = getStoreCartTotals().total;
 
             if (!total || total <= 0) {
                 container.innerHTML = '<p class="text-sm text-red-700">O valor do pedido é inválido.</p>';
@@ -10435,7 +10439,7 @@ function openNavigationModal() {
 
             const existingItem = state.cart.find(item => item.id === productId);
             if (existingItem) {
-                if (existingItem.quantity >= product.stock) {
+                if (existingItem.quantity >= Math.min(Number(product.stock), 100)) {
                     alert('Quantidade máxima em estoque atingida.');
                     return;
                 }
@@ -10453,6 +10457,8 @@ function openNavigationModal() {
 
             saveStateToStorage();
             updateCartIcon();
+            renderCartItems();
+            updateCartTotal();
             alert('Produto adicionado ao carrinho!');
         }
 
@@ -10461,6 +10467,7 @@ function openNavigationModal() {
             saveStateToStorage();
             updateCartIcon();
             renderCartItems();
+            updateCartTotal();
         }
 
         function updateCartItemQuantity(productId, newQuantity) {
@@ -10474,8 +10481,8 @@ function openNavigationModal() {
                 return;
             }
 
-            if (newQuantity > product.stock) {
-                alert('Quantidade máxima em estoque: ' + product.stock);
+            if (!Number.isInteger(newQuantity) || newQuantity > Math.min(Number(product.stock), 100)) {
+                alert('Quantidade máxima por produto neste pedido: ' + Math.min(Number(product.stock), 100));
                 return;
             }
 
@@ -10501,7 +10508,7 @@ function openNavigationModal() {
                     <img src="${escapeAttribute(item.image)}" alt="${escapeAttribute(item.name)}" class="w-16 h-16 object-cover rounded-lg">
                     <div class="flex-1 min-w-0">
                         <p class="font-bold text-sm text-slate-900 truncate">${escapeHtml(item.name)}</p>
-                        <p class="text-xs text-slate-500">${formatCurrency(item.price)} un.</p>
+                        <p class="text-xs text-slate-500">${formatCurrency(getStoreCartLine(item).unit)} un. · ${getStoreCartLine(item).rate ? 'Atacado -' + getStoreCartLine(item).rate + '%' : 'Varejo'}</p>
                     </div>
                     <div class="flex items-center gap-2">
                         <button type="button" onclick="updateCartItemQuantity('${item.id}', ${item.quantity - 1})" class="w-7 h-7 rounded-lg bg-slate-200 hover:bg-slate-300 flex items-center justify-center"><i data-lucide="minus" class="w-3 h-3"></i></button>
@@ -10518,10 +10525,17 @@ function openNavigationModal() {
         function updateCartTotal() {
             const totalEl = document.getElementById('cartTotal');
             if (!totalEl) return;
-            const total = state.cart.reduce((sum, item) => {
-                return sum + (Number(item.price) || 0) * (Number(item.quantity) || 0);
-            }, 0);
-            totalEl.textContent = formatCurrency(total);
+            const totals = getStoreCartTotals();
+            totalEl.textContent = formatCurrency(totals.total);
+            let saving = document.getElementById('royalCartWholesaleSaving');
+            if (!saving) {
+                saving = document.createElement('p');
+                saving.id = 'royalCartWholesaleSaving';
+                saving.className = 'mt-2 text-xs font-bold text-emerald-800';
+                totalEl.closest('div')?.insertAdjacentElement('afterend', saving);
+            }
+            saving.textContent = totals.saving ? 'Economia no atacado: ' + formatCurrency(totals.saving) : '';
+            saving.hidden = !totals.saving;
         }
 
         function updateCartIcon() {
@@ -10856,6 +10870,8 @@ function openNavigationModal() {
             renderCustomerOrders();
 
             modal.classList.remove('hidden');
+            const ordersScroller = modal.querySelector('.account-modal-scroll');
+            if (ordersScroller) ordersScroller.scrollTop = 0;
             lockAccountModalScroll();
             lucide.createIcons();
         }
@@ -13252,14 +13268,47 @@ async function loadRoyalAiPanel() {
         // =====================================================
         // UTILITÁRIOS
         // =====================================================
-        function calculateFinalPrice(product) {
-    const salePrice = Number(product?.salePrice);
+        function roundStoreMoney(value) {
+    return Math.round((Number(value) + Number.EPSILON) * 100) / 100;
+}
+function calculateFinalPrice(product) {
     const price = Number(product?.price) || 0;
-    const baseSalePrice = Number.isFinite(salePrice) && salePrice > 0
-        ? salePrice
-        : price;
+    const salePrice = Number(product?.salePrice);
     const discount = Math.min(Math.max(Number(product?.discount) || 0, 0), 100);
-    return Math.max(0, baseSalePrice * (1 - discount / 100));
+    // Mesma regra da Edge Function: sale_price válido tem prioridade sobre discount.
+    return roundStoreMoney(Math.max(0, Number.isFinite(salePrice) && salePrice > 0
+        ? salePrice
+        : price * (1 - discount / 100)));
+}
+// Faixas aplicadas à quantidade de unidades do MESMO produto.
+function getStoreWholesaleRate(quantity) {
+    const qty = Number(quantity);
+    if (!Number.isInteger(qty) || qty < 10 || qty > 100) return 0;
+    if (qty >= 70) return 5;
+    if (qty >= 40) return 4;
+    return 3;
+}
+function calculateStoreWholesaleUnitPrice(retailPrice, quantity) {
+    return roundStoreMoney(Math.max(0, Number(retailPrice) || 0) *
+        (100 - getStoreWholesaleRate(quantity)) / 100);
+}
+function getStoreCartLine(item) {
+    const qty = Math.max(0, Number(item?.quantity) || 0);
+    const product = state.products.find(p => String(p.id) === String(item?.id));
+    const retail = product ? calculateFinalPrice(product) : roundStoreMoney(item?.price);
+    const rate = getStoreWholesaleRate(qty);
+    const unit = calculateStoreWholesaleUnitPrice(retail, qty);
+    const total = roundStoreMoney(unit * qty);
+    const originalTotal = roundStoreMoney(retail * qty);
+    return {qty, retail, rate, unit, total, saving:roundStoreMoney(originalTotal - total)};
+}
+function getStoreCartTotals() {
+    return state.cart.reduce((acc,item) => {
+        const line = getStoreCartLine(item);
+        acc.total = roundStoreMoney(acc.total + line.total);
+        acc.saving = roundStoreMoney(acc.saving + line.saving);
+        return acc;
+    }, {total:0, saving:0});
 }
 
 function calculateProductAffiliateCommission(product, quantity = 1) {
@@ -14998,10 +15047,10 @@ body.guest-mode #afiliados { display: none !important; }
 <script src="./js/royal-ai-image-upload.js"></script>
 
 <script src="./js/royal-product-image-upload.js"></script>
-<script src="./js/royal-product-page.js?v=20261119-4"></script>
+<script src="./js/royal-product-page.js?v=20261119-5"></script>
 <script src="./js/royal-analytics.js?v=1" defer></script>
 
-<link rel="stylesheet" href="./assets/royal-storefront-upgrade.css?v=20261119-11">
+<link rel="stylesheet" href="./assets/royal-storefront-upgrade.css?v=20261119-12">
 <script src="./js/royal-storefront-ui.js?v=20261119-4"></script>
 <script src="./js/royal-storefront-state.js?v=20261119-3"></script>
 
