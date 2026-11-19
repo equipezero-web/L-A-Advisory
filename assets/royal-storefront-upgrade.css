@@ -612,3 +612,80 @@ html body #productDetailsModal.royal-product-page .royal-p-report:visited {
  color:#284d40!important;
  text-decoration-color:#a48a5c!important;
 }
+
+
+/* Store Royal — all product pictures occupy exactly the dimensions of their cards.
+   Keep fixed 4:5 proportions across product cards and product-detail gallery. */
+#loja #catalogContainer.royal-catalog-grid > .royal-image-only-card {
+ aspect-ratio:4/5!important;
+ overflow:hidden!important;
+ background:#fff!important;
+}
+#loja #catalogContainer.royal-catalog-grid > .royal-image-only-card > img.royal-full-card-image,
+#loja #catalogContainer.royal-catalog-grid > .royal-image-only-card .royal-full-card-image {
+ position:absolute!important;
+ inset:0!important;
+ display:block!important;
+ width:100%!important;
+ height:100%!important;
+ max-width:none!important;
+ max-height:none!important;
+ min-height:0!important;
+ padding:0!important;
+ margin:0!important;
+ box-sizing:border-box!important;
+ object-fit:cover!important;
+ object-position:center!important;
+ border-radius:inherit!important;
+}
+html body #productDetailsModal .royal-product-photo {
+ display:block!important;
+ position:relative!important;
+ width:100%!important;
+ height:auto!important;
+ max-height:none!important;
+ min-height:0!important;
+ aspect-ratio:4/5!important;
+ overflow:hidden!important;
+ background:#fff!important;
+}
+html body #productDetailsModal .royal-product-photo > img#royalSelectedProductImage {
+ position:absolute!important;
+ inset:0!important;
+ display:block!important;
+ width:100%!important;
+ height:100%!important;
+ min-height:100%!important;
+ max-height:none!important;
+ padding:0!important;
+ margin:0!important;
+ box-sizing:border-box!important;
+ object-fit:cover!important;
+ object-position:center!important;
+ border-radius:inherit!important;
+}
+/* Thumbnails keep uniform proportions without stretching or whitespace. */
+#productDetailsModal .royal-p-thumbnails button {
+ flex:0 0 64px!important;
+ width:64px!important;
+ height:80px!important;
+ padding:0!important;
+ overflow:hidden!important;
+}
+#productDetailsModal .royal-p-thumbnails button img {
+ width:100%!important;
+ height:100%!important;
+ max-width:none!important;
+ max-height:none!important;
+ padding:0!important;
+ margin:0!important;
+ object-fit:cover!important;
+ object-position:center!important;
+}
+@media(max-width:520px) {
+ #productDetailsModal .royal-p-thumbnails button {
+   flex-basis:56px!important;
+   width:56px!important;
+   height:70px!important;
+ }
+}
