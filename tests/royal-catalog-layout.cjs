@@ -49,4 +49,20 @@ assert.equal(paginateStoreProducts(products,200).page,2, 'Out-of-range page clam
 assert.equal(paginateStoreProducts(products,-5).page,1);
 assert.match(renderCatalogPagination(paginateStoreProducts(products,2)), /aria-current="page">2<\/button>/);
 assert.match(html, /filterSignature !== lastCatalogFilterSignature/, 'Search and category changes must reset to page 1');
+
+// Header controls: only the cart survives beside the account actions.
+const header = html.slice(html.indexOf('<header class="royal-glass-header'), html.indexOf('<!-- Menu hamburger exclusivo do mobile -->'));
+assert.ok(header.includes('ROYAL ADVISORY') && header.includes('Excellence in Every Detail'), 'Brand and slogan remain in the header');
+assert.equal(header.includes('royal-desktop-nav'), false, 'Remove header Loja/Afiliados navigation');
+assert.equal(header.includes('openNavigationModal()'), false, 'Remove compass beside cart');
+assert.ok(header.includes('openCartModal()'), 'Do not remove cart itself');
+assert.match(css, /royal-brand-heading p \{display:block!important/, 'Show compact slogan on mobile');
+assert.match(css, /body #userMenuModal:not\(\.hidden\) \{[^\n]*z-index:30030!important/, 'Account dropdown above header');
+assert.match(css, /body #customerProfileModal:not\(\.hidden\) \{z-index:30040!important/, 'Customer profile above all header controls');
+const openProfile = html.slice(html.indexOf('async function openCustomerProfile()'), html.indexOf('function closeCustomerProfile()', html.indexOf('async function openCustomerProfile()')));
+assert.ok(openProfile.indexOf("modal.classList.remove('hidden')") > -1, 'Profile must open');
+assert.ok(openProfile.indexOf("modal.classList.remove('hidden')") < openProfile.indexOf('refreshCustomerAffiliateStatus()'), 'Show profile before async affiliate status');
+assert.ok(openProfile.includes('document.body.appendChild(modal)'), 'Profile must be mounted outside stacking-context ancestors');
+assert.match(html, /if \(modal.parentElement !== document.body\) document.body.appendChild\(modal\);\s*updateUserMenu\(\)/, 'Dropdown mounts at document root');
+
 console.log('Store Royal: grid, unique products, 60-item pagination, category picker and profile overlay passed');
