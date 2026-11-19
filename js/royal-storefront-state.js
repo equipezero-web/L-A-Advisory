@@ -317,7 +317,7 @@
       const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(node){
         const parent=node.parentElement;
         if(!parent||parent.closest('script,style,textarea,option,#adminDashboardModal,#catalogContainer,#customerOrdersList,#customerProfileModal,#orderDetailsContent,#royalSearchSuggestions'))return NodeFilter.FILTER_REJECT;
-        const normalized=node.textContent.trim().replace(/\\s+/g,' ');
+        const normalized=node.textContent.trim().replace(/\s+/g,' ');
         return (COMMON[normalized] || Object.values(COMMON).some(v=>v.includes(normalized))) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
       }});
       while(walker.nextNode())result.push(walker.currentNode);
@@ -336,7 +336,7 @@
     });
     for(const node of translationNodes()){
       if(!originals.has(node))originals.set(node,node.textContent);
-      const raw=originals.get(node),value=raw.trim(),translation=idx===null?value:COMMON[value.replace(/\\s+/g,' ')]?.[idx];
+      const raw=originals.get(node),value=raw.trim(),translation=idx===null?value:COMMON[value.replace(/\s+/g,' ')]?.[idx];
       if(translation)node.textContent=raw.replace(value,translation);
     }
     const select=document.getElementById('royalLanguage');if(select)select.value=selected;
