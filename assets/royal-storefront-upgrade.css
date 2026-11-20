@@ -1137,3 +1137,259 @@ html body #productDetailsModal.royal-product-page .royal-wholesale-summary{
  html body #productDetailsModal.royal-product-page .royal-wholesale-tier strong{font-size:13px;}
  html body #productDetailsModal.royal-product-page .royal-wholesale-tier small{font-size:10px;}
 }
+
+
+/* STORE ROYAL — RESPONSIVE MOBILE HEADER (brand + search button + cart).
+   Search opens the existing product-search input in a floating dropdown.
+   Desktop remains unchanged; no duplicated search control or modal. */
+header.royal-glass-header .royal-mobile-brand,
+header.royal-glass-header .royal-mobile-search-toggle {
+ display:none!important;
+}
+@media(min-width:768px) and (max-width:1023px) {
+ header.royal-glass-header .royal-glass-inner{
+   padding:8px 11px!important;
+   gap:8px!important;
+ }
+ header.royal-glass-header .royal-glass-inner>a:first-child>div{
+   width:44px!important;
+   height:44px!important;
+   font-size:13px!important;
+ }
+ header.royal-glass-header .royal-brand-heading{
+   flex:0 1 145px!important;
+   max-width:145px!important;
+ }
+ header.royal-glass-header .royal-brand-heading h1{
+   font-size:12px!important;
+   letter-spacing:.025em!important;
+ }
+ header.royal-glass-header .royal-brand-heading p{
+   font-size:7px!important;
+   letter-spacing:0!important;
+ }
+ header.royal-glass-header .royal-header-search{
+   flex:1 1 190px!important;
+   min-width:125px!important;
+   max-width:none!important;
+ }
+ header.royal-glass-header .royal-header-search input{
+   font-size:12px!important;
+ }
+}
+@media(max-width:767px) {
+ :root{--royal-header-height:60px}
+ /* The upper strip was intended for desktop and crowds small screens. */
+ .royal-web-strip{display:none!important}
+ header.royal-glass-header {
+   width:100%!important;
+   max-width:100%!important;
+   height:var(--royal-header-height)!important;
+   padding:4px 7px!important;
+   overflow:visible!important;
+   isolation:isolate;
+ }
+ header.royal-glass-header .royal-glass-inner {
+   position:relative!important;
+   z-index:1!important;
+   box-sizing:border-box!important;
+   width:100%!important;
+   max-width:100%!important;
+   height:100%!important;
+   min-width:0!important;
+   min-height:0!important;
+   display:flex!important;
+   flex-wrap:nowrap!important;
+   align-items:center!important;
+   justify-content:space-between!important;
+   gap:clamp(5px,1.7vw,10px)!important;
+   padding:5px clamp(7px,2.1vw,12px)!important;
+   overflow:visible!important;
+   border-radius:14px!important;
+   background:linear-gradient(110deg,rgba(0,45,45,.94),rgba(26,75,65,.94),rgba(0,47,46,.96))!important;
+   border:1px solid rgba(229,209,164,.52)!important;
+   box-shadow:0 7px 21px rgba(0,27,26,.18)!important;
+ }
+ /* Prevent the legacy centered brand, logo and desktop controls from stealing width. */
+ header.royal-glass-header .royal-glass-inner>a:first-child:not(.royal-mobile-brand),
+ header.royal-glass-header .royal-brand-heading,
+ header.royal-glass-header .royal-glass-inner>.flex.items-center.justify-end,
+ header.royal-glass-header #mobileMenuButton {
+   display:none!important;
+ }
+ header.royal-glass-header .royal-mobile-brand {
+   order:1!important;
+   display:flex!important;
+   flex:1 1 auto!important;
+   align-items:center!important;
+   justify-content:flex-start!important;
+   min-width:0!important;
+   max-width:none!important;
+   padding:5px 2px!important;
+   margin:0!important;
+   text-decoration:none!important;
+   color:#fffaf0!important;
+ }
+ header.royal-glass-header .royal-mobile-brand-name {
+   display:block!important;
+   min-width:0!important;
+   max-width:100%!important;
+   font-family:Georgia,"Times New Roman",serif!important;
+   font-size:clamp(11px,3.6vw,16px)!important;
+   font-weight:800!important;
+   line-height:1.15!important;
+   letter-spacing:.015em!important;
+   word-spacing:0!important;
+   white-space:normal!important;
+   overflow:visible!important;
+   overflow-wrap:normal!important;
+   text-overflow:clip!important;
+   color:#fffaf0!important;
+   -webkit-text-fill-color:#fffaf0!important;
+   text-shadow:0 1px 4px rgba(0,0,0,.16)!important;
+ }
+ header.royal-glass-header .royal-mobile-search-toggle {
+   order:2!important;
+   display:grid!important;
+   place-items:center!important;
+   flex:0 0 42px!important;
+   width:42px!important;
+   height:42px!important;
+   min-width:42px!important;
+   min-height:42px!important;
+   padding:0!important;
+   margin:0!important;
+   border:1px solid rgba(227,201,153,.65)!important;
+   border-radius:11px!important;
+   background:rgba(9,58,51,.96)!important;
+   color:#f8e8cd!important;
+   box-shadow:0 3px 10px rgba(0,30,27,.17)!important;
+   cursor:pointer!important;
+   touch-action:manipulation;
+ }
+ header.royal-glass-header .royal-mobile-search-toggle svg,
+ header.royal-glass-header .royal-mobile-search-toggle i {
+   display:block!important;
+   width:20px!important;
+   height:20px!important;
+   stroke:currentColor!important;
+ }
+ header.royal-glass-header .royal-mobile-search-toggle[aria-expanded="true"] {
+   background:#e9d7b2!important;
+   color:#123b31!important;
+ }
+ header.royal-glass-header #mobileUtilityActions{
+   order:3!important;
+   position:static!important;
+   display:flex!important;
+   flex:0 0 42px!important;
+   width:42px!important;
+   max-width:42px!important;
+   min-width:42px!important;
+   height:42px!important;
+   padding:0!important;
+   margin:0!important;
+   gap:0!important;
+   align-items:center!important;
+   justify-content:center!important;
+   z-index:auto!important;
+ }
+ header.royal-glass-header #mobileUtilityActions>button:first-child{
+   display:grid!important;
+   place-items:center!important;
+   flex:none!important;
+   width:42px!important;
+   height:42px!important;
+   min-width:42px!important;
+   min-height:42px!important;
+   padding:0!important;
+   border-radius:11px!important;
+   border:1px solid rgba(227,201,153,.5)!important;
+   background:rgba(0,45,44,.95)!important;
+   color:#f8e8cd!important;
+   touch-action:manipulation;
+ }
+ header.royal-glass-header #mobileUtilityActions>button:first-child svg{
+   width:19px!important;
+   height:19px!important;
+ }
+ /* The search input is opened below the header, rather than compressing its name. */
+ header.royal-glass-header .royal-header-search {
+   display:none!important;
+   position:absolute!important;
+   top:calc(100% + 9px)!important;
+   left:0!important;
+   right:0!important;
+   z-index:1100!important;
+   order:4!important;
+   flex:none!important;
+   width:100%!important;
+   min-width:0!important;
+   max-width:100%!important;
+   height:52px!important;
+   margin:0!important;
+   padding:6px 6px 6px 13px!important;
+   border:1px solid #cbb489!important;
+   border-radius:12px!important;
+   background:#fffdf8!important;
+   color:#123b31!important;
+   box-shadow:0 14px 36px rgba(0,34,29,.25)!important;
+ }
+ header.royal-glass-header .royal-glass-inner.royal-mobile-search-open>.royal-header-search{
+   display:flex!important;
+ }
+ header.royal-glass-header .royal-header-search>svg{
+   flex:0 0 18px!important;
+   width:18px!important;
+   height:18px!important;
+ }
+ header.royal-glass-header .royal-header-search input{
+   display:block!important;
+   min-width:0!important;
+   flex:1 1 auto!important;
+   width:100%!important;
+   height:40px!important;
+   font-size:16px!important; /* prevents iOS focus zoom */
+   color:#123b31!important;
+   -webkit-text-fill-color:#123b31!important;
+ }
+ header.royal-glass-header .royal-header-search-submit{
+   width:39px!important;
+   height:39px!important;
+   min-width:39px!important;
+   flex:0 0 39px!important;
+   background:#1c5547!important;
+   color:#fffaf2!important;
+   border-radius:10px!important;
+ }
+ header.royal-glass-header .royal-search-suggestions{
+   box-sizing:border-box!important;
+   max-width:100%!important;
+   max-height:min(53dvh,375px)!important;
+   overflow:auto!important;
+   overscroll-behavior:contain!important;
+   background:#fffdf8!important;
+   border-color:#d7c49f!important;
+ }
+ header.royal-glass-header :is(.royal-mobile-search-toggle,.royal-mobile-brand):focus-visible {
+   outline:2px solid #ffe3a5!important;
+   outline-offset:2px!important;
+ }
+}
+@media(max-width:360px){
+ header.royal-glass-header{padding-inline:5px!important}
+ header.royal-glass-header .royal-glass-inner{padding-inline:6px!important;gap:5px!important}
+ header.royal-glass-header .royal-mobile-brand-name{
+   font-size:clamp(10px,3.35vw,12px)!important;
+   letter-spacing:0!important;
+ }
+ header.royal-glass-header .royal-mobile-search-toggle,
+ header.royal-glass-header #mobileUtilityActions,
+ header.royal-glass-header #mobileUtilityActions>button:first-child{
+   flex-basis:40px!important;
+   width:40px!important;
+   min-width:40px!important;
+   height:40px!important;
+   min-height:40px!important;
+ }
+}
