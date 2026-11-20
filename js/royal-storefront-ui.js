@@ -31,7 +31,7 @@
   function addHeaderSearch(){
     const inner=document.querySelector('.royal-glass-inner');
     if(!inner || byId('royalHeaderSearch'))return;
-    const box=element('div','royal-header-search'); box.setAttribute('role','search');
+    const box=element('div','royal-header-search'); box.id='royalHeaderSearchPanel'; box.setAttribute('role','search');
     box.innerHTML='<label for="royalHeaderSearch" class="sr-only">Buscar produtos</label><i data-lucide="search"></i>' +
       '<input id="royalHeaderSearch" type="search" placeholder="Buscar produtos na loja" autocomplete="off" data-i18n-placeholder="searchPlaceholder" aria-controls="royalSearchSuggestions" aria-autocomplete="list" oninput="royalHeaderSearchInput(this.value)" onkeydown="royalHeaderSearchKeydown(event)">' +
       '<button type="button" class="royal-header-search-submit" onclick="royalSearchGo()" aria-label="Buscar"><i data-lucide="arrow-right"></i></button>' +
@@ -41,6 +41,67 @@
     document.addEventListener('pointerdown',(e)=>{
       if(!box.contains(e.target))byId('royalSearchSuggestions').hidden=true;
     },{passive:true});
+  }
+
+  // Compact mobile header: full brand + search toggle + cart.
+  // Search keeps its existing live catalog suggestions, but opens as a floating panel.
+  function addMobileHeaderControls(){
+    const inner=document.querySelector('header.royal-glass-header .royal-glass-inner');
+    const search=byId('royalHeaderSearchPanel');
+    if(!inner || !search || byId('royalMobileSearchToggle'))return;
+    const brand=element('a','royal-mobile-brand');
+    brand.href='#inicio';
+    brand.setAttribute('aria-label','L&A Royal Advisory — voltar ao início');
+    brand.innerHTML='<span class="royal-mobile-brand-name">L&amp;A ROYAL ADVISORY</span>';
+    const toggle=element('button','royal-mobile-search-toggle');
+    toggle.id='royalMobileSearchToggle';
+    toggle.type='button';
+    toggle.setAttribute('aria-label','Pesquisar produtos');
+    toggle.setAttribute('title','Pesquisar produtos');
+    toggle.setAttribute('aria-expanded','false');
+    toggle.setAttribute('aria-controls','royalHeaderSearchPanel');
+    toggle.innerHTML='<i data-lucide="search" aria-hidden="true"></i>';
+    inner.insertBefore(brand,search);
+    inner.insertBefore(toggle,search);
+    const close=(returnFocus=false)=>{
+      inner.classList.remove('royal-mobile-search-open');
+      toggle.setAttribute('aria-expanded','false');
+      toggle.setAttribute('aria-label','Pesquisar produtos');
+      toggle.setAttribute('title','Pesquisar produtos');
+      toggle.innerHTML='<i data-lucide="search" aria-hidden="true"></i>';
+      const suggestions=byId('royalSearchSuggestions');
+      if(suggestions)suggestions.hidden=true;
+      if(returnFocus)toggle.focus();
+      repaintIcons();
+    };
+    const open=()=>{
+      inner.classList.add('royal-mobile-search-open');
+      toggle.setAttribute('aria-expanded','true');
+      toggle.setAttribute('aria-label','Fechar pesquisa');
+      toggle.setAttribute('title','Fechar pesquisa');
+      toggle.innerHTML='<i data-lucide="x" aria-hidden="true"></i>';
+      repaintIcons();
+      byId('royalHeaderSearch')?.focus();
+    };
+    toggle.addEventListener('click',()=>{
+      if(inner.classList.contains('royal-mobile-search-open'))close();
+      else open();
+    });
+    document.addEventListener('pointerdown',event=>{
+      if(!inner.classList.contains('royal-mobile-search-open'))return;
+      if(toggle.contains(event.target) || search.contains(event.target))return;
+      close();
+    },{passive:true});
+    document.addEventListener('keydown',event=>{
+      if(event.key==='Escape' && inner.classList.contains('royal-mobile-search-open')){
+        event.preventDefault();
+        close(true);
+      }
+    });
+    window.addEventListener('resize',()=>{
+      if(window.innerWidth>=768 && inner.classList.contains('royal-mobile-search-open'))close();
+    },{passive:true});
+    window.royalCloseMobileSearch=close;
   }
   function allSearchMatches(value){
     const query=String(value||'').trim().toLocaleLowerCase('pt-BR');
@@ -55,7 +116,7 @@
       const option=element('button','royal-search-result');option.type='button';option.setAttribute('role','option');
       const img=element('img');img.src=safeUrl(product.image)||'./icons/icons-192.png';img.alt='';img.loading='lazy';
       option.append(img,element('span','',product.name||'Produto'));
-      option.addEventListener('click',()=>{results.hidden=true;const id=String(product.id);if(window.openRoyalProductPage)window.openRoyalProductPage(id);else if(typeof showProductDetails==='function')showProductDetails(id);});
+      option.addEventListener('click',()=>{results.hidden=true;if(window.royalCloseMobileSearch)window.royalCloseMobileSearch();const id=String(product.id);if(window.openRoyalProductPage)window.openRoyalProductPage(id);else if(typeof showProductDetails==='function')showProductDetails(id);});
       results.appendChild(option);
     }
     if(value.trim().length>=2){
@@ -78,6 +139,7 @@
     }
     if(field)field.value=query;
     byId('royalSearchSuggestions').hidden=true;
+    if(window.royalCloseMobileSearch)window.royalCloseMobileSearch();
     if(typeof renderCatalog==='function')renderCatalog();
     byId('loja')?.scrollIntoView({behavior:'smooth',block:'start'});
   };
@@ -284,7 +346,7 @@
     if(guest)guest.hidden=logged;if(account)account.hidden=!logged;
   };
   function initialize(){
-    addSecondaryBar();addHeaderSearch();moveFilters();preparePanels();prepareAffiliateEntryPoints();prepareHero();buildAdminHero();buildPwaDock();removeInstallFromProfile();
+    addSecondaryBar();addHeaderSearch();addMobileHeaderControls();moveFilters();preparePanels();prepareAffiliateEntryPoints();prepareHero();buildAdminHero();buildPwaDock();removeInstallFromProfile();
     window.royalSyncTopAuth();
     void loadBanners();repaintIcons();
     document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.royal-content-panel.royal-panel-open').forEach(p=>window.royalClosePanel(p.id));});
