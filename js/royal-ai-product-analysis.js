@@ -149,7 +149,7 @@
     parent.appendChild(group);
   }
 
-  function showReport(p, a) {
+  function showReport(p, a, finance, privateRow) {
     const output = byId('royalAiProductAnalysisOutput');
     if (!output) return;
     output.replaceChildren();
@@ -224,8 +224,94 @@
       ['Receita após comissão, antes de outros custos',
         a.valid ? money(a.afterCommission) : 'Indisponível sem quantidade válida']
     ]);
+    // A ficha privada vem da tabela com RLS administrativo, não do catálogo público.
+    section(wrap, '5. Fornecedor privado · exclusivo da administração', [
+      ['Fornecedor / local de compra', finance.supplier || 'Não informado'],
+      ['Link de compra', finance.supplierUrl ? 'Disponível apenas no painel administrativo' : 'Não informado']
+    ]);
+    if (finance.supplierUrl) {
+      const supplier = element('p', 'text-sm mt-2');
+      let safeUrl = null;
+      try {
+        const u = new URL(finance.supplierUrl);
+        if (['https:', 'http:'].includes(u.protocol)) safeUrl = u.href;
+      } catch (_) {}
+      if (safeUrl) {
+        const link = element('a', 'text-emerald-800 underline font-semibold', 'Abrir fornecedor (link privado)');
+        link.href = safeUrl;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.referrerPolicy = 'no-referrer';
+        supplier.appendChild(link);
+        wrap.appendChild(supplier);
+      }
+    }
+
+    const privateMoney = field => privateRow && privateRow[field] !== null &&
+      privateRow[field] !== undefined ? money(privateRow[field]) : 'Pendente (não informado)';
+    section(wrap, '6. Composição do custo por unidade · modelo da planilha', [
+      ['Valor do fornecedor / aquisição', privateMoney('acquisition_cost')],
+      ['Frete de aquisição / unidade', privateMoney('supplier_shipping')],
+      ['ICMS / unidade', privateMoney('icms_cost')],
+      ['Serviços ou despesas / unidade', privateMoney('service_cost')],
+      ['Desconto do fornecedor (subtrai)', privateMoney('supplier_discount')],
+      ['Taxa de pagamento / unidade', privateMoney('payment_fee')],
+      ['Custo total por unidade', finance.costsReady ? money(finance.unitCost) : 'Pendente — informe todos os componentes, usando 0,00 quando não se aplicar']
+    ]);
+
+    section(wrap, '7. Resultado financeiro da quantidade selecionada', [
+      ['Receita de venda com desconto aplicável', finance.valid ? money(finance.revenue) : 'Quantidade indisponível'],
+      ['Custo total dos produtos', finance.costTotal === null ? 'Pendente' : money(finance.costTotal)],
+      ['Comissão de afiliado (se houver indicação)', finance.valid ? money(finance.commission) : 'Quantidade indisponível'],
+      ['Lucro estimado — venda direta', finance.directProfit === null ? 'Pendente' : money(finance.directProfit)],
+      ['Margem direta', finance.directMargin === null ? 'Pendente' : percent(finance.directMargin)],
+      ['Lucro estimado — venda por afiliado', finance.affiliateProfit === null ? 'Pendente' : money(finance.affiliateProfit)],
+      ['Margem com afiliado', finance.affiliateMargin === null ? 'Pendente' : percent(finance.affiliateMargin)]
+    ]);
+
+    if (finance.sheetThreePercent) {
+      section(wrap, '8. Comparativo da planilha · 3% (não é desconto extra automático)', [
+        ['3% sobre o valor total da venda', money(finance.sheetThreePercent.revenue)],
+        ['3% sobre a comissão calculada', money(finance.sheetThreePercent.commission)],
+        ['Soma dos dois cálculos', money(finance.sheetThreePercent.combined)]
+      ]);
+    }
+
+    const tierAnalysis = element('section', 'rounded-xl border border-slate-200 bg-white p-4');
+    tierAnalysis.appendChild(element('h6', 'mb-3 text-sm font-bold text-slate-900',
+      '9. Simulações por quantidade · varejo e atacado'));
+    const tierTableWrap = element('div', 'w-full overflow-x-auto');
+    const table = element('table', 'min-w-[540px] w-full text-xs');
+    const thead = element('thead', 'bg-slate-100 text-left');
+    const heading = element('tr', '');
+    for (const headerText of ['Qtd.','Desconto','Receita','Custo','Lucro direto','Lucro afiliado']) {
+      heading.appendChild(element('th', 'p-2', headerText));
+    }
+    thead.appendChild(heading); table.appendChild(thead);
+    const body = element('tbody', '');
+    for (const tier of a.tiers) {
+      const c = window.royalFinanceCompute(p, privateRow, tier.min);
+      const cells = [
+        tier.min + ' un.', c.wholesaleRate + '%',
+        c.valid ? money(c.revenue) : 'Indisponível',
+        c.costTotal === null ? 'Pendente' : money(c.costTotal),
+        c.directProfit === null ? 'Pendente' : money(c.directProfit),
+        c.affiliateProfit === null ? 'Pendente' : money(c.affiliateProfit)
+      ];
+      const tr = element('tr', 'border-b border-slate-100');
+      for (const value of cells) tr.appendChild(element('td', 'p-2 text-slate-800', value));
+      body.appendChild(tr);
+    }
+    table.appendChild(body); tierTableWrap.appendChild(table); tierAnalysis.appendChild(tierTableWrap);
+    tierAnalysis.appendChild(element('p', 'mt-2 text-xs text-slate-500',
+      'Cada linha usa a quantidade mínima da faixa, limitada ao estoque. Os custos cadastrados são tratados como valores por unidade.'));
+    wrap.appendChild(tierAnalysis);
+
     wrap.appendChild(element('p', 'rounded-xl bg-slate-100 border border-slate-200 p-3 text-sm text-slate-700',
-      'A comissão só existe quando houver indicação válida de afiliado. Lucro e margem reais não podem ser calculados: este cadastro não contém custo de aquisição, taxas do pagamento, tributos ou custos operacionais. A receita após comissão NÃO é lucro.'));
+      finance.costsReady
+        ? 'Resultados projetados com base nos custos e preços cadastrados. Comissão de afiliado é condicional; venda direta não tem comissão. Despesas futuras não informadas não estão incluídas. Nenhum valor foi alterado.'
+        : 'Há custos privados pendentes: ' + finance.missing.join(', ') +
+          '. O lucro e a margem ficam indisponíveis até preencher os valores reais ou 0,00 quando uma despesa não existir. Receita após comissão não é lucro.'));
     const stamp = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date());
     wrap.appendChild(element('p', 'text-xs text-slate-500',
       'Fonte: registro atual deste único produto no Supabase · Consultado em ' + stamp +
@@ -235,7 +321,7 @@
     output.appendChild(wrap);
   }
 
-  function plainReport(p, a) {
+  function plainReport(p, a, finance, privateRow) {
     const lines = [
       'Análise exclusiva: ' + p.name,
       'Preço original: ' + money(a.price),
@@ -257,8 +343,28 @@
     } else {
       lines.push('Quantidade indisponível: escolha de 1 a ' + a.max + ' unidade(s).');
     }
-    lines.push('Lucro/margem: não calculáveis sem o custo do produto e demais despesas.',
-      'Relatório detalhado exibido no painel Royal AI. Nenhum dado foi alterado.');
+    lines.push('FORNECEDOR PRIVADO: '+(finance.supplier||'Não informado'));
+    lines.push('Custo de aquisição: '+(privateRow?.acquisition_cost===null||privateRow?.acquisition_cost===undefined?'Pendente':money(privateRow.acquisition_cost)),
+      'Frete de aquisição/un.: '+(privateRow?.supplier_shipping===null||privateRow?.supplier_shipping===undefined?'Pendente':money(privateRow.supplier_shipping)),
+      'ICMS/un.: '+(privateRow?.icms_cost===null||privateRow?.icms_cost===undefined?'Pendente':money(privateRow.icms_cost)),
+      'Serviço/un.: '+(privateRow?.service_cost===null||privateRow?.service_cost===undefined?'Pendente':money(privateRow.service_cost)),
+      'Desconto fornecedor/un.: '+(privateRow?.supplier_discount===null||privateRow?.supplier_discount===undefined?'Pendente':money(privateRow.supplier_discount)),
+      'Taxa pagamento/un.: '+(privateRow?.payment_fee===null||privateRow?.payment_fee===undefined?'Pendente':money(privateRow.payment_fee)));
+    if (finance.valid && finance.costsReady) {
+      lines.push('Custo total/un.: '+money(finance.unitCost),
+        'Custo total na quantidade: '+money(finance.costTotal),
+        'Lucro projetado em venda direta: '+money(finance.directProfit),
+        'Margem em venda direta: '+percent(finance.directMargin),
+        'Lucro projetado em venda com afiliado: '+money(finance.affiliateProfit),
+        'Margem em venda com afiliado: '+percent(finance.affiliateMargin));
+    } else {
+      lines.push('Lucro e margem: PENDENTES (custos ausentes: '+finance.missing.join(', ')+').');
+    }
+    if (finance.sheetThreePercent) lines.push(
+      '3% sobre receita: '+money(finance.sheetThreePercent.revenue),
+      '3% sobre comissão: '+money(finance.sheetThreePercent.commission),
+      'Soma 3% + 3%: '+money(finance.sheetThreePercent.combined)+' (comparativo, não desconto adicional)');
+    lines.push('Análise exclusivamente deste produto · Somente leitura · Dados privados restritos à administração.');
     return lines.join('\n');
   }
 
@@ -289,9 +395,16 @@
       if (error) throw error;
       if (!data || String(data.id) !== selectedId) throw new Error('Produto não encontrado no cadastro atual.');
       const a = calculations(data, quantity);
+      if (typeof window.royalFinanceGetRecord !== 'function' ||
+          typeof window.royalFinanceCompute !== 'function') {
+        throw new Error('Módulo financeiro privado indisponível. Recarregue a página.');
+      }
+      // Only the requested product's private record is read; it is never sent to the public storefront.
+      const privateRow = await window.royalFinanceGetRecord(selectedId);
+      const finance = window.royalFinanceCompute(data, privateRow, a);
       if (generation !== reportGeneration) return null;
-      showReport(data, a);
-      return plainReport(data, a);
+      showReport(data, a, finance, privateRow);
+      return plainReport(data, a, finance, privateRow);
     } catch (e) {
       if (generation === reportGeneration) status('Falha na análise: ' + String(e?.message || e), true);
       return null;
