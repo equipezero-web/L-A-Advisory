@@ -147,11 +147,20 @@ function calcUnit(p,row,qty) {
     COST_FIELDS.every(f=>Number.isFinite(Number(row[f]))&&Number(row[f])>=0) &&
     Number(row.supplier_discount)<=Number(row.acquisition_cost);
   const component=costsReady?Object.fromEntries(COST_FIELDS.map(f=>[f,round(row[f])])):null;
+  // Na planilha, "Serviço" (F) é um acréscimo ao preço (H), e não uma despesa
+  // que deve ser subtraída novamente do lucro (J).
   const unitCost=costsReady?round(component.acquisition_cost+component.supplier_shipping+
-    component.icms_cost+component.service_cost+component.payment_fee-component.supplier_discount):null;
+    component.icms_cost+component.payment_fee-component.supplier_discount):null;
+  const sheetPrice=costsReady?round(component.acquisition_cost+component.supplier_shipping+
+    component.icms_cost+component.service_cost-component.supplier_discount):null;
   const costTotal=valid&&costsReady?round(unitCost*quantity):null;
   const directProfit=costTotal!==null?round(revenue-costTotal):null;
   const affiliateProfit=directProfit!==null?round(directProfit-commission):null;
+  // Referência da planilha: comissão I = valor de compra C × taxa.
+  // O checkout real usa o preço bruto cadastrado: mostrar as duas bases, não confundir.
+  const sheetCommission=valid&&costsReady?round(component.acquisition_cost*quantity*commissionRate/100):null;
+  const sheetStyleProfit=directProfit!==null&&sheetCommission!==null?
+    round(directProfit-sheetCommission):null;
   const directMargin=directProfit!==null&&revenue>0?round(directProfit/revenue*100):null;
   const affiliateMargin=affiliateProfit!==null&&revenue>0?round(affiliateProfit/revenue*100):null;
   const sheetThreePercent=valid&&revenue!==null?{
@@ -159,8 +168,8 @@ function calcUnit(p,row,qty) {
     combined:round(round(revenue*.03)+round(commission*.03))
   }:null;
   return {valid,quantity,stock,retail,saleUnit,wholesaleRate,revenue,commissionRate,commission,
-    costsReady,missing,component,unitCost,costTotal,directProfit,affiliateProfit,
-    directMargin,affiliateMargin,sheetThreePercent, supplier:row?.supplier_name||null,
+    costsReady,missing,component,unitCost,sheetPrice,costTotal,directProfit,affiliateProfit,
+    sheetCommission,sheetStyleProfit,directMargin,affiliateMargin,sheetThreePercent, supplier:row?.supplier_name||null,
     supplierUrl:row?.supplier_url||null,order:Number(row?.display_order)||0};
 }
 window.royalFinanceCompute = function(p,financeRow,analysisOrQty){
