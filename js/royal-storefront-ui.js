@@ -28,7 +28,6 @@
       '</div>' +
       '<div class="royal-web-account-actions">' +
         '<div id="royalWebGuestActions"><button type="button" onclick="openAuthModal(\'customer-register\')" data-i18n="register">Cadastrar</button><button type="button" onclick="openAuthModal(\'customer-login\')" data-i18n="login">Entrar</button></div>' +
-        '<button type="button" id="royalWebAccount" hidden onclick="openUserMenu()"><i data-lucide="user-round"></i><span data-i18n="myAccount">Minha conta</span></button>' +
       '</div></div>';
     header.before(strip);
   }
@@ -346,8 +345,8 @@
     document.querySelectorAll('#mobileLoggedMenu [data-royal-install],#userMenuModal [data-royal-install],#customerProfileModal [data-royal-install]').forEach(el=>el.remove());
   }
   window.royalSyncTopAuth=function(){
-    const logged=typeof state!=='undefined'&&Boolean(state.currentUser), guest=byId('royalWebGuestActions'),account=byId('royalWebAccount');
-    if(guest)guest.hidden=logged;if(account)account.hidden=!logged;
+    const logged=typeof state!=='undefined'&&Boolean(state.currentUser), guest=byId('royalWebGuestActions');
+    if(guest)guest.hidden=logged;
   };
   function initialize(){
     addSecondaryBar();addHeaderSearch();addMobileHeaderControls();moveFilters();preparePanels();prepareAffiliateEntryPoints();prepareHero();buildAdminHero();buildPwaDock();removeInstallFromProfile();
