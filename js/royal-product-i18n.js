@@ -147,7 +147,7 @@
   const key=typeof SUPABASE_ANON_KEY!=='undefined'?SUPABASE_ANON_KEY:'';
   if(!base||!key)throw Error('Serviço indisponível');
   const response=await fetch(base+'/royal-product-translate',{method:'POST',cache:'no-store',
-   headers:{'Content-Type':'application/json',apikey:key,Authorization:'Bearer '+key},
+   headers:{'Content-Type':'application/json',apikey:key},
    body:JSON.stringify({language:lang,ids})});
   const body=await response.json().catch(()=>null);
   if(!response.ok||!body?.ok)throw Error(body?.error||'Falha ao traduzir produtos');
