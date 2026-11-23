@@ -15,13 +15,13 @@
     const unique=new Map();
     list.slice(0,100).forEach(raw=>{
       if(!raw||!raw.id)return;
-      const id=String(raw.id).slice(0,160),qty=Math.min(99,Math.max(1,Math.trunc(Number(raw.quantity)||1)));
+      const id=String(raw.id).slice(0,160),qty=Math.min(100,Math.max(1,Math.trunc(Number(raw.quantity)||1)));
       const product=(typeof state!=='undefined' ? (state.products||[]).find(p=>String(p.id)===id) : null);
       const unit=product&&typeof calculateFinalPrice==='function'?calculateFinalPrice(product):Number(raw.price);
       const price=Number.isFinite(unit)&&unit>=0?Math.round(unit*100)/100:0;
       const item={id,name:String(product?.name||raw.name||'Produto').slice(0,160),quantity:qty,price:price,
         grossPrice:Number(product?.price??raw.grossPrice??price),image:String(product?.image||raw.image||'').slice(0,700)};
-      if(unique.has(id))unique.get(id).quantity=Math.min(99,unique.get(id).quantity+qty);else unique.set(id,item);
+      if(unique.has(id))unique.get(id).quantity=Math.min(100,unique.get(id).quantity+qty);else unique.set(id,item);
     });
     return [...unique.values()].slice(0,100);
   }
