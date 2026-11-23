@@ -2603,3 +2603,93 @@ footer [data-royal-install][hidden] { display:none!important; }
   footer .royal-footer-language { min-height:32px; }
   footer .royal-footer-language select { max-width:146px; font-size:13px; }
 }
+
+
+/* Header and footer utility links coexist: install, social, FAQ and language. */
+.royal-web-strip .royal-web-strip-inner{
+  justify-content:space-between;
+  gap:8px 16px;
+}
+.royal-web-strip .royal-web-services,
+.royal-web-strip .royal-web-account-actions{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px 17px;
+}
+.royal-web-strip .royal-web-services{
+  flex:1 1 auto;
+}
+.royal-web-strip .royal-web-account-actions{
+  flex:0 0 auto;
+  margin-left:auto;
+}
+.royal-web-strip .royal-web-services>button,
+.royal-web-strip .royal-web-services>a{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  min-height:30px;
+  white-space:nowrap;
+}
+.royal-web-strip .royal-web-services .royal-language-label{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  min-height:30px;
+}
+.royal-web-strip .royal-language-label select{
+  min-height:30px;
+  max-width:162px;
+  font-size:12px;
+  border-radius:8px;
+  padding:3px 8px;
+}
+.royal-web-strip .royal-language-label select:focus-visible{
+  outline:2px solid #c1d1de;
+  outline-offset:2px;
+}
+.royal-web-strip [data-royal-install][hidden]{
+  display:none!important;
+}
+@media(max-width:767px){
+  /* Restore the services above the mobile header without squeezing the search/cart. */
+  .royal-web-strip{display:block!important}
+  .royal-web-strip .royal-web-strip-inner{
+    padding:5px 8px;
+    gap:3px 10px;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+  .royal-web-strip .royal-web-services{
+    flex:1 1 100%;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:2px 10px;
+  }
+  .royal-web-strip .royal-web-services>button,
+  .royal-web-strip .royal-web-services>a,
+  .royal-web-strip .royal-web-services .royal-language-label{
+    font-size:11px;
+    min-height:26px;
+    padding:3px 1px;
+  }
+  .royal-web-strip .royal-web-services svg{display:none}
+  .royal-web-strip .royal-language-label select{
+    max-width:132px;
+    min-height:28px;
+    padding:3px 6px;
+    font-size:11px;
+  }
+  .royal-web-strip .royal-web-account-actions{
+    flex:1 1 100%;
+    margin:0;
+    justify-content:center;
+    font-size:11px;
+  }
+  .royal-web-strip #royalWebGuestActions{
+    border-left:0;
+    padding-left:0;
+    gap:18px;
+  }
+}
