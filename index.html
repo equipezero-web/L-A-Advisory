@@ -6440,6 +6440,48 @@ data-lenis-prevent-touch
                 </div>
             </div>
 
+            <!-- Análise determinística e exclusivamente do produto selecionado. -->
+            <section id="royalAiProductCalculator" class="p-4 sm:p-5 border-b border-slate-200 bg-amber-50/40">
+                <div class="mb-4">
+                    <h6 class="font-bold text-slate-900 flex items-center gap-2">
+                        <i data-lucide="calculator" class="w-5 h-5 text-amber-700"></i>
+                        Analisar cálculos de um produto
+                    </h6>
+                    <p class="text-xs text-slate-600 mt-1">
+                        Escolha apenas um produto. Veja preço, descontos, varejo, atacado, estoque e comissão com os dados atuais do catálogo.
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-5 gap-3 items-end">
+                    <label class="sm:col-span-2 flex flex-col gap-1 text-xs font-bold text-slate-700" for="royalAiProductFilter">
+                        Buscar produto
+                        <input id="royalAiProductFilter" type="search" autocomplete="off"
+                            oninput="royalAiFilterProductChoices()" placeholder="Nome do produto"
+                            class="w-full rounded-xl border border-slate-300 bg-white text-slate-900 px-3 py-2.5 text-sm">
+                    </label>
+                    <label class="sm:col-span-2 flex flex-col gap-1 text-xs font-bold text-slate-700" for="royalAiProductSelect">
+                        Produto específico
+                        <select id="royalAiProductSelect" onchange="royalAiSyncProductLimits()"
+                            class="w-full rounded-xl border border-slate-300 bg-white text-slate-900 px-3 py-2.5 text-sm">
+                            <option value="">Carregando produtos...</option>
+                        </select>
+                    </label>
+                    <label class="flex flex-col gap-1 text-xs font-bold text-slate-700" for="royalAiAnalysisQuantity">
+                        Quantidade
+                        <input id="royalAiAnalysisQuantity" type="number" min="1" max="100" value="1" step="1" inputmode="numeric"
+                            class="w-full rounded-xl border border-slate-300 bg-white text-slate-900 px-3 py-2.5 text-sm">
+                    </label>
+                </div>
+                <div class="mt-3 flex flex-wrap items-center gap-3">
+                    <button id="royalAiAnalyzeProductButton" type="button" onclick="royalAiAnalyzeSelectedProduct()"
+                        class="rounded-xl bg-slate-900 text-amber-300 hover:bg-slate-800 font-bold px-5 py-2.5 text-sm">
+                        Analisar cálculos
+                    </button>
+                    <span class="text-xs text-slate-600">Consulta individual · Somente leitura · Sem valores inventados</span>
+                </div>
+                <div id="royalAiProductAnalysisOutput" class="mt-3" role="region"
+                    aria-label="Relatório de cálculos do produto selecionado" aria-live="polite"></div>
+            </section>
+
             <div
                 id="royalAiChatMessages"
                 class="p-5 min-h-[300px] max-h-[420px] overflow-y-auto bg-slate-50"
@@ -12141,7 +12183,10 @@ lucide.createIcons();
     if (tabId === 'admin-products') loadAdminProducts();
     if (tabId === 'admin-orders') loadAdminOrders();
     if (tabId === 'admin-affiliates') loadAdminAffiliates();
-      if (tabId === 'admin-royal-ai') loadRoyalAiPanel();
+      if (tabId === 'admin-royal-ai') {
+          loadRoyalAiPanel();
+          if (typeof window.royalAiLoadProductChoices === 'function') void window.royalAiLoadProductChoices();
+      }
             if (tabId === 'admin-settings') {
                 const savedCompany = JSON.parse(localStorage.getItem('laAdminCompanySettings') || '{}');
                 const savedCommission = localStorage.getItem('laAdminCommissionPercent');
@@ -12371,12 +12416,20 @@ async function loadRoyalAiPanel() {
             throw new Error('Supabase não está disponível.');
         }
 
-        const response = await fetchRoyalAi({ action: 'generate', prompt });
-
-        const result =
-            await response.json().catch(() => ({}));
-
-        if (!response.ok || !result.ok) {
+        // One-product pricing questions use deterministic catalog calculations, not AI guesses.
+        let result;
+        const productCalculation = typeof window.royalAiMaybeAnalyzeProductQuestion === 'function'
+            ? await window.royalAiMaybeAnalyzeProductQuestion(prompt)
+            : null;
+        if (productCalculation !== null) {
+            result = { ok: true, text: productCalculation,
+                provider: 'Royal AI · Catálogo', model: 'Cálculo verificado' };
+        } else {
+            const response = await fetchRoyalAi({ action: 'generate', prompt });
+            result = await response.json().catch(() => ({}));
+            if (!response.ok) result.ok = false;
+        }
+        if (!result.ok) {
             throw new Error(
                 result.error ||
                 result.message ||
@@ -15317,6 +15370,7 @@ body.guest-mode #afiliados { display: none !important; }
 <link rel="stylesheet" href="./assets/royal-storefront-upgrade.css?v=20261123-4">
 <script src="./js/royal-storefront-ui.js?v=20261123-2"></script>
 <script src="./js/royal-storefront-state.js?v=20261123-4"></script>
+<script src="./js/royal-ai-product-analysis.js?v=20261123-1"></script>
 
 <!-- Native scroll isolation for account, checkout, admin and dynamic product overlays.
      Attribute instructs Lenis not to intercept interactions inside scrolling panels. -->
