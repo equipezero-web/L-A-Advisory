@@ -12367,6 +12367,10 @@ lucide.createIcons();
         }
 
         function closeAdminDashboard() {
+            // Não manter fornecedores, links ou contas privadas no DOM após fechar o painel.
+            if (typeof window.royalFinanceClearPrivateUI === 'function') {
+                window.royalFinanceClearPrivateUI();
+            }
             const modal = document.getElementById('adminDashboardModal');
             if (modal) {
                 // Fecha o painel sem deixar a página presa no bloqueio de rolagem.
