@@ -216,6 +216,21 @@
       ' · ' + money(unit) + ' por unidade · Total: ' + money(total);
   }
 
+  // Fit the photo's container to its actual aspect ratio, so portrait, square and
+  // landscape supplier images occupy the full card without stretching or layout bars.
+  // This adjusts presentation only; source photos are never cropped or re-encoded.
+  function syncProductPhotoRatio(dialog) {
+    const photo = dialog.querySelector('.royal-product-photo');
+    const img = dialog.querySelector('#royalSelectedProductImage');
+    if (!photo || !img) return;
+    const apply = () => {
+      if (!img.naturalWidth || !img.naturalHeight) return;
+      photo.style.setProperty('--royal-product-photo-ratio', img.naturalWidth + ' / ' + img.naturalHeight);
+    };
+    img.addEventListener('load', apply);
+    if (img.complete) apply();
+  }
+
   // White, product-first detail layout. Values come exclusively from the Store Royal catalog.
   function enhanceProductPage(dialog, product, gallery, sale, oldPrice, stock) {
     const header = dialog.querySelector('.royal-product-header');
@@ -501,6 +516,7 @@
             '<button type="submit" class="royal-p-primary">Enviar avaliação</button><p class="royal-p-muted" data-review-feedback aria-live="polite">Avaliações passam por moderação antes da publicação. É necessário estar conectado.</p></form>' +
           '</section></div></div>';
     enhanceProductPage(dialog, product, gallery, sale, oldPrice, stock);
+    syncProductPhotoRatio(dialog);
     updateWholesalePreview(dialog, sale, 1);
     addMobilePurchaseDock(dialog, product, sale, maxQty, isAffiliate);
     document.body.appendChild(dialog);
