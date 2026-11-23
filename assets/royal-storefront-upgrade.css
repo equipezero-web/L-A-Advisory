@@ -2800,3 +2800,197 @@ html body #productDetailsModal.royal-product-page .royal-p-gallery .royal-produc
     text-align:center;
   }
 }
+
+/* 2026-11-23 · Cartões de catálogo inspirados em vitrine de varejo.
+ * Preserva 2 colunas mobile, 6 desktop, filtros laterais e paginação 60.
+ * O preço à vista é o valor vigente real (sem desconto Pix inventado).
+ */
+#loja #catalogContainer.royal-catalog-grid>.royal-image-only-card.royal-market-card{
+  display:flex!important;
+  flex-direction:column!important;
+  position:relative!important;
+  aspect-ratio:auto!important;
+  height:auto!important;
+  min-height:0!important;
+  background:#fff!important;
+  border:1px solid #dde3e6!important;
+  border-radius:12px!important;
+  box-shadow:0 2px 9px rgba(16,38,43,.05)!important;
+  color:#162f37!important;
+  overflow:hidden!important;
+  gap:0!important;
+  transform:none!important;
+}
+#loja #catalogContainer.royal-catalog-grid>.royal-market-card:after{display:none!important}
+#loja #catalogContainer.royal-catalog-grid>.royal-market-card:hover,
+#loja #catalogContainer.royal-catalog-grid>.royal-market-card:focus-visible{
+ border-color:#9fbdb5!important;
+ box-shadow:0 8px 24px rgba(17,51,50,.13)!important;
+ outline:2px solid transparent!important;
+}
+#loja #catalogContainer.royal-catalog-grid>.royal-market-card .royal-market-image{
+  width:100%!important;
+  position:relative!important;
+  aspect-ratio:1 / 1!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:9px!important;
+  background:#fff!important;
+  overflow:hidden!important;
+}
+#loja #catalogContainer.royal-catalog-grid>.royal-market-card .royal-market-image img.royal-full-card-image{
+  display:block!important;
+  position:static!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-height:none!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  transform:none!important;
+  border:0!important;
+  padding:0!important;
+  margin:0!important;
+  border-radius:0!important;
+}
+#loja #catalogContainer.royal-catalog-grid>.royal-market-card:hover .royal-market-image img.royal-full-card-image{
+ transform:none!important;
+ filter:none!important;
+}
+#loja #catalogContainer.royal-catalog-grid>.royal-market-card .royal-market-soldout{
+ position:absolute;
+ left:8px;top:9px;
+ z-index:1;
+ background:#263d43;
+ color:#fff;
+ border-radius:5px;
+ padding:3px 7px;
+ font-size:10px;
+ font-weight:800;
+}
+#loja #catalogContainer.royal-catalog-grid>.royal-market-card .royal-image-card-caption.royal-market-info{
+  position:relative!important;
+  flex:1!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  gap:5px!important;
+  left:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  width:100%!important;
+  height:auto!important;
+  min-height:0!important;
+  padding:5px 10px 13px!important;
+  border:0!important;
+  background:none!important;
+  color:#192f39!important;
+  text-align:left!important;
+  box-shadow:none!important;
+}
+#loja #catalogContainer.royal-catalog-grid>.royal-market-card .royal-market-info h3{
+  margin:0 0 4px!important;
+  min-height:3.9em!important;
+  font-size:clamp(11px,1.02vw,14px)!important;
+  line-height:1.3!important;
+  font-weight:500!important;
+  color:#223b49!important;
+  overflow:hidden!important;
+  display:-webkit-box!important;
+  -webkit-line-clamp:3!important;
+  -webkit-box-orient:vertical!important;
+  white-space:normal!important;
+}
+#loja #catalogContainer.royal-catalog-grid>.royal-market-card .royal-market-rating{
+ display:flex;align-items:center;gap:4px;
+ color:#1d3744;font-size:12px;line-height:1.3;
+}
+#loja #catalogContainer.royal-catalog-grid>.royal-market-card .royal-market-rating span{
+ color:#e4a000!important;
+ font-size:15px!important;
+ line-height:1!important;
+ font-weight:700!important;
+}
+#loja #catalogContainer.royal-catalog-grid>.royal-market-card .royal-market-rating small{font-size:11px;color:#667580}
+#loja #catalogContainer.royal-catalog-grid>.royal-market-card .royal-market-no-reviews{
+ font-size:11px;line-height:1.4;color:#67777e;
+}
+#loja #catalogContainer.royal-catalog-grid>.royal-market-card .royal-market-offer{
+ display:inline-flex;
+ align-items:center;
+ padding:3px 7px;
+ background:#e0faed;
+ color:#066342;
+ border-radius:4px;
+ font-size:10px;
+ line-height:1.2;
+ font-weight:750;
+ margin-top:2px;
+}
+#loja #catalogContainer.royal-catalog-grid>.royal-market-card .royal-market-original{
+ display:block;
+ color:#67737b;
+ font-size:11px;
+ line-height:1.25;
+ margin-top:3px;
+}
+#loja #catalogContainer.royal-catalog-grid>.royal-market-card .royal-market-price{
+ display:flex;flex-wrap:wrap;align-items:baseline;column-gap:5px;
+ width:100%;
+ margin-top:auto;
+ line-height:1.18!important;
+ color:#142b35!important;
+}
+#loja #catalogContainer.royal-catalog-grid>.royal-market-card .royal-market-price strong{
+ font-size:clamp(14px,1.28vw,21px)!important;
+ letter-spacing:-.035em!important;
+ font-weight:850!important;
+ overflow-wrap:anywhere!important;
+ color:#102c36!important;
+}
+#loja #catalogContainer.royal-catalog-grid>.royal-market-card .royal-market-price small{
+ font-size:10px;color:#3d5b67;line-height:1.3;
+}
+#loja #catalogContainer.royal-catalog-grid>.royal-market-card .royal-market-installment{
+ font-size:11px;line-height:1.38;color:#405a67;
+}
+#loja #catalogContainer.royal-catalog-grid>.royal-market-card .royal-market-installment strong{
+ font-weight:700;color:#1f3f4c;
+}
+#loja #catalogContainer.royal-catalog-grid>.royal-market-card .royal-market-footnote{
+ margin-top:2px;
+ color:#6f7d83;
+ font-size:9px;
+ line-height:1.3;
+}
+@media(max-width:767px){
+ #loja #catalogContainer.royal-catalog-grid>.royal-market-card .royal-image-card-caption.royal-market-info{
+  padding:6px 7px 10px!important;
+  gap:4px!important;
+ }
+ #loja #catalogContainer.royal-catalog-grid>.royal-market-card .royal-market-info h3{
+  font-size:12px!important;
+  min-height:3.85em!important;
+ }
+ #loja #catalogContainer.royal-catalog-grid>.royal-market-card .royal-market-price strong{font-size:clamp(14px,4vw,19px)!important}
+ #loja #catalogContainer.royal-catalog-grid>.royal-market-card .royal-market-price small{font-size:9px}
+}
+#productDetailsModal .royal-payment-methods{
+ background:#fff;
+ border:1px solid #e1d6c3;
+ border-radius:14px;
+ padding:15px;
+ margin:14px 0;
+ color:#203a42;
+}
+#productDetailsModal .royal-payment-methods h2{font-size:16px;font-weight:800;line-height:1.35;color:#123d39;margin:0 0 8px}
+#productDetailsModal .royal-payment-methods p{font-size:12px;line-height:1.5;color:#53636e;margin:6px 0}
+#productDetailsModal .royal-payment-methods details{padding-top:10px;border-top:1px solid #eee3d3;margin-top:12px}
+#productDetailsModal .royal-payment-methods summary{color:#195b51;font-weight:750;cursor:pointer;font-size:13px}
+#productDetailsModal .royal-payment-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:12px 0}
+#productDetailsModal .royal-payment-grid div{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;border:1px solid #d8e7e2;border-radius:7px;padding:7px 9px;font-size:12px}
+#productDetailsModal .royal-payment-grid strong{font-weight:850;color:#143f37}
+@media(max-width:420px){#productDetailsModal .royal-payment-grid{grid-template-columns:1fr}}
