@@ -118,7 +118,7 @@
     for (const product of matches){
       const option=element('button','royal-search-result');option.type='button';option.setAttribute('role','option');
       const img=element('img');img.src=safeUrl(product.image)||'./icons/icons-192.png';img.alt='';img.loading='lazy';
-      option.append(img,element('span','',product.name||'Produto'));
+      option.append(img,element('span','',window.royalProductLabel?.(product,'name')||product.name||'Produto'));
       option.addEventListener('click',()=>{results.hidden=true;if(window.royalCloseMobileSearch)window.royalCloseMobileSearch();const id=String(product.id);if(window.openRoyalProductPage)window.openRoyalProductPage(id);else if(typeof showProductDetails==='function')showProductDetails(id);});
       results.appendChild(option);
     }
