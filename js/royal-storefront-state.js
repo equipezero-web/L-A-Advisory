@@ -424,7 +424,11 @@
       const translated=idx===null?canonical:(COMMON[canonical]?.[idx]||canonical);
       node.textContent=raw.replace(raw.trim(),translated);
     }
-    const select=document.getElementById('royalLanguage');if(select)select.value=selected;
+    // Both the footer and the upper navigation share a single active language.
+    for(const id of ['royalLanguage','royalTopLanguage']){
+      const select=document.getElementById(id);
+      if(select)select.value=selected;
+    }
     if(typeof window.royalApplyCatalogTranslations === 'function') window.royalApplyCatalogTranslations();
   };
   window.royalApplyCatalogTranslations=function(){
