@@ -163,6 +163,8 @@
     if(preview){preview.replaceChildren();preview.hidden=true}
     offers=Array.isArray(data.results)?data.results:[];
     searchedAt=data.searchedAt;
+    const copyButton=byId('advisoryCopyAllButton');
+    if(copyButton)copyButton.disabled=!offers.length;
     items.replaceChildren();
     const total=Number(data.totalMatching)||0;
     summary.textContent=offers.length+' resultado(s) exibido(s) · '+total+
@@ -214,6 +216,24 @@
     }catch(e){updateStatus('Não foi possível buscar ofertas reais: '+String(e?.message||e),'error')}
     finally{loading=false;if(btn){btn.disabled=false;btn.textContent='Buscar melhores ofertas'}}
   }
+  window.advisoryAiCopyLinks = async function(){
+    if(!offers.length)return;
+    const header='ADVISORY AI | Lista de ofertas | '+formatTimestamp(searchedAt);
+    const lines=offers.map((offer,i)=>[
+      String(i+1)+'. '+offer.title,
+      'Loja: '+offer.merchant+' | Preço: '+money(offer.price),
+      reviewsLabel(offer)+' | '+shippingLabel(offer),
+      'Link original: '+offer.url
+    ].join('\n'));
+    const report=[header,'',...lines].join('\n\n');
+    try{
+      await navigator.clipboard.writeText(report);
+      updateStatus(offers.length+' link(s) de ofertas copiados com seus preços, lojas, fretes e avaliações.','success');
+    }catch{
+      window.prompt('Copie a lista de links:',report);
+    }
+  };
+
   window.advisoryAiInit = async function(){
     if(!initialized){
       const form=byId('advisorySearchForm');
