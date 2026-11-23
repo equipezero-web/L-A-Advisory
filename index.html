@@ -2554,6 +2554,48 @@
                     >
                         Política de Privacidade
                     </a>
+
+                    <button
+                        type="button"
+                        class="royal-footer-action"
+                        data-royal-install
+                        onclick="installRoyalApp()"
+                    >
+                        <i data-lucide="download" aria-hidden="true"></i>
+                        <span data-i18n="downloadApp">Baixar o app</span>
+                    </button>
+
+                    <a
+                        class="royal-footer-action"
+                        href="https://www.instagram.com/advisory.ofc/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <i data-lucide="instagram" aria-hidden="true"></i>
+                        <span data-i18n="followUs">Siga-nos</span>
+                    </a>
+
+                    <button
+                        type="button"
+                        class="royal-footer-action"
+                        onclick="royalOpenPanel('faq')"
+                    >
+                        <i data-lucide="circle-help" aria-hidden="true"></i>
+                        <span data-i18n="help">Ajuda (FAQ)</span>
+                    </button>
+
+                    <label class="royal-footer-language" for="royalLanguage">
+                        <i data-lucide="languages" aria-hidden="true"></i>
+                        <select
+                            id="royalLanguage"
+                            aria-label="Idioma"
+                            onchange="royalSetLanguage(this.value)"
+                        >
+                            <option value="pt-BR">Português (BR)</option>
+                            <option value="en">English</option>
+                            <option value="es">Español</option>
+                        </select>
+                    </label>
                 </div>
             </div>
         </div>
@@ -15236,8 +15278,8 @@ body.guest-mode #afiliados { display: none !important; }
 <script src="./js/royal-product-page.js?v=20261123-1"></script>
 <script src="./js/royal-analytics.js?v=1" defer></script>
 
-<link rel="stylesheet" href="./assets/royal-storefront-upgrade.css?v=20261123-3">
-<script src="./js/royal-storefront-ui.js?v=20261120-1"></script>
+<link rel="stylesheet" href="./assets/royal-storefront-upgrade.css?v=20261123-4">
+<script src="./js/royal-storefront-ui.js?v=20261123-2"></script>
 <script src="./js/royal-storefront-state.js?v=20261119-3"></script>
 
 <!-- Native scroll isolation for account, checkout, admin and dynamic product overlays.
