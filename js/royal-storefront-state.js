@@ -441,6 +441,11 @@
     for(const label of document.querySelectorAll('#catalogContainer .royal-image-card-caption span')){
       label.textContent=idx===null?'Ver produto ›':idx===0?'View product ›':'Ver producto ›';
     }
+    // Dynamic product data is translated separately from fixed interface strings.
+    // Catalog originals remain unchanged for pricing, ordering, SEO and administration.
+    if(typeof window.royalTranslateVisibleProducts==='function'){
+      void window.royalTranslateVisibleProducts();
+    }
   };
   function init(){
     if(initialized)return;initialized=true;
