@@ -22,7 +22,7 @@ function parse(text:string){
  return JSON.parse(raw.slice(a,b+1));
 }
 async function viaGemini(key:string,lang:string,items:Product[]){
- const model=Deno.env.get('ROYAL_PRODUCT_TRANSLATION_MODEL')||'gemini-2.5-flash';
+ const model=Deno.env.get('ROYAL_PRODUCT_TRANSLATION_MODEL')||Deno.env.get('ROYAL_AI_GEMINI_MODEL')||'gemini-2.5-flash';
  const url='https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent';
  const r=await fetch(url,{method:'POST',signal:AbortSignal.timeout(25000),
   headers:{'Content-Type':'application/json','X-goog-api-key':key},
@@ -33,7 +33,7 @@ async function viaGemini(key:string,lang:string,items:Product[]){
  return parse((body.candidates?.[0]?.content?.parts||[]).map((p:any)=>p.text||'').join(''));
 }
 async function viaGroq(key:string,lang:string,items:Product[]){
- const model=Deno.env.get('ROYAL_PRODUCT_TRANSLATION_GROQ_MODEL')||'llama-3.3-70b-versatile';
+ const model=Deno.env.get('ROYAL_PRODUCT_TRANSLATION_GROQ_MODEL')||Deno.env.get('ROYAL_AI_GROQ_MODEL')||'llama-3.3-70b-versatile';
  const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',signal:AbortSignal.timeout(25000),
   headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
   body:JSON.stringify({model,temperature:0,max_tokens:5500,response_format:{type:'json_object'},
