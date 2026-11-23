@@ -168,6 +168,8 @@
       ['Desconto cadastrado', percent(a.discount) +
         (a.salePriceApplies ? ' (não acumulado com preço promocional)' : '')],
       ['Preço promocional informado', a.saleRaw === null ? 'Não cadastrado' : money(a.saleRaw)],
+      ['Preço base antes do adicional', money(a.baseRetail)],
+      ['Adicional fixo de 6%', a.hasFixedMarkup ? 'Ativado · incluído no preço público e no checkout' : 'Desativado'],
       ['Regra aplicada', a.salePriceApplies ? 'Preço promocional tem prioridade' : 'Preço original menos desconto cadastrado'],
       ['Preço de varejo efetivo', money(a.retail)],
       ['Diferença frente ao preço original', money(round(a.price - a.retail)) +
@@ -391,6 +393,7 @@
         'Custo total na quantidade: '+money(finance.costTotal),
         'Comissão da planilha (sobre custo da compra): '+money(finance.sheetCommission),
         'Lucro usando comissão da planilha: '+money(finance.sheetStyleProfit),
+        'Adicional fixo de 6%: '+(p.fixed_markup_6_enabled===true?'ATIVADO':'DESATIVADO'),
         'Lucro projetado em venda direta: '+money(finance.directProfit),
         'Margem em venda direta: '+percent(finance.directMargin),
         'Lucro projetado em venda com afiliado: '+money(finance.affiliateProfit),
