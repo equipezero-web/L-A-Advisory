@@ -233,10 +233,12 @@ window.royalFinanceRenderLedger=function(){
     for(const field of COST_FIELDS)
       composeCell(tr,row?.[field]===null||row?.[field]===undefined?'Pendente':money(row[field]),
         field==='acquisition_cost'?'font-medium':'');
+    composeCell(tr,c.sheetPrice===null?'Pendente':money(c.sheetPrice));
     composeCell(tr,money(c.saleUnit)+(c.wholesaleRate?' · -'+c.wholesaleRate+'%':''));
     composeCell(tr,validOr(c,c.revenue));
     composeCell(tr,validOr(c,c.commission));
     composeCell(tr,c.costsReady?money(c.unitCost):'Custos pendentes');
+    composeCell(tr,c.sheetStyleProfit===null?'Pendente':money(c.sheetStyleProfit));
     composeCell(tr,c.valid&&c.costsReady?money(c.directProfit):'Pendente',
       c.directProfit===null?'text-slate-500':c.directProfit<0?'text-red-700 font-semibold':'text-emerald-700 font-semibold');
     composeCell(tr,c.valid&&c.costsReady?money(c.affiliateProfit):'Pendente',
