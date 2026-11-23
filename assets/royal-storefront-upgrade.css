@@ -2994,3 +2994,10 @@ html body #productDetailsModal.royal-product-page .royal-p-gallery .royal-produc
 #productDetailsModal .royal-payment-grid div{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;border:1px solid #d8e7e2;border-radius:7px;padding:7px 9px;font-size:12px}
 #productDetailsModal .royal-payment-grid strong{font-weight:850;color:#143f37}
 @media(max-width:420px){#productDetailsModal .royal-payment-grid{grid-template-columns:1fr}}
+
+/* Fixed six-percent markup, admin-only control; the percentage cannot be edited. */
+#adminProductForm .royal-fixed-markup-setting{border:1px solid #bad2c8;background:#f0f8f4;border-radius:13px;padding:14px;color:#153c35}
+#adminProductForm .royal-fixed-markup-label{display:flex;align-items:center;gap:11px;font-size:14px;font-weight:750;cursor:pointer}
+#adminProductForm #adminProductFixedMarkup6{width:19px;height:19px;flex:0 0 19px;accent-color:#145e4a;cursor:pointer}
+#adminProductForm .royal-fixed-markup-help{font-size:12px;line-height:1.5;margin:9px 0;color:#365a50}
+#adminProductForm .royal-fixed-markup-preview{font-size:12px;line-height:1.6;border-top:1px solid #cddfd6;padding-top:9px;margin-top:8px;font-weight:650;overflow-wrap:anywhere}
