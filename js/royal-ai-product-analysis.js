@@ -350,7 +350,8 @@
     } else {
       lines.push('Quantidade indisponível: escolha de 1 a ' + a.max + ' unidade(s).');
     }
-    lines.push('FORNECEDOR PRIVADO: '+(finance.supplier||'Não informado'));
+    lines.push('FORNECEDOR PRIVADO: '+(finance.supplier||'Não informado'),
+      'LINK PRIVADO DE COMPRA: '+(finance.supplierUrl||'Não informado'));
     lines.push('Custo de aquisição: '+(privateRow?.acquisition_cost===null||privateRow?.acquisition_cost===undefined?'Pendente':money(privateRow.acquisition_cost)),
       'Frete de aquisição/un.: '+(privateRow?.supplier_shipping===null||privateRow?.supplier_shipping===undefined?'Pendente':money(privateRow.supplier_shipping)),
       'ICMS/un.: '+(privateRow?.icms_cost===null||privateRow?.icms_cost===undefined?'Pendente':money(privateRow.icms_cost)),
@@ -426,7 +427,7 @@
   // Intercept only explicit product-calculation requests; other chat features remain unchanged.
   window.royalAiMaybeAnalyzeProductQuestion = async function (prompt) {
     const q = clean(prompt);
-    const intent = /\b(analise|analisar|analisa|calculo|calculos|calcule|calcular|descontos?|atacado|varejo|comissao|comissoes|estoques?|precos?|margem|lucros?)\b/.test(q);
+    const intent = /\b(analise|analisar|analisa|calculo|calculos|calcule|calcular|descontos?|atacado|varejo|comissao|comissoes|estoques?|precos?|margem|lucros?|fornecedores?|links?|custos?|frete|icms|despesas?)\b/.test(q);
     if (!intent) return null;
     if (!choices.length) await window.royalAiLoadProductChoices();
     // Resolve explicit full product names, taking the longest exact name.
