@@ -1839,7 +1839,7 @@
                             <i data-lucide="chevron-down" aria-hidden="true"></i>
                         </button>
                     </div>
-                    <aside id="royalCatalogSidebar" class="royal-catalog-sidebar" aria-label="Filtros de produtos">
+                    <aside id="royalCatalogSidebar" class="royal-catalog-sidebar" aria-label="Filtros de produtos" role="region" tabindex="0" data-lenis-prevent data-lenis-prevent-wheel data-lenis-prevent-touch>
                         <div class="royal-sidebar-heading">
                             <h3>Filtrar produtos</h3>
                             <button type="button" onclick="clearCatalogFilters()"
@@ -14332,7 +14332,7 @@ function initPremiumScrollMotion() {
             wheelMultiplier: 0.92,
             touchMultiplier: 1.02,
             // Native scrolling is responsible for the login/register pane.
-            prevent: node => Boolean(node?.closest?.('#authModal, #productDetailsModal'))
+            prevent: node => Boolean(node?.closest?.('#authModal, #productDetailsModal, #royalCatalogSidebar'))
         });
         window.laLenis.on('scroll', ScrollTrigger.update);
         gsap.ticker.add((time) => window.laLenis.raf(time * 1000));
@@ -15214,7 +15214,7 @@ body.guest-mode #afiliados { display: none !important; }
 <script src="./js/royal-product-page.js?v=20261123-1"></script>
 <script src="./js/royal-analytics.js?v=1" defer></script>
 
-<link rel="stylesheet" href="./assets/royal-storefront-upgrade.css?v=20261123-2">
+<link rel="stylesheet" href="./assets/royal-storefront-upgrade.css?v=20261123-3">
 <script src="./js/royal-storefront-ui.js?v=20261120-1"></script>
 <script src="./js/royal-storefront-state.js?v=20261119-3"></script>
 
@@ -15224,7 +15224,7 @@ body.guest-mode #afiliados { display: none !important; }
 (function () {
   'use strict';
   const SCROLLABLE = [
-    '.royal-product-scroll','.royal-review-admin-scroll',
+    '#royalCatalogSidebar','.royal-product-scroll','.royal-review-admin-scroll',
     '.royal-auth-scroll-region','.account-modal-scroll',
     '#checkoutModal > div','#cartModal > div','#stockAlertModal > div',
     '#cookieSettingsModal > div','#dataSecurityTermsModal > div',
