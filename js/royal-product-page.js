@@ -316,8 +316,29 @@
           '<p class="royal-wholesale-retail" role="note"><strong>Atacado em ativação:</strong> a finalização de compras com 10 ou mais unidades ficará indisponível até a atualização do servidor de pagamento.</p>'
           : '') +
       '</section>';
+    // Informative only: the actual available installments and methods come
+    // from Mercado Pago at checkout. Merchant fees are never added to the order here.
+    const paymentPricing=window.royalMarketPricing;
+    const paymentText=paymentPricing?.copy?.() || null;
+    const installmentQuotes=paymentPricing && stock>0
+      ? Array.from({length:11},(_,i)=>paymentPricing.installment(sale,i+2)).filter(Boolean)
+      : [];
+    const paymentBlock=paymentText
+      ? '<section class="royal-payment-methods" aria-label="'+attr(paymentText.payments)+'">' +
+        '<h2>'+safe(paymentText.payments)+'</h2>' +
+        '<p>'+safe(paymentText.options)+'</p>' +
+        (installmentQuotes.length
+          ? '<details><summary>'+safe(paymentText.seePayments)+'</summary>' +
+            '<p>'+safe(paymentText.estimated)+'</p>' +
+            '<div class="royal-payment-grid">' +
+              installmentQuotes.map(q=>'<div><span>'+q.count+'x · '+q.rate.toLocaleString('pt-BR',{minimumFractionDigits:2})+'%</span><strong>'+money(q.perInstallment)+'*</strong></div>').join('') +
+            '</div></details>'
+          : '') +
+        '<p>'+safe(paymentText.warning)+'</p></section>'
+      : '';
     price.insertAdjacentHTML('afterend',
       wholesaleMarkup +
+      paymentBlock +
       '<div class="royal-p-service-list">' +
         '<div class="royal-p-service"><i data-lucide="credit-card" aria-hidden="true"></i><div><strong>Cartão de crédito</strong><p>Consulte parcelas, taxas e opções de pagamento no checkout.</p></div></div>' +
         '<div class="royal-p-service"><i data-lucide="truck" aria-hidden="true"></i><div><strong>Envio e frete</strong><p>Frete incluso no valor, conforme a política atual da Store Royal. Prazo informado no checkout.</p></div></div>' +

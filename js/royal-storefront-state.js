@@ -429,7 +429,9 @@
       const select=document.getElementById(id);
       if(select)select.value=selected;
     }
-    if(typeof window.royalApplyCatalogTranslations === 'function') window.royalApplyCatalogTranslations();
+    // Preços, parcelas e rótulos dos novos cards também seguem o idioma ativo.
+    if(typeof renderCatalog==='function')renderCatalog();
+    else if(typeof window.royalApplyCatalogTranslations==='function')window.royalApplyCatalogTranslations();
   };
   window.royalApplyCatalogTranslations=function(){
     const language=fromStore('laRoyalLanguage');const idx=language==='en'?0:language==='es'?1:null;
@@ -438,7 +440,7 @@
         portuguese===heading.textContent.trim() || variants.includes(heading.textContent.trim()));
       if(entry)heading.textContent=idx===null?entry[0]:entry[1][idx];
     }
-    for(const label of document.querySelectorAll('#catalogContainer .royal-image-card-caption span')){
+    for(const label of document.querySelectorAll('#catalogContainer .royal-card-view-link')){
       label.textContent=idx===null?'Ver produto ›':idx===0?'View product ›':'Ver producto ›';
     }
     // Dynamic product data is translated separately from fixed interface strings.

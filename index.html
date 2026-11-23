@@ -6871,7 +6871,7 @@ data-lenis-prevent-touch
                     </div>
                     <p id="royalFinanceLedgerStatus" class="text-sm text-slate-600" role="status" aria-live="polite">Abra a aba Produtos para carregar as informações privadas.</p>
                     <div class="w-full overflow-x-auto border border-slate-200 rounded-xl" data-lenis-prevent>
-                        <table class="w-full min-w-[1680px] text-left text-xs text-slate-700">
+                        <table class="w-full min-w-[2180px] text-left text-xs text-slate-700">
                             <thead class="bg-slate-100 text-slate-900">
                                 <tr>
                                     <th class="p-3">Ordem</th>
@@ -6889,8 +6889,11 @@ data-lenis-prevent-touch
                                     <th class="p-3">Comissão afiliado*</th>
                                     <th class="p-3">Custo total/un.</th>
                                     <th class="p-3">Lucro ref. J</th>
-                                    <th class="p-3">Lucro direto</th>
-                                    <th class="p-3">Lucro afiliado</th>
+                                    <th class="p-3">Lucro direto (taxa manual)</th>
+                                    <th class="p-3">Lucro Pix (0,99%)</th>
+                                    <th class="p-3">Lucro cartão 1x (4,98%)</th>
+                                    <th class="p-3">Lucro cartão 7–12x (3,09%)*</th>
+                                    <th class="p-3">Lucro afiliado (taxa manual)</th>
                                     <th class="p-3">Margem afiliado</th>
                                     <th class="p-3">Royal AI</th>
                                 </tr>
@@ -6901,7 +6904,7 @@ data-lenis-prevent-touch
                     <p id="royalFinanceLedgerTotals" class="rounded-xl bg-slate-50 border border-slate-200 p-3 text-sm text-slate-800">
                         Os totais aparecerão após carregar o catálogo e os custos.
                     </p>
-                    <p class="text-xs text-slate-600">* Serviço é acréscimo de preço (referência F da planilha), não um segundo custo. Lucro ref. J usa comissão baseada no custo de compra; lucro afiliado usa a comissão real do checkout baseada no preço bruto. Frete e taxas são cadastrados por unidade. Campos vazios não são considerados zero. A venda real e a baixa de estoque continuam sob controle do checkout.</p>
+                    <p class="text-xs text-slate-600">* Nas colunas Pix e cartão, a taxa manual por unidade é SUBSTITUÍDA pela taxa percentual informada na simulação, evitando contagem dupla. O cartão 7–12x pressupõe acréscimos pagos pelo comprador; se a loja assumir o parcelamento, o lucro será menor. Taxas e prazos são referências, não liquidação confirmada. Serviço continua como acréscimo de preço; frete, ICMS e comissões seguem a planilha. O checkout real não muda.</p>
                 </section>
             </section>
 
@@ -14134,21 +14137,53 @@ function renderCatalog() {
     const pageResult = paginateStoreProducts(availableProducts, currentCatalogPage);
     currentCatalogPage = pageResult.page;
     container.className = 'royal-catalog-grid';
-    container.innerHTML = pageResult.items.map(product => `
-        <article role="button" tabindex="0" aria-label="Ver detalhes de ${escapeAttribute(product.name)}" onclick="showProductDetails('${String(product.id).replace(/[^a-zA-Z0-9_-]/g, '')}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showProductDetails('${String(product.id).replace(/[^a-zA-Z0-9_-]/g, '')}')}" data-product-id="${escapeAttribute(product.id)}" class="product-motion-card royal-image-only-card cursor-pointer">
-                            <img src="${escapeAttribute(product.image)}" alt="${escapeAttribute(product.name)}" class="royal-full-card-image" loading="lazy">
-                            <div class="royal-image-card-caption">
-                                <h3>${escapeHtml(product.name)}</h3>
-                                <span>Ver produto ›</span>
-                            </div>
-                        </article>
-    `).join('');
+    const market = window.royalMarketPricing;
+    const copy = market?.copy?.() || {noReviews:'Sem avaliações',pix:'no Pix ou cartão à vista',offer:'Oferta',install:'simulação em 12x',checkout:'Condições finais no checkout.'};
+    container.innerHTML = pageResult.items.map(product => {
+        const originalPrice = Number(product.price) || 0;
+        const sellingPrice = calculateFinalPrice(product);
+        const discount = originalPrice > sellingPrice && sellingPrice > 0
+            ? Math.round((originalPrice - sellingPrice) / originalPrice * 100) : 0;
+        const reviews = storeCatalogRatingMap?.get(String(product.id));
+        const average = reviews?.count ? (reviews.total / reviews.count) : null;
+        const reviewLabel = average !== null && Number.isFinite(average)
+            ? '<div class="royal-market-rating" aria-label="' + average.toFixed(1) + ' de 5; ' + reviews.count + ' avaliações">' +
+                '<strong>' + average.toFixed(1).replace('.',',') + '</strong> <span aria-hidden="true">★</span> <small>(' + reviews.count + ')</small></div>'
+            : '<div class="royal-market-no-reviews">' + escapeHtml(copy.noReviews) + '</div>';
+        const quote = market?.installment?.(sellingPrice,12);
+        const installments = quote
+            ? '<div class="royal-market-installment">' + escapeHtml(copy.install) + ': <strong>12x ' +
+                formatCurrency(quote.perInstallment) + '*</strong></div>'
+            : '';
+        const stock = Math.max(0,Number(product.stock)||0);
+        const productId = String(product.id).replace(/[^a-zA-Z0-9_-]/g, '');
+        const name = window.royalProductLabel?.(product,'name') || product.name;
+        return `
+        <article role="button" tabindex="0" aria-label="${escapeAttribute(name)}" onclick="showProductDetails('${productId}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showProductDetails('${productId}')}" data-product-id="${escapeAttribute(product.id)}" class="product-motion-card royal-image-only-card royal-market-card cursor-pointer">
+            <div class="royal-market-image">
+                <img src="${escapeAttribute(product.image)}" alt="${escapeAttribute(name)}" class="royal-full-card-image" loading="lazy">
+                ${stock<=0 ? '<div class="royal-market-soldout">Esgotado</div>' : ''}
+            </div>
+            <div class="royal-image-card-caption royal-market-info">
+                <h3>${escapeHtml(name)}</h3>
+                ${reviewLabel}
+                ${discount>0 ? '<div class="royal-market-offer">' + discount + '% ' + escapeHtml(copy.offer) + '</div>' : ''}
+                ${originalPrice > sellingPrice && sellingPrice > 0 ? '<del class="royal-market-original">' + formatCurrency(originalPrice) + '</del>' : ''}
+                <div class="royal-market-price"><strong>${formatCurrency(sellingPrice)}</strong><small>${escapeHtml(copy.pix)}</small></div>
+                ${installments}
+                <small class="royal-market-footnote">${escapeHtml(copy.checkout)}</small>
+            </div>
+        </article>`;
+    }).join('');
     const pagination = document.getElementById('catalogPagination');
     if (pagination) pagination.innerHTML = renderCatalogPagination(pageResult);
 
     lucide.createIcons();
     if (typeof window.laRefreshMotion === 'function') window.laRefreshMotion();
     if (typeof window.royalApplyCatalogTranslations === 'function') window.royalApplyCatalogTranslations();
+    // Consultar apenas avaliações aprovadas. Nunca inventar notas nem quantidade de reviews.
+    if (!storeCatalogRatingMap && !storeCatalogRatingsLoading && !storeCatalogRatingsError)
+        void loadStoreCatalogRatings();
 }
 
 function showProductDetails(productId) {
@@ -15649,15 +15684,16 @@ body.guest-mode #afiliados { display: none !important; }
 <script src="./js/royal-ai-image-upload.js"></script>
 
 <script src="./js/royal-product-image-upload.js"></script>
-<script src="./js/royal-product-page.js?v=20261123-4"></script>
+<script src="./js/royal-market-pricing.js?v=20261123-1"></script>
+<script src="./js/royal-product-page.js?v=20261123-5"></script>
 <script src="./js/royal-analytics.js?v=1" defer></script>
 
-<link rel="stylesheet" href="./assets/royal-storefront-upgrade.css?v=20261123-7">
+<link rel="stylesheet" href="./assets/royal-storefront-upgrade.css?v=20261123-8">
 <script src="./js/royal-storefront-ui.js?v=20261123-6"></script>
 <script src="./js/royal-product-i18n.js?v=20261123-3"></script>
-<script src="./js/royal-storefront-state.js?v=20261123-6"></script>
-<script src="./js/royal-ai-product-analysis.js?v=20261123-3"></script>
-<script src="./js/royal-product-finance.js?v=20261123-4"></script>
+<script src="./js/royal-storefront-state.js?v=20261123-7"></script>
+<script src="./js/royal-ai-product-analysis.js?v=20261123-4"></script>
+<script src="./js/royal-product-finance.js?v=20261123-5"></script>
 <script src="./js/advisory-ai.js?v=20261123-2"></script>
 
 <!-- Native scroll isolation for account, checkout, admin and dynamic product overlays.
