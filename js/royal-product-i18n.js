@@ -134,6 +134,13 @@
    if(img)img.alt=name;
    card.setAttribute('aria-label',language()==='en'?'View details: '+name:language()==='es'?'Ver detalles: '+name:'Ver detalhes de '+name);
   }
+  // Display translated category names; preserve original values for filtering.
+  for(const option of document.querySelectorAll('#filterCategory option')){
+   const original=option.dataset.royalOriginalLabel||option.textContent;
+   if(!option.dataset.royalOriginalLabel)option.dataset.royalOriginalLabel=original;
+   const p=catalogue().find(p=>String(p.category)===String(option.value)&&translated(p.id,language())?.category);
+   option.textContent=language()==='pt-BR'?original:(p?translated(p.id,language()).category:original);
+  }
  }
  function notice(message){
   const bar=document.querySelector('.royal-web-strip-inner');
@@ -156,8 +163,8 @@
    if(p&&typeof t.name==='string'&&typeof t.description==='string'&&typeof t.category==='string')
     cache.set(lang+':'+t.id,{source:source(p),content:{name:t.name,description:t.description,category:t.category}});
   }
-  if(body.warning&&body.pending?.length)notice(body.warning);
-  else if(!body.pending?.length)notice('');
+  if(body.pending?.length)notice(body.warning||'Alguns produtos ainda aguardam tradução.');
+  else notice('');
  }
  async function load(ids,lang){
   const missing=[...new Set(ids.map(String))].filter(id=>product(id)&&!translated(id,lang));
