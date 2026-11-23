@@ -101,7 +101,11 @@ window.royalFinanceFormOpened = async function(productId) {
     setFormState(false,'Não foi possível carregar os dados privados. O formulário não poderá salvar até que o carregamento funcione: '+String(e?.message||e),true);
   }
 };
-window.royalFinanceCancelProductForm = function() {++openGeneration;formReady=false;};
+window.royalFinanceCancelProductForm = function() {
+  ++openGeneration;
+  formReady=false;
+  clearForm();
+};
 window.royalFinanceReadProductForm = function() {
   if(!formReady)throw Error('Os dados privados ainda não foram carregados. Aguarde ou reabra o produto antes de salvar.');
   if(!isAdmin())throw Error('Acesso administrativo necessário para cadastrar fornecedor.');
@@ -316,6 +320,21 @@ window.royalFinanceSaveOrder=async function(){
   }catch(e){
     info('Não foi possível salvar todas as posições. Atualize a tabela: '+String(e?.message||e),true);
   }
+};
+window.royalFinanceClearPrivateUI = function(){
+  ++ledgerVersion;
+  ++openGeneration;
+  ledgerRows.clear();
+  lastLedgerProducts=[];
+  formReady=false;
+  clearForm();
+  el('royalFinanceLedgerBody')?.replaceChildren();
+  const summary=el('royalFinanceLedgerTotals');
+  if(summary)summary.textContent='Abra novamente o painel administrativo para carregar as informações financeiras.';
+  info('Dados financeiros privados limpos desta sessão visual.');
+  el('royalAiProductAnalysisOutput')?.replaceChildren();
+  // O chat administrativo pode conter nomes de fornecedores/custos; limpar ao sair.
+  el('royalAiChatMessages')?.replaceChildren();
 };
 // Only confidential records are fetched into administrator views, never persisted in the public catalog.
 })();
