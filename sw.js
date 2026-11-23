@@ -1,5 +1,5 @@
 // Public PWA shell. Navigation and scripts/styles must always prefer fresh network content.
-const CACHE_NAME = "la-royal-advisory-v67";
+const CACHE_NAME = "la-royal-advisory-v68";
 const CACHE_PREFIX = "la-royal-advisory-";
 
 const urlsToCache = [
