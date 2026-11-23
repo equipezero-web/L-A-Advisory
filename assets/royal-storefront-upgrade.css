@@ -1643,6 +1643,10 @@ header.royal-glass-header .royal-mobile-search-toggle {
    gap:5px!important;
    min-width:0!important;
  }
+ html body #productDetailsModal.royal-product-page .royal-p-header-left button span,
+ html body #productDetailsModal.royal-product-page .royal-p-header-tools button span {
+   display:none!important;
+ }
  html body #productDetailsModal.royal-product-page .royal-product-header button,
  html body #productDetailsModal.royal-product-page .royal-p-header-left button,
  html body #productDetailsModal.royal-product-page .royal-p-header-tools button{
