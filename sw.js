@@ -1,5 +1,5 @@
 // Public PWA shell. Navigation and scripts/styles must always prefer fresh network content.
-const CACHE_NAME = "la-royal-advisory-v68";
+const CACHE_NAME = "la-royal-advisory-v69";
 const CACHE_PREFIX = "la-royal-advisory-";
 
 const urlsToCache = [
@@ -14,6 +14,7 @@ const urlsToCache = [
     "./assets/royal-storefront-upgrade.css",
     "./js/royal-storefront-ui.js",
     "./js/royal-storefront-state.js",
+    "./js/royal-product-i18n.js",
     "./js/royal-ai-product-analysis.js",
     "./js/royal-product-finance.js",
     "./js/advisory-ai.js",
