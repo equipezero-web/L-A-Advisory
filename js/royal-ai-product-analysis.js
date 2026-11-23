@@ -276,8 +276,33 @@
       ['Margem com afiliado', finance.affiliateMargin === null ? 'Pendente' : percent(finance.affiliateMargin)]
     ]);
 
+    if (finance.paymentScenarios && window.royalMarketPricing) {
+      const methods=window.royalMarketPricing.methods;
+      section(wrap,'8. Lucro por meio de pagamento · simulação com tarifas informadas',methods.map(method=>{
+        const c=finance.paymentScenarios[method.id];
+        const rateText=method.fixed!==undefined?money(method.fixed):percent(method.rate);
+        return [method.name+' · '+rateText+' · '+method.days,
+          'Taxa estimada '+money(c.fee)+' · Recebimento líquido '+money(c.received)+
+          ' · Lucro direto '+money(c.directProfit)+' · Lucro afiliado '+money(c.affiliateProfit)];
+      }));
+      if(finance.creditMarkupComparison){
+        const preview=finance.creditMarkupComparison;
+        section(wrap,'Comparativo privado · hipótese de preço +6% no crédito',[
+          ['Preço total hipotético (não aplicado à loja)',money(preview.gross)],
+          ['Taxa simulada do cartão à vista (4,98%)',money(preview.fee)],
+          ['Recebimento hipotético após taxa',money(preview.net)],
+          ['Lucro direto hipotético',money(preview.directProfit)],
+          ['Lucro hipotético com afiliado',money(preview.affiliateProfit)]
+        ]);
+      }
+      wrap.appendChild(element('p','text-xs text-slate-600',
+        'As simulações substituem a taxa manual por unidade pelo custo estimado do meio de pagamento: não acumulam as duas taxas. Não representam taxas confirmadas de transações. Em parcelado vendedor, a loja pode arcar com taxas adicionais. O comparativo de +6% NÃO modifica os preços, pedidos ou checkout.'));
+    } else {
+      wrap.appendChild(element('p','text-xs text-slate-600',
+        'Para calcular o lucro líquido por Pix e cartão, preencha todos os custos privados do produto. Sem custos completos, não exibimos lucro fictício.'));
+    }
     if (finance.sheetThreePercent) {
-      section(wrap, '8. Comparativo da planilha · 3% (não é desconto extra automático)', [
+      section(wrap, '9. Comparativo da planilha · 3% (não é desconto extra automático)', [
         ['3% sobre o valor total da venda', money(finance.sheetThreePercent.revenue)],
         ['3% sobre a comissão calculada', money(finance.sheetThreePercent.commission)],
         ['Soma dos dois cálculos', money(finance.sheetThreePercent.combined)]
@@ -286,7 +311,7 @@
 
     const tierAnalysis = element('section', 'rounded-xl border border-slate-200 bg-white p-4');
     tierAnalysis.appendChild(element('h6', 'mb-3 text-sm font-bold text-slate-900',
-      '9. Simulações por quantidade · varejo e atacado'));
+      '10. Simulações por quantidade · varejo e atacado'));
     const tierTableWrap = element('div', 'w-full overflow-x-auto');
     const table = element('table', 'min-w-[540px] w-full text-xs');
     const thead = element('thead', 'bg-slate-100 text-left');
@@ -368,6 +393,17 @@
         'Margem em venda direta: '+percent(finance.directMargin),
         'Lucro projetado em venda com afiliado: '+money(finance.affiliateProfit),
         'Margem em venda com afiliado: '+percent(finance.affiliateMargin));
+      if(finance.paymentScenarios && window.royalMarketPricing){
+        lines.push('CENÁRIOS POR MEIO DE PAGAMENTO (taxa manual substituída, não acumulada):');
+        for(const method of window.royalMarketPricing.methods){
+          const v=finance.paymentScenarios[method.id];
+          lines.push(method.name+': taxa estimada '+money(v.fee)+', líquido '+money(v.received)+
+            ', lucro direto '+money(v.directProfit)+', lucro afiliado '+money(v.affiliateProfit));
+        }
+        if(finance.creditMarkupComparison)
+          lines.push('Comparativo PRIVADO de +6% no crédito à vista, NÃO APLICADO ao checkout: receita '+
+            money(finance.creditMarkupComparison.gross)+', lucro direto '+money(finance.creditMarkupComparison.directProfit));
+      }
     } else {
       lines.push('Lucro e margem: PENDENTES (custos ausentes: '+finance.missing.join(', ')+').');
     }
