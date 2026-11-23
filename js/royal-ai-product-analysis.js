@@ -253,16 +253,23 @@
       ['Valor do fornecedor / aquisição', privateMoney('acquisition_cost')],
       ['Frete de aquisição / unidade', privateMoney('supplier_shipping')],
       ['ICMS / unidade', privateMoney('icms_cost')],
-      ['Serviços ou despesas / unidade', privateMoney('service_cost')],
+      ['Serviço / acréscimo na formação do preço (não é custo duplicado)', privateMoney('service_cost')],
       ['Desconto do fornecedor (subtrai)', privateMoney('supplier_discount')],
       ['Taxa de pagamento / unidade', privateMoney('payment_fee')],
-      ['Custo total por unidade', finance.costsReady ? money(finance.unitCost) : 'Pendente — informe todos os componentes, usando 0,00 quando não se aplicar']
+      ['Preço composto de referência da planilha (C + D + E + F − G)',
+        finance.costsReady ? money(finance.sheetPrice) : 'Pendente'],
+      ['Custo real por unidade (compra + frete + ICMS + taxa − desconto)',
+        finance.costsReady ? money(finance.unitCost) : 'Pendente — preencha todos os componentes, usando 0,00 quando não se aplicar']
     ]);
 
     section(wrap, '7. Resultado financeiro da quantidade selecionada', [
       ['Receita de venda com desconto aplicável', finance.valid ? money(finance.revenue) : 'Quantidade indisponível'],
       ['Custo total dos produtos', finance.costTotal === null ? 'Pendente' : money(finance.costTotal)],
-      ['Comissão de afiliado (se houver indicação)', finance.valid ? money(finance.commission) : 'Quantidade indisponível'],
+      ['Comissão de afiliado real no checkout (base: preço bruto)', finance.valid ? money(finance.commission) : 'Quantidade indisponível'],
+      ['Comissão de referência da planilha (base: custo de aquisição)',
+        finance.sheetCommission === null ? 'Pendente' : money(finance.sheetCommission)],
+      ['Lucro na lógica de referência da planilha (com comissão sobre compra)',
+        finance.sheetStyleProfit === null ? 'Pendente' : money(finance.sheetStyleProfit)],
       ['Lucro estimado — venda direta', finance.directProfit === null ? 'Pendente' : money(finance.directProfit)],
       ['Margem direta', finance.directMargin === null ? 'Pendente' : percent(finance.directMargin)],
       ['Lucro estimado — venda por afiliado', finance.affiliateProfit === null ? 'Pendente' : money(finance.affiliateProfit)],
@@ -309,7 +316,7 @@
 
     wrap.appendChild(element('p', 'rounded-xl bg-slate-100 border border-slate-200 p-3 text-sm text-slate-700',
       finance.costsReady
-        ? 'Resultados projetados com base nos custos e preços cadastrados. Comissão de afiliado é condicional; venda direta não tem comissão. Despesas futuras não informadas não estão incluídas. Nenhum valor foi alterado.'
+        ? 'A referência da planilha trata Serviço como acréscimo na formação do preço, não como despesa duplicada. A comissão da planilha utiliza o custo de aquisição; o checkout real usa o preço bruto da loja. Resultados estimados, sem despesas futuras não cadastradas. Nenhum valor foi alterado.'
         : 'Há custos privados pendentes: ' + finance.missing.join(', ') +
           '. O lucro e a margem ficam indisponíveis até preencher os valores reais ou 0,00 quando uma despesa não existir. Receita após comissão não é lucro.'));
     const stamp = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date());
@@ -347,12 +354,15 @@
     lines.push('Custo de aquisição: '+(privateRow?.acquisition_cost===null||privateRow?.acquisition_cost===undefined?'Pendente':money(privateRow.acquisition_cost)),
       'Frete de aquisição/un.: '+(privateRow?.supplier_shipping===null||privateRow?.supplier_shipping===undefined?'Pendente':money(privateRow.supplier_shipping)),
       'ICMS/un.: '+(privateRow?.icms_cost===null||privateRow?.icms_cost===undefined?'Pendente':money(privateRow.icms_cost)),
-      'Serviço/un.: '+(privateRow?.service_cost===null||privateRow?.service_cost===undefined?'Pendente':money(privateRow.service_cost)),
+      'Serviço/markup de preço: '+(privateRow?.service_cost===null||privateRow?.service_cost===undefined?'Pendente':money(privateRow.service_cost)),
       'Desconto fornecedor/un.: '+(privateRow?.supplier_discount===null||privateRow?.supplier_discount===undefined?'Pendente':money(privateRow.supplier_discount)),
       'Taxa pagamento/un.: '+(privateRow?.payment_fee===null||privateRow?.payment_fee===undefined?'Pendente':money(privateRow.payment_fee)));
     if (finance.valid && finance.costsReady) {
-      lines.push('Custo total/un.: '+money(finance.unitCost),
+      lines.push('Preço de referência pela composição da planilha: '+money(finance.sheetPrice),
+        'Custo efetivo total/un.: '+money(finance.unitCost),
         'Custo total na quantidade: '+money(finance.costTotal),
+        'Comissão da planilha (sobre custo da compra): '+money(finance.sheetCommission),
+        'Lucro usando comissão da planilha: '+money(finance.sheetStyleProfit),
         'Lucro projetado em venda direta: '+money(finance.directProfit),
         'Margem em venda direta: '+percent(finance.directMargin),
         'Lucro projetado em venda com afiliado: '+money(finance.affiliateProfit),
