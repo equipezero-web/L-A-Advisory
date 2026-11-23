@@ -303,16 +303,26 @@
   // Intercept only explicit product-calculation requests; other chat features remain unchanged.
   window.royalAiMaybeAnalyzeProductQuestion = async function (prompt) {
     const q = clean(prompt);
-    if (!/\b(analis|analise|analisar|calculo|calculos|calcule|calcular|desconto|atacado|varejo|comissao|estoque|preco|margem|lucro)\b/.test(q)) return null;
+    const intent = /\b(analise|analisar|analisa|calculo|calculos|calcule|calcular|descontos?|atacado|varejo|comissao|comissoes|estoques?|precos?|margem|lucros?)\b/.test(q);
+    if (!intent) return null;
     if (!choices.length) await window.royalAiLoadProductChoices();
+    // Resolve explicit full product names, taking the longest exact name.
+    // Never mix two independent product matches into one report.
     const matches = choices.filter(p => {
       const name = clean(p.name);
       return name.length >= 3 && q.includes(name);
-    });
+    }).sort((a,b) => clean(b.name).length - clean(a.name).length);
+    const bestLength = matches.length ? clean(matches[0].name).length : 0;
+    const bestMatches = matches.filter(p => clean(p.name).length === bestLength);
+    const hasProductReference = /\b(produto|item|peca|selecionado)\b/.test(q);
+    if (!matches.length && !hasProductReference) return null;
     let selected = null;
-    if (matches.length === 1) selected = matches[0];
-    else if (matches.length > 1) return 'Encontrei mais de um nome de produto na pergunta. Selecione um único produto no analisador para evitar misturar cálculos.';
-    else if (/\b(produto selecionado|este produto|desse produto|deste produto)\b/.test(q)) {
+    if (bestMatches.length === 1 && (!matches[1] ||
+        clean(matches[0].name).includes(clean(matches[1].name)))) {
+      selected = bestMatches[0];
+    } else if (matches.length > 1) {
+      return 'Encontrei mais de um produto na pergunta. Selecione um único item no analisador para evitar misturar cálculos.';
+    } else if (/\b(produto selecionado|este produto|desse produto|deste produto|item selecionado)\b/.test(q)) {
       selected = choices.find(p => String(p.id) === String(byId('royalAiProductSelect')?.value));
     }
     if (!selected) return 'Para uma análise precisa, informe o nome completo de UM produto cadastrado ou selecione-o no analisador Royal AI. Não utilizarei dados de produtos não identificados.';
