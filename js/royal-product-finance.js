@@ -272,7 +272,14 @@ window.royalFinanceRenderLedger=function(){
         await window.royalAiAnalyzeSelectedProduct?.(String(p.id));
       })();
     });
-    composeCell(tr,view);
+    const actions=create('div','flex flex-wrap gap-2 min-w-[145px]');
+    const edit=create('button','rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800','Editar');
+    edit.type='button';
+    edit.addEventListener('click',()=>{
+      if(typeof window.openAdminProductForm==='function')window.openAdminProductForm(String(p.id));
+    });
+    actions.append(edit,view);
+    composeCell(tr,actions);
     tbody.appendChild(tr);
     if(c.valid){seen++;totalRevenue=round(totalRevenue+c.revenue)}
     if(c.valid&&c.costsReady){complete++;totalCost=round(totalCost+c.costTotal);totalAffiliateProfit=round(totalAffiliateProfit+c.affiliateProfit)}
