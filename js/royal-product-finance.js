@@ -172,6 +172,25 @@ function calcUnit(p,row,qty) {
   // enquanto o checkout real usa o preço vigente da loja com o atacado.
   const sheetStyleProfit=valid&&costsReady&&sheetPrice!==null&&sheetCommission!==null?
     round(round(sheetPrice*quantity)-costTotal-sheetCommission):null;
+  // The payment_fee field is a *manual per-unit estimate*. For provider-specific
+  // comparisons replace it with the corresponding Mercado Pago reference fee;
+  // do not subtract both charges, or expected profit would be understated.
+  const pricing=window.royalMarketPricing;
+  const baseCostExcludingManualPaymentFee=costTotal!==null
+    ? round(costTotal-component.payment_fee*quantity):null;
+  const paymentScenarios=valid&&costsReady&&pricing
+    ? Object.fromEntries(pricing.methods.map(method=>[method.id,
+        pricing.scenario(revenue,baseCostExcludingManualPaymentFee,commission,method.id)]))
+    : null;
+  // 6% on top of the product price is a PRIVATE comparison, not an active fee
+  // or automatic change to Mercado Pago checkout.
+  const creditMarkupComparison=paymentScenarios?(()=>{
+    const simulatedGross=round(revenue*1.06);
+    const fee=pricing.merchantFee(simulatedGross,'credit1');
+    return {gross:simulatedGross,fee,net:round(simulatedGross-fee),
+      directProfit:round(simulatedGross-fee-baseCostExcludingManualPaymentFee),
+      affiliateProfit:round(simulatedGross-fee-baseCostExcludingManualPaymentFee-commission)};
+  })():null;
   const directMargin=directProfit!==null&&revenue>0?round(directProfit/revenue*100):null;
   const affiliateMargin=affiliateProfit!==null&&revenue>0?round(affiliateProfit/revenue*100):null;
   // As colunas K, L e M da planilha usam H × 3% e I × 3% (comissão
@@ -183,7 +202,8 @@ function calcUnit(p,row,qty) {
   }:null;
   return {valid,quantity,stock,retail,saleUnit,wholesaleRate,revenue,commissionRate,commission,
     costsReady,missing,component,unitCost,sheetPrice,costTotal,directProfit,affiliateProfit,
-    sheetCommission,sheetStyleProfit,directMargin,affiliateMargin,sheetThreePercent, supplier:row?.supplier_name||null,
+    sheetCommission,sheetStyleProfit,directMargin,affiliateMargin,sheetThreePercent,
+    paymentScenarios,creditMarkupComparison, supplier:row?.supplier_name||null,
     supplierUrl:row?.supplier_url||null,order:Number(row?.display_order)||0};
 }
 window.royalFinanceCompute = function(p,financeRow,analysisOrQty){
@@ -255,6 +275,11 @@ window.royalFinanceRenderLedger=function(){
     composeCell(tr,c.sheetStyleProfit===null?'Pendente':money(c.sheetStyleProfit));
     composeCell(tr,c.valid&&c.costsReady?money(c.directProfit):'Pendente',
       c.directProfit===null?'text-slate-500':c.directProfit<0?'text-red-700 font-semibold':'text-emerald-700 font-semibold');
+    for(const methodId of ['pix','credit1','credit7to12']){
+      const value=c.paymentScenarios?.[methodId]?.directProfit;
+      composeCell(tr,value===null||value===undefined?'Pendente':money(value),
+        value===null||value===undefined?'text-slate-500':value<0?'text-red-700 font-semibold':'text-emerald-700 font-semibold');
+    }
     composeCell(tr,c.valid&&c.costsReady?money(c.affiliateProfit):'Pendente',
       c.affiliateProfit===null?'text-slate-500':c.affiliateProfit<0?'text-red-700 font-semibold':'text-emerald-700 font-semibold');
     composeCell(tr,c.valid&&c.costsReady?percent(c.affiliateMargin):'Pendente');
