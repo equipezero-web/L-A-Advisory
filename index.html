@@ -1823,16 +1823,29 @@
 
                         <div class="w-20 h-1 gradient-gold rounded mt-3"></div>
 
-                        <p class="text-slate-500 mt-4 max-w-xl">
-                            Explore livremente o catálogo. O login será solicitado
-                            somente quando você decidir comprar ou adicionar um
-                            item ao carrinho.
-                        </p>
+
                     </div>
 
                 </div>
 
-                <!-- DEPARTAMENTOS INDEPENDENTES DA STORE ROYAL -->
+                <!-- FILTROS À ESQUERDA · CATÁLOGO À DIREITA -->
+                <div id="royalCatalogLayout" class="royal-catalog-layout">
+                    <div class="royal-catalog-mobile-filterbar">
+                        <button id="royalCatalogFiltersToggle" type="button"
+                                aria-expanded="false" aria-controls="royalCatalogSidebar"
+                                onclick="toggleRoyalCatalogFilters()">
+                            <i data-lucide="sliders-horizontal" aria-hidden="true"></i>
+                            Filtros da loja
+                            <i data-lucide="chevron-down" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <aside id="royalCatalogSidebar" class="royal-catalog-sidebar" aria-label="Filtros de produtos">
+                        <div class="royal-sidebar-heading">
+                            <h3>Filtrar produtos</h3>
+                            <button type="button" onclick="clearCatalogFilters()"
+                                    aria-label="Limpar todos os filtros">Limpar</button>
+                        </div>
+                        <p class="royal-sidebar-group-label">Coleção</p>
                 <div id="storeAudienceTabs" role="tablist" aria-label="Escolha a coleção da loja"
                      onkeydown="handleStoreAudienceKey(event)">
                     <button type="button" id="storeAudienceMasculino" class="store-audience-tab"
@@ -1854,7 +1867,6 @@
                         <span>Unissex / Outros</span><span class="store-audience-count" aria-hidden="true">Coleção</span>
                     </button>
                 </div>
-                <p id="storeAudienceHelper">Os produtos são exibidos somente na coleção selecionada. A divisão é feita exclusivamente pela categoria cadastrada. Itens sem classificação ficam em Unissex / Outros.</p>
                 <div class="royal-category-picker" aria-label="Selecionar categoria">
                     <div class="royal-category-field">
                             <label
@@ -1874,35 +1886,9 @@
                 <!-- FILTROS -->
                 <div
                     id="catalogFilters"
-                    class="hidden mb-10 p-5 sm:p-6 bg-slate-900 rounded-2xl border border-amber-500/20 shadow-xl"
+                    class="royal-filter-fields"
                 >
-                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-5">
-                        <div>
-                            <p class="text-sm text-amber-400 font-bold uppercase tracking-wider">
-                                Filtros e ordenação
-                            </p>
-
-                            <p class="text-xs text-slate-400 mt-1">
-                                Pesquise por categoria, preço, tamanho, cor,
-                                disponibilidade e relevância.
-                            </p>
-                        </div>
-
-                        <button
-                            type="button"
-                            onclick="clearCatalogFilters()"
-                            class="text-sm text-amber-400 hover:text-amber-300 font-bold flex items-center gap-2"
-                        >
-                            <i
-                                data-lucide="rotate-ccw"
-                                class="w-4 h-4"
-                            ></i>
-
-                            Limpar filtros
-                        </button>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="royal-filter-grid">
                         <div>
                             <label
                                 for="searchProduct"
@@ -1997,6 +1983,23 @@
                         </div>
 
                         <div>
+                            <label for="filterRating" class="block text-xs text-slate-300 font-bold mb-2">
+                                Avaliação dos clientes
+                            </label>
+                            <select id="filterRating" onchange="renderCatalog()"
+                                class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm outline-none focus:border-amber-500">
+                                <option value="all">Todas as avaliações</option>
+                                <option value="4">4 estrelas ou mais</option>
+                                <option value="3">3 estrelas ou mais</option>
+                                <option value="2">2 estrelas ou mais</option>
+                                <option value="1">1 estrela ou mais</option>
+                            </select>
+                            <p id="royalRatingFilterStatus" class="royal-rating-filter-status" role="status" aria-live="polite">
+                                Somente avaliações aprovadas.
+                            </p>
+                        </div>
+
+                        <div>
                             <label
                                 for="filterStock"
                                 class="block text-xs text-slate-300 font-bold mb-2"
@@ -2051,6 +2054,9 @@
                                 <option value="highest-price">
                                     Maior preço
                                 </option>
+                                <option value="best-rated">
+                                    Melhor avaliados
+                                </option>
 
                                 <option value="name-az">
                                     Nome: A–Z
@@ -2063,17 +2069,13 @@
                         </div>
                     </div>
                 </div>
+                        <button class="royal-filter-mobile-apply" type="button"
+                                onclick="toggleRoyalCatalogFilters(false)">Ver produtos</button>
+                    </aside>
+                    <div class="royal-catalog-results" id="royalCatalogResults">
 
                 <!-- INFORMAÇÃO -->
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-                    <p
-                        id="catalogResultInfo"
-                        aria-live="polite" aria-atomic="true"
-                        class="text-sm text-slate-500"
-                    >
-                        Carregando produtos...
-                    </p>
-
                     <div
                         id="affiliateCatalogStatus"
                         class="hidden text-xs px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-700 font-bold"
@@ -2087,6 +2089,8 @@
                     <!-- Grade contínua: até 60 produtos por página -->
                 </div>
                 <div id="catalogPagination" class="royal-catalog-pagination" aria-live="polite"></div>
+                    </div><!-- /royal-catalog-results -->
+                </div><!-- /royal-catalog-layout -->
 
                 <div id="virtualStoreOpenWrap" class="mt-4 flex justify-center">
                     <button type="button" id="openVirtualStoreButton" onclick="openVirtualStore()" class="gradient-gold text-slate-900 px-7 py-4 rounded-xl font-bold hover:shadow-gold transition inline-flex items-center gap-2">
@@ -13417,16 +13421,123 @@ function setStoreAudience(audience) {
     clearCatalogFilters();
 }
 function handleStoreAudienceKey(event) {
-    if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+    if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(event.key))return;
     const tabs=Array.from(document.querySelectorAll('#storeAudienceTabs .store-audience-tab'));
     const current=tabs.findIndex(tab=>tab.dataset.storeAudience===selectedStoreAudience);
     const next=event.key==='Home'?0:event.key==='End'?tabs.length-1:
-      (current+(event.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;
+      (current+(['ArrowRight','ArrowDown'].includes(event.key)?1:-1)+tabs.length)%tabs.length;
     event.preventDefault();
     const tab=tabs[next];
     if(!tab)return;
     setStoreAudience(tab.dataset.storeAudience);
     tab.focus();
+}
+
+
+/* Store Royal: left filters on desktop; accessible expandable filters on small screens. */
+function toggleRoyalCatalogFilters(force) {
+    const sidebar = document.getElementById('royalCatalogSidebar');
+    const toggle = document.getElementById('royalCatalogFiltersToggle');
+    if (!sidebar || !toggle) return;
+    const open = typeof force === 'boolean' ? force : !sidebar.classList.contains('is-open');
+    sidebar.classList.toggle('is-open', open);
+    toggle.setAttribute('aria-expanded', String(open));
+    if (open && window.matchMedia('(max-width: 899px)').matches) {
+        sidebar.scrollIntoView({behavior:'smooth',block:'start'});
+    } else if (!open && window.matchMedia('(max-width: 899px)').matches) {
+        toggle.focus({preventScroll:true});
+    }
+}
+document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && document.getElementById('royalCatalogSidebar')?.classList.contains('is-open')) {
+        toggleRoyalCatalogFilters(false);
+    }
+});
+
+function syncStoreFacetOptions(products) {
+    const audienceProducts = products.filter(p => p.active !== false && getProductAudience(p) === selectedStoreAudience);
+    const expand = input => {
+        if (Array.isArray(input)) return input.flatMap(expand);
+        if (typeof input === 'string' || typeof input === 'number') {
+            return String(input).split(/[;,|]/).map(t => t.trim()).filter(Boolean);
+        }
+        return [];
+    };
+    for (const field of [
+        {id:'filterSize', label:'Todos os tamanhos', sources:p => [p.size,p.sizes,p.variations?.size]},
+        {id:'filterColor',label:'Todas as cores',sources:p => [p.color,p.colors,p.variations?.color]}
+    ]) {
+        const select = document.getElementById(field.id);
+        if (!select) continue;
+        const values = [...new Set(audienceProducts.flatMap(p=>field.sources(p).flatMap(expand)))].sort(
+            (a,b) => a.localeCompare(b,'pt-BR',{numeric:true})
+        );
+        const signature = JSON.stringify([selectedStoreAudience,values]);
+        if (select.dataset.facetSignature === signature) continue;
+        const selected = select.value;
+        select.replaceChildren(new Option(field.label,'all'),...values.map(value=>new Option(value,value)));
+        if (!values.length) {
+            select.add(new Option('Nenhuma opção cadastrada','unavailable',false,false));
+            select.options[1].disabled = true;
+        }
+        select.value = values.includes(selected) ? selected : 'all';
+        select.dataset.facetSignature = signature;
+    }
+}
+
+// Ratings are based exclusively on approved reviews from Supabase.
+// No inferred, synthetic or unmoderated ratings are used in filtering/sorting.
+let storeCatalogRatingMap = null;
+let storeCatalogRatingsLoading = false;
+let storeCatalogRatingsError = false;
+async function loadStoreCatalogRatings() {
+    if (storeCatalogRatingMap || storeCatalogRatingsLoading || storeCatalogRatingsError) return;
+    storeCatalogRatingsLoading = true;
+    const notice = document.getElementById('royalRatingFilterStatus');
+    if (notice) notice.textContent = 'Carregando avaliações aprovadas…';
+    try {
+        const aggregation = new Map();
+        const pageSize = 500;
+        let completed = false;
+        for (let offset=0;offset<20000;offset+=pageSize) {
+            const {data,error} = await supabaseClient.from('reviews')
+                .select('product_id,rating')
+                .eq('status','approved')
+                .order('id',{ascending:true})
+                .range(offset,offset+pageSize-1);
+            if (error) throw error;
+            const rows = Array.isArray(data) ? data : [];
+            for (const row of rows) {
+                const rating = Number(row.rating);
+                if (row.product_id == null || !Number.isFinite(rating) || rating < 1 || rating > 5) continue;
+                const id = String(row.product_id);
+                const current = aggregation.get(id) || {total:0,count:0};
+                current.total += rating;
+                current.count++;
+                aggregation.set(id,current);
+            }
+            if (rows.length < pageSize) {completed=true;break;}
+        }
+        if (!completed) throw new Error('O volume de avaliações excede a capacidade do filtro');
+        storeCatalogRatingMap = aggregation;
+        if (notice) notice.textContent = 'Filtro baseado somente em avaliações aprovadas.';
+    } catch (error) {
+        storeCatalogRatingsError = true;
+        if (notice) notice.textContent = 'Não foi possível carregar avaliações. Tente novamente mais tarde.';
+        console.warn('Filtro de avaliações indisponível:', error);
+    } finally {
+        storeCatalogRatingsLoading = false;
+        renderCatalog();
+    }
+}
+function retryStoreCatalogRatings() {
+    storeCatalogRatingsError = false;
+    storeCatalogRatingMap = null;
+    renderCatalog();
+}
+function storeCatalogAverageRating(product) {
+    const entry = storeCatalogRatingMap?.get(String(product.id));
+    return entry?.count ? entry.total / entry.count : 0;
 }
 
 const CATALOG_PAGE_SIZE = 60;
@@ -13471,6 +13582,7 @@ function clearCatalogFilters() {
         filterColor: 'all',
         filterSize: 'all',
         filterStock: 'all',
+        filterRating: 'all',
         sortProducts: 'relevance'
     };
 
@@ -13492,6 +13604,7 @@ function renderCatalog() {
     const products = Array.isArray(state.products) ? state.products : [];
     syncStoreAudienceTabs(products);
     syncStoreCategoryOptions(products);
+    syncStoreFacetOptions(products);
 
     const searchTerm = (document.getElementById('searchProduct')?.value || '').trim().toLocaleLowerCase('pt-BR');
     const categoryFilter = document.getElementById('filterCategory')?.value || 'all';
@@ -13502,11 +13615,26 @@ function renderCatalog() {
     const colorFilter = document.getElementById('filterColor')?.value || 'all';
     const sizeFilter = document.getElementById('filterSize')?.value || 'all';
     const stockFilter = document.getElementById('filterStock')?.value || 'all';
+    const ratingFilter = document.getElementById('filterRating')?.value || 'all';
     const sortMode = document.getElementById('sortProducts')?.value || 'relevance';
-    const filterSignature = JSON.stringify([selectedStoreAudience,searchTerm,categoryFilter,minPriceValue,maxPriceValue,colorFilter,sizeFilter,stockFilter,sortMode]);
+    const filterSignature = JSON.stringify([selectedStoreAudience,searchTerm,categoryFilter,minPriceValue,maxPriceValue,colorFilter,sizeFilter,stockFilter,ratingFilter,sortMode]);
     if (filterSignature !== lastCatalogFilterSignature) {
         currentCatalogPage = 1;
         lastCatalogFilterSignature = filterSignature;
+    }
+
+    if (ratingFilter !== 'all' || sortMode === 'best-rated') {
+        if (!storeCatalogRatingMap) {
+            if (storeCatalogRatingsError) {
+                container.innerHTML = '<div class="store-empty-collection" role="status"><strong>Avaliações temporariamente indisponíveis.</strong><p>Não é possível filtrar por avaliações agora.</p><button type="button" class="royal-rating-retry" onclick="retryStoreCatalogRatings()">Tentar novamente</button></div>';
+            } else {
+                container.innerHTML = '<div class="store-empty-collection" role="status">Consultando avaliações aprovadas…</div>';
+                if (!storeCatalogRatingsLoading) void loadStoreCatalogRatings();
+            }
+            const pagination = document.getElementById('catalogPagination');
+            if (pagination) pagination.replaceChildren();
+            return;
+        }
     }
 
     const availableProducts = products.filter(product => {
@@ -13529,6 +13657,7 @@ function renderCatalog() {
         if (sizeFilter !== 'all' && !sizes.some(value => value === String(sizeFilter).toLocaleLowerCase('pt-BR'))) return false;
         if (stockFilter === 'available' && stock <= 0) return false;
         if (stockFilter === 'out-of-stock' && stock > 0) return false;
+        if (ratingFilter !== 'all' && storeCatalogAverageRating(product) < Number(ratingFilter)) return false;
         // Produtos sem estoque continuam visíveis com indicação de indisponibilidade.
         return true;
     }).sort((a, b) => {
@@ -13537,6 +13666,7 @@ function renderCatalog() {
         switch (sortMode) {
             case 'lowest-price': return priceA - priceB;
             case 'highest-price': return priceB - priceA;
+            case 'best-rated': return storeCatalogAverageRating(b) - storeCatalogAverageRating(a);
             case 'name-az': return String(a.name || '').localeCompare(String(b.name || ''), 'pt-BR');
             case 'name-za': return String(b.name || '').localeCompare(String(a.name || ''), 'pt-BR');
             case 'newest': return new Date(b.createdAt || b.created_at || 0) - new Date(a.createdAt || a.created_at || 0);
@@ -13558,8 +13688,6 @@ function renderCatalog() {
             audienceCount ? 'Limpe os filtros para voltar a ver os produtos desta coleção.' :
             'Novos produtos aparecerão aqui quando forem cadastrados com a categoria correspondente.';
         container.innerHTML = '<div class="store-empty-collection"><strong>' + catalogTitle + '</strong><p>' + catalogHint + '</p></div>';
-        const info = document.getElementById('catalogResultInfo');
-        if (info) info.textContent = catalogTitle;
         lucide.createIcons();
         return;
     }
@@ -13579,9 +13707,6 @@ function renderCatalog() {
     `).join('');
     const pagination = document.getElementById('catalogPagination');
     if (pagination) pagination.innerHTML = renderCatalogPagination(pageResult);
-    const info = document.getElementById('catalogResultInfo');
-    if (info) info.textContent = 'Exibindo ' + (pageResult.start + 1) + '–' + (pageResult.start + pageResult.items.length) +
-       ' de ' + pageResult.totalCount + ' produtos na coleção ' + ({masculino:'masculina',feminino:'feminina',outros:'unissex / outros'}[selectedStoreAudience]) + '.';
 
     lucide.createIcons();
     if (typeof window.laRefreshMotion === 'function') window.laRefreshMotion();
@@ -13891,6 +14016,12 @@ function escapeAttribute(value) {
     }
 
     function openCatalogFilters() {
+        const sidebar = document.getElementById('royalCatalogSidebar');
+        if (sidebar) {
+            toggleRoyalCatalogFilters(true);
+            sidebar.scrollIntoView({behavior:'smooth',block:'nearest'});
+            return;
+        }
         const filters = document.getElementById('catalogFilters');
         const modal = document.getElementById('catalogFiltersModal');
 
@@ -13921,6 +14052,10 @@ function escapeAttribute(value) {
     }
 
     function closeCatalogFilters() {
+        if (document.getElementById('royalCatalogSidebar')) {
+            toggleRoyalCatalogFilters(false);
+            return;
+        }
         const modal = document.getElementById('catalogFiltersModal');
 
         if (modal) {
@@ -15079,7 +15214,7 @@ body.guest-mode #afiliados { display: none !important; }
 <script src="./js/royal-product-page.js?v=20261123-1"></script>
 <script src="./js/royal-analytics.js?v=1" defer></script>
 
-<link rel="stylesheet" href="./assets/royal-storefront-upgrade.css?v=20261123-1">
+<link rel="stylesheet" href="./assets/royal-storefront-upgrade.css?v=20261123-2">
 <script src="./js/royal-storefront-ui.js?v=20261120-1"></script>
 <script src="./js/royal-storefront-state.js?v=20261119-3"></script>
 
