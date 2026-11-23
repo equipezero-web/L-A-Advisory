@@ -6883,10 +6883,12 @@ data-lenis-prevent-touch
                                     <th class="p-3">Serviço/un.</th>
                                     <th class="p-3">Desconto forn.</th>
                                     <th class="p-3">Taxa/un.</th>
+                                    <th class="p-3">Preço ref. H</th>
                                     <th class="p-3">Venda/un.</th>
                                     <th class="p-3">Receita total</th>
                                     <th class="p-3">Comissão afiliado*</th>
                                     <th class="p-3">Custo total/un.</th>
+                                    <th class="p-3">Lucro ref. J</th>
                                     <th class="p-3">Lucro direto</th>
                                     <th class="p-3">Lucro afiliado</th>
                                     <th class="p-3">Margem afiliado</th>
@@ -6899,7 +6901,7 @@ data-lenis-prevent-touch
                     <p id="royalFinanceLedgerTotals" class="rounded-xl bg-slate-50 border border-slate-200 p-3 text-sm text-slate-800">
                         Os totais aparecerão após carregar o catálogo e os custos.
                     </p>
-                    <p class="text-xs text-slate-600">* Comissão de afiliado é simulada apenas quando houver indicação válida; lucro direto não desconta comissão. O frete e as demais despesas cadastradas são considerados por unidade. Campos vazios não são tratados como custo zero. A venda real e a baixa de estoque continuam sob controle do checkout.</p>
+                    <p class="text-xs text-slate-600">* Serviço é acréscimo de preço (referência F da planilha), não um segundo custo. Lucro ref. J usa comissão baseada no custo de compra; lucro afiliado usa a comissão real do checkout baseada no preço bruto. Frete e taxas são cadastrados por unidade. Campos vazios não são considerados zero. A venda real e a baixa de estoque continuam sob controle do checkout.</p>
                 </section>
             </section>
 
@@ -7528,7 +7530,7 @@ data-lenis-prevent-touch
                                     class="mt-1 block w-full rounded-xl border border-slate-300 bg-white p-3 text-sm">
                             </label>
                             <label class="text-xs font-bold text-slate-700" for="royalFinanceService">
-                                Serviços / despesas (R$) / un.
+                                Serviço / acréscimo de preço (R$) / un.
                                 <input id="royalFinanceService" type="text" inputmode="decimal" placeholder="0,00" autocomplete="off"
                                     class="mt-1 block w-full rounded-xl border border-slate-300 bg-white p-3 text-sm">
                             </label>
