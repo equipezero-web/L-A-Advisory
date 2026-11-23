@@ -142,8 +142,11 @@ function calcUnit(p,row,qty) {
   const quantity=Number(qty);
   const valid=Number.isInteger(quantity)&&quantity>0&&quantity<=Math.min(stock,100);
   const gross=Number(p.price)||0;
-  const retail=typeof calculateFinalPrice==='function'?calculateFinalPrice(p):
-    (Number(p.salePrice)>0?round(Number(p.salePrice)):round(gross*(1-Number(p.discount||0)/100)));
+  const storedSale=Number(p.salePrice??p.sale_price);
+  const baseRetail=Number.isFinite(storedSale)&&storedSale>0
+    ? round(storedSale):round(gross*(1-Number(p.discount||0)/100));
+  const hasFixedMarkup=p.fixedMarkup6===true||p.fixed_markup_6_enabled===true;
+  const retail=round(baseRetail*(hasFixedMarkup?1.06:1));
   const wholesaleRate=valid&&typeof getStoreWholesaleRate==='function'?getStoreWholesaleRate(quantity):
     valid?(quantity>=70?5:quantity>=40?4:quantity>=10?3:0):0;
   const saleUnit=round(retail*(1-wholesaleRate/100));
@@ -182,12 +185,11 @@ function calcUnit(p,row,qty) {
     ? Object.fromEntries(pricing.methods.map(method=>[method.id,
         pricing.scenario(revenue,baseCostExcludingManualPaymentFee,commission,method.id)]))
     : null;
-  // 6% on top of the product price is a PRIVATE comparison, not an active fee
-  // or automatic change to Mercado Pago checkout.
+  // For marked products this is already the actual revenue; never add 6% twice.
   const creditMarkupComparison=paymentScenarios?(()=>{
-    const simulatedGross=round(revenue*1.06);
+    const simulatedGross=hasFixedMarkup?revenue:round(revenue*1.06);
     const fee=pricing.merchantFee(simulatedGross,'credit1');
-    return {gross:simulatedGross,fee,net:round(simulatedGross-fee),
+    return {gross:simulatedGross,applied:hasFixedMarkup,fee,net:round(simulatedGross-fee),
       directProfit:round(simulatedGross-fee-baseCostExcludingManualPaymentFee),
       affiliateProfit:round(simulatedGross-fee-baseCostExcludingManualPaymentFee-commission)};
   })():null;
