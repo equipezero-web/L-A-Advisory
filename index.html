@@ -9851,6 +9851,11 @@ function openNavigationModal() {
                 alert('Seu carrinho está vazio.');
                 return;
             }
+            const stockIssue = getStoreCartStockIssue();
+            if (stockIssue) {
+                alert(stockIssue);
+                return;
+            }
             if (wholesaleCheckoutPending()) {
                 alert(wholesaleCheckoutPendingMessage());
                 return;
@@ -10083,6 +10088,8 @@ function openNavigationModal() {
             const paymentMessage = document.getElementById('checkoutPaymentMessage');
 
             try {
+                const stockIssue = getStoreCartStockIssue();
+                if (stockIssue) throw new Error(stockIssue);
                 if (wholesaleCheckoutPending()) throw new Error(wholesaleCheckoutPendingMessage());
                 if (button) {
                     button.disabled = true;
@@ -10197,6 +10204,8 @@ function openNavigationModal() {
             if (event?.preventDefault) event.preventDefault();
 
             try {
+                const stockIssue = getStoreCartStockIssue();
+                if (stockIssue) throw new Error(stockIssue);
                 if (wholesaleCheckoutPending()) throw new Error(wholesaleCheckoutPendingMessage());
                 const customer = await collectCheckoutCustomer();
                 alert('Confira os dados e finalize o pagamento pelo formulário seguro do Mercado Pago abaixo.');
@@ -10586,7 +10595,9 @@ function openNavigationModal() {
                     <img src="${escapeAttribute(item.image)}" alt="${escapeAttribute(item.name)}" class="w-16 h-16 object-cover rounded-lg">
                     <div class="flex-1 min-w-0">
                         <p class="font-bold text-sm text-slate-900 truncate">${escapeHtml(item.name)}</p>
-                        <p class="text-xs text-slate-500">${formatCurrency(getStoreCartLine(item).unit)} un. · ${getStoreCartLine(item).rate ? 'Atacado -' + getStoreCartLine(item).rate + '%' : 'Varejo'}</p>
+                        <p class="text-xs ${getStoreCartLine(item).stockOk ? 'text-slate-500' : 'text-red-600 font-bold'}">${getStoreCartLine(item).stockOk
+                            ? formatCurrency(getStoreCartLine(item).unit) + ' un. · ' + (getStoreCartLine(item).rate ? 'Atacado -' + getStoreCartLine(item).rate + '%' : 'Varejo')
+                            : 'Estoque insuficiente · disponível: ' + getStoreCartLine(item).stockLimit + ' un.'}</p>
                     </div>
                     <div class="flex items-center gap-2">
                         <button type="button" onclick="updateCartItemQuantity('${item.id}', ${item.quantity - 1})" class="w-7 h-7 rounded-lg bg-slate-200 hover:bg-slate-300 flex items-center justify-center"><i data-lucide="minus" class="w-3 h-3"></i></button>
@@ -10623,6 +10634,16 @@ function openNavigationModal() {
             }
             pending.textContent = wholesaleCheckoutPending() ? 'Atacado: pagamento aguardando ativação do servidor.' : '';
             pending.hidden = !wholesaleCheckoutPending();
+            let stockWarning = document.getElementById('royalCartStockWarning');
+            if (!stockWarning) {
+                stockWarning = document.createElement('p');
+                stockWarning.id = 'royalCartStockWarning';
+                stockWarning.className = 'mt-2 text-xs font-bold text-red-700';
+                pending.insertAdjacentElement('afterend', stockWarning);
+            }
+            const stockIssue = getStoreCartStockIssue();
+            stockWarning.textContent = stockIssue || '';
+            stockWarning.hidden = !stockIssue;
         }
 
         function updateCartIcon() {
@@ -13392,12 +13413,27 @@ function calculateStoreWholesaleUnitPrice(retailPrice, quantity) {
 function getStoreCartLine(item) {
     const qty = Math.max(0, Number(item?.quantity) || 0);
     const product = state.products.find(p => String(p.id) === String(item?.id));
+    const stockLimit = product ? Math.min(100, Math.max(0, Math.trunc(Number(product.stock) || 0))) : 0;
+    const stockOk = Number.isInteger(qty) && qty >= 1 && qty <= stockLimit;
     const retail = product ? calculateFinalPrice(product) : roundStoreMoney(item?.price);
-    const rate = getStoreWholesaleRate(qty);
-    const unit = calculateStoreWholesaleUnitPrice(retail, qty);
+    // No wholesale discount if the requested stock is not available.
+    const rate = stockOk ? getStoreWholesaleRate(qty) : 0;
+    const unit = calculateStoreWholesaleUnitPrice(retail, stockOk ? qty : 1);
     const total = roundStoreMoney(unit * qty);
     const originalTotal = roundStoreMoney(retail * qty);
-    return {qty, retail, rate, unit, total, saving:roundStoreMoney(originalTotal - total)};
+    return {qty, retail, rate, unit, total, stockLimit, stockOk,
+        saving:roundStoreMoney(originalTotal - total)};
+}
+function getStoreCartStockIssue() {
+    for (const item of state.cart) {
+        const line = getStoreCartLine(item);
+        if (!line.stockOk) {
+            return 'Estoque indisponível para ' + String(item.name || 'este produto') +
+                ': ' + line.stockLimit + ' unidade(s) disponível(is), ' +
+                line.qty + ' no carrinho. Ajuste a quantidade antes de continuar.';
+        }
+    }
+    return null;
 }
 function getStoreCartTotals() {
     return state.cart.reduce((acc,item) => {
@@ -15275,12 +15311,12 @@ body.guest-mode #afiliados { display: none !important; }
 <script src="./js/royal-ai-image-upload.js"></script>
 
 <script src="./js/royal-product-image-upload.js"></script>
-<script src="./js/royal-product-page.js?v=20261123-1"></script>
+<script src="./js/royal-product-page.js?v=20261123-2"></script>
 <script src="./js/royal-analytics.js?v=1" defer></script>
 
 <link rel="stylesheet" href="./assets/royal-storefront-upgrade.css?v=20261123-4">
 <script src="./js/royal-storefront-ui.js?v=20261123-2"></script>
-<script src="./js/royal-storefront-state.js?v=20261119-3"></script>
+<script src="./js/royal-storefront-state.js?v=20261123-4"></script>
 
 <!-- Native scroll isolation for account, checkout, admin and dynamic product overlays.
      Attribute instructs Lenis not to intercept interactions inside scrolling panels. -->
