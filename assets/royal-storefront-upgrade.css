@@ -2515,3 +2515,50 @@ header.royal-glass-header .royal-mobile-search-toggle {
    padding:8px 4px!important;
  }
 }
+
+
+/* Store Royal · Correção da rolagem interna dos filtros.
+   O painel possui sua própria área de scroll nativo e impede o encadeamento
+   da rolagem à vitrine. No celular, o painel expandido também rola sozinho. */
+@media(min-width:900px) {
+ #loja #royalCatalogSidebar.royal-catalog-sidebar {
+   position:sticky!important;
+   top:12px!important;
+   align-self:start!important;
+   height:auto!important;
+   max-height:calc(100vh - 24px)!important;
+   max-height:calc(100dvh - 24px)!important;
+   min-height:0!important;
+   overflow-x:hidden!important;
+   overflow-y:auto!important;
+   overscroll-behavior-x:none!important;
+   overscroll-behavior-y:contain!important;
+   -webkit-overflow-scrolling:touch!important;
+   touch-action:pan-y!important;
+   scrollbar-gutter:stable!important;
+ }
+}
+@media(max-width:899px) {
+ #loja #royalCatalogSidebar.royal-catalog-sidebar.is-open {
+   position:relative!important;
+   top:auto!important;
+   max-height:70vh!important;
+   max-height:min(72dvh,660px)!important;
+   min-height:0!important;
+   overflow-x:hidden!important;
+   overflow-y:auto!important;
+   overscroll-behavior-y:contain!important;
+   -webkit-overflow-scrolling:touch!important;
+   touch-action:pan-y!important;
+   scrollbar-gutter:stable!important;
+   scroll-behavior:auto!important;
+ }
+}
+/* A scrollbar acompanha a paleta champanhe e continua funcional. */
+#loja #royalCatalogSidebar.royal-catalog-sidebar {
+ scrollbar-width:thin!important;
+ scrollbar-color:#b99a65 #f5ecdd!important;
+}
+#loja #royalCatalogSidebar.royal-catalog-sidebar::-webkit-scrollbar{width:7px}
+#loja #royalCatalogSidebar.royal-catalog-sidebar::-webkit-scrollbar-track{background:#f5ecdd;border-radius:99px}
+#loja #royalCatalogSidebar.royal-catalog-sidebar::-webkit-scrollbar-thumb{background:#b99a65;border-radius:99px}
