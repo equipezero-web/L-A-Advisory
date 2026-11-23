@@ -388,6 +388,56 @@
     }
   }
 
+
+  // A barra mobile reutiliza os mesmos data-action/cart e data-action/buy
+  // da página; não cria outra operação financeira ou outro checkout.
+  function updateMobilePurchaseDock(dialog, retail, rawQuantity) {
+    const dock=dialog.querySelector('.royal-mobile-product-dock');
+    if (!dock) return;
+    const qty=Number(rawQuantity);
+    const max=Number(dialog.querySelector('#royalProductQty')?.max||100);
+    const valid=Number.isInteger(qty)&&qty>=1&&qty<=max;
+    const rate=valid&&typeof getStoreWholesaleRate==='function'?getStoreWholesaleRate(qty):0;
+    const unit=valid&&typeof calculateStoreWholesaleUnitPrice==='function'
+      ?calculateStoreWholesaleUnitPrice(retail,qty):retail;
+    const price=dock.querySelector('.royal-mobile-dock-price');
+    const info=dock.querySelector('.royal-mobile-dock-meta');
+    const notice=dock.querySelector('.royal-mobile-dock-notice');
+    if(price)price.textContent=money(unit);
+    if(info)info.textContent=valid
+      ? qty+' un. · '+money(Math.round(unit*qty*100)/100)+(rate?' · Atacado -'+rate+'%':' · Varejo')
+      : 'Confira a quantidade selecionada';
+    const pending=rate>0&&!window.royalWholesalePaymentReady;
+    if(notice){
+      notice.textContent=pending?'Pagamento de atacado em ativação; adicionar ao carrinho continua disponível.':'';
+      notice.hidden=!pending;
+    }
+    dock.querySelectorAll('button[data-action]').forEach(button=>{
+      button.disabled=!valid || (button.dataset.action==='buy'&&pending);
+      if(button.dataset.action==='buy'){
+        button.title=pending?'Pagamento de atacado temporariamente indisponível':'Comprar agora';
+      }
+    });
+  }
+
+  function addMobilePurchaseDock(dialog, product, retail, maxQty, affiliate) {
+    if(affiliate||maxQty<1)return;
+    dialog.insertAdjacentHTML('beforeend',
+      '<aside class="royal-mobile-product-dock" aria-label="Comprar '+attr(product.name)+'">'+
+        '<div class="royal-mobile-dock-summary">'+
+          '<div><span class="royal-mobile-dock-label">Preço por unidade</span>'+
+          '<strong class="royal-mobile-dock-price">'+money(retail)+'</strong></div>'+
+          '<span class="royal-mobile-dock-meta"></span>'+
+          '<span class="royal-mobile-dock-notice" role="status" hidden></span>'+
+        '</div>'+
+        '<div class="royal-mobile-dock-actions">'+
+          '<button type="button" class="royal-p-primary" data-action="cart" aria-label="Adicionar ao carrinho">Carrinho</button>'+
+          '<button type="button" class="royal-p-secondary" data-action="buy">Comprar agora</button>'+
+        '</div>'+
+      '</aside>');
+    updateMobilePurchaseDock(dialog,retail,1);
+  }
+
   function createPage(product, updateHistory) {
     if (!product) return false;
     if (isOpen()) removePage(false);
@@ -436,6 +486,7 @@
           '</section></div></div>';
     enhanceProductPage(dialog, product, gallery, sale, oldPrice, stock);
     updateWholesalePreview(dialog, sale, 1);
+    addMobilePurchaseDock(dialog, product, sale, maxQty, isAffiliate);
     document.body.appendChild(dialog);
     document.body.classList.add('account-modal-open');
     document.documentElement.classList.add('account-modal-open');
@@ -447,8 +498,8 @@
     if (scroller) scroller.scrollTop = 0;
     const qtyInput = dialog.querySelector('#royalProductQty');
     if (qtyInput) {
-      qtyInput.addEventListener('input', () => updateWholesalePreview(dialog,sale,qtyInput.value));
-      qtyInput.addEventListener('change', () => updateWholesalePreview(dialog,sale,qtyInput.value));
+      qtyInput.addEventListener('input', () => {updateWholesalePreview(dialog,sale,qtyInput.value);updateMobilePurchaseDock(dialog,sale,qtyInput.value);});
+      qtyInput.addEventListener('change', () => {updateWholesalePreview(dialog,sale,qtyInput.value);updateMobilePurchaseDock(dialog,sale,qtyInput.value);});
     }
     // Horizontal swipes change photos; vertical scrolling remains completely native.
     const photoSurface = dialog.querySelector('.royal-product-photo');
@@ -531,6 +582,7 @@
       if (action === 'increase' || action === 'decrease') {
         input.value = String(Math.max(1, Math.min(maxQty, Number(input.value || 1) + (action === 'increase' ? 1 : -1))));
         updateWholesalePreview(dialog, sale, input.value);
+        updateMobilePurchaseDock(dialog, sale, input.value);
         return;
       }
       if (action === 'cart' || action === 'buy') {
