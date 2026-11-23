@@ -109,7 +109,8 @@
   function allSearchMatches(value){
     const query=String(value||'').trim().toLocaleLowerCase('pt-BR');
     if(query.length<2 || typeof state==='undefined')return [];
-    return (state.products||[]).filter(p=>p.active!==false && [p.name,p.description,p.category,p.brand].filter(Boolean).join(' ').toLocaleLowerCase('pt-BR').includes(query));
+    return (state.products||[]).filter(p=>p.active!==false &&
+      (window.royalProductSearchText?.(p)||[p.name,p.description,p.category,p.brand].filter(Boolean).join(' ').toLocaleLowerCase('pt-BR')).includes(query));
   }
   window.royalHeaderSearchInput=function(value){
     const results=byId('royalSearchSuggestions');if(!results)return;
@@ -123,7 +124,9 @@
       results.appendChild(option);
     }
     if(value.trim().length>=2){
-      const all=element('button','royal-search-result royal-search-all','Ver resultados no catálogo');
+      const lang=document.documentElement.lang;
+      const allLabel=lang==='en'?'View all results in the catalog':lang==='es'?'Ver todos los resultados en el catálogo':'Ver resultados no catálogo';
+      const all=element('button','royal-search-result royal-search-all',allLabel);
       all.type='button';all.onclick=window.royalSearchGo;results.appendChild(all);
     }
     results.hidden=!results.children.length;

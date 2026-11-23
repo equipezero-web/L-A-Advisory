@@ -11,6 +11,13 @@
    return p&&v&&v.source===source(p)?v.content:null;
  }
  window.royalProductLabel=(p,field)=>p?(translated(p.id,language())?.[field]||p[field]||''):'';
+ // Search across all original and translated fields without changing the product record.
+ window.royalProductSearchText=p=>{
+  if(!p)return '';
+  const v=translated(p.id,language());
+  return [p.name,p.description,p.category,p.brand,v?.name,v?.description,v?.category]
+   .filter(Boolean).join(' ').toLocaleLowerCase('pt-BR');
+ };
  const DICT={
   'Voltar à loja':['Back to store','Volver a la tienda'],
   'Favoritar':['Favorite','Favorito'],'Favoritado':['Favorited','Favorito guardado'],
@@ -168,12 +175,17 @@
  }
  async function load(ids,lang){
   const missing=[...new Set(ids.map(String))].filter(id=>product(id)&&!translated(id,lang));
-  for(let i=0;i<missing.length;i+=15){
-   const batch=missing.slice(i,i+15),key=lang+':'+batch.join(',');
+  for(let i=0;i<missing.length;i+=5){
+   const batch=missing.slice(i,i+5),key=lang+':'+batch.join(',');
    if(inFlight.has(key)){await inFlight.get(key);continue;}
    const task=request(batch,lang);inFlight.set(key,task);
    try{await task;}finally{inFlight.delete(key);}
-   if(language()===lang){cards();detail();}
+   if(language()===lang){
+    cards();detail();
+    const search=document.getElementById('royalHeaderSearch');
+    if(search?.value?.trim().length>=2 && typeof window.royalHeaderSearchInput==='function')
+     window.royalHeaderSearchInput(search.value);
+   }
   }
  }
  window.royalTranslateVisibleProducts=async function(){
@@ -183,7 +195,10 @@
   const ids=[...document.querySelectorAll('#catalogContainer .royal-image-only-card[data-product-id]')].map(e=>e.dataset.productId);
   const dialog=document.getElementById('productDetailsModal');
   if(dialog?.dataset.productId)ids.unshift(dialog.dataset.productId);
-  try{await load(ids,lang);}
+  // Translate the visible collection first, then the other active departments.
+  // This also makes search suggestions work in the chosen language across the store.
+  const allActive=catalogue().filter(p=>p.active!==false).map(p=>String(p.id));
+  try{await load([...ids,...allActive],lang);}
   catch(e){console.warn('Store Royal translations:',String(e));notice('Tradução indisponível; exibindo títulos originais.');}
  };
  window.royalTranslateProductDetail=async function(id){
