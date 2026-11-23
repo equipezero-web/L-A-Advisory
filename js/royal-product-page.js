@@ -103,6 +103,9 @@
         article.append(header,text);
         box.appendChild(article);
       }
+      if (typeof window.royalApplyProductDetailTranslations === 'function') {
+        window.royalApplyProductDetailTranslations();
+      }
     } catch (error) {
       if (box.isConnected) box.textContent = 'Não foi possível consultar as avaliações agora.';
       console.warn('Store Royal reviews:', error);
@@ -208,12 +211,16 @@
       summary.textContent = stockLimit > 0
         ? 'Selecione de 1 a ' + stockLimit + ' unidades disponíveis deste produto.'
         : 'Produto esgotado. Varejo e atacado indisponíveis.';
+      if (typeof window.royalApplyProductDetailTranslations === 'function')
+        window.royalApplyProductDetailTranslations();
       return;
     }
     const unit = calculateStoreWholesaleUnitPrice(retail, qty);
     const total = Math.round(unit * qty * 100) / 100;
     summary.textContent = (rate ? 'Atacado · ' + rate + '% OFF' : 'Varejo') +
       ' · ' + money(unit) + ' por unidade · Total: ' + money(total);
+    if (typeof window.royalApplyProductDetailTranslations === 'function')
+      window.royalApplyProductDetailTranslations();
   }
 
   // Fit the photo's container to its actual aspect ratio, so portrait, square and
@@ -481,6 +488,7 @@
     const isAffiliate = document.body.classList.contains('affiliate-mode');
     const dialog = document.createElement('section');
     dialog.id = 'productDetailsModal';
+    dialog.dataset.productId = String(product.id);
     dialog.className = 'royal-product-page';
     dialog.setAttribute('role', 'dialog');
     dialog.setAttribute('aria-modal', 'true');
@@ -520,6 +528,10 @@
     updateWholesalePreview(dialog, sale, 1);
     addMobilePurchaseDock(dialog, product, sale, maxQty, isAffiliate);
     document.body.appendChild(dialog);
+    // Apply cached translation immediately and request missing product text if needed.
+    if (typeof window.royalTranslateProductDetail === 'function') {
+      void window.royalTranslateProductDetail(String(product.id));
+    }
     document.body.classList.add('account-modal-open');
     document.documentElement.classList.add('account-modal-open');
     document.body.style.overflow = 'hidden';
