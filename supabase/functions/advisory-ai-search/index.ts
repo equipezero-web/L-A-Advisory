@@ -42,7 +42,9 @@ function numericPrice(v:unknown):number|null {
 }
 function shipping(value:unknown){
   const delivery=text(value,200);
-  const free=/(?:frete|entrega|envio)\s+gr[aá]tis|gr[aá]tis\s+(?:frete|entrega|envio)|free\s+(?:shipping|delivery)/i.test(delivery);
+  const free=/(?:frete|entrega|envio)\s+gr[aá]tis|gr[aá]tis\s+(?:frete|entrega|envio)|free\s+(?:shipping|delivery)/i.test(delivery)
+    || /^gr[aá]tis$/i.test(delivery)
+    || /(?:frete|entrega|envio)\D{0,15}R\$\s*0(?:,00)?\b/i.test(delivery);
   if(free)return {delivery,freeShipping:true,shippingKnown:true,shippingCost:0};
   const match=delivery.match(/(?:frete|entrega|envio|shipping|delivery)[^\d]{0,25}R\$\s*([\d.,]+)/i)
     ||delivery.match(/R\$\s*([\d.,]+)\s*(?:de\s+)?(?:frete|entrega|envio)/i);
@@ -146,8 +148,9 @@ Deno.serve(async (req:Request):Promise<Response>=>{
     const reqbody=await req.json().catch(()=>null);
     if(!reqbody||typeof reqbody!=='object')return json({ok:false,error:'Solicitação inválida.'},400);
     const input=reqbody as Record<string,unknown>;
-    const serper=Deno.env.get('ADVISORY_SERPER_API_KEY')||'';
-    const serpapi=Deno.env.get('ADVISORY_SERPAPI_API_KEY')||'';
+    // Dedicated keys take precedence; existing generic provider keys also work.
+    const serper=Deno.env.get('ADVISORY_SERPER_API_KEY')||Deno.env.get('SERPER_API_KEY')||'';
+    const serpapi=Deno.env.get('ADVISORY_SERPAPI_API_KEY')||Deno.env.get('SERPAPI_API_KEY')||'';
     const provider:'serper'|'serpapi'|null=serper?'serper':serpapi?'serpapi':null;
     if(input.action==='status')return json({ok:true,configured:Boolean(provider),provider,
       message:provider?'Busca externa configurada.':'Configure ADVISORY_SERPER_API_KEY ou ADVISORY_SERPAPI_API_KEY no Supabase.'});
