@@ -159,8 +159,10 @@ function calcUnit(p,row,qty) {
   // Referência da planilha: comissão I = valor de compra C × taxa.
   // O checkout real usa o preço bruto cadastrado: mostrar as duas bases, não confundir.
   const sheetCommission=valid&&costsReady?round(component.acquisition_cost*quantity*commissionRate/100):null;
-  const sheetStyleProfit=directProfit!==null&&sheetCommission!==null?
-    round(directProfit-sheetCommission):null;
+  // A fórmula de referência J usa o preço composto H da planilha,
+  // enquanto o checkout real usa o preço vigente da loja com o atacado.
+  const sheetStyleProfit=valid&&costsReady&&sheetPrice!==null&&sheetCommission!==null?
+    round(round(sheetPrice*quantity)-costTotal-sheetCommission):null;
   const directMargin=directProfit!==null&&revenue>0?round(directProfit/revenue*100):null;
   const affiliateMargin=affiliateProfit!==null&&revenue>0?round(affiliateProfit/revenue*100):null;
   const sheetThreePercent=valid&&revenue!==null?{
