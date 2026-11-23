@@ -264,7 +264,7 @@ Deno.serve(async (req) => {
   } = await admin
     .from('products')
     .select(
-      'id,name,description,price,sale_price,discount,stock,commission,image,active'
+      'id,name,description,price,sale_price,discount,stock,commission,image,active,fixed_markup_6_enabled'
     )
     .in('id', productIds)
     .eq('active', true);
@@ -328,9 +328,11 @@ Deno.serve(async (req) => {
         ? money(salePriceRaw)
         : money(price * (1 - discount / 100));
 
+    // Flag comes from products, never from the client. The markup rate is always 6%.
+    const markedRetailPrice = money(retailUnitPrice * (product.fixed_markup_6_enabled === true ? 1.06 : 1));
     // Atacado é um desconto ADICIONAL sobre o varejo, não sobre o preço bruto.
     const wholesalePercent = wholesaleRate(quantity);
-    const unitPrice = money(retailUnitPrice * (1 - wholesalePercent / 100));
+    const unitPrice = money(markedRetailPrice * (1 - wholesalePercent / 100));
 
     const itemSubtotal = money(unitPrice * quantity);
 
