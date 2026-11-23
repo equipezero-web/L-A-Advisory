@@ -481,14 +481,12 @@ Deno.serve(async (req) => {
       ? Number(product.sale_price)
       : NaN;
 
-    const baseSalePrice =
-      Number.isFinite(salePriceRaw) && salePriceRaw > 0
-        ? salePriceRaw
-        : price;
-
-    // O desconto incide sobre o preço de venda, não sobre o preço bruto.
+    // The valid sale_price has priority over discount, just as in the storefront
+    // and create-order; do not discount an existing promotional price twice.
     const unmarkedPrice =
-      money(baseSalePrice * (1 - discount / 100));
+      Number.isFinite(salePriceRaw) && salePriceRaw > 0
+        ? money(salePriceRaw)
+        : money(price * (1 - discount / 100));
     const unitPrice = money(unmarkedPrice * (product.fixed_markup_6_enabled === true ? 1.06 : 1));
 
     const itemSubtotal =
