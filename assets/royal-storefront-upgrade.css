@@ -3001,3 +3001,53 @@ html body #productDetailsModal.royal-product-page .royal-p-gallery .royal-produc
 #adminProductForm #adminProductFixedMarkup6{width:19px;height:19px;flex:0 0 19px;accent-color:#145e4a;cursor:pointer}
 #adminProductForm .royal-fixed-markup-help{font-size:12px;line-height:1.5;margin:9px 0;color:#365a50}
 #adminProductForm .royal-fixed-markup-preview{font-size:12px;line-height:1.6;border-top:1px solid #cddfd6;padding-top:9px;margin-top:8px;font-weight:650;overflow-wrap:anywhere}
+
+
+/* Store Royal v74 — readable green product titles and a true white filter panel.
+   Do not recolor labels in active dark-green tabs or the editorial hero. */
+#loja #royalCatalogSidebar.royal-catalog-sidebar{
+  background:#ffffff!important;
+  background-image:none!important;
+  color:#123b31!important;
+  border-color:#d6e4dc!important;
+}
+#loja #royalCatalogSidebar .royal-sidebar-heading{
+  border-bottom-color:#dce8e1!important;
+}
+#loja #royalCatalogSidebar .royal-sidebar-heading h3,
+#loja #royalCatalogSidebar .royal-sidebar-group-label,
+#loja #royalCatalogSidebar .royal-category-label,
+#loja #royalCatalogSidebar #catalogFilters .royal-filter-grid label,
+#loja > .max-w-7xl > .flex h2{
+  color:#123b31!important;
+  -webkit-text-fill-color:#123b31!important;
+  opacity:1!important;
+  text-shadow:none!important;
+}
+#loja #royalCatalogSidebar :is(#filterCategory,#catalogFilters input,#catalogFilters select),
+#loja #royalCatalogSidebar .royal-sidebar-heading button{
+  background:#ffffff!important;
+  background-image:none!important;
+  color:#153e32!important;
+  -webkit-text-fill-color:#153e32!important;
+  border-color:#cbdcd2!important;
+}
+#loja #royalCatalogFiltersToggle{
+  background:#ffffff!important;
+  background-image:none!important;
+  color:#123b31!important;
+}
+#loja #royalCatalogResults #catalogContainer.royal-catalog-grid > article.royal-market-card
+  .royal-image-card-caption.royal-market-info h3{
+  color:#123b31!important;
+  -webkit-text-fill-color:#123b31!important;
+  opacity:1!important;
+  text-shadow:none!important;
+}
+html body #productDetailsModal.royal-product-page
+  :is(.royal-product-info h1,.royal-product-details h2,.royal-p-specs h2,.royal-payment-methods h2){
+  color:#123b31!important;
+  -webkit-text-fill-color:#123b31!important;
+  opacity:1!important;
+  text-shadow:none!important;
+}
