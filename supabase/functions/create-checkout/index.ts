@@ -385,7 +385,7 @@ Deno.serve(async (req) => {
   } = await admin
     .from('products')
     .select(
-      'id,name,description,price,sale_price,discount,stock,commission,image,active'
+      'id,name,description,price,sale_price,discount,stock,commission,image,active,fixed_markup_6_enabled'
     )
     .in('id', productIds)
     .eq('active', true);
@@ -487,8 +487,9 @@ Deno.serve(async (req) => {
         : price;
 
     // O desconto incide sobre o preço de venda, não sobre o preço bruto.
-    const unitPrice =
+    const unmarkedPrice =
       money(baseSalePrice * (1 - discount / 100));
+    const unitPrice = money(unmarkedPrice * (product.fixed_markup_6_enabled === true ? 1.06 : 1));
 
     const itemSubtotal =
       money(
