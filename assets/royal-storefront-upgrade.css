@@ -2779,3 +2779,24 @@ html body #productDetailsModal.royal-product-page .royal-p-gallery .royal-produc
   object-position:center center!important;
   background:transparent!important;
 }
+
+/* Discreet feedback if live product translations are unavailable or incomplete. */
+.royal-web-strip .royal-product-translation-notice {
+  display:inline-flex;
+  align-items:center;
+  max-width:min(100%,460px);
+  padding:4px 9px;
+  border:1px solid rgba(245,211,130,.36);
+  border-radius:8px;
+  color:#f4ddb2;
+  font-size:11px;
+  line-height:1.4;
+}
+.royal-web-strip .royal-product-translation-notice[hidden]{display:none!important}
+@media(max-width:767px){
+  .royal-web-strip .royal-product-translation-notice{
+    max-width:100%;
+    font-size:10px;
+    text-align:center;
+  }
+}
