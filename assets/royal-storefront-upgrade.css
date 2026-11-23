@@ -2693,3 +2693,89 @@ footer [data-royal-install][hidden] { display:none!important; }
     gap:18px;
   }
 }
+
+
+/* Store Royal · Full-bleed catalog images and adaptive product gallery · 2026-11-23 */
+/* Search typing: eliminate sand-colored native/Tailwind focus edges on the text field. */
+header.royal-glass-header .royal-header-search input#royalHeaderSearch,
+header.royal-glass-header .royal-header-search input#royalHeaderSearch:focus,
+header.royal-glass-header .royal-header-search input#royalHeaderSearch:focus-visible,
+header.royal-glass-header .royal-header-search input#royalHeaderSearch:active {
+  -webkit-appearance:none!important;
+  appearance:none!important;
+  border:0!important;
+  outline:none!important;
+  outline-offset:0!important;
+  box-shadow:none!important;
+  --tw-ring-offset-shadow:0 0 #0000!important;
+  --tw-ring-shadow:0 0 #0000!important;
+  --tw-ring-color:transparent!important;
+  background:transparent!important;
+}
+header.royal-glass-header .royal-header-search:focus-within{
+  border-color:transparent!important;
+  outline:none!important;
+}
+/* Product listing remains 4:5. Photos fill edge to edge, without the extra
+   sand stroke or spacing on the card that could leave a visible frame. */
+#loja #catalogContainer.royal-catalog-grid > .royal-image-only-card{
+  border:0!important;
+  padding:0!important;
+  background:#fff!important;
+  overflow:hidden!important;
+}
+#loja #catalogContainer.royal-catalog-grid > .royal-image-only-card > img.royal-full-card-image {
+  display:block!important;
+  position:absolute!important;
+  inset:0!important;
+  box-sizing:border-box!important;
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  max-width:none!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:0!important;
+  object-fit:cover!important;
+  object-position:center center!important;
+  border:0!important;
+  border-radius:inherit!important;
+}
+/* Product detail: use the actual picture ratio instead of a forced square.
+   The gallery JS updates --royal-product-photo-ratio on each image load. */
+html body #productDetailsModal.royal-product-page .royal-p-gallery .royal-product-photo{
+  box-sizing:border-box!important;
+  display:block!important;
+  position:relative!important;
+  width:100%!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  aspect-ratio:var(--royal-product-photo-ratio, 4 / 5)!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  border-radius:15px!important;
+  box-shadow:none!important;
+  overflow:hidden!important;
+  background:#fff!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-gallery .royal-product-photo > img#royalSelectedProductImage{
+  box-sizing:border-box!important;
+  display:block!important;
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-width:none!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:inherit!important;
+  object-fit:cover!important;
+  object-position:center center!important;
+  background:transparent!important;
+}
