@@ -9,7 +9,7 @@
   const clean = text => String(text || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
   const integer = n => Number.isInteger(n) && n >= 0;
   const tierRate = qty => qty >= 70 ? 5 : qty >= 40 ? 4 : qty >= 10 ? 3 : 0;
-  const fields = 'id,name,category,price,sale_price,discount,stock,commission,active,updated_at';
+  const fields = 'id,name,category,price,sale_price,discount,stock,commission,fixed_markup_6_enabled,active,updated_at';
   let choices = [];
   let listPromise = null;
   let reportGeneration = 0;
@@ -106,7 +106,9 @@
     }
     // Same priority as create-order: positive sale_price replaces catalog discount.
     const salePriceApplies = saleRaw !== null && saleRaw > 0;
-    const retail = salePriceApplies ? round(saleRaw) : round(price * (1 - discount / 100));
+    const baseRetail = salePriceApplies ? round(saleRaw) : round(price * (1 - discount / 100));
+    const hasFixedMarkup = p.fixed_markup_6_enabled === true;
+    const retail = round(baseRetail * (hasFixedMarkup ? 1.06 : 1));
     const max = Math.min(stock, 100);
     const valid = Number.isInteger(quantity) && quantity >= 1 && quantity <= max;
     const rate = valid ? tierRate(quantity) : 0;
@@ -125,7 +127,7 @@
         unit: round(retail * (1 - t.rate / 100)),
         exampleTotal: round(round(retail * (1 - t.rate / 100)) * t.min) }));
     return {
-      price, stock, discount, commission, retail, saleRaw, salePriceApplies, max,
+      price, stock, discount, commission, retail, baseRetail, hasFixedMarkup, saleRaw, salePriceApplies, max,
       valid, quantity, rate, unit, total, retailTotal, grossTotal, affiliateCommission,
       totalSavings: valid ? round(grossTotal - total) : null,
       wholesaleSavings: valid ? round(retailTotal - total) : null,
@@ -287,8 +289,8 @@
       }));
       if(finance.creditMarkupComparison){
         const preview=finance.creditMarkupComparison;
-        section(wrap,'Comparativo privado · hipótese de preço +6% no crédito',[
-          ['Preço total hipotético (não aplicado à loja)',money(preview.gross)],
+        section(wrap,preview.applied?'Adicional fixo de 6% aplicado ao produto':'Comparativo privado · hipótese de preço +6% no crédito',[
+          [preview.applied?'Preço cobrado (adicional já incluído)':'Preço total hipotético (não aplicado à loja)',money(preview.gross)],
           ['Taxa simulada do cartão à vista (4,98%)',money(preview.fee)],
           ['Recebimento hipotético após taxa',money(preview.net)],
           ['Lucro direto hipotético',money(preview.directProfit)],
@@ -296,7 +298,7 @@
         ]);
       }
       wrap.appendChild(element('p','text-xs text-slate-600',
-        'As simulações substituem a taxa manual por unidade pelo custo estimado do meio de pagamento: não acumulam as duas taxas. Não representam taxas confirmadas de transações. Em parcelado vendedor, a loja pode arcar com taxas adicionais. O comparativo de +6% NÃO modifica os preços, pedidos ou checkout.'));
+        'As simulações substituem a taxa manual por unidade pelo custo estimado do meio de pagamento: não acumulam as duas taxas. Não representam taxas confirmadas de transações. Em parcelado vendedor, a loja pode arcar com taxas adicionais. O adicional de 6% só altera o preço quando a opção fixa está marcada no cadastro.'));
     } else {
       wrap.appendChild(element('p','text-xs text-slate-600',
         'Para calcular o lucro líquido por Pix e cartão, preencha todos os custos privados do produto. Sem custos completos, não exibimos lucro fictício.'));
@@ -401,7 +403,7 @@
             ', lucro direto '+money(v.directProfit)+', lucro afiliado '+money(v.affiliateProfit));
         }
         if(finance.creditMarkupComparison)
-          lines.push('Comparativo PRIVADO de +6% no crédito à vista, NÃO APLICADO ao checkout: receita '+
+          lines.push((finance.creditMarkupComparison.applied?'Adicional FIXO de 6% ATIVO no preço de checkout':'Comparativo PRIVADO de +6% no crédito à vista, NÃO APLICADO ao checkout')+': receita '+
             money(finance.creditMarkupComparison.gross)+', lucro direto '+money(finance.creditMarkupComparison.directProfit));
       }
     } else {
