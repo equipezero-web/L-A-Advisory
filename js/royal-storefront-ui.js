@@ -20,8 +20,16 @@
     const strip=element('div','royal-web-strip');strip.id='royalWebStrip';
     strip.setAttribute('role','navigation');strip.setAttribute('aria-label','Serviços da loja');
     strip.innerHTML='<div class="royal-web-strip-inner">' +
-      '<div id="royalWebGuestActions"><button type="button" onclick="openAuthModal(\'customer-register\')" data-i18n="register">Cadastrar</button><button type="button" onclick="openAuthModal(\'customer-login\')" data-i18n="login">Entrar</button></div>' +
-      '<button type="button" id="royalWebAccount" hidden onclick="openUserMenu()"><i data-lucide="user-round"></i><span data-i18n="myAccount">Minha conta</span></button></div>';
+      '<div class="royal-web-services" role="group" aria-label="Serviços da loja">' +
+        '<button type="button" data-royal-install onclick="installRoyalApp()"><i data-lucide="download" aria-hidden="true"></i><span data-i18n="downloadApp">Baixar o app</span></button>' +
+        '<a href="https://www.instagram.com/advisory.ofc/" target="_blank" rel="noopener noreferrer"><i data-lucide="instagram" aria-hidden="true"></i><span data-i18n="followUs">Siga-nos</span></a>' +
+        '<button type="button" onclick="royalOpenPanel(\'faq\')"><i data-lucide="circle-help" aria-hidden="true"></i><span data-i18n="help">Ajuda (FAQ)</span></button>' +
+        '<label class="royal-language-label" for="royalTopLanguage"><i data-lucide="languages" aria-hidden="true"></i><select id="royalTopLanguage" aria-label="Idioma do cabeçalho" onchange="royalSetLanguage(this.value)"><option value="pt-BR">Português (BR)</option><option value="en">English</option><option value="es">Español</option></select></label>' +
+      '</div>' +
+      '<div class="royal-web-account-actions">' +
+        '<div id="royalWebGuestActions"><button type="button" onclick="openAuthModal(\'customer-register\')" data-i18n="register">Cadastrar</button><button type="button" onclick="openAuthModal(\'customer-login\')" data-i18n="login">Entrar</button></div>' +
+        '<button type="button" id="royalWebAccount" hidden onclick="openUserMenu()"><i data-lucide="user-round"></i><span data-i18n="myAccount">Minha conta</span></button>' +
+      '</div></div>';
     header.before(strip);
   }
   function addHeaderSearch(){
