@@ -193,7 +193,9 @@
 
   function updateWholesalePreview(dialog, retail, quantity) {
     const qty = Number(quantity);
-    const valid = Number.isInteger(qty) && qty >= 1 && qty <= 100;
+    const stockLimit = Math.min(100, Math.max(0, Math.trunc(Number(
+      dialog.querySelector('.royal-wholesale-box')?.dataset.stockLimit) || 0)));
+    const valid = Number.isInteger(qty) && qty >= 1 && qty <= stockLimit;
     const rate = valid ? getStoreWholesaleRate(qty) : 0;
     dialog.querySelectorAll('.royal-wholesale-tier').forEach(card => {
       const min = Number(card.dataset.min);
@@ -203,7 +205,9 @@
     const summary = dialog.querySelector('#royalWholesaleSummary');
     if (!summary) return;
     if (!valid) {
-      summary.textContent = 'Informe uma quantidade de 1 a 100 unidades.';
+      summary.textContent = stockLimit > 0
+        ? 'Selecione de 1 a ' + stockLimit + ' unidades disponíveis deste produto.'
+        : 'Produto esgotado. Varejo e atacado indisponíveis.';
       return;
     }
     const unit = calculateStoreWholesaleUnitPrice(retail, qty);
@@ -256,14 +260,25 @@
         (percentage > 0 ? '<span class="royal-p-discount-badge">-' + percentage + '%</span>' : '');
     }
 
+    // A faixa só é exibida se o estoque deste produto permite alcançá-la.
+    const stockLimit = Math.min(100, Math.max(0, Math.trunc(Number(stock) || 0)));
     const tierList = [
       {min:10,max:39,rate:3},{min:40,max:69,rate:4},{min:70,max:100,rate:5}
-    ];
+    ].filter(tier => stockLimit >= tier.min)
+      .map(tier => ({...tier, max:Math.min(tier.max,stockLimit)}));
+    const retailLimit = Math.min(9, stockLimit);
+    const stockMessage = stockLimit === 0
+      ? 'Produto esgotado: nenhuma unidade disponível para compra.'
+      : stockLimit < 10
+        ? 'Atacado indisponível: estoque atual de apenas ' + stockLimit + ' unidades.'
+        : 'Faixas de atacado limitadas às ' + stockLimit + ' unidades disponíveis deste produto.';
     const wholesaleMarkup =
-      '<section class="royal-wholesale-box" aria-labelledby="royalWholesaleTitle">' +
+      '<section class="royal-wholesale-box" data-stock-limit="' + stockLimit + '" aria-labelledby="royalWholesaleTitle">' +
         '<h2 id="royalWholesaleTitle">Preço de varejo e atacado</h2>' +
-        '<p class="royal-wholesale-retail">Varejo (1 a 9 unidades): <strong>' + money(sale) + ' por unidade</strong></p>' +
-        '<div class="royal-wholesale-tiers">' +
+        '<p class="royal-wholesale-retail">' + (retailLimit
+          ? 'Varejo (1 a ' + retailLimit + ' unidades): <strong>' + money(sale) + ' por unidade</strong>'
+          : 'Varejo indisponível — produto esgotado.') + '</p>' +
+        (tierList.length ? '<div class="royal-wholesale-tiers">' +
           tierList.map(tier =>
             '<div class="royal-wholesale-tier" data-min="' + tier.min + '" data-max="' + tier.max + '">' +
               '<span>' + tier.min + '–' + tier.max + ' un.</span>' +
@@ -271,10 +286,11 @@
               '<small>-' + tier.rate + '% por unidade</small>' +
             '</div>'
           ).join('') +
-        '</div>' +
+        '</div>' : '') +
         '<p class="royal-wholesale-summary" id="royalWholesaleSummary" role="status" aria-live="polite"></p>' +
-        '<p class="royal-wholesale-retail">Desconto por quantidade do mesmo produto, sujeito ao estoque disponível.</p>' +
-        (!window.royalWholesalePaymentReady ?
+        '<p class="royal-wholesale-retail">' + stockMessage +
+          ' O desconto é por quantidade do mesmo produto e sujeito à confirmação no pedido.</p>' +
+        (tierList.length && !window.royalWholesalePaymentReady ?
           '<p class="royal-wholesale-retail" role="note"><strong>Atacado em ativação:</strong> a finalização de compras com 10 ou mais unidades ficará indisponível até a atualização do servidor de pagamento.</p>'
           : '') +
       '</section>';
