@@ -13688,8 +13688,6 @@ function renderCatalog() {
             audienceCount ? 'Limpe os filtros para voltar a ver os produtos desta coleção.' :
             'Novos produtos aparecerão aqui quando forem cadastrados com a categoria correspondente.';
         container.innerHTML = '<div class="store-empty-collection"><strong>' + catalogTitle + '</strong><p>' + catalogHint + '</p></div>';
-        const info = document.getElementById('catalogResultInfo');
-        if (info) info.textContent = catalogTitle;
         lucide.createIcons();
         return;
     }
@@ -13709,9 +13707,6 @@ function renderCatalog() {
     `).join('');
     const pagination = document.getElementById('catalogPagination');
     if (pagination) pagination.innerHTML = renderCatalogPagination(pageResult);
-    const info = document.getElementById('catalogResultInfo');
-    if (info) info.textContent = 'Exibindo ' + (pageResult.start + 1) + '–' + (pageResult.start + pageResult.items.length) +
-       ' de ' + pageResult.totalCount + ' produtos na coleção ' + ({masculino:'masculina',feminino:'feminina',outros:'unissex / outros'}[selectedStoreAudience]) + '.';
 
     lucide.createIcons();
     if (typeof window.laRefreshMotion === 'function') window.laRefreshMotion();
@@ -14021,6 +14016,12 @@ function escapeAttribute(value) {
     }
 
     function openCatalogFilters() {
+        const sidebar = document.getElementById('royalCatalogSidebar');
+        if (sidebar) {
+            toggleRoyalCatalogFilters(true);
+            sidebar.scrollIntoView({behavior:'smooth',block:'nearest'});
+            return;
+        }
         const filters = document.getElementById('catalogFilters');
         const modal = document.getElementById('catalogFiltersModal');
 
@@ -14051,6 +14052,10 @@ function escapeAttribute(value) {
     }
 
     function closeCatalogFilters() {
+        if (document.getElementById('royalCatalogSidebar')) {
+            toggleRoyalCatalogFilters(false);
+            return;
+        }
         const modal = document.getElementById('catalogFiltersModal');
 
         if (modal) {
@@ -15209,7 +15214,7 @@ body.guest-mode #afiliados { display: none !important; }
 <script src="./js/royal-product-page.js?v=20261123-1"></script>
 <script src="./js/royal-analytics.js?v=1" defer></script>
 
-<link rel="stylesheet" href="./assets/royal-storefront-upgrade.css?v=20261123-1">
+<link rel="stylesheet" href="./assets/royal-storefront-upgrade.css?v=20261123-2">
 <script src="./js/royal-storefront-ui.js?v=20261120-1"></script>
 <script src="./js/royal-storefront-state.js?v=20261119-3"></script>
 
