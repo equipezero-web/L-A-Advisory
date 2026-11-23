@@ -6451,7 +6451,13 @@ data-lenis-prevent-touch
     <div class="rounded-2xl border border-slate-200 bg-[#f8faf9] p-4 sm:p-5">
         <div class="flex flex-wrap items-center justify-between gap-2">
             <h5 class="font-bold text-lg text-slate-900">Ofertas encontradas</h5>
-            <span class="text-xs text-slate-500">Visualização dentro da L&A · Links para loja original</span>
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="text-xs text-slate-500">Visualização dentro da L&A · Links para loja original</span>
+                <button id="advisoryCopyAllButton" type="button" disabled onclick="advisoryAiCopyLinks()"
+                    class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 disabled:opacity-40">
+                    Copiar lista de links
+                </button>
+            </div>
         </div>
         <p id="advisorySummary" class="mt-2 text-sm text-slate-600">Nenhuma busca realizada.</p>
         <div id="advisoryPreview" hidden class="mt-5 rounded-2xl border border-amber-200 bg-amber-50/60 p-4 sm:p-5"
@@ -15508,7 +15514,7 @@ body.guest-mode #afiliados { display: none !important; }
 <script src="./js/royal-storefront-ui.js?v=20261123-2"></script>
 <script src="./js/royal-storefront-state.js?v=20261123-4"></script>
 <script src="./js/royal-ai-product-analysis.js?v=20261123-1"></script>
-<script src="./js/advisory-ai.js?v=20261123-1"></script>
+<script src="./js/advisory-ai.js?v=20261123-2"></script>
 
 <!-- Native scroll isolation for account, checkout, admin and dynamic product overlays.
      Attribute instructs Lenis not to intercept interactions inside scrolling panels. -->
