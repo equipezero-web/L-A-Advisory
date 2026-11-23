@@ -19,7 +19,12 @@ const FORM_FIELDS = {
 const el = id => document.getElementById(id);
 const money = n => new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n)||0);
 const moneyInput = n => n===null||n===undefined?'':new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(n));
-const round = n => Math.round((Number(n)+Number.EPSILON)*100)/100;
+const round = n => {
+  const value=Number(n),abs=Math.abs(value);
+  if(!Number.isFinite(value))return NaN;
+  // Currency half-up rounding including x.xxx5 ties despite IEEE-754 precision.
+  return Math.sign(value)*Math.round((abs+Number.EPSILON*Math.max(1,abs))*100)/100;
+};
 const percent = n => Number.isFinite(n)?new Intl.NumberFormat('pt-BR',{maximumFractionDigits:2}).format(n)+'%':'—';
 const create = (tag,cl='',txt)=>{const node=document.createElement(tag);if(cl)node.className=cl;if(txt!==undefined)node.textContent=String(txt);return node;};
 let openGeneration = 0;
