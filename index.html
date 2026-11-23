@@ -1823,16 +1823,29 @@
 
                         <div class="w-20 h-1 gradient-gold rounded mt-3"></div>
 
-                        <p class="text-slate-500 mt-4 max-w-xl">
-                            Explore livremente o catálogo. O login será solicitado
-                            somente quando você decidir comprar ou adicionar um
-                            item ao carrinho.
-                        </p>
+
                     </div>
 
                 </div>
 
-                <!-- DEPARTAMENTOS INDEPENDENTES DA STORE ROYAL -->
+                <!-- FILTROS À ESQUERDA · CATÁLOGO À DIREITA -->
+                <div id="royalCatalogLayout" class="royal-catalog-layout">
+                    <div class="royal-catalog-mobile-filterbar">
+                        <button id="royalCatalogFiltersToggle" type="button"
+                                aria-expanded="false" aria-controls="royalCatalogSidebar"
+                                onclick="toggleRoyalCatalogFilters()">
+                            <i data-lucide="sliders-horizontal" aria-hidden="true"></i>
+                            Filtros da loja
+                            <i data-lucide="chevron-down" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <aside id="royalCatalogSidebar" class="royal-catalog-sidebar" aria-label="Filtros de produtos">
+                        <div class="royal-sidebar-heading">
+                            <h3>Filtrar produtos</h3>
+                            <button type="button" onclick="clearCatalogFilters()"
+                                    aria-label="Limpar todos os filtros">Limpar</button>
+                        </div>
+                        <p class="royal-sidebar-group-label">Coleção</p>
                 <div id="storeAudienceTabs" role="tablist" aria-label="Escolha a coleção da loja"
                      onkeydown="handleStoreAudienceKey(event)">
                     <button type="button" id="storeAudienceMasculino" class="store-audience-tab"
@@ -1854,7 +1867,6 @@
                         <span>Unissex / Outros</span><span class="store-audience-count" aria-hidden="true">Coleção</span>
                     </button>
                 </div>
-                <p id="storeAudienceHelper">Os produtos são exibidos somente na coleção selecionada. A divisão é feita exclusivamente pela categoria cadastrada. Itens sem classificação ficam em Unissex / Outros.</p>
                 <div class="royal-category-picker" aria-label="Selecionar categoria">
                     <div class="royal-category-field">
                             <label
@@ -1874,35 +1886,9 @@
                 <!-- FILTROS -->
                 <div
                     id="catalogFilters"
-                    class="hidden mb-10 p-5 sm:p-6 bg-slate-900 rounded-2xl border border-amber-500/20 shadow-xl"
+                    class="royal-filter-fields"
                 >
-                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-5">
-                        <div>
-                            <p class="text-sm text-amber-400 font-bold uppercase tracking-wider">
-                                Filtros e ordenação
-                            </p>
-
-                            <p class="text-xs text-slate-400 mt-1">
-                                Pesquise por categoria, preço, tamanho, cor,
-                                disponibilidade e relevância.
-                            </p>
-                        </div>
-
-                        <button
-                            type="button"
-                            onclick="clearCatalogFilters()"
-                            class="text-sm text-amber-400 hover:text-amber-300 font-bold flex items-center gap-2"
-                        >
-                            <i
-                                data-lucide="rotate-ccw"
-                                class="w-4 h-4"
-                            ></i>
-
-                            Limpar filtros
-                        </button>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="royal-filter-grid">
                         <div>
                             <label
                                 for="searchProduct"
@@ -1997,6 +1983,23 @@
                         </div>
 
                         <div>
+                            <label for="filterRating" class="block text-xs text-slate-300 font-bold mb-2">
+                                Avaliação dos clientes
+                            </label>
+                            <select id="filterRating" onchange="renderCatalog()"
+                                class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm outline-none focus:border-amber-500">
+                                <option value="all">Todas as avaliações</option>
+                                <option value="4">4 estrelas ou mais</option>
+                                <option value="3">3 estrelas ou mais</option>
+                                <option value="2">2 estrelas ou mais</option>
+                                <option value="1">1 estrela ou mais</option>
+                            </select>
+                            <p id="royalRatingFilterStatus" class="royal-rating-filter-status" role="status" aria-live="polite">
+                                Somente avaliações aprovadas.
+                            </p>
+                        </div>
+
+                        <div>
                             <label
                                 for="filterStock"
                                 class="block text-xs text-slate-300 font-bold mb-2"
@@ -2051,6 +2054,9 @@
                                 <option value="highest-price">
                                     Maior preço
                                 </option>
+                                <option value="best-rated">
+                                    Melhor avaliados
+                                </option>
 
                                 <option value="name-az">
                                     Nome: A–Z
@@ -2063,17 +2069,13 @@
                         </div>
                     </div>
                 </div>
+                        <button class="royal-filter-mobile-apply" type="button"
+                                onclick="toggleRoyalCatalogFilters(false)">Ver produtos</button>
+                    </aside>
+                    <div class="royal-catalog-results" id="royalCatalogResults">
 
                 <!-- INFORMAÇÃO -->
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-                    <p
-                        id="catalogResultInfo"
-                        aria-live="polite" aria-atomic="true"
-                        class="text-sm text-slate-500"
-                    >
-                        Carregando produtos...
-                    </p>
-
                     <div
                         id="affiliateCatalogStatus"
                         class="hidden text-xs px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-700 font-bold"
@@ -2087,6 +2089,8 @@
                     <!-- Grade contínua: até 60 produtos por página -->
                 </div>
                 <div id="catalogPagination" class="royal-catalog-pagination" aria-live="polite"></div>
+                    </div><!-- /royal-catalog-results -->
+                </div><!-- /royal-catalog-layout -->
 
                 <div id="virtualStoreOpenWrap" class="mt-4 flex justify-center">
                     <button type="button" id="openVirtualStoreButton" onclick="openVirtualStore()" class="gradient-gold text-slate-900 px-7 py-4 rounded-xl font-bold hover:shadow-gold transition inline-flex items-center gap-2">
