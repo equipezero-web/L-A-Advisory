@@ -7430,7 +7430,7 @@ data-lenis-prevent-touch
 
                         <input
                             type="text"
-                            id="adminProductPrice" onblur="royalMoneyInputBlur(this)"
+                            id="adminProductPrice" oninput="royalPreviewFixedMarkup()" onblur="royalMoneyInputBlur(this);royalPreviewFixedMarkup()"
                             required
                             
                             inputmode="decimal"
@@ -7440,7 +7440,7 @@ data-lenis-prevent-touch
 
                     <div>
                         <label for="adminProductSalePrice" class="block text-xs font-bold text-slate-700 uppercase mb-2">Preço de venda / total (R$)</label>
-                        <input type="text" id="adminProductSalePrice" onblur="royalMoneyInputBlur(this)" required  inputmode="decimal" placeholder="Ex.: 100,00" class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-amber-500">
+                        <input type="text" id="adminProductSalePrice" oninput="royalPreviewFixedMarkup()" onblur="royalMoneyInputBlur(this);royalPreviewFixedMarkup()" required  inputmode="decimal" placeholder="Ex.: 100,00" class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-amber-500">
                     </div>
 
                     <div>
@@ -7454,6 +7454,7 @@ data-lenis-prevent-touch
                         <input
                             type="number"
                             id="adminProductDiscount"
+                            oninput="royalPreviewFixedMarkup()"
                             min="0"
                             max="100"
                             step="0.01"
@@ -7462,6 +7463,14 @@ data-lenis-prevent-touch
                         >
                     </div>
 
+                    <div class="sm:col-span-2 royal-fixed-markup-setting">
+                        <label for="adminProductFixedMarkup6" class="royal-fixed-markup-label">
+                            <input id="adminProductFixedMarkup6" type="checkbox" onchange="royalPreviewFixedMarkup()">
+                            <span>Aplicar adicional fixo de <strong>6%</strong> ao preço de venda</span>
+                        </label>
+                        <p class="royal-fixed-markup-help">Percentual travado em 6% (não editável). O preço publicado e o checkout incluem o adicional em todos os meios de pagamento, inclusive Pix. Isso não garante lucro de 6%.</p>
+                        <div id="adminProductFixedMarkupPreview" class="royal-fixed-markup-preview" role="status" aria-live="polite">Informe o preço de venda para ver o cálculo.</div>
+                    </div>
                     <div>
                         <label
                             for="adminProductStock"
@@ -8711,7 +8720,7 @@ data-lenis-prevent-touch
                 stock: Number(product.stock || 0), commission: Number(product.commission || 0),
                 image: product.image || '',
                 images: Array.isArray(product.images) && product.images.length ? product.images : (product.image ? [product.image] : []),
-                category: product.category || '', featured: product.featured === true, active: product.active !== false,
+                category: product.category || '', featured: product.featured === true, fixedMarkup6: product.fixed_markup_6_enabled === true, active: product.active !== false,
                 createdAt: product.created_at, updatedAt: product.updated_at
             };
         }
@@ -12854,7 +12863,7 @@ async function loadRoyalAiPanel() {
                 <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
                     <img src="${escapeAttribute(p.image)}" alt="${escapeAttribute(p.name)}" class="w-full h-32 object-cover rounded-xl mb-3">
                     <h4 class="font-bold text-sm mb-1">${escapeHtml(p.name)}</h4>
-                    <p class="text-xs text-slate-500 mb-2">${formatCurrency(calculateFinalPrice(p))}</p>
+                    <p class="text-xs text-slate-500 mb-2">${formatCurrency(calculateFinalPrice(p))}${p.fixedMarkup6 ? ' · Adicional fixo de 6% ativado' : ''}</p>
                     <p class="text-xs text-slate-500 mb-3">Estoque: ${escapeHtml(p.stock)}</p>
                     <div class="flex gap-2">
                         <button type="button" onclick="openAdminProductForm('${String(p.id).replace(/[^a-zA-Z0-9_-]/g, '')}')" class="flex-1 px-2 py-1 rounded bg-slate-900 text-amber-400 text-[10px] font-bold">Editar</button>
@@ -13050,6 +13059,26 @@ async function loadRoyalAiPanel() {
             loadAdminCommissionSummary();
         }
 
+        function royalPreviewFixedMarkup() {
+            const target = document.getElementById('adminProductFixedMarkupPreview');
+            if (!target) return;
+            const saleField = document.getElementById('adminProductSalePrice');
+            const priceField = document.getElementById('adminProductPrice');
+            const amountSource = (saleField?.value || '').trim() || (priceField?.value || '').trim();
+            if (!amountSource) { target.textContent = 'Informe o preço de venda para ver o cálculo.'; return; }
+            const salePrice = royalParseBRL(saleField?.value || '');
+            const grossPrice = royalParseBRL(priceField?.value || '');
+            const discount = Math.max(0, Math.min(100, Number(document.getElementById('adminProductDiscount')?.value) || 0));
+            const base = Number.isFinite(salePrice) && salePrice > 0 ? salePrice : grossPrice * (1 - discount / 100);
+            if (!Number.isFinite(base) || base < 0) { target.textContent = 'Informe um preço válido.'; return; }
+            const enabled = document.getElementById('adminProductFixedMarkup6')?.checked === true;
+            const normal = roundStoreMoney(base);
+            const final = roundStoreMoney(normal * (enabled ? 1.06 : 1));
+            target.textContent = 'Preço base: ' + formatCurrency(normal) +
+                '  |  Adicional fixo de 6%: ' + formatCurrency(roundStoreMoney(final-normal)) +
+                '  |  Preço exibido e cobrado: ' + formatCurrency(final);
+        }
+
         function openAdminProductForm(productId = null) {
             const modal = document.getElementById('adminProductFormModal');
             if (!modal) return;
@@ -13073,11 +13102,13 @@ async function loadRoyalAiPanel() {
                     document.getElementById('adminProductImage').value = product.image;
                     document.getElementById('adminProductCategory').value = product.category;
                     document.getElementById('adminProductFeatured').checked = product.featured === true;
+                    document.getElementById('adminProductFixedMarkup6').checked = product.fixedMarkup6 === true;
                 }
             } else {
                 document.getElementById('adminProductId').value = '';
             }
 
+            royalPreviewFixedMarkup();
             hideAdminProductMessage();
             if (typeof window.royalFinanceFormOpened === 'function') {
                 void window.royalFinanceFormOpened(productId);
@@ -13135,6 +13166,7 @@ async function loadRoyalAiPanel() {
             const discount = parseFloat(document.getElementById('adminProductDiscount')?.value || '0');
             const stock = parseInt(document.getElementById('adminProductStock')?.value || '0');
             const commission = parseFloat(document.getElementById('adminProductCommission')?.value || '0');
+            const fixedMarkup6 = document.getElementById('adminProductFixedMarkup6')?.checked === true;
             let image = document.getElementById('adminProductImage')?.value.trim();
             const imageFiles = Array.from(document.getElementById('adminProductImageFiles')?.files || []);
             const currentProduct = state.products.find(p => p.id === id);
@@ -13190,7 +13222,8 @@ async function loadRoyalAiPanel() {
                 commission,
                 image,
                 category,
-                featured: document.getElementById('adminProductFeatured')?.checked === true
+                featured: document.getElementById('adminProductFeatured')?.checked === true,
+                fixedMarkup6
             };
 
             try {
@@ -13220,6 +13253,7 @@ async function loadRoyalAiPanel() {
                         images: product.images,
                         category: product.category,
                         featured: product.featured,
+                        fixed_markup_6_enabled: product.fixedMarkup6,
                         active: true
                     }, { onConflict: 'id' });
 
@@ -13722,10 +13756,12 @@ function calculateFinalPrice(product) {
     const price = Number(product?.price) || 0;
     const salePrice = Number(product?.salePrice);
     const discount = Math.min(Math.max(Number(product?.discount) || 0, 0), 100);
-    // Mesma regra da Edge Function: sale_price válido tem prioridade sobre discount.
-    return roundStoreMoney(Math.max(0, Number.isFinite(salePrice) && salePrice > 0
+    // A taxa é fixa em 6% e só é aplicada se a opção estiver habilitada no cadastro.
+    // Sempre calcular o adicional a partir do preço base, sem alterar o valor salvo.
+    const base = roundStoreMoney(Math.max(0, Number.isFinite(salePrice) && salePrice > 0
         ? salePrice
         : price * (1 - discount / 100)));
+    return roundStoreMoney(base * (product?.fixedMarkup6 === true ? 1.06 : 1));
 }
 // A Edge Function em produção ainda não possui as faixas; só ativar após deploy e validação.
 // Proteção para impedir que clientes sejam cobrados por valores diferentes dos exibidos.
@@ -15688,12 +15724,12 @@ body.guest-mode #afiliados { display: none !important; }
 <script src="./js/royal-product-page.js?v=20261123-5"></script>
 <script src="./js/royal-analytics.js?v=1" defer></script>
 
-<link rel="stylesheet" href="./assets/royal-storefront-upgrade.css?v=20261123-8">
+<link rel="stylesheet" href="./assets/royal-storefront-upgrade.css?v=20261123-9">
 <script src="./js/royal-storefront-ui.js?v=20261123-6"></script>
 <script src="./js/royal-product-i18n.js?v=20261123-3"></script>
 <script src="./js/royal-storefront-state.js?v=20261123-7"></script>
-<script src="./js/royal-ai-product-analysis.js?v=20261123-4"></script>
-<script src="./js/royal-product-finance.js?v=20261123-5"></script>
+<script src="./js/royal-ai-product-analysis.js?v=20261123-5"></script>
+<script src="./js/royal-product-finance.js?v=20261123-6"></script>
 <script src="./js/advisory-ai.js?v=20261123-2"></script>
 
 <!-- Native scroll isolation for account, checkout, admin and dynamic product overlays.
