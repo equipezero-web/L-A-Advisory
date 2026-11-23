@@ -2562,3 +2562,44 @@ header.royal-glass-header .royal-mobile-search-toggle {
 #loja #royalCatalogSidebar.royal-catalog-sidebar::-webkit-scrollbar{width:7px}
 #loja #royalCatalogSidebar.royal-catalog-sidebar::-webkit-scrollbar-track{background:#f5ecdd;border-radius:99px}
 #loja #royalCatalogSidebar.royal-catalog-sidebar::-webkit-scrollbar-thumb{background:#b99a65;border-radius:99px}
+
+
+/* Footer navigation: services relocated from the desktop utility strip. */
+footer .royal-footer-action,
+footer .royal-footer-language {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  color:#94a3b8;
+  background:transparent;
+  border:0;
+  font:inherit;
+  line-height:1.45;
+}
+footer .royal-footer-action { cursor:pointer; transition:color .2s ease; }
+footer .royal-footer-action:hover,
+footer .royal-footer-action:focus-visible { color:#fff; }
+footer .royal-footer-action svg,
+footer .royal-footer-language svg { width:16px; height:16px; flex:none; }
+footer .royal-footer-language select {
+  width:auto;
+  max-width:158px;
+  padding:5px 10px;
+  background:#002c2c;
+  color:#f1f5f9;
+  border:1px solid rgba(193,209,222,.35);
+  border-radius:8px;
+  font:inherit;
+  cursor:pointer;
+}
+footer .royal-footer-language select:focus-visible {
+  outline:2px solid #c1d1de;
+  outline-offset:3px;
+}
+footer [data-royal-install][hidden] { display:none!important; }
+@media(max-width:767px){
+  footer .royal-footer-action,
+  footer .royal-footer-language { min-height:32px; }
+  footer .royal-footer-language select { max-width:146px; font-size:13px; }
+}
