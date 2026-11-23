@@ -169,9 +169,12 @@ function calcUnit(p,row,qty) {
     round(round(sheetPrice*quantity)-costTotal-sheetCommission):null;
   const directMargin=directProfit!==null&&revenue>0?round(directProfit/revenue*100):null;
   const affiliateMargin=affiliateProfit!==null&&revenue>0?round(affiliateProfit/revenue*100):null;
-  const sheetThreePercent=valid&&revenue!==null?{
-    revenue:round(revenue*.03),commission:round(commission*.03),
-    combined:round(round(revenue*.03)+round(commission*.03))
+  // As colunas K, L e M da planilha usam H × 3% e I × 3% (comissão
+  // sobre o custo da compra), não a comissão efetiva do checkout.
+  const sheetThreePercent=valid&&costsReady&&sheetPrice!==null&&sheetCommission!==null?{
+    revenue:round(round(sheetPrice*quantity)*.03),
+    commission:round(sheetCommission*.03),
+    combined:round(round(round(sheetPrice*quantity)*.03)+round(sheetCommission*.03))
   }:null;
   return {valid,quantity,stock,retail,saleUnit,wholesaleRate,revenue,commissionRate,commission,
     costsReady,missing,component,unitCost,sheetPrice,costTotal,directProfit,affiliateProfit,
