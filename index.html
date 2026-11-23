@@ -6849,9 +6849,58 @@ data-lenis-prevent-touch
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div id="adminProductsCards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <!-- Cards de produtos carregados pelo JavaScript -->
                 </div>
+                <section id="royalFinanceLedger" class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 space-y-4" aria-label="Planilha administrativa de fornecedores e contas">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <h5 class="text-lg font-bold text-slate-900">Planilha de produtos e contas</h5>
+                            <p class="text-xs text-slate-600 mt-1">Ordem personalizada, fornecedor privado, custos, vendas, descontos e lucro por produto, como na sua planilha.</p>
+                        </div>
+                        <div class="flex flex-wrap items-end gap-2">
+                            <label class="text-xs font-semibold text-slate-700">Simular unidades do mesmo produto
+                                <input id="royalFinanceLedgerQty" type="number" min="1" max="100" value="1" step="1" inputmode="numeric"
+                                    oninput="royalFinanceRenderLedger()" class="mt-1 block w-28 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm">
+                            </label>
+                            <button type="button" onclick="royalFinanceSaveOrder()"
+                                class="rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-bold text-amber-300">Salvar ordem</button>
+                            <button type="button" onclick="royalFinanceLoadLedger()"
+                                class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-700">Atualizar contas</button>
+                        </div>
+                    </div>
+                    <p id="royalFinanceLedgerStatus" class="text-sm text-slate-600" role="status" aria-live="polite">Abra a aba Produtos para carregar as informações privadas.</p>
+                    <div class="w-full overflow-x-auto border border-slate-200 rounded-xl" data-lenis-prevent>
+                        <table class="w-full min-w-[1680px] text-left text-xs text-slate-700">
+                            <thead class="bg-slate-100 text-slate-900">
+                                <tr>
+                                    <th class="p-3">Ordem</th>
+                                    <th class="p-3">Produto</th>
+                                    <th class="p-3">Fornecedor · link privado</th>
+                                    <th class="p-3">Compra/un.</th>
+                                    <th class="p-3">Frete/un.</th>
+                                    <th class="p-3">ICMS/un.</th>
+                                    <th class="p-3">Serviço/un.</th>
+                                    <th class="p-3">Desconto forn.</th>
+                                    <th class="p-3">Taxa/un.</th>
+                                    <th class="p-3">Venda/un.</th>
+                                    <th class="p-3">Receita total</th>
+                                    <th class="p-3">Comissão afiliado*</th>
+                                    <th class="p-3">Custo total/un.</th>
+                                    <th class="p-3">Lucro direto</th>
+                                    <th class="p-3">Lucro afiliado</th>
+                                    <th class="p-3">Margem afiliado</th>
+                                    <th class="p-3">Royal AI</th>
+                                </tr>
+                            </thead>
+                            <tbody id="royalFinanceLedgerBody" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                    <p id="royalFinanceLedgerTotals" class="rounded-xl bg-slate-50 border border-slate-200 p-3 text-sm text-slate-800">
+                        Os totais aparecerão após carregar o catálogo e os custos.
+                    </p>
+                    <p class="text-xs text-slate-600">* Comissão de afiliado é simulada apenas quando houver indicação válida; lucro direto não desconta comissão. O frete e as demais despesas cadastradas são considerados por unidade. Campos vazios não são tratados como custo zero. A venda real e a baixa de estoque continuam sob controle do checkout.</p>
+                </section>
             </section>
 
             <!-- PEDIDOS -->
@@ -7444,6 +7493,60 @@ data-lenis-prevent-touch
 >
                     </div>
 
+                    <section class="sm:col-span-2 rounded-2xl border border-amber-200 bg-amber-50/30 p-4 sm:p-5 space-y-4" aria-label="Informações privadas do fornecedor e custos">
+                        <div>
+                            <h4 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                                <i data-lucide="lock-keyhole" class="w-5 h-5 text-amber-700"></i>
+                                Fornecedor e cálculos privados
+                            </h4>
+                            <p class="mt-1 text-xs text-slate-600">Visíveis apenas no painel administrativo e na Royal AI. O nome, o link e os custos não são enviados à vitrine pública.</p>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <label class="sm:col-span-2 text-xs font-bold text-slate-700" for="royalFinanceSupplierName">
+                                Onde você compra (fornecedor / empresa)
+                                <input id="royalFinanceSupplierName" type="text" maxlength="160" autocomplete="off" placeholder="Ex.: Shopee · Loja do fabricante"
+                                    class="mt-1 block w-full rounded-xl border border-slate-300 bg-white p-3 text-sm text-slate-900">
+                            </label>
+                            <label class="sm:col-span-2 text-xs font-bold text-slate-700" for="royalFinanceSupplierUrl">
+                                Link privado do anúncio do fornecedor
+                                <input id="royalFinanceSupplierUrl" type="url" maxlength="2048" autocomplete="off" placeholder="https://..."
+                                    class="mt-1 block w-full rounded-xl border border-slate-300 bg-white p-3 text-sm text-slate-900">
+                            </label>
+                            <label class="text-xs font-bold text-slate-700" for="royalFinanceAcquisition">
+                                Valor de compra (R$) / un.
+                                <input id="royalFinanceAcquisition" type="text" inputmode="decimal" placeholder="Ex.: 162,25" autocomplete="off"
+                                    class="mt-1 block w-full rounded-xl border border-slate-300 bg-white p-3 text-sm">
+                            </label>
+                            <label class="text-xs font-bold text-slate-700" for="royalFinanceShipping">
+                                Frete fornecedor (R$) / un.
+                                <input id="royalFinanceShipping" type="text" inputmode="decimal" placeholder="0,00" autocomplete="off"
+                                    class="mt-1 block w-full rounded-xl border border-slate-300 bg-white p-3 text-sm">
+                            </label>
+                            <label class="text-xs font-bold text-slate-700" for="royalFinanceIcms">
+                                ICMS (R$) / un.
+                                <input id="royalFinanceIcms" type="text" inputmode="decimal" placeholder="0,00" autocomplete="off"
+                                    class="mt-1 block w-full rounded-xl border border-slate-300 bg-white p-3 text-sm">
+                            </label>
+                            <label class="text-xs font-bold text-slate-700" for="royalFinanceService">
+                                Serviços / despesas (R$) / un.
+                                <input id="royalFinanceService" type="text" inputmode="decimal" placeholder="0,00" autocomplete="off"
+                                    class="mt-1 block w-full rounded-xl border border-slate-300 bg-white p-3 text-sm">
+                            </label>
+                            <label class="text-xs font-bold text-slate-700" for="royalFinanceSupplierDiscount">
+                                Desconto fornecedor (R$) / un.
+                                <input id="royalFinanceSupplierDiscount" type="text" inputmode="decimal" placeholder="0,00" autocomplete="off"
+                                    class="mt-1 block w-full rounded-xl border border-slate-300 bg-white p-3 text-sm">
+                            </label>
+                            <label class="text-xs font-bold text-slate-700" for="royalFinancePaymentFee">
+                                Taxa de pagamento (R$) / un.
+                                <input id="royalFinancePaymentFee" type="text" inputmode="decimal" placeholder="0,00" autocomplete="off"
+                                    class="mt-1 block w-full rounded-xl border border-slate-300 bg-white p-3 text-sm">
+                            </label>
+                        </div>
+                        <p id="royalFinanceFormStatus" class="text-xs text-slate-600" aria-live="polite">
+                            Se um custo não for conhecido, deixe-o em branco. Informe 0,00 somente quando ele for realmente zero.
+                        </p>
+                    </section>
                     <div class="sm:col-span-2"><label class="royal-featured-checkbox text-sm font-bold text-slate-900"><input id="adminProductFeatured" type="checkbox"> Destacar produto na vitrine principal</label></div>
                     <div class="sm:col-span-2">
                         <label
@@ -12322,7 +12425,10 @@ lucide.createIcons();
 
     if (tabId === 'admin-dashboard') loadAdminDashboard();
     if (tabId === 'admin-users') loadAdminUsers();
-    if (tabId === 'admin-products') loadAdminProducts();
+    if (tabId === 'admin-products') {
+        loadAdminProducts();
+        if (typeof window.royalFinanceLoadLedger === 'function') void window.royalFinanceLoadLedger();
+    }
     if (tabId === 'admin-orders') loadAdminOrders();
     if (tabId === 'admin-affiliates') loadAdminAffiliates();
       if (tabId === 'admin-royal-ai') {
@@ -12732,7 +12838,7 @@ async function loadRoyalAiPanel() {
         }
 
         function loadAdminProducts() {
-            const container = document.querySelector('#admin-products .grid');
+            const container = document.getElementById('adminProductsCards');
             if (!container) return;
 
             container.innerHTML = state.products.map(p => `
@@ -12964,6 +13070,9 @@ async function loadRoyalAiPanel() {
             }
 
             hideAdminProductMessage();
+            if (typeof window.royalFinanceFormOpened === 'function') {
+                void window.royalFinanceFormOpened(productId);
+            }
             // O formulário precisa ficar acima do painel administrativo e rolar por conta própria.
             modal.classList.remove('hidden');
             modal.style.setProperty('display', 'flex', 'important');
@@ -12979,6 +13088,7 @@ async function loadRoyalAiPanel() {
         }
 
         function closeAdminProductForm() {
+            if (typeof window.royalFinanceCancelProductForm === 'function') window.royalFinanceCancelProductForm();
             const modal = document.getElementById('adminProductFormModal');
             if (modal) {
                 modal.classList.add('hidden');
@@ -13048,6 +13158,17 @@ async function loadRoyalAiPanel() {
                 return;
             }
 
+            let privateFinance;
+            try {
+                if (typeof window.royalFinanceReadProductForm !== 'function') {
+                    throw new Error('Módulo de fornecedor privado indisponível. Recarregue o painel para salvar com segurança.');
+                }
+                privateFinance = window.royalFinanceReadProductForm();
+            } catch (financeError) {
+                showAdminProductMessage(financeError?.message || 'Revise os dados do fornecedor.', 'error');
+                return;
+            }
+
             const productId = id || 'prod_' + Date.now();
             const product = {
                 id: productId,
@@ -13094,6 +13215,13 @@ async function loadRoyalAiPanel() {
                     }, { onConflict: 'id' });
 
                 if (error) throw error;
+                let privateFinanceError = null;
+                try {
+                    await window.royalFinanceSaveProduct(product.id, privateFinance);
+                } catch (financeError) {
+                    privateFinanceError = financeError;
+                    console.error('Falha ao salvar informações privadas do fornecedor:', financeError);
+                }
 
                 const index = state.products.findIndex(p => p.id === product.id);
                 if (index !== -1) {
@@ -13108,9 +13236,15 @@ async function loadRoyalAiPanel() {
                 saveStateToStorage();
                 renderCatalog();
                 loadAdminProducts();
+                if (typeof window.royalFinanceLoadLedger === 'function') void window.royalFinanceLoadLedger();
                 document.getElementById('adminProductImageFiles').value = '';
                 document.getElementById('royalProductUploadPreview').innerHTML = '';
-                showAdminProductMessage('Produto salvo no Supabase com sucesso!', 'success');
+                showAdminProductMessage(
+                    privateFinanceError
+                        ? 'O produto público foi salvo, mas os dados privados do fornecedor NÃO foram gravados. Corrija a conexão e salve novamente: ' + (privateFinanceError?.message || 'Falha no Supabase')
+                        : 'Produto e informações privadas do fornecedor salvos no Supabase com sucesso!',
+                    privateFinanceError ? 'error' : 'success'
+                );
             } catch (error) {
                 console.error('Erro ao salvar produto no Supabase:', error);
                 showAdminProductMessage(
@@ -15514,6 +15648,7 @@ body.guest-mode #afiliados { display: none !important; }
 <script src="./js/royal-storefront-ui.js?v=20261123-2"></script>
 <script src="./js/royal-storefront-state.js?v=20261123-4"></script>
 <script src="./js/royal-ai-product-analysis.js?v=20261123-1"></script>
+<script src="./js/royal-product-finance.js?v=20261123-1"></script>
 <script src="./js/advisory-ai.js?v=20261123-2"></script>
 
 <!-- Native scroll isolation for account, checkout, admin and dynamic product overlays.
