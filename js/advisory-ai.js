@@ -68,6 +68,12 @@
     return data;
   }
 
+  const offerPrice=o=>o.price!==null&&Number.isFinite(Number(o.price))?money(o.price):'Preço a consultar na loja';
+  const priceContext=o=>o.priceSource==='snippet'
+    ?'Valor encontrado no resultado de busca; confirme no anúncio.'
+    :o.priceSource==='shopping'
+      ?'Preço mostrado no Google Shopping; confirme na loja.'
+      :'Preço não informado pelo buscador; consulte diretamente o vendedor.';
   function infoLine(name,value){
     const p=el('p','text-sm text-slate-700');
     p.append(el('strong','text-slate-900',name+': '),document.createTextNode(value));
@@ -115,7 +121,8 @@
     addImage(imageWrap,offer,'w-full max-h-[290px] object-contain');
     const details=el('div','flex flex-col gap-2');
     details.append(infoLine('Loja',offer.merchant),
-      infoLine('Preço anunciado',money(offer.price)),
+      infoLine('Preço anunciado',offerPrice(offer)),
+      infoLine('Origem do preço',priceContext(offer)),
       infoLine('Avaliações',reviewsLabel(offer)),
       infoLine('Frete',shippingLabel(offer)),
       infoLine('Preço + frete conhecido',
@@ -143,8 +150,10 @@
     const body=el('div','flex flex-1 flex-col gap-2 p-4');
     body.append(el('p','text-[11px] uppercase tracking-wide text-slate-500',offer.merchant),
       el('h6','text-sm font-bold text-slate-900 leading-snug min-h-[40px]',offer.title));
-    const price=el('p','text-xl font-black text-emerald-800',money(offer.price));
+    const price=el('p',offer.price===null
+      ?'text-sm font-bold text-emerald-900':'text-xl font-black text-emerald-800',offerPrice(offer));
     body.append(price,
+      el('p','text-[11px] text-slate-500',priceContext(offer)),
       el('p','text-xs text-slate-600',reviewsLabel(offer)),
       el('p','text-xs font-medium '+(offer.freeShipping?'text-emerald-700':'text-slate-600'),shippingLabel(offer)));
     if(offer.knownTotal!==null)
@@ -169,18 +178,35 @@
     const total=Number(data.totalMatching)||0;
     summary.textContent=offers.length+' resultado(s) exibido(s) · '+total+
       ' correspondente(s) aos filtros · '+Number(data.uniqueCount||0)+
-      ' anúncio(s) distinto(s) encontrados · '+Number(data.queries||1)+' buscas · '+
-      formatTimestamp(searchedAt)+'.';
+      ' anúncio(s) distinto(s) encontrados · '+Number(data.queries||1)+' consultas externas · '+
+      Number(data.knownPrices||0)+' com preço informado · '+formatTimestamp(searchedAt)+'.';
+    const coverage=byId('advisoryStoreCoverage');
+    if(coverage){
+      const searched=Array.isArray(data.searchedStores)?data.searchedStores:[];
+      const found=new Set(Array.isArray(data.storesWithLinks)?data.storesWithLinks:[]);
+      coverage.replaceChildren();
+      if(searched.length){
+        coverage.appendChild(el('strong','text-sm font-bold text-slate-900','Lojas consultadas: '));
+        for(const shop of searched){
+          const hasLinks=found.has(shop);
+          const status=el('span','inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold '+
+            (hasLinks?'bg-emerald-50 text-emerald-800 border-emerald-200':'bg-slate-100 text-slate-600 border-slate-200'),
+            shop+(hasLinks?' · anúncios encontrados':' · sem anúncios nesta consulta'));
+          coverage.appendChild(status);
+        }
+      }
+    }
     if(!offers.length)items.append(el('p','col-span-full rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900',
-      'Nenhum anúncio corresponde aos filtros. Experimente reduzir a nota mínima, aumentar o preço ou desmarcar frete grátis.'));
+      'Nenhum anúncio corresponde aos filtros. Tente um nome mais simples, retire os filtros de avaliação/preço/frete ou use a busca muito ampla.'));
     for(const [i,offer] of offers.entries())items.appendChild(productCard(offer,i));
     const notes=Array.isArray(data.notices)?data.notices:[];
     const notice=byId('advisoryNotices');
     if(notice)notice.textContent=notes.length?'Busca parcialmente concluída: '+notes.join('; '):'';
     const stamp=byId('advisorySource');
-    if(stamp)stamp.textContent='Fonte: resultados de compras via '+String(data.provider||'provedor externo')+
-      ' · Dados consultados em '+formatTimestamp(data.searchedAt)+
-      ' · Preços e fretes devem ser confirmados diretamente no anúncio.';
+    if(stamp)stamp.textContent='Fontes: buscas Google Shopping e pesquisas em sites de lojas, por '+
+      (Array.isArray(data.providersUsed)&&data.providersUsed.length?data.providersUsed.join(', '):String(data.provider||'provedor externo'))+
+      ' · Consultado em '+formatTimestamp(data.searchedAt)+
+      ' · Nem todos os anúncios aparecem em buscadores. Preços, estoque e frete devem ser confirmados na loja original.';
   }
   function readForm(){
     const f=byId('advisorySearchForm');
@@ -206,7 +232,7 @@
     loading=true;
     const btn=byId('advisorySearchButton');
     if(btn){btn.disabled=true;btn.textContent='Pesquisando ofertas...'}
-    updateStatus('Comparando anúncios, preços, fretes e avaliações. A pesquisa pode consultar diversas variações da categoria.');
+    updateStatus('Pesquisando Google Shopping e lojas de verdade (Shopee, SHEIN, Mercado Livre e outras conforme a amplitude). Os preços dependem dos anúncios recuperados.');
     try{
       const result=await request(args);
       render(result);
@@ -221,7 +247,7 @@
     const header='ADVISORY AI | Lista de ofertas | '+formatTimestamp(searchedAt);
     const lines=offers.map((offer,i)=>[
       String(i+1)+'. '+offer.title,
-      'Loja: '+offer.merchant+' | Preço: '+money(offer.price),
+      'Loja: '+offer.merchant+' | Preço: '+offerPrice(offer),
       reviewsLabel(offer)+' | '+shippingLabel(offer),
       'Link original: '+offer.url
     ].join('\n'));
@@ -245,7 +271,7 @@
     try{
       const response=await request({action:'status'});
       updateStatus(response.configured?
-        'Motor de busca disponível. Selecione categoria e produto para iniciar.' :
+        'Motor de busca configurado. Pesquise por menor preço em Google Shopping, Shopee, SHEIN e outras lojas. A disponibilidade dos anúncios depende do provedor.' :
         'Busca ainda não configurada. É necessário adicionar uma chave de acesso Serper ou SerpApi aos segredos da Edge Function no Supabase.',
         response.configured?'success':'error');
     }catch(e){
