@@ -331,7 +331,7 @@
           ? '<details><summary>'+safe(paymentText.seePayments)+'</summary>' +
             '<p>'+safe(paymentText.estimated)+'</p>' +
             '<div class="royal-payment-grid">' +
-              installmentQuotes.map(q=>'<div><span>'+q.count+'x · '+q.rate.toLocaleString('pt-BR',{minimumFractionDigits:2})+'%</span><strong>'+money(q.perInstallment)+'*</strong></div>').join('') +
+              installmentQuotes.map(q=>'<div><span>'+q.count+'x · '+q.rate.toLocaleString('pt-BR',{minimumFractionDigits:2})+'%</span><strong>'+money(q.perInstallment)+'</strong></div>').join('') +
             '</div></details>'
           : '') +
         '<p>'+safe(paymentText.warning)+'</p></section>'
@@ -341,12 +341,41 @@
       paymentBlock +
       '<div class="royal-p-service-list">' +
         '<div class="royal-p-service"><i data-lucide="credit-card" aria-hidden="true"></i><div><strong>Cartão de crédito</strong><p>Consulte parcelas, taxas e opções de pagamento no checkout.</p></div></div>' +
-        '<div class="royal-p-service"><i data-lucide="truck" aria-hidden="true"></i><div><strong>Envio e frete</strong><p>Frete incluso no valor, conforme a política atual da Store Royal. Prazo informado no checkout.</p></div></div>' +
+        '<div class="royal-p-service"><i data-lucide="truck" aria-hidden="true"></i><div><strong>Entrega e frete</strong><p>Prazo, disponibilidade e condições de entrega são confirmados no checkout.</p></div></div>' +
       '</div>'
     );
 
     const attributes = dialog.querySelector('.royal-p-attributes');
-    if (attributes) attributes.remove();
+    if (attributes && !attributes.children.length) attributes.remove();
+
+    // Marketplace detail layout: gallery / genuine product information /
+    // purchase panel. Move the existing trusted checkout controls; do not clone them.
+    const productInfo = dialog.querySelector('.royal-product-info');
+    const purchasePanel = document.createElement('aside');
+    purchasePanel.className = 'royal-p-purchase-panel';
+    purchasePanel.setAttribute('aria-label','Preço e opções de compra');
+    const quote12 = paymentPricing?.installment?.(sale,12);
+    const estimated = quote12
+      ? '<div class="royal-p-installment-preview"><strong>12x de ' + money(quote12.perInstallment) +
+        '</strong><span>Estimativa; juros e valor final confirmados no Mercado Pago.</span></div>'
+      : '';
+    if (price) {
+      purchasePanel.appendChild(price);
+      if (estimated) purchasePanel.insertAdjacentHTML('beforeend',estimated);
+    }
+    const payment = productInfo.querySelector('.royal-payment-methods');
+    if (payment) purchasePanel.appendChild(payment);
+    const services = productInfo.querySelector('.royal-p-service-list');
+    if (services) purchasePanel.appendChild(services);
+    for (const selector of ['.royal-p-qty-label','.royal-p-qty','.royal-p-actions','.royal-p-muted']) {
+      const node = productInfo.querySelector(selector);
+      if (node) purchasePanel.appendChild(node);
+    }
+    const wholesale = productInfo.querySelector('.royal-wholesale-box');
+    const availability = productInfo.querySelector('.royal-p-stock');
+    if (wholesale && availability) wholesale.before(availability);
+    if (wholesale && attributes && attributes.isConnected) wholesale.before(attributes);
+    productInfo.after(purchasePanel);
 
     const container = dialog.querySelector('.royal-product-container');
     const phone = typeof APP_CONFIG !== 'undefined' ? String(APP_CONFIG.supportPhone || '').replace(/\D/g, '') : '';
@@ -385,8 +414,40 @@
         );
       }
     }
-    const note = dialog.querySelector('.royal-product-info > .royal-p-muted');
+    // The original checkout security message lives in the purchase panel now.
+    const note = dialog.querySelector('.royal-p-purchase-panel > .royal-p-muted');
     if (note) note.textContent = 'Finalização segura pelo checkout da Store Royal.';
+
+    // Related items are selected from live public inventory, not invented
+    // "customers also viewed" behavior or untracked browsing history.
+    const related = state.products.filter(p => p && p.active !== false &&
+      String(p.id) !== String(product.id) && (p.image || p.images?.[0]));
+    const sameCategory = related.filter(p => p.category && p.category === product.category);
+    const suggestions = [...sameCategory,
+      ...related.filter(p => !sameCategory.some(match => String(match.id) === String(p.id)))]
+      .slice(0,8);
+    if (suggestions.length) {
+      const cards = suggestions.map(p => {
+        const current = calculateFinalPrice(p);
+        const label = window.royalProductLabel?.(p,'name') || p.name;
+        const photo = p.image || p.images?.[0] || '';
+        return '<button type="button" class="royal-p-related-card" data-related-product-id="' +
+          attr(p.id) + '" aria-label="Abrir produto ' + attr(label) + '">' +
+          '<img loading="lazy" src="' + attr(photo) + '" alt="' + attr(label) + '">' +
+          '<span class="royal-p-related-name">' + safe(label) + '</span>' +
+          '<strong>' + money(current) + '</strong></button>';
+      }).join('');
+      const more = suggestions.length > 4
+        ? '<button type="button" class="royal-p-related-next" data-action="related-next" aria-label="Ver outros produtos semelhantes"><i data-lucide="chevron-right" aria-hidden="true"></i></button>'
+        : '';
+      const section = document.createElement('section');
+      section.className = 'royal-p-related-section';
+      section.setAttribute('aria-label','Produtos semelhantes');
+      section.innerHTML = '<h2>Produtos semelhantes</h2>' +
+        '<div class="royal-p-related-shell"><div class="royal-p-related-track" tabindex="0" aria-label="Mais produtos da Store Royal">' +
+        cards + '</div>' + more + '</div>';
+      container.querySelector('.royal-product-main')?.after(section);
+    }
     if (window.lucide?.createIcons) window.lucide.createIcons();
   }
 
@@ -615,9 +676,24 @@
         if (nextButton) nextButton.click();
         return;
       }
+      const relatedButton = event.target.closest('button[data-related-product-id]');
+      if (relatedButton) {
+        const relatedId = relatedButton.dataset.relatedProductId;
+        if (relatedId && productById(relatedId)) window.openRoyalProductPage(relatedId);
+        return;
+      }
       const button = event.target.closest('button[data-action]');
       if (!button) return;
       const action = button.dataset.action;
+      if (action === 'related-next') {
+        const track = dialog.querySelector('.royal-p-related-track');
+        if (track) {
+          const max = Math.max(0, track.scrollWidth-track.clientWidth);
+          track.scrollTo({left:track.scrollLeft>=max-5?0:Math.min(max,track.scrollLeft+track.clientWidth*.85),
+            behavior:window.matchMedia?.('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+        }
+        return;
+      }
       if (action === 'close') return removePage(true);
       if (action === 'favorite') return toggleFavorite(product, button);
       if (action === 'reviews') { dialog.querySelector('#royalProductReviewsSection')?.scrollIntoView({behavior:'smooth',block:'start'}); return; }
