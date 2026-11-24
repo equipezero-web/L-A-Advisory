@@ -101,7 +101,28 @@ function validated(raw:Record<string,unknown>){
     throw Error('Filtro inválido.');
   return {category,query,maxPrice,minRating,minReviews,depth,sort,onlyFree:raw.onlyFree===true};
 }
-async function runProvider(provider:'serper'|'serpapi',key:string,q:string):Promise<unknown[]>{
+type SearchProvider = 'serper'|'serpapi';
+type ProviderCandidate = {provider:SearchProvider; key:string; secretName:string};
+class ProviderAccessError extends Error {}
+// Keep credentials in Supabase; never include values in status responses or logs.
+function configuredProviders():ProviderCandidate[]{
+  const entries:[SearchProvider,string][]=[
+    ['serper','ADVISORY_SERPER_API_KEY'],
+    ['serpapi','ADVISORY_SERPAPI_API_KEY'],
+    ['serper','SERPER_API_KEY'],
+    ['serpapi','SERPAPI_API_KEY']
+  ];
+  const used=new Set<string>();
+  const result:ProviderCandidate[]=[];
+  for(const [provider,secretName] of entries){
+    const key=(Deno.env.get(secretName)||'').trim();
+    if(!key || used.has(provider+':'+key))continue;
+    used.add(provider+':'+key);
+    result.push({provider,key,secretName});
+  }
+  return result;
+}
+async function runProvider(provider:SearchProvider,key:string,q:string):Promise<unknown[]>{
   const signal=AbortSignal.timeout(18000);
   let result:Response;
   if(provider==='serper'){
@@ -118,13 +139,31 @@ async function runProvider(provider:'serper'|'serpapi',key:string,q:string):Prom
   }
   if(!result.ok){
     if(result.status===429)throw Error('Limite de consultas do provedor atingido.');
-    if([401,403].includes(result.status))throw Error('Chave de acesso ao provedor inválida ou sem permissão.');
+    if(result.status===401)throw new ProviderAccessError('Autenticação recusada (HTTP 401). Confira se a chave pertence a este provedor.');
+    if(result.status===403)throw new ProviderAccessError('Acesso negado (HTTP 403). Confira permissões, plano e acesso ao Google Shopping.');
     throw Error('Provedor de buscas indisponível: HTTP '+result.status);
   }
   const body=await result.json();
   if(body?.error)throw Error('Provedor informou uma falha na consulta.');
   const rows=provider==='serper'?body?.shopping:body?.shopping_results;
   return Array.isArray(rows)?rows:[];
+}
+// A rejected/stale provider key must not suppress another properly configured
+// supported provider. Only authentication/permission failures cause fallbacks.
+async function runWithCredentialFallback(q:string,candidates:ProviderCandidate[]){
+  const failures:string[]=[];
+  for(const candidate of candidates){
+    try{
+      const rows=await runProvider(candidate.provider,candidate.key,q);
+      return {provider:candidate.provider,rows};
+    }catch(error){
+      const why=error instanceof Error?error.message:'Falha desconhecida do provedor.';
+      const name=candidate.provider==='serper'?'Serper':'SerpApi';
+      failures.push(name+' ('+candidate.secretName+'): '+why);
+      if(!(error instanceof ProviderAccessError))break;
+    }
+  }
+  throw new Error(failures.join(' | '));
 }
 const recent=new Map<string,number>();
 Deno.serve(async (req:Request):Promise<Response>=>{
@@ -148,14 +187,17 @@ Deno.serve(async (req:Request):Promise<Response>=>{
     const reqbody=await req.json().catch(()=>null);
     if(!reqbody||typeof reqbody!=='object')return json({ok:false,error:'Solicitação inválida.'},400);
     const input=reqbody as Record<string,unknown>;
-    // Dedicated keys take precedence; existing generic provider keys also work.
-    const serper=Deno.env.get('ADVISORY_SERPER_API_KEY')||Deno.env.get('SERPER_API_KEY')||'';
-    const serpapi=Deno.env.get('ADVISORY_SERPAPI_API_KEY')||Deno.env.get('SERPAPI_API_KEY')||'';
-    const provider:'serper'|'serpapi'|null=serper?'serper':serpapi?'serpapi':null;
-    if(input.action==='status')return json({ok:true,configured:Boolean(provider),provider,
-      message:provider?'Busca externa configurada.':'Configure ADVISORY_SERPER_API_KEY ou ADVISORY_SERPAPI_API_KEY no Supabase.'});
+    const candidates=configuredProviders();
+    const provider:SearchProvider|null=candidates[0]?.provider||null;
+    if(input.action==='status')return json({
+      ok:true,configured:candidates.length>0,provider,
+      configuredSecrets:candidates.map(c=>({provider:c.provider,secretName:c.secretName})),
+      message:candidates.length
+        ? 'Credencial(is) detectada(s). A validade e as permissões serão verificadas na pesquisa.'
+        : 'Configure ADVISORY_SERPER_API_KEY ou ADVISORY_SERPAPI_API_KEY no Supabase.'
+    });
     if(input.action!=='search')return json({ok:false,error:'Ação não suportada.'},400);
-    if(!provider)return json({ok:false,code:'provider_not_configured',
+    if(!candidates.length)return json({ok:false,code:'provider_not_configured',
       error:'A busca externa exige uma chave Serper ou SerpApi nos secrets do Supabase.'},503);
     let options:ReturnType<typeof validated>;
     try{options=validated(input)}catch(e){return json({ok:false,error:String((e as Error).message)},400)}
@@ -166,18 +208,25 @@ Deno.serve(async (req:Request):Promise<Response>=>{
     const queries=[options.category+' '+options.query];
     if(options.depth>1)queries.push(options.query+' '+options.category+' ofertas lojas');
     if(options.depth>2)queries.push(options.category+' '+options.query+' promoção comprar');
-    const calls=await Promise.allSettled(queries.map(async q=>
-      (await runProvider(provider,provider==='serper'?serper:serpapi,q.slice(0,190)))
-        .map(row=>normal(row as Record<string,unknown>,q,provider)).filter((x):x is Offer=>x!==null)
-    ));
-    const offers=new Map<string,Offer>();
+    const calls=await Promise.allSettled(queries.map(async q=>{
+      const response=await runWithCredentialFallback(q.slice(0,190),candidates);
+      const list=response.rows.map(row=>normal(row as Record<string,unknown>,q,response.provider))
+        .filter((x):x is Offer=>x!==null);
+      return {provider:response.provider,offers:list};
+    }));
+    const offers=new Map<string,Offer>(),usedProviders=new Set<SearchProvider>();
     const errors:string[]=[];let rawCount=0;
     for(let i=0;i<calls.length;i++){
       const result=calls[i];
-      if(result.status==='rejected'){errors.push('Pesquisa '+(i+1)+': '+text(result.reason?.message,150));continue}
-      for(const item of result.value){rawCount++;if(!offers.has(item.url))offers.set(item.url,item)}
+      if(result.status==='rejected'){
+        errors.push('Pesquisa '+(i+1)+': '+text(result.reason?.message,450));continue;
+      }
+      usedProviders.add(result.value.provider);
+      for(const item of result.value.offers){rawCount++;if(!offers.has(item.url))offers.set(item.url,item)}
     }
-    if(errors.length&&!offers.size)return json({ok:false,error:'As buscas externas falharam.',details:errors},502);
+    if(errors.length&&!offers.size)return json({ok:false,code:'provider_search_failed',
+      error:'As buscas externas falharam. Confira as credenciais e as permissões do provedor.',
+      details:errors},502);
     let selected=[...offers.values()].filter(o=>
       (options.maxPrice===null||o.price<=options.maxPrice)&&
       (options.minRating===0||(o.rating!==null&&o.rating>=options.minRating))&&
@@ -190,7 +239,8 @@ Deno.serve(async (req:Request):Promise<Response>=>{
     else if(options.sort==='reviews')selected.sort((a,b)=>(b.reviews??-1)-(a.reviews??-1));
     else if(options.sort==='shipping')selected.sort((a,b)=>Number(b.freeShipping)-Number(a.freeShipping)||a.price-b.price);
     else selected.sort((a,b)=>b.score-a.score);
-    return json({ok:true,provider,category:options.category,query:options.query,
+    return json({ok:true,provider:[...usedProviders][0]||provider,
+      providersUsed:[...usedProviders],category:options.category,query:options.query,
       searchedAt:new Date().toISOString(),queries:queries.length,rawCount,
       uniqueCount:offers.size,totalMatching:selected.length,results:selected.slice(0,90),
       notices:errors,partial:errors.length>0,
