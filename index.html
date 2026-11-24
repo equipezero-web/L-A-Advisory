@@ -6455,7 +6455,14 @@ data-lenis-prevent-touch
         <div class="flex flex-wrap items-center justify-between gap-2">
             <h5 class="font-bold text-lg text-slate-900">Ofertas encontradas</h5>
             <div class="flex flex-wrap items-center gap-2">
-                <span class="text-xs text-slate-500">Visualização dentro da L&A · Links para loja original</span>
+                <label for="advisoryStoreFilter" class="flex items-center gap-2 text-xs font-semibold text-slate-700">
+                    Filtrar loja
+                    <select id="advisoryStoreFilter" disabled onchange="advisoryAiFilterStore(this.value)"
+                        class="min-h-[36px] max-w-[190px] rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs text-slate-800">
+                        <option value="">Todas as lojas</option>
+                    </select>
+                </label>
+                <span class="text-xs text-slate-500">Links para a loja original</span>
                 <button id="advisoryCopyAllButton" type="button" disabled onclick="advisoryAiCopyLinks()"
                     class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 disabled:opacity-40">
                     Copiar lista de links
