@@ -6398,8 +6398,8 @@ data-lenis-prevent-touch
             <label class="flex flex-col gap-1 text-sm font-semibold text-slate-700" for="advisoryMinRating">
                 Avaliação mínima
                 <select id="advisoryMinRating" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-slate-900">
-                    <option value="0">Todas (inclusive sem nota)</option>
-                    <option value="4" selected>4,0 ★ ou mais</option>
+                    <option value="0" selected>Todas (inclusive sem nota)</option>
+                    <option value="4">4,0 ★ ou mais</option>
                     <option value="4.3">4,3 ★ ou mais</option>
                     <option value="4.5">4,5 ★ ou mais</option>
                     <option value="4.7">4,7 ★ ou mais</option>
@@ -6408,8 +6408,8 @@ data-lenis-prevent-touch
             <label class="flex flex-col gap-1 text-sm font-semibold text-slate-700" for="advisoryMinReviews">
                 Quantidade mínima de avaliações
                 <select id="advisoryMinReviews" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-slate-900">
-                    <option value="0">Sem exigência</option>
-                    <option value="10" selected>10 ou mais</option>
+                    <option value="0" selected>Sem exigência</option>
+                    <option value="10">10 ou mais</option>
                     <option value="25">25 ou mais</option>
                     <option value="50">50 ou mais</option>
                     <option value="100">100 ou mais</option>
@@ -6418,8 +6418,8 @@ data-lenis-prevent-touch
             <label class="flex flex-col gap-1 text-sm font-semibold text-slate-700" for="advisorySort">
                 Organizar resultados
                 <select id="advisorySort" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-slate-900">
+                    <option value="price" selected>Menor preço primeiro</option>
                     <option value="balance">Melhor equilíbrio geral</option>
-                    <option value="price">Menor preço primeiro</option>
                     <option value="rating">Melhores avaliações</option>
                     <option value="reviews">Mais avaliações</option>
                     <option value="shipping">Frete grátis primeiro</option>
@@ -6428,9 +6428,9 @@ data-lenis-prevent-touch
             <label class="flex flex-col gap-1 text-sm font-semibold text-slate-700" for="advisoryDepth">
                 Amplitude de busca
                 <select id="advisoryDepth" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-slate-900">
-                    <option value="1">Rápida · 1 consulta</option>
-                    <option value="2" selected>Ampla · 2 consultas</option>
-                    <option value="3">Muito ampla · 3 consultas</option>
+                    <option value="1">Rápida · 1 consulta (Google Shopping)</option>
+                    <option value="2" selected>Ampla · 4 consultas (Shopping, Shopee, SHEIN, Mercado Livre)</option>
+                    <option value="3">Muito ampla · 7 consultas (mais lojas, mais créditos)</option>
                 </select>
             </label>
         </div>
@@ -6444,7 +6444,7 @@ data-lenis-prevent-touch
                 Buscar melhores ofertas
             </button>
         </div>
-        <p class="text-xs text-slate-500">A busca compara anúncios recuperados por um provedor externo. Não garante todos os produtos do mercado. O frete grátis e a avaliação só aparecem quando informados pela fonte.</p>
+        <p class="text-xs text-slate-500">A busca consulta Google Shopping e páginas encontradas nos marketplaces selecionados conforme a amplitude. Nem todos os anúncios são indexados. Preço, estoque, frete e qualidade devem ser confirmados na loja original. Cada consulta consome créditos do provedor.</p>
     </form>
 
     <div id="advisoryStatus" role="status" aria-live="polite"
@@ -6463,6 +6463,7 @@ data-lenis-prevent-touch
             </div>
         </div>
         <p id="advisorySummary" class="mt-2 text-sm text-slate-600">Nenhuma busca realizada.</p>
+        <div id="advisoryStoreCoverage" class="mt-3 flex flex-wrap items-center gap-2" aria-live="polite"></div>
         <div id="advisoryPreview" hidden class="mt-5 rounded-2xl border border-amber-200 bg-amber-50/60 p-4 sm:p-5"
             aria-label="Prévia interna do produto"></div>
         <div id="advisoryResults" class="mt-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4"></div>
@@ -15789,7 +15790,7 @@ body.guest-mode #afiliados { display: none !important; }
 <script src="./js/royal-storefront-state.js?v=20261123-7"></script>
 <script src="./js/royal-ai-product-analysis.js?v=20261123-5"></script>
 <script src="./js/royal-product-finance.js?v=20261123-6"></script>
-<script src="./js/advisory-ai.js?v=20261123-2"></script>
+<script src="./js/advisory-ai.js?v=20261124-3"></script>
 
 <!-- Native scroll isolation for account, checkout, admin and dynamic product overlays.
      Attribute instructs Lenis not to intercept interactions inside scrolling panels. -->
