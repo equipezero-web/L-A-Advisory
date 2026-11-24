@@ -210,7 +210,7 @@ body #customerProfileModal:not(.hidden)>div {max-height:calc(100dvh - 24px)!impo
 
 
 /* Store Royal — individual product page, clean white marketplace presentation. */
-#productDetailsModal.royal-product-page{z-index:1100;background:#fff;color:#182b2a;font-family:Lato,system-ui,sans-serif}
+#productDetailsModal.royal-product-page{z-index:1100;background:#fff;color:#182b2a;font-family:"Inter",system-ui,sans-serif}
 #productDetailsModal .royal-product-scroll{background:#fff!important;color:#182b2a!important;scrollbar-gutter:stable}
 #productDetailsModal .royal-product-header{position:sticky;top:0;z-index:20;min-height:68px;padding:12px clamp(14px,3vw,38px);background:#fff;color:#172d2c;border-bottom:1px solid #e5e9e7;box-shadow:0 3px 13px rgba(18,55,49,.045)}
 #productDetailsModal .royal-p-header-left,#productDetailsModal .royal-p-header-tools{display:flex;align-items:center;gap:8px;min-width:0}
@@ -344,7 +344,7 @@ html body #productDetailsModal.royal-product-page { color:var(--royal-luxe-ink)!
  -webkit-backdrop-filter:blur(18px);
 }
 #productDetailsModal .royal-p-header-brand {
- font-family:"Playfair Display",Georgia,serif;
+ font-family:"Plus Jakarta Sans","Inter",system-ui,sans-serif;
  color:#003737;
  letter-spacing:.17em;
  font-weight:800;
@@ -366,7 +366,7 @@ html body #productDetailsModal.royal-product-page { color:var(--royal-luxe-ink)!
 #productDetailsModal .royal-product-header button { transition:transform .24s var(--royal-luxe-ease),background .24s,border-color .24s,box-shadow .24s; }
 #productDetailsModal .royal-product-header button:hover:not(:disabled) { transform:translateY(-2px);border-color:#c7b58d;box-shadow:0 7px 18px rgba(20,44,37,.09); }
 #productDetailsModal .royal-p-kicker {color:#85775b;letter-spacing:.14em;text-transform:uppercase;}
-#productDetailsModal .royal-product-info h1 {font-family:"Playfair Display",Georgia,serif;font-weight:700;letter-spacing:-.018em;color:#172f2b;}
+#productDetailsModal .royal-product-info h1 {font-family:"Plus Jakarta Sans","Inter",system-ui,sans-serif;font-weight:700;letter-spacing:-.018em;color:#172f2b;}
 #productDetailsModal .royal-product-photo {
  border-color:#ede7dc;
  box-shadow:0 15px 36px rgba(16,45,39,.045);
@@ -425,7 +425,7 @@ html body #productDetailsModal.royal-product-page { color:var(--royal-luxe-ink)!
 #productDetailsModal .royal-p-secondary{background:linear-gradient(115deg,#003737,#28564b);border-color:#003737;color:#fff;}
 #productDetailsModal .royal-p-secondary:hover:not(:disabled){background:#164944;}
 #productDetailsModal .royal-product-details {border-color:#ece7dd;box-shadow:0 9px 30px rgba(19,45,38,.025);}
-#productDetailsModal .royal-product-details h2{font-family:"Playfair Display",Georgia,serif;color:#1d3931;}
+#productDetailsModal .royal-product-details h2{font-family:"Plus Jakarta Sans","Inter",system-ui,sans-serif;color:#1d3931;}
 #productDetailsModal .royal-p-stars{color:#b89555;}
 #productDetailsModal .royal-p-gallery,
 #productDetailsModal .royal-product-info {animation:royalLuxeRise .6s var(--royal-luxe-ease) both;}
@@ -1071,7 +1071,7 @@ html body #productDetailsModal.royal-product-page .royal-wholesale-box{
  color:#123b31!important;
 }
 html body #productDetailsModal.royal-product-page .royal-wholesale-box h2{
- font-family:"Playfair Display",Georgia,serif;
+ font-family:"Plus Jakarta Sans","Inter",system-ui,sans-serif;
  font-size:18px;
  font-weight:750;
  color:#123b31!important;
@@ -1234,7 +1234,7 @@ header.royal-glass-header .royal-mobile-search-toggle {
    display:block!important;
    min-width:0!important;
    max-width:100%!important;
-   font-family:Georgia,"Times New Roman",serif!important;
+   font-family:"Plus Jakarta Sans","Inter",system-ui,sans-serif!important;
    font-size:clamp(11px,3.6vw,16px)!important;
    font-weight:800!important;
    line-height:1.15!important;
@@ -2213,7 +2213,7 @@ header.royal-glass-header .royal-mobile-search-toggle {
 #loja .royal-sidebar-heading h3{
  margin:0!important;
  color:#123b31!important;
- font-family:Georgia,"Times New Roman",serif!important;
+ font-family:"Plus Jakarta Sans","Inter",system-ui,sans-serif!important;
  font-size:19px!important;
  font-weight:800!important;
  line-height:1.2!important;
@@ -3074,7 +3074,7 @@ html body #productDetailsModal.royal-product-page
   padding:10px 11px 13px!important;
   gap:7px!important;
   text-align:left!important;
-  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+  font-family:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
   opacity:1!important;
 }
 #loja #royalCatalogResults #catalogContainer.royal-catalog-grid > article.royal-market-card
@@ -3130,7 +3130,7 @@ html body #productDetailsModal.royal-product-page
   overflow:hidden!important;
   color:#cbd6d0!important;
   -webkit-text-fill-color:#cbd6d0!important;
-  font-family:Arial,sans-serif!important;
+  font-family:"Inter",Arial,sans-serif!important;
   font-size:15px!important;
   font-weight:800!important;
   line-height:1!important;
@@ -3264,4 +3264,45 @@ html body #productDetailsModal.royal-product-page
   .royal-market-installment {padding:7px 6px!important}
   #loja #royalCatalogResults #catalogContainer.royal-catalog-grid > article.royal-market-card
   .royal-market-installment strong {font-size:13px!important}
+}
+
+
+/* Store Royal v76 — cohesive, two-font visual system.
+   Headings: Plus Jakarta Sans. Body / pricing / controls: Inter.
+   Do not add more remote font families; keep fallbacks local. */
+:root {
+  --royal-font-heading:"Plus Jakarta Sans","Inter",system-ui,sans-serif;
+  --royal-font-body:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+html body {
+  font-family:var(--royal-font-body)!important;
+}
+html body :is(button,input,select,textarea) {
+  font-family:var(--royal-font-body)!important;
+}
+html body :is(h1,h2,h3,h4,h5,h6,.font-serif) {
+  font-family:var(--royal-font-heading)!important;
+}
+/* Keep product names modern and bold, without changing their green contrast. */
+#loja #royalCatalogResults #catalogContainer.royal-catalog-grid > article.royal-market-card
+.royal-market-info h3 {
+  font-family:var(--royal-font-heading)!important;
+  font-weight:700!important;
+  letter-spacing:-.015em!important;
+}
+#loja #royalCatalogResults #catalogContainer.royal-catalog-grid > article.royal-market-card
+.royal-market-info :is(.royal-market-price,.royal-market-rating,.royal-market-installment,.royal-market-offer,.royal-market-footnote),
+html body #productDetailsModal.royal-product-page .royal-product-info {
+  font-family:var(--royal-font-body)!important;
+}
+/* Stable price columns in the product catalog, product detail, cart and admin. */
+#loja :is(.royal-market-price,.royal-market-installment,.royal-market-original),
+#loja :is(.royal-market-price,.royal-market-installment) :is(strong,small,span),
+#productDetailsModal :is(.royal-p-price,.royal-p-current-price,.royal-payment-grid,.royal-wholesale-box,.royal-wholesale-tier),
+#cartModal,
+#checkoutModal,
+#adminProductsCards,
+#adminProductFixedMarkupPreview {
+  font-variant-numeric:tabular-nums lining-nums!important;
+  font-feature-settings:"tnum" 1,"lnum" 1!important;
 }
