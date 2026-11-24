@@ -3333,8 +3333,8 @@ html body #productDetailsModal.royal-product-page .royal-product-info {
   margin:0!important;
   box-sizing:border-box!important;
   isolation:isolate;
-  --royal-carousel-gap:clamp(10px,1.1vw,15px);
-  --royal-carousel-visible:5;
+  --royal-carousel-gap:12px;
+  --royal-carousel-card-width:calc(20% - 9.6px);
 }
 #loja #royalCatalogResults #catalogContainer.royal-catalog-grid .royal-catalog-track {
   display:flex!important;
@@ -3371,14 +3371,8 @@ html body #productDetailsModal.royal-product-page .royal-product-info {
   box-sizing:border-box!important;
   display:flex!important;
   flex-direction:column!important;
-  flex:0 0 calc(
-    (100% - (var(--royal-carousel-visible) - 1) * var(--royal-carousel-gap))
-    / var(--royal-carousel-visible)
-  )!important;
-  width:calc(
-    (100% - (var(--royal-carousel-visible) - 1) * var(--royal-carousel-gap))
-    / var(--royal-carousel-visible)
-  )!important;
+  flex:0 0 var(--royal-carousel-card-width)!important;
+  width:var(--royal-carousel-card-width)!important;
   max-width:none!important;
   min-width:0!important;
   min-height:0!important;
@@ -3432,19 +3426,19 @@ html body #productDetailsModal.royal-product-page .royal-product-info {
 }
 @media (min-width:900px) and (max-width:1199px) {
   #loja #royalCatalogResults #catalogContainer.royal-catalog-grid > .royal-catalog-carousel {
-    --royal-carousel-visible:3;
+    --royal-carousel-card-width:calc(33.333333% - 8px);
   }
   #loja #royalCatalogResults #catalogContainer.royal-catalog-grid .royal-catalog-carousel[data-count="3"] > .royal-carousel-next {display:none!important}
 }
 @media (min-width:640px) and (max-width:899px) {
   #loja #royalCatalogResults #catalogContainer.royal-catalog-grid > .royal-catalog-carousel {
-    --royal-carousel-visible:3;
+    --royal-carousel-card-width:calc(33.333333% - 8px);
   }
   #loja #royalCatalogResults #catalogContainer.royal-catalog-grid .royal-catalog-carousel[data-count="3"] > .royal-carousel-next {display:none!important}
 }
 @media (max-width:639px) {
   #loja #royalCatalogResults #catalogContainer.royal-catalog-grid > .royal-catalog-carousel {
-    --royal-carousel-visible:2;
+    --royal-carousel-card-width:calc(50% - 5px);
     --royal-carousel-gap:10px;
     padding-right:9px!important;
   }
