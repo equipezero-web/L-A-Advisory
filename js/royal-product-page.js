@@ -241,12 +241,28 @@
   // White, product-first detail layout. Values come exclusively from the Store Royal catalog.
   function enhanceProductPage(dialog, product, gallery, sale, oldPrice, stock) {
     const header = dialog.querySelector('.royal-product-header');
+    // Recreate the actual home storefront header's visual identity inside
+    // the product dialog, without duplicating global IDs or event handlers.
     header.innerHTML =
-      '<div class="royal-p-header-left"><button type="button" data-action="close" aria-label="Voltar à loja"><i data-lucide="arrow-left" aria-hidden="true"></i><span>Voltar à loja</span></button></div>' +
-      '<strong class="royal-p-header-brand">STORE ROYAL</strong>' +
-      '<div class="royal-p-header-tools">' +
-        '<button type="button" data-action="favorite" aria-pressed="false" aria-label="Favoritar produto" title="Favoritar"><i data-lucide="heart" aria-hidden="true"></i><span data-favorite-label>Favoritar</span></button>' +
-        '<button type="button" data-action="share" aria-label="Compartilhar produto" title="Compartilhar"><i data-lucide="share-2" aria-hidden="true"></i><span>Compartilhar</span></button>' +
+      '<div class="royal-p-header-glass">' +
+        '<div class="royal-p-header-left">' +
+          '<button type="button" class="royal-p-header-back" data-action="close" aria-label="Voltar à loja" title="Voltar à loja"><i data-lucide="arrow-left" aria-hidden="true"></i></button>' +
+          '<button type="button" class="royal-p-header-logo" data-action="home" aria-label="L&A Royal Advisory — voltar ao início" title="Voltar ao início">L&amp;A</button>' +
+        '</div>' +
+        '<div class="royal-p-header-brand-block">' +
+          '<strong class="royal-p-header-brand">ROYAL ADVISORY</strong>' +
+          '<span>Excellence in Every Detail</span>' +
+        '</div>' +
+        '<form class="royal-p-header-search" role="search" aria-label="Pesquisar produtos na loja">' +
+          '<label class="sr-only" for="royalProductHeaderSearch">Buscar produtos na loja</label>' +
+          '<input id="royalProductHeaderSearch" type="search" autocomplete="off" placeholder="Buscar produtos na loja">' +
+          '<button type="submit" aria-label="Buscar produtos" title="Buscar"><i data-lucide="search" aria-hidden="true"></i></button>' +
+        '</form>' +
+        '<div class="royal-p-header-tools">' +
+          '<button type="button" data-action="favorite" aria-pressed="false" aria-label="Favoritar produto" title="Favoritar"><i data-lucide="heart" aria-hidden="true"></i></button>' +
+          '<button type="button" data-action="share" aria-label="Compartilhar produto" title="Compartilhar"><i data-lucide="share-2" aria-hidden="true"></i></button>' +
+          '<button type="button" data-action="header-cart" aria-label="Abrir carrinho" title="Abrir carrinho"><i data-lucide="shopping-cart" aria-hidden="true"></i></button>' +
+        '</div>' +
       '</div>';
 
     const photo = dialog.querySelector('.royal-product-photo');
@@ -606,6 +622,20 @@
             '<button type="submit" class="royal-p-primary">Enviar avaliação</button><p class="royal-p-muted" data-review-feedback aria-live="polite">Avaliações passam por moderação antes da publicação. É necessário estar conectado.</p></form>' +
           '</section></div></div>';
     enhanceProductPage(dialog, product, gallery, sale, oldPrice, stock);
+    // Product-page search uses the existing catalog filters and public search
+    // rather than duplicating the homepage's search input or dropdown IDs.
+    dialog.querySelector('.royal-p-header-search')?.addEventListener('submit', event => {
+      event.preventDefault();
+      const term = dialog.querySelector('#royalProductHeaderSearch')?.value.trim() || '';
+      if (!term) return;
+      const field = document.getElementById('searchProduct');
+      if (field) field.value = term;
+      const mainSearch = document.getElementById('royalHeaderSearch');
+      if (mainSearch) mainSearch.value = term;
+      removePage(true);
+      if (typeof renderCatalog === 'function') renderCatalog();
+      document.getElementById('loja')?.scrollIntoView({behavior:'smooth',block:'start'});
+    });
     syncProductPhotoRatio(dialog);
     updateWholesalePreview(dialog, sale, 1);
     addMobilePurchaseDock(dialog, product, sale, maxQty, isAffiliate);
@@ -695,6 +725,16 @@
         return;
       }
       if (action === 'close') return removePage(true);
+      if (action === 'home') {
+        removePage(true);
+        document.getElementById('inicio')?.scrollIntoView({behavior:'smooth',block:'start'});
+        return;
+      }
+      if (action === 'header-cart') {
+        removePage(true);
+        if (typeof openCartModal === 'function') openCartModal();
+        return;
+      }
       if (action === 'favorite') return toggleFavorite(product, button);
       if (action === 'reviews') { dialog.querySelector('#royalProductReviewsSection')?.scrollIntoView({behavior:'smooth',block:'start'}); return; }
       if (action === 'share') {
