@@ -12,7 +12,7 @@ const HEADERS: Record<string,string> = {
 type Offer = {
   id:string; title:string; merchant:string; url:string;
   linkKind:'merchant'|'aggregator'; image:string|null;
-  price:number; currency:'BRL'; delivery:string|null;
+  price:number|null; priceSource:'shopping'|'snippet'|'unavailable'; currency:'BRL'; delivery:string|null;
   freeShipping:boolean; shippingKnown:boolean; shippingCost:number|null;
   knownTotal:number|null; rating:number|null; reviews:number|null;
   score:number; query:string;
@@ -73,16 +73,59 @@ function normal(raw:Record<string,unknown>,q:string,provider:string):Offer|null 
     title,merchant:text(raw.source||raw.merchant||raw.store,110)||'Loja não identificada',
     url,linkKind:isAggregator?'aggregator':'merchant',
     image:safeUrl(raw.imageUrl||raw.thumbnail||raw.image),
-    price,currency:'BRL',...ship,
+    price,priceSource:'shopping',currency:'BRL',...ship,
     knownTotal:ship.shippingKnown?Math.round((price+(ship.shippingCost||0))*100)/100:null,
     rating:stars,reviews:count(raw.ratingCount??raw.reviews),score:0,query:q
   };
 }
+/* Target marketplaces through the same authorized Google search provider.
+ * We do NOT scrape their protected sites, impersonate sessions or invent stock.
+ * Organic listings without explicit price remain links with "price unknown". */
+const MARKETPLACES=[
+  {name:'Shopee',domain:'shopee.com.br',site:'shopee.com.br'},
+  {name:'SHEIN',domain:'shein.com',site:'br.shein.com'},
+  {name:'Mercado Livre',domain:'mercadolivre.com.br',site:'mercadolivre.com.br'},
+  {name:'AliExpress',domain:'aliexpress.com',site:'pt.aliexpress.com'},
+  {name:'Amazon Brasil',domain:'amazon.com.br',site:'amazon.com.br'},
+  {name:'Magalu',domain:'magazineluiza.com.br',site:'magazineluiza.com.br'}
+] as const;
+type Marketplace=typeof MARKETPLACES[number];
+function isFromMarketplace(url:string,market:Marketplace):boolean{
+  try{
+    const host=new URL(url).hostname.toLowerCase();
+    return host===market.domain||host.endsWith('.'+market.domain);
+  }catch{return false}
+}
+function listingPrice(raw:Record<string,unknown>):{price:number|null;source:'snippet'|'unavailable'}{
+  const structured=numericPrice(raw.extracted_price??raw.price);
+  if(structured!==null)return {price:structured,source:'snippet'};
+  const snippet=text(raw.snippet,700);
+  const matches=[...snippet.matchAll(/R\$\s*((?:\d{1,3}(?:[.\s]\d{3})+|\d+)(?:,\d{2})?)/gi)];
+  if(matches.length!==1)return {price:null,source:'unavailable'};
+  const hit=matches[0],near=snippet.slice(Math.max(0,hit.index-14),hit.index);
+  if(/\b\d{1,2}\s*x\s*(?:de\s*)?$/i.test(near))return {price:null,source:'unavailable'};
+  const price=numericPrice('R$ '+hit[1]);
+  return {price,source:price===null?'unavailable':'snippet'};
+}
+function normalOrganic(raw:Record<string,unknown>,q:string,provider:string,market:Marketplace):Offer|null{
+  const title=text(raw.title,230),url=safeUrl(raw.link);
+  if(title.length<8||!url||!isFromMarketplace(url,market))return null;
+  if(new URL(url).pathname==='/'||new URL(url).pathname.length<3)return null;
+  const {price,source}=listingPrice(raw);
+  return {
+    id:provider+':organic:'+text(url,260),
+    title,merchant:market.name,url,linkKind:'merchant',
+    image:safeUrl(raw.thumbnail||raw.image),
+    price,priceSource:source,currency:'BRL',
+    ...shipping(null),knownTotal:null,rating:null,reviews:null,score:0,query:q
+  };
+}
 function rank(offers:Offer[]){
-  const prices=offers.map(o=>o.price);
-  const lowest=Math.min(...prices),highest=Math.max(...prices);
+  const prices=offers.map(o=>o.price).filter((n):n is number=>n!==null);
+  const lowest=prices.length?Math.min(...prices):0;
+  const highest=prices.length?Math.max(...prices):0;
   for(const o of offers){
-    const cheap=highest===lowest?30:40*(highest-o.price)/(highest-lowest);
+    const cheap=o.price===null?0:highest===lowest?30:40*(highest-o.price)/(highest-lowest);
     const quality=o.rating===null?0:o.rating/5*28;
     const reviews=o.reviews===null?0:Math.min(12,Math.log10(o.reviews+1)*4);
     const delivery=o.freeShipping?20:o.shippingKnown?7:2;
@@ -95,7 +138,7 @@ function validated(raw:Record<string,unknown>){
   const maxPrice=raw.maxPrice===null||raw.maxPrice===undefined||raw.maxPrice===''?null:Number(raw.maxPrice);
   if(maxPrice!==null&&(!Number.isFinite(maxPrice)||maxPrice<=0||maxPrice>1000000))throw Error('Preço máximo inválido.');
   const minRating=Number(raw.minRating??0),minReviews=Number(raw.minReviews??0);
-  const depth=Number(raw.depth??2),sort=text(raw.sort,25)||'balance';
+  const depth=Number(raw.depth??2),sort=text(raw.sort,25)||'price';
   if(![0,4,4.3,4.5,4.7].includes(minRating)||![0,10,25,50,100].includes(minReviews)
     ||![1,2,3].includes(depth)||!['balance','price','rating','reviews','shipping'].includes(sort))
     throw Error('Filtro inválido.');
@@ -122,18 +165,18 @@ function configuredProviders():ProviderCandidate[]{
   }
   return result;
 }
-async function runProvider(provider:SearchProvider,key:string,q:string):Promise<unknown[]>{
+async function runProvider(provider:SearchProvider,key:string,q:string,mode:'shopping'|'organic'):Promise<unknown[]>{
   const signal=AbortSignal.timeout(18000);
   let result:Response;
   if(provider==='serper'){
-    result=await fetch('https://google.serper.dev/shopping',{
+    result=await fetch('https://google.serper.dev/'+(mode==='shopping'?'shopping':'search'),{
       method:'POST',signal,
       headers:{'Content-Type':'application/json','X-API-KEY':key},
       body:JSON.stringify({q,gl:'br',hl:'pt',num:35,page:1})
     });
   }else{
     const uri=new URL('https://serpapi.com/search.json');
-    for(const [k,v] of Object.entries({engine:'google_shopping',api_key:key,q,gl:'br',hl:'pt',num:'35'}))
+    for(const [k,v] of Object.entries({engine:mode==='shopping'?'google_shopping':'google',api_key:key,q,gl:'br',hl:'pt',num:mode==='shopping'?'35':'10'}))
       uri.searchParams.set(k,v);
     result=await fetch(uri,{signal});
   }
@@ -145,16 +188,17 @@ async function runProvider(provider:SearchProvider,key:string,q:string):Promise<
   }
   const body=await result.json();
   if(body?.error)throw Error('Provedor informou uma falha na consulta.');
-  const rows=provider==='serper'?body?.shopping:body?.shopping_results;
+  const rows=provider==='serper'?(mode==='shopping'?body?.shopping:body?.organic)
+      :(mode==='shopping'?body?.shopping_results:body?.organic_results);
   return Array.isArray(rows)?rows:[];
 }
 // A rejected/stale provider key must not suppress another properly configured
 // supported provider. Only authentication/permission failures cause fallbacks.
-async function runWithCredentialFallback(q:string,candidates:ProviderCandidate[]){
+async function runWithCredentialFallback(q:string,candidates:ProviderCandidate[],mode:'shopping'|'organic'){
   const failures:string[]=[];
   for(const candidate of candidates){
     try{
-      const rows=await runProvider(candidate.provider,candidate.key,q);
+      const rows=await runProvider(candidate.provider,candidate.key,q,mode);
       return {provider:candidate.provider,rows};
     }catch(error){
       const why=error instanceof Error?error.message:'Falha desconhecida do provedor.';
@@ -205,46 +249,62 @@ Deno.serve(async (req:Request):Promise<Response>=>{
     if(Date.now()-last<9000)return json({ok:false,error:'Aguarde 9 segundos antes da próxima pesquisa.'},429);
     if(recent.size>250)recent.clear();
     recent.set(identity.user.id,Date.now());
-    const queries=[options.category+' '+options.query];
-    if(options.depth>1)queries.push(options.query+' '+options.category+' ofertas lojas');
-    if(options.depth>2)queries.push(options.category+' '+options.query+' promoção comprar');
-    const calls=await Promise.allSettled(queries.map(async q=>{
-      const response=await runWithCredentialFallback(q.slice(0,190),candidates);
-      const list=response.rows.map(row=>normal(row as Record<string,unknown>,q,response.provider))
+    // Fast: one broad Shopping query.
+    // Standard: Shopping + Shopee, SHEIN and Mercado Livre targeted organic queries.
+    // Extended: also AliExpress, Amazon Brasil and Magalu (seven API queries).
+    // Each query is billed by the external provider; depth is an explicit choice.
+    const targets=options.depth===1?[]:options.depth===2?MARKETPLACES.slice(0,3):[...MARKETPLACES];
+    const tasks:Array<{mode:'shopping'|'organic';q:string;market?:Marketplace}>=[
+      {mode:'shopping',q:options.category+' '+options.query}
+    ];
+    for(const market of targets)tasks.push({
+      mode:'organic',q:options.query+' '+options.category+' site:'+market.site,
+      market
+    });
+    const calls=await Promise.allSettled(tasks.map(async task=>{
+      const response=await runWithCredentialFallback(task.q.slice(0,190),candidates,task.mode);
+      const list=response.rows.map(row=>task.market
+        ? normalOrganic(row as Record<string,unknown>,task.q,response.provider,task.market)
+        : normal(row as Record<string,unknown>,task.q,response.provider))
         .filter((x):x is Offer=>x!==null);
-      return {provider:response.provider,offers:list};
+      return {provider:response.provider,offers:list,market:task.market?.name||null};
     }));
     const offers=new Map<string,Offer>(),usedProviders=new Set<SearchProvider>();
+    const storesWithLinks=new Set<string>();
     const errors:string[]=[];let rawCount=0;
     for(let i=0;i<calls.length;i++){
       const result=calls[i];
       if(result.status==='rejected'){
-        errors.push('Pesquisa '+(i+1)+': '+text(result.reason?.message,450));continue;
+        errors.push('Consulta '+(i+1)+(tasks[i].market?' ('+tasks[i].market.name+')':' (Google Shopping)')+
+          ': '+text(result.reason?.message,400));continue;
       }
       usedProviders.add(result.value.provider);
+      if(result.value.market&&result.value.offers.length)storesWithLinks.add(result.value.market);
       for(const item of result.value.offers){rawCount++;if(!offers.has(item.url))offers.set(item.url,item)}
     }
     if(errors.length&&!offers.size)return json({ok:false,code:'provider_search_failed',
       error:'As buscas externas falharam. Confira as credenciais e as permissões do provedor.',
       details:errors},502);
     let selected=[...offers.values()].filter(o=>
-      (options.maxPrice===null||o.price<=options.maxPrice)&&
+      (options.maxPrice===null||(o.price!==null&&o.price<=options.maxPrice))&&
       (options.minRating===0||(o.rating!==null&&o.rating>=options.minRating))&&
       (options.minReviews===0||(o.reviews!==null&&o.reviews>=options.minReviews))&&
       (!options.onlyFree||o.freeShipping)
     );
     if(selected.length)rank(selected);
-    if(options.sort==='price')selected.sort((a,b)=>a.price-b.price);
+    if(options.sort==='price')selected.sort((a,b)=>(a.price??Infinity)-(b.price??Infinity));
     else if(options.sort==='rating')selected.sort((a,b)=>(b.rating??-1)-(a.rating??-1));
     else if(options.sort==='reviews')selected.sort((a,b)=>(b.reviews??-1)-(a.reviews??-1));
     else if(options.sort==='shipping')selected.sort((a,b)=>Number(b.freeShipping)-Number(a.freeShipping)||a.price-b.price);
-    else selected.sort((a,b)=>b.score-a.score);
+    else selected.sort((a,b)=>b.score-a.score||((a.price??Infinity)-(b.price??Infinity)));
     return json({ok:true,provider:[...usedProviders][0]||provider,
       providersUsed:[...usedProviders],category:options.category,query:options.query,
-      searchedAt:new Date().toISOString(),queries:queries.length,rawCount,
+      searchedAt:new Date().toISOString(),queries:tasks.length,rawCount,
+      searchedStores:targets.map(t=>t.name),storesWithLinks:[...storesWithLinks],
+      knownPrices:selected.filter(o=>o.price!==null).length,
       uniqueCount:offers.size,totalMatching:selected.length,results:selected.slice(0,90),
       notices:errors,partial:errors.length>0,
-      disclaimer:'Valores e fretes informados pelo agregador. Confirme o anúncio, CEP de entrega, estoque e reputação na loja original.'});
+      disclaimer:'O buscador pode omitir anúncios. Preços de Google Shopping e trechos de busca são indicativos; confirme preço final, disponibilidade, frete e reputação na loja original.'});
   }catch(e){
     console.error('Advisory AI - search failed',String(e));
     return json({ok:false,error:'Erro interno ao pesquisar fornecedores.'},500);
