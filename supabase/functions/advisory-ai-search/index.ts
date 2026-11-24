@@ -249,18 +249,22 @@ Deno.serve(async (req:Request):Promise<Response>=>{
     if(Date.now()-last<9000)return json({ok:false,error:'Aguarde 9 segundos antes da próxima pesquisa.'},429);
     if(recent.size>250)recent.clear();
     recent.set(identity.user.id,Date.now());
-    // Fast: one broad Shopping query.
-    // Standard: Shopping + Shopee, SHEIN and Mercado Livre targeted organic queries.
-    // Extended: also AliExpress, Amazon Brasil and Magalu (seven API queries).
-    // Each query is billed by the external provider; depth is an explicit choice.
-    const targets=options.depth===1?[]:options.depth===2?MARKETPLACES.slice(0,3):[...MARKETPLACES];
-    const tasks:Array<{mode:'shopping'|'organic';q:string;market?:Marketplace}>=[
-      {mode:'shopping',q:options.category+' '+options.query}
-    ];
-    for(const market of targets)tasks.push({
-      mode:'organic',q:options.query+' '+options.category+' site:'+market.site,
-      market
-    });
+    // Direct marketplace listings only. Google is merely the discovery index;
+    // Google Shopping aggregate cards must never be represented as vendor offers.
+    // Each external query consumes provider credits. Expanded depth allows an
+    // additional query variant, not unrelated Shopping aggregation.
+    const targets=options.depth===1?MARKETPLACES.slice(0,3):[...MARKETPLACES];
+    const tasks:Array<{mode:'shopping'|'organic';q:string;market?:Marketplace}>=[];
+    for(const market of targets){
+      tasks.push({
+        mode:'organic',q:options.query+' '+options.category+' site:'+market.site,
+        market
+      });
+      if(options.depth===3)tasks.push({
+        mode:'organic',q:'comprar '+options.query+' site:'+market.site,
+        market
+      });
+    }
     const calls=await Promise.allSettled(tasks.map(async task=>{
       const response=await runWithCredentialFallback(task.q.slice(0,190),candidates,task.mode);
       const list=response.rows.map(row=>task.market
@@ -275,7 +279,7 @@ Deno.serve(async (req:Request):Promise<Response>=>{
     for(let i=0;i<calls.length;i++){
       const result=calls[i];
       if(result.status==='rejected'){
-        errors.push('Consulta '+(i+1)+(tasks[i].market?' ('+tasks[i].market.name+')':' (Google Shopping)')+
+        errors.push('Consulta '+(i+1)+(tasks[i].market?' ('+tasks[i].market.name+')':' (busca externa)')+
           ': '+text(result.reason?.message,400));continue;
       }
       usedProviders.add(result.value.provider);
@@ -304,7 +308,7 @@ Deno.serve(async (req:Request):Promise<Response>=>{
       knownPrices:selected.filter(o=>o.price!==null).length,
       uniqueCount:offers.size,totalMatching:selected.length,results:selected.slice(0,90),
       notices:errors,partial:errors.length>0,
-      disclaimer:'O buscador pode omitir anúncios. Preços de Google Shopping e trechos de busca são indicativos; confirme preço final, disponibilidade, frete e reputação na loja original.'});
+      disclaimer:'Resultados direcionados às lojas de origem, descobertos por mecanismos de busca. Não incluem fichas agregadas do Google Shopping. Preços extraídos de trechos podem estar desatualizados; confirme preço, frete e disponibilidade no anúncio da loja.'});
   }catch(e){
     console.error('Advisory AI - search failed',String(e));
     return json({ok:false,error:'Erro interno ao pesquisar fornecedores.'},500);
