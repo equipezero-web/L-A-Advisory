@@ -3455,3 +3455,390 @@ html body #productDetailsModal.royal-product-page .royal-product-info {
     scroll-behavior:auto!important;
   }
 }
+
+
+/* Store Royal v78 — product-detail marketplace composition.
+   Preserve native inventory and checkout controls; no invented delivery promises. */
+html body #productDetailsModal.royal-product-page .royal-product-scroll {
+  background:#f2f5f3!important;
+}
+html body #productDetailsModal.royal-product-page .royal-product-container {
+  box-sizing:border-box!important;
+  width:100%!important;
+  max-width:1520px!important;
+  padding:clamp(15px,2vw,30px) clamp(12px,2.1vw,30px) 80px!important;
+  margin:0 auto!important;
+}
+html body #productDetailsModal.royal-product-page .royal-product-main {
+  display:grid!important;
+  grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(280px,.84fr)!important;
+  align-items:start!important;
+  gap:clamp(12px,1.4vw,22px)!important;
+  min-width:0!important;
+  background:transparent!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-gallery,
+html body #productDetailsModal.royal-product-page .royal-product-info,
+html body #productDetailsModal.royal-product-page .royal-p-purchase-panel {
+  min-width:0!important;
+  box-sizing:border-box!important;
+  border:1px solid #dce7e1!important;
+  border-radius:15px!important;
+  background:#fff!important;
+  box-shadow:0 2px 14px rgba(10,47,36,.035)!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-gallery {
+  padding:clamp(12px,1.5vw,20px)!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-gallery .royal-product-photo {
+  width:100%!important;
+  max-width:100%!important;
+  background:#fff!important;
+  border:0!important;
+  border-radius:11px!important;
+  box-shadow:none!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-gallery .royal-product-photo > img#royalSelectedProductImage {
+  padding:clamp(6px,1vw,14px)!important;
+  object-fit:contain!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-thumbnails {
+  display:flex!important;
+  justify-content:flex-start!important;
+  gap:9px!important;
+  padding:13px 0 2px!important;
+  overflow-x:auto!important;
+  overscroll-behavior-x:contain;
+  scrollbar-width:thin;
+}
+html body #productDetailsModal.royal-product-page .royal-p-thumbnails button {
+  flex:none!important;
+  width:65px!important;
+  height:65px!important;
+  border-radius:9px!important;
+  background:#fff!important;
+  border:1px solid #dce6df!important;
+  box-shadow:none!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-thumbnails button.royal-p-thumbnail-active {
+  border:2px solid #17674f!important;
+}
+html body #productDetailsModal.royal-product-page .royal-product-info {
+  padding:clamp(16px,1.7vw,25px)!important;
+  margin:0!important;
+}
+html body #productDetailsModal.royal-product-page .royal-product-info h1 {
+  font-family:var(--royal-font-heading)!important;
+  font-size:clamp(20px,1.85vw,27px)!important;
+  font-weight:750!important;
+  line-height:1.37!important;
+  color:#103c30!important;
+  margin:12px 0 14px!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-rating-trigger {
+  margin:0 0 18px!important;
+  padding:5px 0!important;
+  color:#2b6653!important;
+  font-weight:700!important;
+}
+html body #productDetailsModal.royal-product-page .royal-product-info .royal-p-stock {
+  display:block!important;
+  margin:0 0 15px!important;
+  color:#176446!important;
+  font-size:14px!important;
+  font-weight:750!important;
+}
+html body #productDetailsModal.royal-product-page .royal-product-info .royal-p-attributes {
+  display:grid!important;
+  gap:7px!important;
+  margin-bottom:18px!important;
+  padding:12px 0!important;
+  border-top:1px solid #e7efe9!important;
+  border-bottom:1px solid #e7efe9!important;
+}
+html body #productDetailsModal.royal-product-page .royal-product-info .royal-p-attribute {
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:space-between!important;
+  gap:14px!important;
+  color:#496358!important;
+  font-size:13px!important;
+}
+html body #productDetailsModal.royal-product-page .royal-product-info .royal-p-attribute strong {
+  color:#153d31!important;
+  text-align:right!important;
+  font-weight:750!important;
+}
+html body #productDetailsModal.royal-product-page .royal-product-info .royal-wholesale-box {
+  margin:13px 0 0!important;
+  padding:14px!important;
+  border-radius:12px!important;
+  border-color:#dbe5df!important;
+  background:#f9fbf9!important;
+  box-shadow:none!important;
+}
+html body #productDetailsModal.royal-product-page .royal-product-info .royal-wholesale-box h2 {
+  font-size:16px!important;
+  font-weight:800!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-purchase-panel {
+  display:flex!important;
+  flex-direction:column!important;
+  gap:13px!important;
+  padding:clamp(14px,1.4vw,20px)!important;
+  margin:0!important;
+  color:#143b30!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-purchase-panel .royal-p-price {
+  display:flex!important;
+  flex-wrap:wrap!important;
+  gap:6px 9px!important;
+  align-items:baseline!important;
+  margin:0!important;
+  padding:0 0 12px!important;
+  border:0!important;
+  border-bottom:1px solid #e3ece7!important;
+  border-radius:0!important;
+  background:#fff!important;
+  background-image:none!important;
+  box-shadow:none!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-purchase-panel .royal-p-price:before {
+  display:none!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-purchase-panel .royal-p-current-price {
+  color:#093b2d!important;
+  -webkit-text-fill-color:#093b2d!important;
+  font-size:clamp(26px,2.25vw,35px)!important;
+  font-weight:900!important;
+  line-height:1.15!important;
+  font-variant-numeric:tabular-nums!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-purchase-panel .royal-p-installment-preview {
+  display:flex!important;
+  flex-direction:column!important;
+  gap:4px!important;
+  padding:10px 12px!important;
+  border:1px solid #d6e9dd!important;
+  border-radius:9px!important;
+  background:#f3faf5!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-purchase-panel .royal-p-installment-preview strong {
+  color:#164e38!important;
+  font-size:15px!important;
+  font-weight:800!important;
+  font-variant-numeric:tabular-nums!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-purchase-panel .royal-p-installment-preview span {
+  color:#526f60!important;
+  font-size:11px!important;
+  line-height:1.5!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-purchase-panel .royal-payment-methods {
+  margin:0!important;
+  padding:12px!important;
+  border:1px solid #e0ebe3!important;
+  border-radius:10px!important;
+  background:#fff!important;
+  color:#173e32!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-purchase-panel .royal-payment-methods h2 {
+  font-size:15px!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-purchase-panel .royal-p-service-list {
+  margin:0!important;
+  border:1px solid #e0ebe5!important;
+  border-radius:10px!important;
+  background:#fff!important;
+  box-shadow:none!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-purchase-panel .royal-p-service {
+  padding:12px 9px!important;
+  background:#fff!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-purchase-panel .royal-p-qty-label {
+  display:block!important;
+  margin:0!important;
+  color:#224739!important;
+  font-size:13px!important;
+  font-weight:800!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-purchase-panel .royal-p-qty {
+  margin:0!important;
+  max-width:180px!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-purchase-panel .royal-p-actions {
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  gap:9px!important;
+  margin:0!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-purchase-panel .royal-p-actions button {
+  width:100%!important;
+  min-height:48px!important;
+  font-size:14px!important;
+  font-weight:800!important;
+  border-radius:9px!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-purchase-panel .royal-p-actions .royal-p-primary {
+  background:#007b40!important;
+  background-image:none!important;
+  border:1px solid #007b40!important;
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-purchase-panel .royal-p-actions .royal-p-primary:hover:not(:disabled){
+  background:#006938!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-purchase-panel .royal-p-actions .royal-p-secondary {
+  background:#fff!important;
+  background-image:none!important;
+  color:#087746!important;
+  -webkit-text-fill-color:#087746!important;
+  border:1px solid #087746!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-purchase-panel > .royal-p-muted {
+  margin:0!important;
+  font-size:11px!important;
+  color:#567166!important;
+  line-height:1.55!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-related-section {
+  margin:16px 0 0!important;
+  padding:clamp(14px,1.6vw,22px)!important;
+  border:1px solid #dce7e1!important;
+  border-radius:15px!important;
+  background:#fff!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-related-section h2 {
+  color:#133c30!important;
+  font-size:clamp(17px,1.55vw,22px)!important;
+  font-family:var(--royal-font-heading)!important;
+  font-weight:800!important;
+  margin:0 0 14px!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-related-shell {
+  position:relative!important;
+  min-width:0!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-related-track {
+  display:flex!important;
+  flex-flow:row nowrap!important;
+  align-items:stretch!important;
+  gap:12px!important;
+  width:100%!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  scroll-snap-type:x mandatory;
+  scroll-behavior:smooth;
+  padding:0 4px 8px!important;
+  overscroll-behavior-x:contain;
+  scrollbar-width:thin;
+}
+html body #productDetailsModal.royal-product-page .royal-p-related-card {
+  display:flex!important;
+  flex:0 0 calc(25% - 9px)!important;
+  flex-direction:column!important;
+  text-align:left!important;
+  gap:9px!important;
+  min-width:0!important;
+  padding:10px!important;
+  border-radius:11px!important;
+  border:1px solid #dce7e1!important;
+  background:#fff!important;
+  color:#123b31!important;
+  cursor:pointer!important;
+  scroll-snap-align:start!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-related-card:hover,
+html body #productDetailsModal.royal-product-page .royal-p-related-card:focus-visible {
+  border-color:#7cb19a!important;
+  box-shadow:0 4px 14px rgba(22,69,50,.09)!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-related-card img {
+  display:block!important;
+  width:100%!important;
+  height:145px!important;
+  object-fit:contain!important;
+  background:#fff!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-related-card .royal-p-related-name {
+  font-size:13px!important;
+  font-weight:650!important;
+  line-height:1.4!important;
+  color:#183c32!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-related-card strong {
+  margin-top:auto!important;
+  font-size:17px!important;
+  font-weight:900!important;
+  color:#103b2e!important;
+  font-variant-numeric:tabular-nums!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-related-next {
+  position:absolute!important;
+  right:0!important;
+  top:88px!important;
+  transform:translateY(-50%)!important;
+  display:grid!important;
+  place-items:center!important;
+  width:39px!important;
+  height:39px!important;
+  border-radius:50%!important;
+  border:1px solid #b8d1c3!important;
+  background:#fff!important;
+  color:#154633!important;
+  box-shadow:0 4px 12px rgba(10,46,35,.13)!important;
+  cursor:pointer!important;
+}
+html body #productDetailsModal.royal-product-page .royal-p-related-next svg{width:21px;height:21px}
+@media(min-width:1180px){
+  html body #productDetailsModal.royal-product-page .royal-p-purchase-panel {
+    position:sticky!important;
+    top:82px!important;
+  }
+}
+@media(min-width:801px) and (max-width:1179px){
+  html body #productDetailsModal.royal-product-page .royal-product-main {
+    grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr)!important;
+    gap:16px!important;
+  }
+  html body #productDetailsModal.royal-product-page .royal-p-purchase-panel {
+    grid-column:1/-1!important;
+    position:static!important;
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:12px!important;
+  }
+  html body #productDetailsModal.royal-product-page .royal-p-purchase-panel .royal-p-actions,
+  html body #productDetailsModal.royal-product-page .royal-p-purchase-panel .royal-p-service-list {
+    grid-column:1/-1!important;
+  }
+  html body #productDetailsModal.royal-product-page .royal-p-purchase-panel > .royal-p-muted {
+    grid-column:1/-1!important;
+  }
+}
+@media(max-width:800px){
+  html body #productDetailsModal.royal-product-page .royal-product-main {
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:12px!important;
+  }
+  html body #productDetailsModal.royal-product-page .royal-product-container {
+    max-width:660px!important;
+    padding:12px 10px 115px!important;
+  }
+  html body #productDetailsModal.royal-product-page .royal-product-info,
+  html body #productDetailsModal.royal-product-page .royal-p-purchase-panel,
+  html body #productDetailsModal.royal-product-page .royal-p-gallery {padding:14px!important}
+  html body #productDetailsModal.royal-product-page .royal-p-related-section{padding:13px!important}
+  html body #productDetailsModal.royal-product-page .royal-p-related-card{flex-basis:calc(55% - 8px)!important}
+  html body #productDetailsModal.royal-product-page .royal-p-purchase-panel .royal-p-actions {
+    display:none!important; /* existing fixed mobile purchase dock stays authoritative */
+  }
+}
+@media(max-width:440px){
+  html body #productDetailsModal.royal-product-page .royal-p-related-card {flex-basis:calc(75% - 8px)!important}
+}
+@media(prefers-reduced-motion:reduce){
+  html body #productDetailsModal.royal-product-page .royal-p-related-track {scroll-behavior:auto!important}
+}
