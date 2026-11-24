@@ -166,6 +166,16 @@
     card.append(body);
     return card;
   }
+  function renderStoreCards(storeName=''){
+    const list=byId('advisoryResults');
+    if(!list)return;
+    list.replaceChildren();
+    const filtered=storeName?offers.filter(o=>o.merchant===storeName):offers;
+    for(const [index,offer] of filtered.entries())list.appendChild(productCard(offer,index));
+    if(!filtered.length)list.appendChild(el('p','col-span-full rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900',
+      'Nenhuma oferta desta loja corresponde aos resultados atuais.'));
+  }
+  window.advisoryAiFilterStore = function(name){renderStoreCards(name||'')};
   function render(data){
     const items=byId('advisoryResults'),summary=byId('advisorySummary'),preview=byId('advisoryPreview');
     if(!items||!summary)return;
@@ -174,7 +184,13 @@
     searchedAt=data.searchedAt;
     const copyButton=byId('advisoryCopyAllButton');
     if(copyButton)copyButton.disabled=!offers.length;
-    items.replaceChildren();
+    const storeFilter=byId('advisoryStoreFilter');
+    if(storeFilter){
+      const merchants=[...new Set(offers.map(o=>o.merchant).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+      storeFilter.replaceChildren(new Option('Todas as lojas',''),...merchants.map(name=>new Option(name,name)));
+      storeFilter.disabled=!merchants.length;
+    }
+    renderStoreCards('');
     const total=Number(data.totalMatching)||0;
     summary.textContent=offers.length+' resultado(s) exibido(s) · '+total+
       ' correspondente(s) aos filtros · '+Number(data.uniqueCount||0)+
@@ -196,9 +212,8 @@
         }
       }
     }
-    if(!offers.length)items.append(el('p','col-span-full rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900',
+    if(!offers.length)items.replaceChildren(el('p','col-span-full rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900',
       'Nenhum anúncio corresponde aos filtros. Tente um nome mais simples, retire os filtros de avaliação/preço/frete ou use a busca muito ampla.'));
-    for(const [i,offer] of offers.entries())items.appendChild(productCard(offer,i));
     const notes=Array.isArray(data.notices)?data.notices:[];
     const notice=byId('advisoryNotices');
     if(notice)notice.textContent=notes.length?'Busca parcialmente concluída: '+notes.join('; '):'';
