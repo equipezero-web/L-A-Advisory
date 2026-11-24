@@ -4107,3 +4107,63 @@ html body #productDetailsModal.royal-product-page .royal-product-header input:fo
     padding:5px 7px!important;
   }
 }
+
+
+/* Store Royal v80 — catalog product photos fill each card's complete image
+   section, edge to edge. No letterboxing or padding. Original files unchanged. */
+#loja #royalCatalogResults #catalogContainer.royal-catalog-grid
+.royal-catalog-track > article.royal-image-only-card.royal-market-card
+.royal-market-image {
+  box-sizing:border-box!important;
+  display:block!important;
+  position:relative!important;
+  flex:0 0 auto!important;
+  width:100%!important;
+  min-width:0!important;
+  height:auto!important;
+  aspect-ratio:3 / 4!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#ffffff!important;
+  overflow:hidden!important;
+}
+#loja #royalCatalogResults #catalogContainer.royal-catalog-grid
+.royal-catalog-track > article.royal-image-only-card.royal-market-card
+.royal-market-image > img.royal-full-card-image {
+  box-sizing:border-box!important;
+  display:block!important;
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:100%!important;
+  min-height:100%!important;
+  max-width:none!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  object-fit:cover!important;
+  object-position:center center!important;
+  transform:none!important;
+  filter:none!important;
+}
+/* Keep product information below the photo, not overlaid on top of it. */
+#loja #royalCatalogResults #catalogContainer.royal-catalog-grid
+.royal-catalog-track > article.royal-image-only-card.royal-market-card
+.royal-image-card-caption.royal-market-info {
+  flex:1 1 auto!important;
+  position:relative!important;
+  width:100%!important;
+  background:#ffffff!important;
+}
+@media(max-width:639px){
+  #loja #royalCatalogResults #catalogContainer.royal-catalog-grid
+  .royal-catalog-track > article.royal-image-only-card.royal-market-card
+  .royal-market-image {
+    aspect-ratio:3 / 4!important;
+  }
+}
