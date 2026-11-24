@@ -374,7 +374,7 @@
     const wholesale = productInfo.querySelector('.royal-wholesale-box');
     const availability = productInfo.querySelector('.royal-p-stock');
     if (wholesale && availability) wholesale.before(availability);
-    if (wholesale && attributes && attributes.isConnected) wholesale.before(attributes);
+    if (wholesale && attributes && attributes.parentElement === productInfo) wholesale.before(attributes);
     productInfo.after(purchasePanel);
 
     const container = dialog.querySelector('.royal-product-container');
@@ -442,8 +442,8 @@
         : '';
       const section = document.createElement('section');
       section.className = 'royal-p-related-section';
-      section.setAttribute('aria-label','Produtos semelhantes');
-      section.innerHTML = '<h2>Produtos semelhantes</h2>' +
+      section.setAttribute('aria-label','Sugestões de produtos');
+      section.innerHTML = '<h2>Você também pode gostar</h2>' +
         '<div class="royal-p-related-shell"><div class="royal-p-related-track" tabindex="0" aria-label="Mais produtos da Store Royal">' +
         cards + '</div>' + more + '</div>';
       container.querySelector('.royal-product-main')?.after(section);
