@@ -14204,7 +14204,7 @@ function renderCatalog() {
     currentCatalogPage = pageResult.page;
     container.className = 'royal-catalog-grid';
     const market = window.royalMarketPricing;
-    const copy = market?.copy?.() || {noReviews:'Sem avaliações',pix:'no Pix ou cartão à vista',offer:'Oferta',install:'simulação em 12x',checkout:'Condições finais no checkout.'};
+    const copy = market?.copy?.() || {noReviews:'Sem avaliações',pix:'no Pix ou cartão à vista',offer:'Oferta',install:'12x de',checkout:'Condições finais no checkout.'};
     const renderedCards = pageResult.items.map(product => {
         const originalPrice = Number(product.price) || 0;
         const sellingPrice = calculateFinalPrice(product);
