@@ -68,12 +68,19 @@
     return data;
   }
 
+  const marketplaceHosts=['shopee.com.br','shein.com','mercadolivre.com.br','aliexpress.com','amazon.com.br','magazineluiza.com.br'];
+  function directMarketplaceOffer(offer){
+    if(offer?.linkKind!=='merchant')return false;
+    const href=safeHref(offer.url);
+    if(!href)return false;
+    const host=new URL(href).hostname.toLowerCase();
+    return marketplaceHosts.some(domain=>host===domain||host.endsWith('.'+domain));
+  }
+
   const offerPrice=o=>o.price!==null&&Number.isFinite(Number(o.price))?money(o.price):'Preço a consultar na loja';
   const priceContext=o=>o.priceSource==='snippet'
     ?'Valor encontrado no resultado de busca; confirme no anúncio.'
-    :o.priceSource==='shopping'
-      ?'Preço mostrado no Google Shopping; confirme na loja.'
-      :'Preço não informado pelo buscador; consulte diretamente o vendedor.';
+    :'Preço não informado pelo buscador; consulte diretamente o vendedor.';
   function infoLine(name,value){
     const p=el('p','text-sm text-slate-700');
     p.append(el('strong','text-slate-900',name+': '),document.createTextNode(value));
@@ -127,10 +134,10 @@
       infoLine('Frete',shippingLabel(offer)),
       infoLine('Preço + frete conhecido',
         offer.knownTotal!==null?money(offer.knownTotal):'Não calculável: falta valor do frete'),
-      infoLine('Origem do link',offer.linkKind==='merchant'?'Anúncio da loja':'Ficha agregada do produto'),
+      infoLine('Origem do link','Link direto do marketplace'),
       infoLine('Nota comparativa',offer.score.toFixed(1)+'/100 (pontuação interna, não nota da loja)'));
     const actions=el('div','mt-3 flex flex-wrap gap-2');
-    actions.appendChild(anchor(offer,offer.linkKind==='merchant'?'Abrir anúncio na loja':'Abrir ficha de ofertas'));
+    actions.appendChild(anchor(offer,'Abrir anúncio na loja'));
     const copy=el('button','rounded-lg border border-slate-300 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50','Copiar link');
     copy.type='button';copy.addEventListener('click',async ()=>{
       if(navigator.clipboard){try{await navigator.clipboard.writeText(offer.url);copy.textContent='Link copiado';return}catch{}}
@@ -161,7 +168,7 @@
     const actions=el('div','mt-auto pt-3 flex flex-wrap gap-2');
     const preview=el('button','flex-1 min-h-[36px] rounded-lg border border-slate-300 px-2 py-2 text-xs font-bold text-slate-800','Prévia na L&A');
     preview.type='button';preview.addEventListener('click',()=>previewOffer(offer));
-    actions.append(preview,anchor(offer,offer.linkKind==='merchant'?'Ver anúncio':'Ver ficha'));
+    actions.append(preview,anchor(offer,'Abrir na loja'));
     body.append(actions);
     card.append(body);
     return card;
@@ -173,14 +180,14 @@
     const filtered=storeName?offers.filter(o=>o.merchant===storeName):offers;
     for(const [index,offer] of filtered.entries())list.appendChild(productCard(offer,index));
     if(!filtered.length)list.appendChild(el('p','col-span-full rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900',
-      'Nenhuma oferta desta loja corresponde aos resultados atuais.'));
+      'Nenhum anúncio direto desta loja foi localizado na pesquisa atual.'));
   }
   window.advisoryAiFilterStore = function(name){renderStoreCards(name||'')};
   function render(data){
     const items=byId('advisoryResults'),summary=byId('advisorySummary'),preview=byId('advisoryPreview');
     if(!items||!summary)return;
     if(preview){preview.replaceChildren();preview.hidden=true}
-    offers=Array.isArray(data.results)?data.results:[];
+    offers=(Array.isArray(data.results)?data.results:[]).filter(directMarketplaceOffer);
     searchedAt=data.searchedAt;
     const copyButton=byId('advisoryCopyAllButton');
     if(copyButton)copyButton.disabled=!offers.length;
