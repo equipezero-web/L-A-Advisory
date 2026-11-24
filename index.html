@@ -2111,7 +2111,7 @@
 
                 <!-- CATÁLOGO -->
                 <div id="catalogContainer" role="tabpanel" aria-labelledby="storeAudienceMasculino" tabindex="0" class="royal-catalog-grid">
-                    <!-- Grade contínua: até 60 produtos por página -->
+                    <!-- Até 60 produtos por página, em grupos de até 8 por carrossel -->
                 </div>
                 <div id="catalogPagination" class="royal-catalog-pagination" aria-live="polite"></div>
                     </div><!-- /royal-catalog-results -->
@@ -14076,6 +14076,33 @@ function toggleFullCatalog() {
     renderCatalog();
 }
 
+// Cada página continua limitada a 60 itens; somente a apresentação
+// divide o resultado em carrosséis independentes de até oito produtos.
+function groupStoreCarouselItems(items) {
+    const groups = [];
+    for (let i = 0; i < items.length; i += 8) groups.push(items.slice(i, i + 8));
+    return groups;
+}
+
+// Um único botão à direita por carrossel. Ao chegar ao fim, a próxima ação
+// retorna ao início; o arrasto horizontal permite navegar nos dois sentidos.
+function advanceRoyalCatalogCarousel(button) {
+    const track = button?.previousElementSibling;
+    if (!track || !track.classList.contains('royal-catalog-track')) return;
+    const slides = track.querySelectorAll(':scope > article.royal-market-card');
+    if (!slides.length) return;
+    const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth);
+    if (maxScroll < 2) return;
+    const gap = parseFloat(getComputedStyle(track).gap) || 0;
+    const itemStep = slides[0].getBoundingClientRect().width + gap;
+    const visible = Math.max(1, Math.round((track.clientWidth + gap) / itemStep));
+    const step = itemStep * Math.max(1, visible - 1);
+    const next = track.scrollLeft >= maxScroll - 4
+        ? 0 : Math.min(maxScroll, track.scrollLeft + step);
+    const smooth = !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    track.scrollTo({left: next, behavior: smooth ? 'smooth' : 'auto'});
+}
+
 function renderCatalog() {
     const container = document.getElementById('catalogContainer') || document.getElementById('productsGrid');
     if (!container) return;
@@ -14178,7 +14205,7 @@ function renderCatalog() {
     container.className = 'royal-catalog-grid';
     const market = window.royalMarketPricing;
     const copy = market?.copy?.() || {noReviews:'Sem avaliações',pix:'no Pix ou cartão à vista',offer:'Oferta',install:'simulação em 12x',checkout:'Condições finais no checkout.'};
-    container.innerHTML = pageResult.items.map(product => {
+    const renderedCards = pageResult.items.map(product => {
         const originalPrice = Number(product.price) || 0;
         const sellingPrice = calculateFinalPrice(product);
         const discount = originalPrice > sellingPrice && sellingPrice > 0
@@ -14219,6 +14246,29 @@ function renderCatalog() {
                 <small class="royal-market-footnote">${escapeHtml(copy.checkout)}</small>
             </div>
         </article>`;
+    });
+    const language = document.documentElement.lang;
+    const moreLabel = language === 'en' ? 'See more products in this carousel'
+        : language === 'es' ? 'Ver más productos de este carrusel'
+        : 'Ver mais produtos deste carrossel';
+    const groups = groupStoreCarouselItems(renderedCards);
+    container.innerHTML = groups.map((cards, groupIndex) => {
+        const first = groupIndex * 8 + 1;
+        const last = first + cards.length - 1;
+        const rangeLabel = language === 'en'
+            ? 'Products ' + first + ' to ' + last + ' of ' + pageResult.items.length + ' on this page'
+            : language === 'es'
+                ? 'Productos ' + first + ' a ' + last + ' de ' + pageResult.items.length + ' en esta página'
+                : 'Produtos ' + first + ' a ' + last + ' de ' + pageResult.items.length + ' nesta página';
+        return '<section class="royal-catalog-carousel" data-count="' + cards.length +
+            '" role="group" aria-label="' + escapeAttribute(rangeLabel) + '">' +
+            '<div class="royal-catalog-track" tabindex="0" aria-label="' +
+            escapeAttribute(rangeLabel) + '">' + cards.join('') + '</div>' +
+            (cards.length > 2
+                ? '<button type="button" class="royal-carousel-next" onclick="advanceRoyalCatalogCarousel(this)"' +
+                  ' aria-label="' + escapeAttribute(moreLabel) + '" title="' + escapeAttribute(moreLabel) +
+                  '"><i data-lucide="chevron-right" aria-hidden="true"></i></button>'
+                : '') + '</section>';
     }).join('');
     const pagination = document.getElementById('catalogPagination');
     if (pagination) pagination.innerHTML = renderCatalogPagination(pageResult);
@@ -15733,7 +15783,7 @@ body.guest-mode #afiliados { display: none !important; }
 <script src="./js/royal-product-page.js?v=20261123-5"></script>
 <script src="./js/royal-analytics.js?v=1" defer></script>
 
-<link rel="stylesheet" href="./assets/royal-storefront-upgrade.css?v=20261124-2">
+<link rel="stylesheet" href="./assets/royal-storefront-upgrade.css?v=20261124-3">
 <script src="./js/royal-storefront-ui.js?v=20261123-6"></script>
 <script src="./js/royal-product-i18n.js?v=20261123-3"></script>
 <script src="./js/royal-storefront-state.js?v=20261123-7"></script>
