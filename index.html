@@ -14182,14 +14182,20 @@ function renderCatalog() {
             ? Math.round((originalPrice - sellingPrice) / originalPrice * 100) : 0;
         const reviews = storeCatalogRatingMap?.get(String(product.id));
         const average = reviews?.count ? (reviews.total / reviews.count) : null;
+        // Use only approved rating aggregates; the five-star visual represents
+        // the actual mean instead of suggesting a perfect rating.
+        const ratingFill = average !== null && Number.isFinite(average)
+            ? Math.max(0, Math.min(100, average / 5 * 100)).toFixed(1) : '0';
         const reviewLabel = average !== null && Number.isFinite(average)
             ? '<div class="royal-market-rating" aria-label="' + average.toFixed(1) + ' de 5; ' + reviews.count + ' avaliações">' +
-                '<strong>' + average.toFixed(1).replace('.',',') + '</strong> <span aria-hidden="true">★</span> <small>(' + reviews.count + ')</small></div>'
+                '<strong>' + average.toFixed(1).replace('.',',') + '</strong>' +
+                '<span class="royal-market-stars" style="--royal-rating-fill:' + ratingFill + '%" aria-hidden="true">★★★★★</span>' +
+                '<small>(' + reviews.count + ')</small></div>'
             : '<div class="royal-market-no-reviews">' + escapeHtml(copy.noReviews) + '</div>';
         const quote = market?.installment?.(sellingPrice,12);
         const installments = quote
-            ? '<div class="royal-market-installment">' + escapeHtml(copy.install) + ': <strong>12x ' +
-                formatCurrency(quote.perInstallment) + '*</strong></div>'
+            ? '<div class="royal-market-installment"><span>' + escapeHtml(copy.install) +
+                '</span><strong>' + formatCurrency(quote.perInstallment) + '*</strong></div>'
             : '';
         const stock = Math.max(0,Number(product.stock)||0);
         const productId = String(product.id).replace(/[^a-zA-Z0-9_-]/g, '');
@@ -14203,7 +14209,7 @@ function renderCatalog() {
             <div class="royal-image-card-caption royal-market-info">
                 <h3>${escapeHtml(name)}</h3>
                 ${reviewLabel}
-                ${discount>0 ? '<div class="royal-market-offer">' + discount + '% ' + escapeHtml(copy.offer) + '</div>' : ''}
+                ${discount>0 ? '<div class="royal-market-offer">' + escapeHtml(copy.offer) + ' · ' + discount + '% OFF</div>' : ''}
                 ${originalPrice > sellingPrice && sellingPrice > 0 ? '<del class="royal-market-original">' + formatCurrency(originalPrice) + '</del>' : ''}
                 <div class="royal-market-price"><strong>${formatCurrency(sellingPrice)}</strong><small>${escapeHtml(copy.pix)}</small></div>
                 ${installments}
@@ -15724,7 +15730,7 @@ body.guest-mode #afiliados { display: none !important; }
 <script src="./js/royal-product-page.js?v=20261123-5"></script>
 <script src="./js/royal-analytics.js?v=1" defer></script>
 
-<link rel="stylesheet" href="./assets/royal-storefront-upgrade.css?v=20261123-10">
+<link rel="stylesheet" href="./assets/royal-storefront-upgrade.css?v=20261124-1">
 <script src="./js/royal-storefront-ui.js?v=20261123-6"></script>
 <script src="./js/royal-product-i18n.js?v=20261123-3"></script>
 <script src="./js/royal-storefront-state.js?v=20261123-7"></script>
