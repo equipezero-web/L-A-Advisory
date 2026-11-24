@@ -36,7 +36,7 @@ function numericPrice(v:unknown):number|null {
   if(n.includes(',')&&n.includes('.')){
     n=n.lastIndexOf(',')>n.lastIndexOf('.')?n.replace(/\./g,'').replace(',','.'):n.replace(/,/g,'');
   }else if(n.includes(','))n=n.replace(',','.');
-  else if((n.match(/\./g)||[]).length>1)n=n.replace(/\./g,'');
+  else if(/^\d{1,3}(?:\.\d{3})+$/.test(n))n=n.replace(/\./g,'');
   const val=Number(n);
   return Number.isFinite(val)&&val>0&&val<100000000?Math.round(val*100)/100:null;
 }
